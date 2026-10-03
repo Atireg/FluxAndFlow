@@ -26,16 +26,21 @@ import smokeFragmentShader from './shaders/smoke/fragment.glsl';
 const canvas = document.querySelector('canvas.webgl');
 
 /**
- * Sizes & Number of projects displayed at the moment
+ * Sizes
  */
 let screenWidth = window.innerWidth;
 let screenHeight = window.innerHeight;
 let aspectRatio = screenWidth / screenHeight;
-let frustumSize = 10;
-let fursumDiv = 2 * aspectRatio;
 const cubeSize = 5;
 const spacing = 1.2;
-const numberOfProjects = 3;
+
+/**
+ * Catalog slots
+ *
+ * The grid always holds SLOT_COUNT cubes, whatever the viewport. The viewport
+ * only decides how they are arranged, so no project is ever unreachable.
+ */
+const SLOT_COUNT = 10;
 
 /**
  * Colors 
@@ -47,12 +52,39 @@ const backgroudCubesColor = new THREE.Color("rgb(190, 190, 190)").convertSRGBToL
 const lightColor = new THREE.Color("rgb(194, 238, 255)");
 
 /**
+ * Assets
+ *
+ * Paths are stored without a leading slash and resolved against Vite's base
+ * URL, so they keep working if the site is served from a sub-path.
+ */
+const assetUrl = (path) => `${import.meta.env.BASE_URL}${path}`;
+
+/**
+ * Projects
+ *
+ * Single source of truth for the catalog. `slot` is the cube a project
+ * occupies (0-based, row-major) and stays the same across reloads and
+ * resizes. Slots with no project listed here render as empty cubes.
+ */
+const projects = [
+    {
+        id: 'rock-print',
+        slot: 0,
+        title: 'Rock Print Pavilion',
+        thumbModel: 'models/rock.gltf',
+        detailModel: 'models/RockPrintStructureReduced.glb',
+    },
+];
+
+const projectBySlot = new Map(projects.map((project) => [project.slot, project]));
+
+/**
  * Loaders
  */
 const textureLoader = new THREE.TextureLoader();
 
 const dracoLoader = new DRACOLoader();
-dracoLoader.setDecoderPath('/draco/');
+dracoLoader.setDecoderPath(assetUrl('draco/'));
 
 const gltfLoader = new GLTFLoader();
 gltfLoader.setDRACOLoader(dracoLoader);
@@ -173,7 +205,7 @@ scene.add(directionalLight)
 /**
  * Camera
  */
-const camera = new THREE.PerspectiveCamera(45, screenWidth / screenHeight, 0.1, 40);
+const camera = new THREE.PerspectiveCamera(45, screenWidth / screenHeight, 1, 2000);
 scene.add(camera);
 
 /**
@@ -210,7 +242,7 @@ const smokeGeometry = new THREE.PlaneGeometry(20, 20, 32, 64);
 smokeGeometry.rotateX(Math.PI / 2);
 // smokeGeometry.scale(1.5, 6, 1.5);
 
-const perlinTexture = textureLoader.load('/textures/perlin.png');
+const perlinTexture = textureLoader.load(assetUrl('textures/perlin.png'));
 perlinTexture.wrapS = THREE.RepeatWrapping
 perlinTexture.wrapT = THREE.RepeatWrapping
 
@@ -238,7 +270,7 @@ const smoke = new THREE.Mesh(smokeGeometry, smokeMaterial)
 */
 
 const sky = new Sky();
-sky.scale.set(100, 100, 100)
+sky.scale.set(1000, 1000, 1000)
 scene.add(sky)
 
 sky.material.uniforms['turbidity'].value = 5
@@ -256,105 +288,78 @@ scene.fog = new THREE.Fog('#04343f', 15, 8)
  * Playground
  */
 let cubes = [];
+let gridShape = { cols: 1, rows: SLOT_COUNT };
+let viewState = 'catalog'; // 'catalog' | 'detail'
 createPlayground();
 
 // Cubes
 function createPlayground() {
-    // Clear only the cubes
     clearCubes();
 
-    // Calculate grid dimensions
-    const gridWidth = Math.floor((frustumSize * aspectRatio) / cubeSize);
-    const gridHeight = Math.floor(frustumSize / cubeSize);
+    // One cube per slot. The count is fixed, so a project always has a home.
+    for (let slot = 0; slot < SLOT_COUNT; slot++) {
+        const cubeGeometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
+        const cubeMaterial = new THREE.MeshStandardMaterial({
+            color: cubesColor,
+            metalness: 0.2,
+            roughness: 0.6,
+            transparent: true,
+            opacity: 1,
+            blending: THREE.AdditiveBlending,
 
-    // Calculate the offset to center the grid
-    const offsetX = (gridWidth * cubeSize * spacing) / 2 - (cubeSize * spacing) / 2;
-    const offsetZ = (gridHeight * cubeSize * spacing) / 2 - (cubeSize * spacing) / 2;
+        });
 
-    // Create the grid of cubes
-    for (let i = 0; i < gridWidth; i++) {
-        for (let j = 0; j < gridHeight; j++) {
-            const cubeGeometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
-            const cubeMaterial = new THREE.MeshStandardMaterial({
-                color: cubesColor,
-                metalness: 0.2,
-                roughness: 0.6,
-                transparent: true,
-                opacity: 1,
-                blending: THREE.AdditiveBlending,
+        const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
 
-            });
+        // Add edges for a visible border
+        const edgesGeometry = new THREE.EdgesGeometry(cube.geometry);
+        const edgesMaterial = new THREE.LineBasicMaterial({
+            color: selectedCubeColor,
+        });
+        const edges = new THREE.LineSegments(edgesGeometry, edgesMaterial);
+        cube.add(edges); // Attach edges to the cube
 
-            const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+        // Store edges in userData for future reference
+        cube.userData.edges = edges;
 
-            // Add edges for a visible border
-            const edgesGeometry = new THREE.EdgesGeometry(cube.geometry);
-            const edgesMaterial = new THREE.LineBasicMaterial({
-                color: selectedCubeColor,
-            });
-            const edges = new THREE.LineSegments(edgesGeometry, edgesMaterial);
-            cube.add(edges); // Attach edges to the cube
+        // Which slot this is, and the project sitting in it (null when empty)
+        cube.userData.slot = slot;
+        cube.userData.project = projectBySlot.get(slot) ?? null;
 
-            // Store edges in userData for future reference
-            cube.userData.edges = edges;
+        // Add random Y offset and speed for animation
+        cube.userData.ySpeed = Math.random() * 0.01 + 0.001; // Speed of Y movement
+        cube.userData.yOffset = Math.random() * 5 - 2.5; // Initial random Y offset
+        cube.position.y = cube.userData.yOffset;
 
-            // Center the cubes in the grid and apply spacing
-            const x = i * cubeSize * spacing - offsetX;
-            const z = j * cubeSize * spacing - offsetZ;
+        // Add the cube to the scene and the array
+        scene.add(cube);
+        cubes.push(cube);
 
-            // Position the cubes
-            cube.position.set(x, 0, z);
-
-            // Add random Y offset and speed for animation
-            cube.userData.ySpeed = Math.random() * 0.01 + 0.001; // Speed of Y movement
-            cube.userData.yOffset = Math.random() * 5 - 2.5; // Initial random Y offset
-            cube.position.y += cube.userData.yOffset;
-
-            // Add the cube to the scene and the array
-            scene.add(cube);
-            cubes.push(cube);
+        if (cube.userData.project) {
+            addContentToCube(cube);
         }
     }
 
-    // Set up the camera to fit all cubes
-    addContectToSubsetOfCubes(numberOfProjects, 0xff0000, 0.5);
-    updateCamera(gridWidth, gridHeight, spacing);
+    layoutCubes();
+    fitCameraToGrid();
 }
 
 // Function to clear only cubes from the scene
-function clearCubes(cube) {
-    // Filter out cube objects and remove them from the scene
-    if (!cube) {
-        cubes.forEach((cube) => {
-            scene.remove(cube);
-        });
-        // Clear the cubes array
-        cubes = [];
-    }
-}
-
-function addContectToSubsetOfCubes(numberOfProjects, color, dims) {
-    // Ensure we don't select more cubes than available
-    numberOfProjects = Math.min(numberOfProjects, cubes.length);
-
-    // Randomly shuffle the array of cubes
-    const shuffledCubes = [...cubes].sort(() => Math.random() - 0.5);
-
-    // Select the first `numberOfProjects` cubes
-    const selectedCubes = shuffledCubes.slice(0, numberOfProjects);
-
-    // Add content to each selected cube
-    selectedCubes.forEach(cube => {
-        addContentToCube(cube);
+function clearCubes() {
+    cubes.forEach((cube) => {
+        scene.remove(cube);
     });
+
+    cubes = [];
 }
 
-// Helper function to add a content to a single cube
+// Helper function to add a project's thumbnail to its cube
 function addContentToCube(cube) {
+    const { project } = cube.userData;
 
     // Load 3D project representation
     gltfLoader.load(
-        '/models/rock.gltf',
+        assetUrl(project.thumbModel),
         (gltf) => {
             const content = gltf.scene;
             content.position.set(0, -1, 0);
@@ -365,53 +370,92 @@ function addContentToCube(cube) {
     );
 }
 
-function updateCamera(gridWidth, gridHeight, spacing) {
-    // Calculate the grid boundaries based on spacing and number of cubes
-    const gridWidthWithSpacing = gridWidth * cubeSize * spacing;
-    const gridHeightWithSpacing = gridHeight * cubeSize * spacing;
+/**
+ * Pick the arrangement whose proportions sit closest to the viewport's, so a
+ * wide window gets a wide grid and a tall one gets a tall grid - without ever
+ * changing how many cubes there are.
+ */
+function computeGridShape(count, aspect) {
+    let best = null;
 
-    // Adjust the camera's frustum to fit the grid (considering cube size and spacing)
-    const aspectRatio = window.innerWidth / window.innerHeight;
+    for (let cols = 1; cols <= count; cols++) {
+        const rows = Math.ceil(count / cols);
+        const score = Math.abs(Math.log((cols / rows) / aspect));
 
-    // Update the orthographic camera's frustum to fit all cubes
-    const frustumSizeX = gridWidthWithSpacing / 2;
-    const frustumSizeY = gridHeightWithSpacing / 2;
+        if (!best || score < best.score) {
+            best = { cols, rows, score };
+        }
+    }
 
-    camera.left = -frustumSizeX;
-    camera.right = frustumSizeX;
-    camera.top = frustumSizeY;
-    camera.bottom = -frustumSizeY;
+    return best;
+}
 
-    // Update the camera's position (above the grid)
-    const cameraHeight = gridHeightWithSpacing * 1.7; // Camera height above the grid (adjustable)
-    camera.position.set(0, cameraHeight, 0); // Position the camera above the grid
+// Position the cubes in the current arrangement
+function layoutCubes() {
+    gridShape = computeGridShape(cubes.length, aspectRatio);
 
-    // Ensure the camera is looking straight down at the grid
-    camera.up.set(0, 1, 0); // Ensure the camera's up vector is consistent
-    camera.lookAt(new THREE.Vector3(0, 0, 0)); // Point the camera towards the center of the grid
+    const step = cubeSize * spacing;
+    const offsetZ = ((gridShape.rows - 1) * step) / 2;
 
-    // Update the projection matrix to apply the changes
+    cubes.forEach((cube, index) => {
+        const row = Math.floor(index / gridShape.cols);
+        const col = index % gridShape.cols;
+
+        // Centre each row, so a partly filled last row still looks deliberate
+        const cubesInRow = Math.min(gridShape.cols, cubes.length - row * gridShape.cols);
+        const offsetX = ((cubesInRow - 1) * step) / 2;
+
+        cube.position.x = col * step - offsetX;
+        cube.position.z = row * step - offsetZ;
+    });
+}
+
+// Move the camera back far enough to frame the whole grid
+function fitCameraToGrid() {
+    const step = cubeSize * spacing;
+
+    // Grid extents, measured to the outer faces of the edge cubes
+    const gridWidth = (gridShape.cols - 1) * step + cubeSize;
+    const gridDepth = (gridShape.rows - 1) * step + cubeSize;
+    const margin = 1.15;
+
+    const halfFov = THREE.MathUtils.degToRad(camera.fov) / 2;
+    const distanceForDepth = (gridDepth * margin) / 2 / Math.tan(halfFov);
+    const distanceForWidth = (gridWidth * margin) / 2 / (Math.tan(halfFov) * camera.aspect);
+
+    // Clear the highest point a cube reaches while it bobs
+    const cubeTop = cubeSize / 2 + 3;
+    const height = Math.max(distanceForDepth, distanceForWidth) + cubeTop;
+
+    // Position the camera above the grid, looking straight down at its centre
+    camera.position.set(0, height, 0);
+    camera.up.set(0, 1, 0);
+    camera.lookAt(0, 0, 0);
     camera.updateProjectionMatrix();
+
+    controls.target.set(0, 0, 0);
+    controls.update();
 }
 
 window.addEventListener('resize', () => {
-    // Update renderer size
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    screenWidth = window.innerWidth;
+    screenHeight = window.innerHeight;
+    aspectRatio = screenWidth / screenHeight;
 
-    // Update camera parameters
-    const aspectRatio = window.innerWidth / window.innerHeight;
-    camera.left = (-frustumSize * aspectRatio) / 2;
-    camera.right = (frustumSize * aspectRatio) / 2;
-    camera.top = frustumSize / fursumDiv;
-    camera.bottom = -frustumSize / fursumDiv;
+    // Update camera
+    camera.aspect = aspectRatio;
     camera.updateProjectionMatrix();
 
     // Update renderer
-    renderer.setSize(window.innerWidth, window.innerHeight)
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    renderer.setSize(screenWidth, screenHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-    // Recreate the grid
-    createPlayground();
+    // Re-arrange the cubes that already exist. They are never rebuilt, so a
+    // project keeps its slot and anything already loaded stays loaded.
+    if (viewState === 'catalog') {
+        layoutCubes();
+        fitCameraToGrid();
+    }
 });
 
 const clock = new THREE.Clock();
@@ -447,6 +491,19 @@ animate();
 let hoveredCube = null;
 let fluxyAnimationId = null;
 
+// A ray can land on a cube's edges or on the model inside it, so walk back
+// up the hierarchy to the cube that owns whatever was hit.
+function findCube(object) {
+    let current = object;
+
+    while (current) {
+        if (current.userData.slot !== undefined) return current;
+        current = current.parent;
+    }
+
+    return null;
+}
+
 // Function to handle mouse move
 function onMouseMove(event) {
     // Calculate mouse position in normalized device coordinates (-1 to +1)
@@ -458,10 +515,9 @@ function onMouseMove(event) {
 
     // Find intersections with cubes
     const intersects = raycaster.intersectObjects(cubes);
+    const cube = intersects.length > 0 ? findCube(intersects[0].object) : null;
 
-    if (intersects.length > 0) {
-        const cube = intersects[0].object;
-
+    if (cube) {
         if (hoveredCube !== cube) {
             // If a new cube is hovered, stop the old animation and start a new one
             if (hoveredCube) stopFluxyMovement(hoveredCube);
@@ -539,39 +595,38 @@ function onMouseClick(event) {
     // Find intersections with cubes
     const intersects = raycaster.intersectObjects(cubes);
 
-    if (intersects.length > 0) {
-        // Get the first intersected cube
-        const selectedCube = intersects[0].object;
+    if (intersects.length === 0) return;
 
-        // Check if the cube has a plane (content)
-        if (selectedCube.userData.content) {
-            stopFluxyMovement(selectedCube);
-            // selectedCube.material.color.set(selectedCubeColor);
-            selectedCube.userData.edges.material.color.set(selectedCubeColor);
-            selectedCube.material.opacity = 0;
+    // Get the cube that was clicked, and the project sitting in its slot
+    const selectedCube = findCube(intersects[0].object);
+    const project = selectedCube && selectedCube.userData.project;
 
-            if (selectedCube.userData.content) {
-                selectedCube.userData.content.visible = false;
-            }
+    // Empty slots have nothing to open yet
+    if (!project) return;
 
-            zoomCameraToPlane(selectedCube.userData.content);
+    stopFluxyMovement(selectedCube);
+    // selectedCube.material.color.set(selectedCubeColor);
+    selectedCube.userData.edges.material.color.set(selectedCubeColor);
+    selectedCube.material.opacity = 0;
 
-            loadPointCloudWithShaderMaterial({
-                glbPath: '/models/RockPrintStructureReduced.glb',
-                parentObject: selectedCube,
-                pointColor: 0x00ff00,
-                pointSize: 5.0, // Larger point size
-            });
-
-        }
+    if (selectedCube.userData.content) {
+        selectedCube.userData.content.visible = false;
     }
+
+    viewState = 'detail';
+
+    zoomCameraToPlane(selectedCube);
+
+    loadPointCloudWithShaderMaterial({
+        glbPath: assetUrl(project.detailModel),
+        parentObject: selectedCube,
+        pointColor: 0x00ff00,
+        pointSize: 5.0, // Larger point size
+    });
 }
 
 // Function to zoom the camera to the plane
-function zoomCameraToPlane(content) {
-    // Get the parent cube
-    const selectedCube = content.parent;
-
+function zoomCameraToPlane(selectedCube) {
     // Get cube position
     const targetPosition = new THREE.Vector3();
     selectedCube.getWorldPosition(targetPosition);
@@ -641,7 +696,7 @@ function zoomCameraToPlane(content) {
     // console.log(selectedCube.userData.content);
     
 
-    addDetailsButton({selectedCube}); // Here I'm sending undefined??
+    addDetailsButton({ parentObject: selectedCube });
 
 }
 
