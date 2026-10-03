@@ -458,8 +458,18 @@ sky.material.uniforms['sunPosition'].value.set(0.6, -0.038, -0.95)
 
 /**
  * Fog
+ *
+ * Disabled. It was configured as Fog('#04343f', 15, 8) - near beyond far -
+ * which inverts it: everything NEARER than 15 units renders fully fogged and
+ * everything beyond it renders clean. In the catalog the cubes sit ~29 units
+ * out, so nothing was fogged and it looked fine; in a project the camera
+ * comes within ~10 units, so the cube fogged out completely to a colour
+ * indistinguishable from the background and its frame vanished.
+ *
+ * Worth bringing back deliberately for the "fog shader" idea in the README,
+ * with near < far and a range that suits both views.
  */
-scene.fog = new THREE.Fog('#04343f', 15, 8)
+scene.fog = null
 
 /**
  * Playground
