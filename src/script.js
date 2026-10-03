@@ -992,6 +992,10 @@ function openProject(cube) {
         other.userData.restingYSpeed = other.userData.ySpeed;
         other.userData.ySpeed = 0;
 
+        // The faces fade to nothing but keep writing depth, which hides the
+        // cube's own back edges and flattens the perspective away
+        other.material.depthWrite = false;
+
         // Only the project being looked at keeps its frame. Square-on, the
         // rest of the grid lines up into a lattice of rectangles behind the
         // model rather than scattering into the distance, so it goes entirely.
@@ -1065,6 +1069,7 @@ function closeProject() {
     // Bring the catalog back
     cubes.forEach((other) => {
         other.userData.ySpeed = other.userData.restingYSpeed ?? other.userData.ySpeed;
+        other.material.depthWrite = true;
 
         gsap.to(other.material, { opacity: 1, duration: 0.7, ease: 'power2.out' });
         gsap.to(other.userData.edges.material, { opacity: 1, duration: 0.7, ease: 'power2.out' });
