@@ -292,7 +292,7 @@ let camera = perspectiveCamera;
  *   'orthographic' no convergence at all, everything true to scale.
  */
 const DETAIL_PROJECTION = 'perspective';
-const DETAIL_FOV = 35;
+const DETAIL_FOV = 45;
 const CATALOG_FOV = 45;
 
 // Half the height of the orthographic frustum, in world units
@@ -945,9 +945,12 @@ function openProject(cube) {
         other.userData.restingYSpeed = other.userData.ySpeed;
         other.userData.ySpeed = 0;
 
+        // Only the project being looked at keeps its frame. Square-on, the
+        // rest of the grid lines up into a lattice of rectangles behind the
+        // model rather than scattering into the distance, so it goes entirely.
         gsap.to(other.material, { opacity: 0, duration: 0.8, ease: 'power2.out' });
         gsap.to(other.userData.edges.material, {
-            opacity: other === cube ? 0.3 : 0.05,
+            opacity: other === cube ? 0.3 : 0,
             duration: 0.8,
             ease: 'power2.out',
         });
