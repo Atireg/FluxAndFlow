@@ -6,9 +6,6 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import { Sky } from 'three/addons/objects/Sky.js'
 
-import gridVertexShader from './shaders/grid/vertex.glsl';
-import gridFragmentShader from './shaders/grid/fragment.glsl';
-
 import pointCloudVertexShader from './shaders/pointCloud/vertex.glsl';
 import pointCloudFragmentShader from './shaders/pointCloud/fragment.glsl';
 
@@ -71,12 +68,91 @@ const projects = [
         id: 'rock-print',
         slot: 0,
         title: 'Rock Print Pavilion',
+
+        // TODO: all of the copy below is placeholder - replace it with your
+        // own words, and state your role on the project accurately.
+        year: '20XX',
+        role: 'Your role on the project',
+        context: 'Studio, course or research group',
+        body: [
+            'What the project is: the brief, the site, the question it set out to answer.',
+            'What you did: your specific contribution, the tools and methods you used, and what you would do differently now.',
+        ],
+        credits: 'Collaborators and credits.',
+
         thumbModel: 'models/rock.gltf',
         detailModel: 'models/RockPrintStructureReduced.glb',
     },
 ];
 
+/**
+ * How much of the viewport the project panel covers, per layout. These mirror
+ * --panel-fraction in styles.css and the 859px breakpoint there; the detail
+ * camera frames the model into whatever space the panel leaves free.
+ */
+const PANEL_FRACTION = { side: 0.44, stacked: 0.54 };
+const SIDE_PANEL_QUERY = '(min-width: 860px)';
+
+function getPanelLayout() {
+    const mode = window.matchMedia(SIDE_PANEL_QUERY).matches ? 'side' : 'stacked';
+
+    return { mode, fraction: PANEL_FRACTION[mode] };
+}
+
 const projectBySlot = new Map(projects.map((project) => [project.slot, project]));
+
+/**
+ * Project panel (the 2D half of the detail view)
+ */
+const panel = document.querySelector('#panel');
+const panelTitle = document.querySelector('#panel-title');
+const panelMeta = document.querySelector('#panel-meta');
+const panelBody = document.querySelector('#panel-body');
+const panelCredits = document.querySelector('#panel-credits');
+const panelStatus = document.querySelector('#panel-status');
+const panelClose = document.querySelector('#panel-close');
+
+function showPanel(project) {
+    panelTitle.textContent = project.title;
+
+    // Only render the meta rows a project actually has
+    panelMeta.replaceChildren();
+    [
+        ['Year', project.year],
+        ['Role', project.role],
+        ['Context', project.context],
+    ].forEach(([label, value]) => {
+        if (!value) return;
+
+        const dt = document.createElement('dt');
+        dt.textContent = label;
+        const dd = document.createElement('dd');
+        dd.textContent = value;
+        panelMeta.append(dt, dd);
+    });
+
+    panelBody.replaceChildren(
+        ...(project.body ?? []).map((text) => {
+            const paragraph = document.createElement('p');
+            paragraph.textContent = text;
+            return paragraph;
+        })
+    );
+
+    panelCredits.textContent = project.credits ?? '';
+    panel.classList.add('is-open');
+    panel.setAttribute('aria-hidden', 'false');
+}
+
+function hidePanel() {
+    panel.classList.remove('is-open');
+    panel.setAttribute('aria-hidden', 'true');
+    panel.scrollTop = 0;
+}
+
+function setPanelStatus(message) {
+    panelStatus.textContent = message ?? '';
+}
 
 /**
  * Loaders
@@ -89,33 +165,10 @@ dracoLoader.setDecoderPath(assetUrl('draco/'));
 const gltfLoader = new GLTFLoader();
 gltfLoader.setDRACOLoader(dracoLoader);
 
-function addDetailsButton({parentObject}){
-
-    console.log(parentObject);
-    
-    // Create a button geometry
-    const buttonGeometry = new THREE.PlaneGeometry(10, 10, 8, 8);
-
-    const buttonMaterial = new THREE.ShaderMaterial({
-        vertexShader: gridVertexShader,
-        fragmentShader: gridFragmentShader,
-        side: THREE.DoubleSide,
-    })
-    const button = new THREE.Mesh(buttonGeometry, buttonMaterial);
-    
-    // Position the content at the center of the cube
-    button.position.set(0, 0, 0);
-
-    // Add the content as a child of the cube
-    // parentObject.add(button);
-    // parentObject.userData.button = button;
-}
-
 function loadPointCloudWithShaderMaterial({
     glbPath,
     parentObject,
-    pointColor = 0xff0000, // Default point color (red)
-    pointSize = 4.0, // Default point size
+    onLoaded,
 }) {
 
     // console.log(parentObject);
@@ -175,6 +228,8 @@ function loadPointCloudWithShaderMaterial({
 
         // Add the GLTF model to the specified parent object
         parentObject.add(gltf.scene);
+
+        if (onLoaded) onLoaded(gltf.scene);
     });
 
 }
@@ -290,6 +345,7 @@ scene.fog = new THREE.Fog('#04343f', 15, 8)
 let cubes = [];
 let gridShape = { cols: 1, rows: SLOT_COUNT };
 let viewState = 'catalog'; // 'catalog' | 'detail'
+let selectedCube = null; // the cube whose project is open, in detail view
 createPlayground();
 
 // Cubes
@@ -315,6 +371,7 @@ function createPlayground() {
         const edgesGeometry = new THREE.EdgesGeometry(cube.geometry);
         const edgesMaterial = new THREE.LineBasicMaterial({
             color: selectedCubeColor,
+            transparent: true,
         });
         const edges = new THREE.LineSegments(edgesGeometry, edgesMaterial);
         cube.add(edges); // Attach edges to the cube
@@ -407,11 +464,14 @@ function layoutCubes() {
 
         cube.position.x = col * step - offsetX;
         cube.position.z = row * step - offsetZ;
+
+        // The hover animation nudges cubes around, so keep a home to return to
+        cube.userData.slotPosition = { x: cube.position.x, z: cube.position.z };
     });
 }
 
 // Move the camera back far enough to frame the whole grid
-function fitCameraToGrid() {
+function fitCameraToGrid({ animate = false } = {}) {
     const step = cubeSize * spacing;
 
     // Grid extents, measured to the outer faces of the edge cubes
@@ -428,13 +488,60 @@ function fitCameraToGrid() {
     const height = Math.max(distanceForDepth, distanceForWidth) + cubeTop;
 
     // Position the camera above the grid, looking straight down at its centre
-    camera.position.set(0, height, 0);
     camera.up.set(0, 1, 0);
-    camera.lookAt(0, 0, 0);
     camera.updateProjectionMatrix();
 
+    if (animate) {
+        gsap.to(camera.position, { x: 0, y: height, z: 0, duration: 1.1, ease: 'power2.inOut' });
+        gsap.to(controls.target, { x: 0, y: 0, z: 0, duration: 1.1, ease: 'power2.inOut' });
+        return;
+    }
+
+    camera.position.set(0, height, 0);
+    camera.lookAt(0, 0, 0);
     controls.target.set(0, 0, 0);
     controls.update();
+}
+
+/**
+ * Frame an object for the detail view, in the part of the viewport the
+ * project panel leaves free. Uses the object's bounding sphere, so it fits
+ * whatever shape a project's model happens to be.
+ */
+function frameDetail(object, { duration = 1.6 } = {}) {
+    const box = new THREE.Box3().setFromObject(object);
+    if (box.isEmpty()) return;
+
+    const sphere = box.getBoundingSphere(new THREE.Sphere());
+    const { mode, fraction } = getPanelLayout();
+    const halfFov = THREE.MathUtils.degToRad(camera.fov) / 2;
+    const radius = sphere.radius * 1.15;
+    const free = 1 - fraction;
+
+    // Distance at which the model fits both axes of the free area
+    const forHeight = radius / Math.tan(halfFov) / (mode === 'stacked' ? free : 1);
+    const forWidth = radius / (Math.tan(halfFov) * camera.aspect) / (mode === 'side' ? free : 1);
+    const distance = Math.max(forHeight, forWidth);
+
+    // Look at the model from the side, a little above and in front
+    const direction = new THREE.Vector3(-1, 0.3, 0.55).normalize();
+    const position = sphere.center.clone().addScaledVector(direction, distance);
+
+    // Slide the whole view sideways (or up) so the model sits in the free
+    // half rather than behind the panel
+    const forward = sphere.center.clone().sub(position).normalize();
+    const right = forward.clone().cross(camera.up).normalize();
+    const visibleHeight = 2 * distance * Math.tan(halfFov);
+    const shift = (fraction / 2) * (mode === 'side' ? visibleHeight * camera.aspect : visibleHeight);
+    const offset = mode === 'side'
+        ? right.multiplyScalar(shift)
+        : right.cross(forward).normalize().multiplyScalar(-shift);
+
+    position.add(offset);
+    const target = sphere.center.clone().add(offset);
+
+    gsap.to(camera.position, { x: position.x, y: position.y, z: position.z, duration, ease: 'power2.inOut' });
+    gsap.to(controls.target, { x: target.x, y: target.y, z: target.z, duration, ease: 'power2.inOut' });
 }
 
 window.addEventListener('resize', () => {
@@ -455,7 +562,12 @@ window.addEventListener('resize', () => {
     if (viewState === 'catalog') {
         layoutCubes();
         fitCameraToGrid();
+        return;
     }
+
+    // The panel changes size and may switch sides, so re-frame the model
+    const detail = selectedCube && (selectedCube.userData.detail ?? selectedCube);
+    if (detail) frameDetail(detail, { duration: 0.4 });
 });
 
 const clock = new THREE.Clock();
@@ -506,6 +618,8 @@ function findCube(object) {
 
 // Function to handle mouse move
 function onMouseMove(event) {
+    if (viewState !== 'catalog') return;
+
     // Calculate mouse position in normalized device coordinates (-1 to +1)
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -567,8 +681,13 @@ function stopFluxyMovement(cube) {
         fluxyAnimationId = null;
     }
 
-    // Reset the cube's position and scale
-    cube.position.y = 0; // Reset to the original position (adjust if needed)
+    // Put the cube back in its slot - the hover nudges x/y as it animates,
+    // and those nudges would otherwise accumulate and drift it away
+    if (cube.userData.slotPosition) {
+        cube.position.x = cube.userData.slotPosition.x;
+        cube.position.z = cube.userData.slotPosition.z;
+    }
+
     cube.scale.setScalar(1); // Reset scale
     cube.material.color.set(backgroudCubesColor);
 
@@ -583,8 +702,27 @@ function stopFluxyMovement(cube) {
     }
 }
 
+/**
+ * Orbiting the catalog ends in a click, so remember where the press started
+ * and treat anything that travelled as a drag rather than a selection.
+ */
+const DRAG_THRESHOLD = 5; // px
+let pointerDownAt = null;
+
+window.addEventListener('pointerdown', (event) => {
+    pointerDownAt = { x: event.clientX, y: event.clientY };
+});
+
+function wasDrag(event) {
+    if (!pointerDownAt) return false;
+
+    return Math.hypot(event.clientX - pointerDownAt.x, event.clientY - pointerDownAt.y) > DRAG_THRESHOLD;
+}
+
 // Function to handle mouse clicks
 function onMouseClick(event) {
+    if (viewState !== 'catalog' || wasDrag(event)) return;
+
     // Calculate mouse position in normalized device coordinates (-1 to +1)
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -598,106 +736,107 @@ function onMouseClick(event) {
     if (intersects.length === 0) return;
 
     // Get the cube that was clicked, and the project sitting in its slot
-    const selectedCube = findCube(intersects[0].object);
-    const project = selectedCube && selectedCube.userData.project;
+    const cube = findCube(intersects[0].object);
 
     // Empty slots have nothing to open yet
-    if (!project) return;
+    if (cube && cube.userData.project) openProject(cube);
+}
 
-    stopFluxyMovement(selectedCube);
-    // selectedCube.material.color.set(selectedCubeColor);
-    selectedCube.userData.edges.material.color.set(selectedCubeColor);
-    selectedCube.material.opacity = 0;
-
-    if (selectedCube.userData.content) {
-        selectedCube.userData.content.visible = false;
-    }
+/**
+ * Detail view: the project's model on one half of the screen, its text on
+ * the other.
+ */
+function openProject(cube) {
+    const project = cube.userData.project;
 
     viewState = 'detail';
+    selectedCube = cube;
 
-    zoomCameraToPlane(selectedCube);
+    stopFluxyMovement(cube);
+
+    // Hold the catalog still and sink it into the background, so the project
+    // is the only thing competing for attention
+    cubes.forEach((other) => {
+        other.userData.restingYSpeed = other.userData.ySpeed;
+        other.userData.ySpeed = 0;
+
+        gsap.to(other.material, { opacity: 0, duration: 0.8, ease: 'power2.out' });
+        gsap.to(other.userData.edges.material, {
+            opacity: other === cube ? 0.3 : 0.05,
+            duration: 0.8,
+            ease: 'power2.out',
+        });
+
+        if (other.userData.content) other.userData.content.visible = false;
+    });
+
+    cube.userData.edges.material.color.set(selectedCubeColor);
+
+    // Show the text straight away - it costs nothing and gives the click an
+    // answer while the model is still downloading
+    showPanel(project);
+
+    controls.autoRotate = true;
+    controls.autoRotateSpeed = 0.3;
+
+    if (cube.userData.detail) {
+        cube.userData.detail.visible = true;
+        setPanelStatus(null);
+        frameDetail(cube.userData.detail);
+        return;
+    }
+
+    // Move towards the cube now, then settle on the model once it arrives
+    setPanelStatus('Loading model');
+    frameDetail(cube, { duration: 1 });
 
     loadPointCloudWithShaderMaterial({
         glbPath: assetUrl(project.detailModel),
-        parentObject: selectedCube,
-        pointColor: 0x00ff00,
-        pointSize: 5.0, // Larger point size
+        parentObject: cube,
+        onLoaded: (model) => {
+            cube.userData.detail = model;
+
+            // The visitor may have gone back while this was downloading
+            if (viewState !== 'detail' || selectedCube !== cube) {
+                model.visible = false;
+                return;
+            }
+
+            setPanelStatus(null);
+            frameDetail(model);
+        },
     });
 }
 
-// Function to zoom the camera to the plane
-function zoomCameraToPlane(selectedCube) {
-    // Get cube position
-    const targetPosition = new THREE.Vector3();
-    selectedCube.getWorldPosition(targetPosition);
+function closeProject() {
+    if (viewState !== 'detail') return;
 
-    // Calculate camera position for side view
-    const distance = 10; // Distance from cube
-    const finalCameraPosition = new THREE.Vector3(
-        targetPosition.x - distance, // Position camera to the left of cube
-        targetPosition.y,
-        targetPosition.z           // Same Z as cube
-    );
+    const cube = selectedCube;
 
-    // Point camera at cube
-    const lookAtPosition = targetPosition.clone();
+    viewState = 'catalog';
+    selectedCube = null;
 
-    // Hide cubes between camera and selected cube
-    cubes.forEach((cube) => {
-        if (cube !== selectedCube) {
-            const cubePosition = new THREE.Vector3();
-            cube.getWorldPosition(cubePosition);
+    hidePanel();
+    setPanelStatus(null);
+    controls.autoRotate = false;
 
-            // Calculate if cube is between camera and target
-            const cameraToCube = cubePosition.clone().sub(finalCameraPosition);
-            const cameraToTarget = targetPosition.clone().sub(finalCameraPosition);
+    if (cube && cube.userData.detail) cube.userData.detail.visible = false;
 
-            const distanceToCube = cameraToCube.length();
-            const distanceToTarget = cameraToTarget.length();
+    // Bring the catalog back
+    cubes.forEach((other) => {
+        other.userData.ySpeed = other.userData.restingYSpeed ?? other.userData.ySpeed;
 
-            cube.visible = distanceToCube > distanceToTarget;
+        gsap.to(other.material, { opacity: 1, duration: 0.7, ease: 'power2.out' });
+        gsap.to(other.userData.edges.material, { opacity: 1, duration: 0.7, ease: 'power2.out' });
 
-            cube.material.color.set(backgroudCubesColor);
-            cube.material.opacity = 0.4;
+        other.material.color.set(cubesColor);
+        other.userData.edges.material.color.set(selectedCubeColor);
+        other.visible = true;
 
-            cube.userData.edges.material.color.set(backgroudCubesColor);
-            cube.userData.edges.material.opacity = 0.8;
-
-            if (cube.userData.content) {
-                cube.userData.content.scale.setScalar(0.15);
-            }
-        }
+        if (other.userData.content) other.userData.content.visible = true;
     });
 
-    // Stop cube movement
-    selectedCube.userData.ySpeed = 0;
-    selectedCube.userData.yOffset = 0;
-
-    // Disable hover and click behaviors
-    window.removeEventListener('mousemove', onMouseMove);
-    window.removeEventListener('click', onMouseClick);
-
-    // Animate camera
-    gsap.to(camera.position, {
-        x: finalCameraPosition.x,
-        y: finalCameraPosition.y,
-        z: finalCameraPosition.z + 5,
-        duration: 2,
-        delay: 0.3,
-        ease: "power1.inOut",
-        onUpdate: () => {
-            camera.lookAt(lookAtPosition);
-        }
-    });
-
-    controls.autoRotateSpeed = 0.3;
-    controls.autoRotate = true;
-
-    // console.log(selectedCube.userData.content);
-    
-
-    addDetailsButton({ parentObject: selectedCube });
-
+    fitCameraToGrid({ animate: true });
 }
 
 // Add event listener for mouse move
@@ -705,6 +844,17 @@ window.addEventListener('mousemove', onMouseMove);
 
 // Add the click event listener
 window.addEventListener('click', onMouseClick);
+
+// Ways back to the catalog
+panelClose.addEventListener('click', (event) => {
+    // Keep this click from reaching onMouseClick on the way up
+    event.stopPropagation();
+    closeProject();
+});
+
+window.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') closeProject();
+});
 
 
 
