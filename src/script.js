@@ -93,33 +93,53 @@ const projects = [
  * --panel-fraction in styles.css and the 859px breakpoint there; the detail
  * camera frames the model into whatever space the panel leaves free.
  */
-const PANEL_FRACTION = { side: 0.44, stacked: 0.54 };
+const PANEL_FRACTION = { side: 0.42, stacked: 0.58 };
 const SIDE_PANEL_QUERY = '(min-width: 860px)';
 
+// The drawer only takes room once it is pulled out, so a closed drawer
+// leaves the model the whole canvas
 function getPanelLayout() {
     const mode = window.matchMedia(SIDE_PANEL_QUERY).matches ? 'side' : 'stacked';
 
-    return { mode, fraction: PANEL_FRACTION[mode] };
+    return { mode, fraction: drawerOpen ? PANEL_FRACTION[mode] : 0 };
 }
 
 const projectBySlot = new Map(projects.map((project) => [project.slot, project]));
 
 /**
- * Project panel (the 2D half of the detail view)
+ * Project bar and description drawer
+ *
+ * The bar carries only what is needed to know where you are. The description
+ * lives in a drawer parked off the edge of the screen, so by default the
+ * model gets the whole canvas; pulling it out hands part of that back.
  */
-const panel = document.querySelector('#panel');
-const panelTitle = document.querySelector('#panel-title');
-const panelMeta = document.querySelector('#panel-meta');
-const panelBody = document.querySelector('#panel-body');
-const panelCredits = document.querySelector('#panel-credits');
-const panelStatus = document.querySelector('#panel-status');
-const panelClose = document.querySelector('#panel-close');
+const bar = document.querySelector('#bar');
+const barTitle = document.querySelector('#project-title');
+const barStatus = document.querySelector('#project-status');
+const projectClose = document.querySelector('#project-close');
 
-function showPanel(project) {
-    panelTitle.textContent = project.title;
+const drawer = document.querySelector('#drawer');
+const drawerHandle = document.querySelector('#drawer-handle');
+const drawerMeta = document.querySelector('#project-meta');
+const drawerBody = document.querySelector('#project-body');
+const drawerCredits = document.querySelector('#project-credits');
+
+let drawerOpen = false;
+
+function hasDescription(project) {
+    return Boolean(
+        project.year || project.role || project.context || project.credits
+        || (project.body && project.body.length)
+    );
+}
+
+function showProject(project) {
+    barTitle.textContent = project.title;
+    bar.classList.add('is-open');
+    bar.setAttribute('aria-hidden', 'false');
 
     // Only render the meta rows a project actually has
-    panelMeta.replaceChildren();
+    drawerMeta.replaceChildren();
     [
         ['Year', project.year],
         ['Role', project.role],
@@ -131,10 +151,10 @@ function showPanel(project) {
         dt.textContent = label;
         const dd = document.createElement('dd');
         dd.textContent = value;
-        panelMeta.append(dt, dd);
+        drawerMeta.append(dt, dd);
     });
 
-    panelBody.replaceChildren(
+    drawerBody.replaceChildren(
         ...(project.body ?? []).map((text) => {
             const paragraph = document.createElement('p');
             paragraph.textContent = text;
@@ -142,19 +162,36 @@ function showPanel(project) {
         })
     );
 
-    panelCredits.textContent = project.credits ?? '';
-    panel.classList.add('is-open');
-    panel.setAttribute('aria-hidden', 'false');
+    drawerCredits.textContent = project.credits ?? '';
+
+    // Nothing written yet means nothing to pull out, so no handle appears
+    const available = hasDescription(project);
+    drawer.classList.toggle('is-available', available);
+    drawer.setAttribute('aria-hidden', available ? 'false' : 'true');
 }
 
-function hidePanel() {
-    panel.classList.remove('is-open');
-    panel.setAttribute('aria-hidden', 'true');
-    panel.scrollTop = 0;
+function hideProject() {
+    setDrawer(false, { reframe: false });
+
+    bar.classList.remove('is-open');
+    bar.setAttribute('aria-hidden', 'true');
+    drawer.classList.remove('is-available');
+    drawer.setAttribute('aria-hidden', 'true');
+    drawer.scrollTop = 0;
 }
 
-function setPanelStatus(message) {
-    panelStatus.textContent = message ?? '';
+function setDrawer(open, { reframe = true } = {}) {
+    drawerOpen = open;
+
+    drawer.classList.toggle('is-open', open);
+    drawerHandle.setAttribute('aria-expanded', String(open));
+
+    // The model makes room for the drawer, and takes it back when it closes
+    if (reframe && selectedCube) frameDetail(selectedCube, { duration: 0.8 });
+}
+
+function setProjectStatus(message) {
+    barStatus.textContent = message ?? '';
 }
 
 /**
@@ -962,7 +999,7 @@ function openProject(cube) {
 
     // Show the text straight away - it costs nothing and gives the click an
     // answer while the model is still downloading
-    showPanel(project);
+    showProject(project);
 
     // The elevation is the point of this view, so nothing rotates it off-axis
     controls.autoRotate = false;
@@ -971,13 +1008,13 @@ function openProject(cube) {
 
     if (cube.userData.detail) {
         cube.userData.detail.visible = true;
-        setPanelStatus(null);
+        setProjectStatus(null);
         frameDetail(cube);
         return;
     }
 
     // Frame the cube now, then re-frame once the model is inside it
-    setPanelStatus('Loading model');
+    setProjectStatus('Loading model');
     frameDetail(cube, { duration: 1 });
 
     loadPointCloudWithShaderMaterial({
@@ -992,7 +1029,7 @@ function openProject(cube) {
                 return;
             }
 
-            setPanelStatus(null);
+            setProjectStatus(null);
 
             // The model is a child of the cube, so framing the cube frames
             // both together
@@ -1009,8 +1046,8 @@ function closeProject() {
     viewState = 'catalog';
     selectedCube = null;
 
-    hidePanel();
-    setPanelStatus(null);
+    hideProject();
+    setProjectStatus(null);
     controls.autoRotate = false;
 
     if (cube && cube.userData.detail) cube.userData.detail.visible = false;
@@ -1040,14 +1077,27 @@ window.addEventListener('mousemove', onMouseMove);
 window.addEventListener('click', onMouseClick);
 
 // Ways back to the catalog
-panelClose.addEventListener('click', (event) => {
+projectClose.addEventListener('click', (event) => {
     // Keep this click from reaching onMouseClick on the way up
     event.stopPropagation();
     closeProject();
 });
 
+drawerHandle.addEventListener('click', (event) => {
+    event.stopPropagation();
+    setDrawer(!drawerOpen);
+});
+
 window.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape') closeProject();
+    if (event.key !== 'Escape') return;
+
+    // Escape backs out one step at a time: the drawer first, then the project
+    if (drawerOpen) {
+        setDrawer(false);
+        return;
+    }
+
+    closeProject();
 });
 
 

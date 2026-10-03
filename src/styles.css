@@ -7,14 +7,19 @@
     --ink-dim: #86a9b1;
     --accent: rgb(192, 255, 252);
     --rule: rgba(192, 255, 252, 0.16);
-    --panel-bg: rgba(2, 16, 22, 0.88);
+    --panel-bg: rgba(2, 16, 22, 0.9);
+
+    /* The one warm note in the palette: the invitation to pull the drawer */
+    --warm: #c42941;
+    --warm-deep: #5d1322;
 
     /**
-     * How much of the viewport the panel covers. script.js frames the 3D
-     * model into the space that is left, so these two must stay in step
-     * with PANEL_FRACTION there.
+     * How much of the viewport the drawer covers once it is open. script.js
+     * frames the 3D model into the space that is left, so these must stay in
+     * step with PANEL_FRACTION there.
      */
-    --panel-fraction: 44%;
+    --drawer-size: 42%;
+    --handle: 2.75rem;
 }
 
 *,
@@ -50,46 +55,40 @@ canvas.webgl {
 }
 
 /**
- * Project panel - the 2D half of the detail view
+ * Project bar - the minimum needed to orient, kept clear of the model
  */
-.panel {
+.bar {
     position: fixed;
     top: 0;
-    right: 0;
-    z-index: 1;
+    left: 0;
+    z-index: 2;
 
-    width: var(--panel-fraction);
-    height: 100%;
-    padding: clamp(1.5rem, 3.5vw, 3.5rem);
-    overflow-y: auto;
-    overscroll-behavior: contain;
-
-    background: linear-gradient(to left, var(--panel-bg) 55%, rgba(2, 16, 22, 0.55) 85%, rgba(2, 16, 22, 0));
-    border-left: 1px solid var(--rule);
+    padding: clamp(1.25rem, 3vw, 2.5rem);
+    max-width: min(26rem, 60vw);
 
     opacity: 0;
     visibility: hidden;
-    transform: translateX(2rem);
+    transform: translateY(-0.75rem);
     transition: opacity 0.5s ease, transform 0.5s ease, visibility 0s linear 0.5s;
 }
 
-.panel.is-open {
+.bar.is-open {
     opacity: 1;
     visibility: visible;
     transform: none;
     transition: opacity 0.6s ease 0.2s, transform 0.6s ease 0.2s, visibility 0s;
 }
 
-.panel__close {
+.bar__back {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    margin-bottom: clamp(1.5rem, 4vh, 3rem);
+    margin-bottom: 0.75rem;
     padding: 0.4rem 0;
 
     font: inherit;
-    font-size: 0.8rem;
-    letter-spacing: 0.08em;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--ink-dim);
 
@@ -99,28 +98,179 @@ canvas.webgl {
     transition: color 0.2s ease;
 }
 
-.panel__close:hover,
-.panel__close:focus-visible {
+.bar__back:hover,
+.bar__back:focus-visible {
     color: var(--accent);
 }
 
-.panel__close-arrow {
+.bar__back-arrow {
     transition: transform 0.2s ease;
 }
 
-.panel__close:hover .panel__close-arrow {
+.bar__back:hover .bar__back-arrow {
     transform: translateX(-0.25rem);
 }
 
-.panel__title {
-    margin: 0 0 1rem;
-    font-size: clamp(1.75rem, 3.5vw, 2.75rem);
+.bar__title {
+    margin: 0;
+    font-size: clamp(1.4rem, 2.6vw, 2.1rem);
     font-weight: 600;
     line-height: 1.15;
     letter-spacing: -0.01em;
 }
 
-.panel__meta {
+.bar__status:not(:empty) {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin: 0.75rem 0 0;
+    font-size: 0.8125rem;
+    color: var(--ink-dim);
+}
+
+.bar__status:not(:empty)::before {
+    content: "";
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: blink 1.4s ease-in-out infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 0.25; transform: scale(0.8); }
+    50%      { opacity: 1;    transform: scale(1.1); }
+}
+
+/**
+ * Drawer - the description, off screen until pulled out
+ */
+.drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 3;
+
+    width: var(--drawer-size);
+    height: 100%;
+
+    background: linear-gradient(to left, var(--panel-bg) 70%, rgba(2, 16, 22, 0.72));
+    border-left: 1px solid var(--rule);
+
+    visibility: hidden;
+    transform: translateX(100%);
+    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), visibility 0s linear 0.6s;
+}
+
+/* Available means the project has something to say; until then there is no
+   handle to pull and no drawer to pull it from */
+.drawer.is-available {
+    visibility: visible;
+    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), visibility 0s;
+}
+
+.drawer.is-open {
+    transform: none;
+}
+
+.drawer__content {
+    height: 100%;
+    padding: clamp(1.5rem, 3.5vw, 3.5rem);
+    padding-top: clamp(4rem, 12vh, 7rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.drawer.is-open .drawer__content {
+    opacity: 1;
+    transition: opacity 0.5s ease 0.25s;
+}
+
+/**
+ * The handle sits on the drawer's outer edge, so it stays on screen while
+ * the drawer itself is parked off it
+ */
+.drawer__handle {
+    position: absolute;
+    top: 50%;
+    left: calc(var(--handle) * -1);
+    transform: translateY(-50%);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.9rem;
+
+    width: var(--handle);
+    padding: 1.25rem 0;
+
+    font: inherit;
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink);
+
+    background: linear-gradient(to bottom, rgba(93, 19, 34, 0.92), rgba(60, 12, 22, 0.92));
+    border: 1px solid rgba(196, 41, 65, 0.55);
+    border-right: 0;
+    border-radius: 0.5rem 0 0 0.5rem;
+    cursor: pointer;
+
+    transition: background 0.25s ease, border-color 0.25s ease;
+}
+
+.drawer__handle:hover,
+.drawer__handle:focus-visible {
+    background: linear-gradient(to bottom, rgba(120, 25, 44, 0.95), rgba(80, 16, 29, 0.95));
+    border-color: var(--warm);
+}
+
+.drawer__label {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+}
+
+.drawer__chevron {
+    font-size: 1.1rem;
+    line-height: 1;
+    transition: transform 0.4s ease;
+}
+
+.drawer.is-open .drawer__chevron {
+    transform: rotate(180deg);
+}
+
+/* The invitation: a dark red pulse that stops once the drawer is open */
+.drawer__pulse {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--warm);
+    animation: pull 2.2s ease-out infinite;
+}
+
+@keyframes pull {
+    0%   { box-shadow: 0 0 0 0 rgba(196, 41, 65, 0.75); }
+    70%  { box-shadow: 0 0 0 0.85rem rgba(196, 41, 65, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(196, 41, 65, 0); }
+}
+
+.drawer.is-open .drawer__pulse {
+    animation: none;
+    background: var(--ink-dim);
+}
+
+/**
+ * Drawer contents
+ */
+.drawer__meta:empty {
+    display: none;
+}
+
+.drawer__meta {
     display: grid;
     grid-template-columns: auto 1fr;
     gap: 0.25rem 1.25rem;
@@ -131,12 +281,7 @@ canvas.webgl {
     font-size: 0.875rem;
 }
 
-/* A project with none of these fields yet shouldn't show an empty frame */
-.panel__meta:empty {
-    display: none;
-}
-
-.panel__meta dt {
+.drawer__meta dt {
     color: var(--ink-dim);
     letter-spacing: 0.04em;
     text-transform: uppercase;
@@ -144,15 +289,15 @@ canvas.webgl {
     align-self: center;
 }
 
-.panel__meta dd {
+.drawer__meta dd {
     margin: 0;
 }
 
-.panel__body p {
+.drawer__body p {
     margin: 0 0 1.25rem;
 }
 
-.panel__credits:not(:empty) {
+.drawer__credits:not(:empty) {
     margin: 2rem 0 0;
     padding-top: 1.25rem;
     border-top: 1px solid var(--rule);
@@ -160,56 +305,68 @@ canvas.webgl {
     color: var(--ink-dim);
 }
 
-.panel__status:not(:empty) {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    margin: 1.5rem 0 0;
-    font-size: 0.8125rem;
-    color: var(--ink-dim);
-}
-
-.panel__status:not(:empty)::before {
-    content: "";
-    width: 0.5rem;
-    height: 0.5rem;
-    border-radius: 50%;
-    background: var(--accent);
-    animation: pulse 1.4s ease-in-out infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { opacity: 0.25; transform: scale(0.8); }
-    50%      { opacity: 1;    transform: scale(1.1); }
-}
-
 /**
- * Narrow viewports - the panel stacks below the 3D view instead of beside it
+ * Narrow viewports - the drawer pulls up from the bottom instead of in from
+ * the side, and its handle sits on its top edge
  */
 @media (max-width: 859px) {
     :root {
-        --panel-fraction: 54%;
+        --drawer-size: 58%;
     }
 
-    .panel {
+    .drawer {
         top: auto;
         bottom: 0;
         width: 100%;
-        height: var(--panel-fraction);
+        height: var(--drawer-size);
         border-left: 0;
         border-top: 1px solid var(--rule);
-        background: linear-gradient(to top, var(--panel-bg) 60%, rgba(2, 16, 22, 0.6) 90%, rgba(2, 16, 22, 0));
-        transform: translateY(2rem);
+        background: linear-gradient(to top, var(--panel-bg) 70%, rgba(2, 16, 22, 0.72));
+        transform: translateY(100%);
+    }
+
+    .drawer__content {
+        padding-top: clamp(1.5rem, 5vh, 2.5rem);
+    }
+
+    .drawer__handle {
+        top: calc(var(--handle) * -1);
+        left: 50%;
+        transform: translateX(-50%);
+
+        flex-direction: row;
+        width: auto;
+        height: var(--handle);
+        padding: 0 1.5rem;
+        border: 1px solid rgba(196, 41, 65, 0.55);
+        border-bottom: 0;
+        border-radius: 0.5rem 0.5rem 0 0;
+    }
+
+    .drawer__label {
+        writing-mode: horizontal-tb;
+    }
+
+    .drawer__chevron {
+        transform: rotate(90deg);
+    }
+
+    .drawer.is-open .drawer__chevron {
+        transform: rotate(-90deg);
     }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .panel,
-    .panel__close-arrow {
+    .bar,
+    .drawer,
+    .drawer__content,
+    .drawer__chevron,
+    .bar__back-arrow {
         transition-duration: 0.01ms;
     }
 
-    .panel__status:not(:empty)::before {
+    .drawer__pulse,
+    .bar__status:not(:empty)::before {
         animation: none;
         opacity: 1;
     }

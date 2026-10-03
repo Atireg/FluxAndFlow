@@ -19,21 +19,31 @@
 <body>
   <canvas class="webgl"></canvas>
 
-  <aside class="panel" id="panel" aria-hidden="true">
-    <button class="panel__close" id="panel-close" type="button">
-      <span class="panel__close-arrow" aria-hidden="true">&larr;</span> All projects
+  <!-- Always on screen while a project is open: just enough to say what you
+       are looking at and how to get back -->
+  <header class="bar" id="bar" aria-hidden="true">
+    <button class="bar__back" id="project-close" type="button">
+      <span class="bar__back-arrow" aria-hidden="true">&larr;</span> All projects
     </button>
 
-    <header>
-      <h1 class="panel__title" id="panel-title"></h1>
-      <dl class="panel__meta" id="panel-meta"></dl>
-    </header>
+    <h1 class="bar__title" id="project-title"></h1>
+    <p class="bar__status" id="project-status" role="status"></p>
+  </header>
 
-    <div class="panel__body" id="panel-body"></div>
+  <!-- The description, pulled out from the edge on demand -->
+  <aside class="drawer" id="drawer" aria-hidden="true">
+    <button class="drawer__handle" id="drawer-handle" type="button"
+            aria-expanded="false" aria-controls="drawer-content">
+      <span class="drawer__pulse" aria-hidden="true"></span>
+      <span class="drawer__label">About</span>
+      <span class="drawer__chevron" aria-hidden="true">&lsaquo;</span>
+    </button>
 
-    <p class="panel__credits" id="panel-credits"></p>
-
-    <p class="panel__status" id="panel-status" role="status"></p>
+    <div class="drawer__content" id="drawer-content">
+      <dl class="drawer__meta" id="project-meta"></dl>
+      <div class="drawer__body" id="project-body"></div>
+      <p class="drawer__credits" id="project-credits"></p>
+    </div>
   </aside>
 
   <script type="module" src="script.js"></script>
