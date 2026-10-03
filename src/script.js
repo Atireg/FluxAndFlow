@@ -69,16 +69,19 @@ const projects = [
         slot: 0,
         title: 'Rock Print Pavilion',
 
-        // TODO: all of the copy below is placeholder - replace it with your
-        // own words, and state your role on the project accurately.
-        year: '20XX',
-        role: 'Your role on the project',
-        context: 'Studio, course or research group',
-        body: [
-            'What the project is: the brief, the site, the question it set out to answer.',
-            'What you did: your specific contribution, the tools and methods you used, and what you would do differently now.',
-        ],
-        credits: 'Collaborators and credits.',
+        // Fill these in and they appear in the panel automatically; anything
+        // left empty is skipped rather than rendered blank. State the role
+        // accurately - the page implies authorship of whatever it shows.
+        //   year:    '2018'
+        //   role:    what you actually did on it
+        //   context: studio, course or research group
+        //   body:    ['paragraph', 'paragraph']
+        //   credits: collaborators, and the research group to credit
+        year: '',
+        role: '',
+        context: '',
+        body: [],
+        credits: '',
 
         thumbModel: 'models/rock.gltf',
         detailModel: 'models/RockPrintStructureReduced.glb',

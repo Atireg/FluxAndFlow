@@ -131,6 +131,11 @@ canvas.webgl {
     font-size: 0.875rem;
 }
 
+/* A project with none of these fields yet shouldn't show an empty frame */
+.panel__meta:empty {
+    display: none;
+}
+
 .panel__meta dt {
     color: var(--ink-dim);
     letter-spacing: 0.04em;
