@@ -220,9 +220,13 @@ function loadPointCloudWithShaderMaterial({
                         uLightDirection: {value: lightDirection.normalize()},
                         uLightColor: {value: lightColor},
                         uPerlinTexture: new THREE.Uniform(perlinTexture),
-                        uPointSize: { value: 20 * renderer.getPixelRatio() }
+                        uPointScale: { value: 1 },
+                        uSizeAttenuation: { value: 1 }
                     },
                 });
+
+                pointCloudMaterials.push(shaderMaterial);
+                refreshPointScale();
 
                 // Replace the material with the custom ShaderMaterial
                 child.material = shaderMaterial;
@@ -261,10 +265,88 @@ directionalLight.target.getWorldPosition(lightDirection);
 scene.add(directionalLight)
 
 /**
- * Camera
+ * Cameras
+ *
+ * The catalog is perspective, so the cubes read as solids with depth. A
+ * project is orthographic and viewed straight down an axis, so the cube's
+ * edges stay parallel to the canvas and the model is drawn true to scale.
  */
-const camera = new THREE.PerspectiveCamera(45, screenWidth / screenHeight, 1, 2000);
-scene.add(camera);
+const perspectiveCamera = new THREE.PerspectiveCamera(45, screenWidth / screenHeight, 1, 2000);
+
+// near is negative so the frustum reaches behind the camera and nothing
+// clips as it is moved around
+const orthographicCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, -2000, 4000);
+
+scene.add(perspectiveCamera, orthographicCamera);
+
+let camera = perspectiveCamera;
+
+/**
+ * Which projection a project is shown in.
+ *
+ *   'perspective'  one-point perspective - the camera sits square-on to the
+ *                  cube, so its vertical and horizontal edges stay parallel
+ *                  to the canvas while depth converges on a single vanishing
+ *                  point. DETAIL_FOV sets how strong that convergence is:
+ *                  lower is flatter, higher is more dramatic.
+ *   'orthographic' no convergence at all, everything true to scale.
+ */
+const DETAIL_PROJECTION = 'perspective';
+const DETAIL_FOV = 35;
+const CATALOG_FOV = 45;
+
+// Half the height of the orthographic frustum, in world units
+let orthoHalfHeight = 1;
+
+// Point clouds keep a constant size in world units under either projection
+const pointCloudMaterials = [];
+const POINT_WORLD_SIZE = 0.022;
+
+function framebufferHeight() {
+    return screenHeight * renderer.getPixelRatio();
+}
+
+// Pixels per world unit at the plane being looked at, which is what turns a
+// world-space point size into a pixel size
+function setPointScale(pixelsPerUnit, attenuate) {
+    pointCloudMaterials.forEach((material) => {
+        material.uniforms.uPointScale.value = POINT_WORLD_SIZE * pixelsPerUnit;
+        material.uniforms.uSizeAttenuation.value = attenuate ? 1 : 0;
+    });
+}
+
+function refreshPointScale() {
+    if (camera === orthographicCamera) {
+        setOrthoFrustum(orthoHalfHeight);
+        return;
+    }
+
+    setPerspectivePointScale();
+}
+
+function setPerspectivePointScale() {
+    const halfFov = THREE.MathUtils.degToRad(perspectiveCamera.fov) / 2;
+    setPointScale(framebufferHeight() / (2 * Math.tan(halfFov)), true);
+}
+
+function setOrthoFrustum(halfHeight) {
+    orthoHalfHeight = Math.max(halfHeight, 0.001);
+
+    const halfWidth = orthoHalfHeight * aspectRatio;
+    orthographicCamera.left = -halfWidth;
+    orthographicCamera.right = halfWidth;
+    orthographicCamera.top = orthoHalfHeight;
+    orthographicCamera.bottom = -orthoHalfHeight;
+    orthographicCamera.updateProjectionMatrix();
+
+    setPointScale(framebufferHeight() / (2 * orthoHalfHeight), false);
+}
+
+function setActiveCamera(next) {
+    camera = next;
+    controls.object = next;
+    controls.update();
+}
 
 /**
  * Orbit controls
@@ -482,69 +564,168 @@ function fitCameraToGrid({ animate = false } = {}) {
     const gridDepth = (gridShape.rows - 1) * step + cubeSize;
     const margin = 1.15;
 
-    const halfFov = THREE.MathUtils.degToRad(camera.fov) / 2;
+    const halfFov = THREE.MathUtils.degToRad(CATALOG_FOV) / 2;
     const distanceForDepth = (gridDepth * margin) / 2 / Math.tan(halfFov);
-    const distanceForWidth = (gridWidth * margin) / 2 / (Math.tan(halfFov) * camera.aspect);
+    const distanceForWidth = (gridWidth * margin) / 2 / (Math.tan(halfFov) * perspectiveCamera.aspect);
 
     // Clear the highest point a cube reaches while it bobs
     const cubeTop = cubeSize / 2 + 3;
     const height = Math.max(distanceForDepth, distanceForWidth) + cubeTop;
 
     // Position the camera above the grid, looking straight down at its centre
-    camera.up.set(0, 1, 0);
-    camera.updateProjectionMatrix();
+    perspectiveCamera.up.set(0, 1, 0);
+    perspectiveCamera.updateProjectionMatrix();
 
     if (animate) {
-        gsap.to(camera.position, { x: 0, y: height, z: 0, duration: 1.1, ease: 'power2.inOut' });
+        gsap.to(perspectiveCamera.position, { x: 0, y: height, z: 0, duration: 1.1, ease: 'power2.inOut' });
         gsap.to(controls.target, { x: 0, y: 0, z: 0, duration: 1.1, ease: 'power2.inOut' });
         return;
     }
 
-    camera.position.set(0, height, 0);
-    camera.lookAt(0, 0, 0);
+    perspectiveCamera.position.set(0, height, 0);
+    perspectiveCamera.lookAt(0, 0, 0);
     controls.target.set(0, 0, 0);
     controls.update();
 }
 
 /**
- * Frame an object for the detail view, in the part of the viewport the
- * project panel leaves free. Uses the object's bounding sphere, so it fits
- * whatever shape a project's model happens to be.
+ * Frame a project for the detail view.
+ *
+ * The camera sits square-on to the cube, looking along +X, so the cube's
+ * vertical and horizontal edges stay parallel to the canvas. Under
+ * perspective that is a one-point view - depth converges on a single central
+ * vanishing point, nothing skews sideways. Under orthographic nothing
+ * converges at all.
  */
+const DETAIL_VIEW_OFFSET = new THREE.Vector3(-1, 0, 0); // camera sits on -X
+const ORTHO_VIEW_DISTANCE = 50; // orthographic ignores distance; this just clears the scene
+
 function frameDetail(object, { duration = 1.6 } = {}) {
     const box = new THREE.Box3().setFromObject(object);
     if (box.isEmpty()) return;
 
-    const sphere = box.getBoundingSphere(new THREE.Sphere());
-    const { mode, fraction } = getPanelLayout();
-    const halfFov = THREE.MathUtils.degToRad(camera.fov) / 2;
-    const radius = sphere.radius * 1.15;
-    const free = 1 - fraction;
+    const center = box.getCenter(new THREE.Vector3());
+    const half = box.getSize(new THREE.Vector3()).multiplyScalar(0.5);
 
-    // Distance at which the model fits both axes of the free area
-    const forHeight = radius / Math.tan(halfFov) / (mode === 'stacked' ? free : 1);
-    const forWidth = radius / (Math.tan(halfFov) * camera.aspect) / (mode === 'side' ? free : 1);
-    const distance = Math.max(forHeight, forWidth);
-
-    // Look at the model from the side, a little above and in front
-    const direction = new THREE.Vector3(-1, 0.3, 0.55).normalize();
-    const position = sphere.center.clone().addScaledVector(direction, distance);
-
-    // Slide the whole view sideways (or up) so the model sits in the free
-    // half rather than behind the panel
-    const forward = sphere.center.clone().sub(position).normalize();
+    const forward = DETAIL_VIEW_OFFSET.clone().negate();
     const right = forward.clone().cross(camera.up).normalize();
-    const visibleHeight = 2 * distance * Math.tan(halfFov);
-    const shift = (fraction / 2) * (mode === 'side' ? visibleHeight * camera.aspect : visibleHeight);
-    const offset = mode === 'side'
-        ? right.multiplyScalar(shift)
-        : right.cross(forward).normalize().multiplyScalar(-shift);
+    const up = right.clone().cross(forward).normalize();
 
-    position.add(offset);
-    const target = sphere.center.clone().add(offset);
+    // The box's extent as it projects onto the screen axes, plus its depth
+    // along the view axis - under perspective the near face projects larger
+    // than the centre, so the fit has to allow for it
+    const halfW = Math.abs(right.x) * half.x + Math.abs(right.y) * half.y + Math.abs(right.z) * half.z;
+    const halfH = Math.abs(up.x) * half.x + Math.abs(up.y) * half.y + Math.abs(up.z) * half.z;
+    const halfD = Math.abs(forward.x) * half.x + Math.abs(forward.y) * half.y + Math.abs(forward.z) * half.z;
+
+    const { mode, fraction } = getPanelLayout();
+    const side = mode === 'side';
+    const free = 1 - fraction;
+    const margin = 1.12;
+
+    const ortho = DETAIL_PROJECTION === 'orthographic';
+    const tan = Math.tan(THREE.MathUtils.degToRad(DETAIL_FOV) / 2);
+
+    let distance;
+    let halfHeight;
+
+    if (ortho) {
+        // Nothing converges, so the fit is just the projected extent
+        const neededH = (halfH * margin) / (side ? 1 : free);
+        const neededW = (halfW * margin) / (aspectRatio * (side ? free : 1));
+
+        halfHeight = Math.max(neededH, neededW);
+        distance = ORTHO_VIEW_DISTANCE;
+    } else {
+        // Keep the nearest face inside the free area, not just the centre
+        const forWidth = (halfD + halfW / (tan * aspectRatio)) / (side ? free : 1);
+        const forHeight = (halfD + halfH / tan) / (side ? 1 : free);
+
+        distance = margin * Math.max(forWidth, forHeight);
+        halfHeight = distance * tan;
+    }
+
+    // Slide the view so the model sits in the free half, not behind the panel
+    const shift = fraction * (side ? halfHeight * aspectRatio : halfHeight);
+    const offset = side
+        ? right.clone().multiplyScalar(shift)
+        : up.clone().multiplyScalar(-shift);
+
+    const position = center.clone().addScaledVector(DETAIL_VIEW_OFFSET, distance).add(offset);
+    const target = center.clone().add(offset);
 
     gsap.to(camera.position, { x: position.x, y: position.y, z: position.z, duration, ease: 'power2.inOut' });
     gsap.to(controls.target, { x: target.x, y: target.y, z: target.z, duration, ease: 'power2.inOut' });
+
+    if (ortho) {
+        const frustum = { halfHeight: orthoHalfHeight };
+        gsap.to(frustum, {
+            halfHeight,
+            duration,
+            ease: 'power2.inOut',
+            onUpdate: () => setOrthoFrustum(frustum.halfHeight),
+        });
+    }
+}
+
+// Changing the field of view changes how strongly depth converges, so the
+// catalog and a project can each have their own lens
+function animateFov(fov, duration) {
+    gsap.to(perspectiveCamera, {
+        fov,
+        duration,
+        ease: 'power2.inOut',
+        onUpdate: () => {
+            perspectiveCamera.updateProjectionMatrix();
+            setPerspectivePointScale();
+        },
+    });
+}
+
+function enterDetailProjection(duration) {
+    if (DETAIL_PROJECTION === 'orthographic') {
+        swapToOrthographic();
+        return;
+    }
+
+    animateFov(DETAIL_FOV, duration);
+}
+
+function exitDetailProjection(duration) {
+    if (DETAIL_PROJECTION === 'orthographic') {
+        swapToPerspective();
+    }
+
+    animateFov(CATALOG_FOV, duration);
+}
+
+/**
+ * Switching projection is a cut, so start the incoming camera matched to what
+ * the outgoing one was showing and the scale does not jump.
+ */
+function swapToOrthographic() {
+    const distance = perspectiveCamera.position.distanceTo(controls.target);
+    const halfHeight = distance * Math.tan(THREE.MathUtils.degToRad(perspectiveCamera.fov) / 2);
+
+    orthographicCamera.position.copy(perspectiveCamera.position);
+    orthographicCamera.quaternion.copy(perspectiveCamera.quaternion);
+    setOrthoFrustum(halfHeight);
+    setActiveCamera(orthographicCamera);
+}
+
+function swapToPerspective() {
+    perspectiveCamera.fov = CATALOG_FOV;
+    perspectiveCamera.updateProjectionMatrix();
+
+    const direction = orthographicCamera.position.clone().sub(controls.target);
+    const distance = orthoHalfHeight / Math.tan(THREE.MathUtils.degToRad(CATALOG_FOV) / 2);
+
+    if (direction.lengthSq() > 0) {
+        perspectiveCamera.position.copy(controls.target).addScaledVector(direction.normalize(), distance);
+    }
+
+    perspectiveCamera.quaternion.copy(orthographicCamera.quaternion);
+    setActiveCamera(perspectiveCamera);
 }
 
 window.addEventListener('resize', () => {
@@ -552,9 +733,11 @@ window.addEventListener('resize', () => {
     screenHeight = window.innerHeight;
     aspectRatio = screenWidth / screenHeight;
 
-    // Update camera
-    camera.aspect = aspectRatio;
-    camera.updateProjectionMatrix();
+    // Update both cameras; only one of them is active at a time
+    perspectiveCamera.aspect = aspectRatio;
+    perspectiveCamera.updateProjectionMatrix();
+    setOrthoFrustum(orthoHalfHeight);
+    refreshPointScale();
 
     // Update renderer
     renderer.setSize(screenWidth, screenHeight);
@@ -568,9 +751,8 @@ window.addEventListener('resize', () => {
         return;
     }
 
-    // The panel changes size and may switch sides, so re-frame the model
-    const detail = selectedCube && (selectedCube.userData.detail ?? selectedCube);
-    if (detail) frameDetail(detail, { duration: 0.4 });
+    // The panel changes size and may switch sides, so re-frame
+    if (selectedCube) frameDetail(selectedCube, { duration: 0.4 });
 });
 
 const clock = new THREE.Clock();
@@ -779,17 +961,19 @@ function openProject(cube) {
     // answer while the model is still downloading
     showPanel(project);
 
-    controls.autoRotate = true;
-    controls.autoRotateSpeed = 0.3;
+    // The elevation is the point of this view, so nothing rotates it off-axis
+    controls.autoRotate = false;
+
+    enterDetailProjection(1.6);
 
     if (cube.userData.detail) {
         cube.userData.detail.visible = true;
         setPanelStatus(null);
-        frameDetail(cube.userData.detail);
+        frameDetail(cube);
         return;
     }
 
-    // Move towards the cube now, then settle on the model once it arrives
+    // Frame the cube now, then re-frame once the model is inside it
     setPanelStatus('Loading model');
     frameDetail(cube, { duration: 1 });
 
@@ -806,7 +990,10 @@ function openProject(cube) {
             }
 
             setPanelStatus(null);
-            frameDetail(model);
+
+            // The model is a child of the cube, so framing the cube frames
+            // both together
+            frameDetail(cube);
         },
     });
 }
@@ -839,6 +1026,7 @@ function closeProject() {
         if (other.userData.content) other.userData.content.visible = true;
     });
 
+    exitDetailProjection(1.1);
     fitCameraToGrid({ animate: true });
 }
 
