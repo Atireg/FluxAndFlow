@@ -343,12 +343,14 @@ const CATALOG_FOV = 45;
  * How much room to leave around a project. Above 1 the whole box fits with
  * air around it; below 1 the view crops into it.
  *
- * A phone's frame is far taller than the pavilion is deep, so the fit there
- * is limited by width and fitting the whole box leaves the model marooned in
- * a thin band with dead space above and below. Stacked layouts crop the ends
- * instead, trading the sparse edges of the model for scale.
+ * Crop only where there is room going spare. On a phone with the drawer
+ * parked, the frame is far taller than the pavilion is deep: the fit is
+ * limited by width and leaves the model marooned in a thin band, so cropping
+ * its sparse ends buys scale cheaply. Pull the drawer out and the free area
+ * is short enough that height becomes the limit instead - the same crop would
+ * take the top off the cube, so the margin eases back past 1.
  */
-const DETAIL_MARGIN = { side: 1.12, stacked: 0.88 };
+const DETAIL_MARGIN = { side: 1.12, stackedParked: 0.88, stackedOpen: 1.05 };
 
 // Half the height of the orthographic frustum, in world units
 let orthoHalfHeight = 1;
@@ -686,7 +688,9 @@ function frameDetail(object, { duration = 1.6 } = {}) {
     const { mode, fraction } = getPanelLayout();
     const side = mode === 'side';
     const free = 1 - fraction;
-    const margin = DETAIL_MARGIN[mode];
+    const margin = side
+        ? DETAIL_MARGIN.side
+        : (drawerOpen ? DETAIL_MARGIN.stackedOpen : DETAIL_MARGIN.stackedParked);
 
     const ortho = DETAIL_PROJECTION === 'orthographic';
     const tan = Math.tan(THREE.MathUtils.degToRad(DETAIL_FOV[mode]) / 2);
