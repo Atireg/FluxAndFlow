@@ -329,7 +329,14 @@ let camera = perspectiveCamera;
  *   'orthographic' no convergence at all, everything true to scale.
  */
 const DETAIL_PROJECTION = 'perspective';
-const DETAIL_FOV = 45;
+
+/**
+ * The lens a project is seen through, per layout. A phone's frame is narrow
+ * enough that a wide angle shows the cube's top and bottom faces receding at
+ * once, which reads as a tunnel rather than a box, so it gets a longer lens
+ * than the desktop layout does.
+ */
+const DETAIL_FOV = { side: 45, stacked: 30 };
 const CATALOG_FOV = 45;
 
 // Half the height of the orthographic frustum, in world units
@@ -671,7 +678,7 @@ function frameDetail(object, { duration = 1.6 } = {}) {
     const margin = 1.12;
 
     const ortho = DETAIL_PROJECTION === 'orthographic';
-    const tan = Math.tan(THREE.MathUtils.degToRad(DETAIL_FOV) / 2);
+    const tan = Math.tan(THREE.MathUtils.degToRad(DETAIL_FOV[mode]) / 2);
 
     let distance;
     let halfHeight;
@@ -701,6 +708,8 @@ function frameDetail(object, { duration = 1.6 } = {}) {
     const position = center.clone().addScaledVector(DETAIL_VIEW_OFFSET, distance).add(offset);
     const target = center.clone().add(offset);
 
+    if (!ortho) animateFov(DETAIL_FOV[mode], duration);
+
     gsap.to(camera.position, { x: position.x, y: position.y, z: position.z, duration, ease: 'power2.inOut' });
     gsap.to(controls.target, { x: target.x, y: target.y, z: target.z, duration, ease: 'power2.inOut' });
 
@@ -729,13 +738,9 @@ function animateFov(fov, duration) {
     });
 }
 
-function enterDetailProjection(duration) {
-    if (DETAIL_PROJECTION === 'orthographic') {
-        swapToOrthographic();
-        return;
-    }
-
-    animateFov(DETAIL_FOV, duration);
+function enterDetailProjection() {
+    // Under perspective there is nothing to switch; frameDetail sets the lens
+    if (DETAIL_PROJECTION === 'orthographic') swapToOrthographic();
 }
 
 function exitDetailProjection(duration) {
@@ -1018,7 +1023,7 @@ function openProject(cube) {
     // The elevation is the point of this view, so nothing rotates it off-axis
     controls.autoRotate = false;
 
-    enterDetailProjection(1.6);
+    enterDetailProjection();
 
     if (cube.userData.detail) {
         cube.userData.detail.visible = true;
