@@ -119,3 +119,13 @@ rendered no handle at all. Not a deploy problem; a content problem.
   position that passes through the degenerate point. Checked the reverse
   (closing a project) too and confirmed it was never broken - verified
   before and after across desktop and mobile layouts. See DECISIONS.md.
+- **The model turns slowly while a project is open** - a full rotation
+  every 40s, ambient rather than something to watch. This is not the
+  auto-rotation that was removed early in Session 1: that orbited the
+  camera and turned the cube's edges off-square, which is why it was
+  pulled; this turns the point cloud itself, parented inside the cube, so
+  the camera and the cube's own edges never move. Checked that the fit
+  computed once at open time still holds the model as it turns - sampled
+  the actual asset across a full rotation in both layouts, including the
+  narrowest profile at 90°, and it stays inside the frame throughout. See
+  DECISIONS.md.

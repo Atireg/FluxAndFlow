@@ -96,8 +96,52 @@ frame is narrow enough that 45 shows the cube's top and bottom faces receding
 at once, as two symmetrical trapezoids around the model, which reads as a
 tunnel rather than as a box.
 
-Auto-rotation is off in this view. It slowly turned the cube off-axis, which
-is precisely what the view exists to avoid.
+`controls.autoRotate` is off in this view and stays off: it orbits the
+CAMERA around the target, which turns the cube's own edges off-axis - the
+one thing this view exists to keep square. The model now does slowly
+rotate on its own (see "The model rotates slowly once a project is open",
+below), but that turns the model only, parented inside a cube whose edges
+stay exactly where the fit put them. The two are not the same lever, and
+only one of them was ever the problem.
+
+
+The model rotates slowly once a project is open
+-------------------------------------------------
+
+A plain static model read as inert, so it now turns slowly around its own
+Y axis while a project is open - a full turn every 40s (`DETAIL_ROTATE_SPEED`),
+slow enough to read as ambient rather than as something to actively watch,
+in the same spirit as the catalog's own wander.
+
+This is not the auto-rotation that was removed earlier (see "The detail
+view is a one-point perspective", above): that orbited the camera around
+the cube via `controls.autoRotate`, which turned the cube's own edges away
+from square to the canvas - exactly what this view exists to prevent. This
+instead rotates `cube.userData.detail` (the point cloud), a child of the
+cube, directly - the camera and the cube's edges never move, only the
+content inside does. The two looked like the same feature from the
+outside but are different levers entirely; one of them was the actual
+problem and the other was always fine.
+
+Computed as `(elapsedTime - startTime) * DETAIL_ROTATE_SPEED`, not
+accumulated per frame, matching the rest of the project's animation - see
+"A cube's visual state is a pure function of its mode", below.
+`startTime` is reset at the moment the model becomes visible (both the
+already-loaded path and the just-finished-downloading path in
+`openProject`), with rotation explicitly zeroed at the same moment, so the
+model is always seen square-on at the instant it appears - the same reason
+`openProject` already zeroes the cube's own rotation and scale on click.
+
+`frameDetail`'s fit is computed once, from the model's bounding box at
+that same zeroed instant, and is not recomputed as the model turns - a
+rotating box's on-screen footprint does change shape as it turns (a
+structure that is wide and shallow presents narrower but deeper at 90°).
+Checked by sampling the actual asset across a full turn in a real browser,
+both layouts, parked and open drawer on mobile: the structure stays well
+inside the frame at every angle tested, including the narrowest profile at
+90°, so the existing margins already have enough air and no fit change was
+needed. This would need revisiting for a future project whose footprint is
+closer to the frame's edges than this one's.
 
 
 Fitting has to allow for depth, and for what else is on screen

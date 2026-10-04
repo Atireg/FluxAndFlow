@@ -369,6 +369,12 @@ const DETAIL_PROJECTION = 'perspective';
 const DETAIL_FOV = { side: 45, stacked: 30 };
 const CATALOG_FOV = 45;
 
+// A full turn every 40s - slow enough to read as ambient rather than as
+// something to watch, same spirit as the catalog's own wander. Turns the
+// model itself, not the camera - see DECISIONS.md for why that distinction
+// matters here.
+const DETAIL_ROTATE_SPEED = (2 * Math.PI) / 40;
+
 /**
  * How much room to leave around a project. Above 1 the whole box fits with
  * air around it; below 1 the view crops into it.
@@ -1011,6 +1017,11 @@ function animate() {
     if (viewState === 'catalog') {
         updateSpotlightCycle(elapsedTime);
         cubes.forEach((cube) => updateCube(cube, elapsedTime));
+    } else if (selectedCube && selectedCube.userData.detail) {
+        // Turns the model itself, not the camera, so the cube's edges stay
+        // square to the canvas - see DETAIL_ROTATE_SPEED
+        const since = elapsedTime - selectedCube.userData.detailRotateStartTime;
+        selectedCube.userData.detail.rotation.y = since * DETAIL_ROTATE_SPEED;
     }
 
     // Update controls - except while a camera move is driving orientation
@@ -1299,6 +1310,8 @@ function openProject(cube) {
 
     if (cube.userData.detail) {
         cube.userData.detail.visible = true;
+        cube.userData.detail.rotation.y = 0;
+        cube.userData.detailRotateStartTime = clock.getElapsedTime();
         setProjectStatus(null);
         frameDetail(cube);
         return;
@@ -1321,6 +1334,7 @@ function openProject(cube) {
             }
 
             setProjectStatus(null);
+            cube.userData.detailRotateStartTime = clock.getElapsedTime();
 
             // The model is a child of the cube, so framing the cube frames
             // both together

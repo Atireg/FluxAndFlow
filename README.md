@@ -63,6 +63,9 @@ Catalog view
 
 Details view (per project)
     [x] Integrate 2D content per project - text only so far
+    [x] Slow ambient rotation of the model while a project is open - the
+        model only, not the camera; see DECISIONS.md for why that
+        distinction mattered here
     [ ] Images and video in the drawer
     [x] Split the screen in two: half for 3D content/half for the 2D content
         (then superseded: the text now lives in a drawer pulled from the edge,
