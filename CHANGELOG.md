@@ -105,3 +105,17 @@ rendered no handle at all. Not a deploy problem; a content problem.
   a brief red tint during that fade. Reset both now, verified by forcing
   a click mid-glow and confirming no tint and a clean settle. See
   DECISIONS.md.
+- **Fixed the opening transition's rotation glitch.** Clicking a project
+  made the whole grid snap to a skewed diagonal angle for the first few
+  frames before settling square. Root cause: the catalog camera sits
+  exactly overhead, the one position where OrbitControls' spherical math
+  can't tell which way is "around", and frameDetail's own geometry keeps
+  that ambiguous axis pinned throughout the tween rather than only at the
+  start - confirmed with frame-by-frame quaternion logging in a real
+  browser showing the camera's roll snap to its final value in a single
+  frame while its pitch was still easing in. Fixed by slerping the
+  camera's quaternion directly between known start and end orientations
+  instead of leaving OrbitControls to re-derive orientation from a
+  position that passes through the degenerate point. Checked the reverse
+  (closing a project) too and confirmed it was never broken - verified
+  before and after across desktop and mobile layouts. See DECISIONS.md.

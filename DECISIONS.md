@@ -26,6 +26,59 @@ desktop - but the ordering is row-major and constant, so "the first one" is
 always the first one.
 
 
+Opening a project slerps the camera's orientation, not just its position
+--------------------------------------------------------------------------
+
+Clicking a project used to tween `camera.position` and `controls.target`
+straight across to the detail framing and leave OrbitControls to work out
+the camera's orientation from them, as it does the rest of the time. That
+broke specifically for this one transition: the catalog camera sits exactly
+overhead (`position` and `target` share the same X/Z, differing only in Y),
+which is the pole of OrbitControls' spherical math - the azimuth is
+undefined there. Worse, `frameDetail`'s own geometry means `camera.position`
+and `controls.target` share the same Y and Z for the ENTIRE tween too (the
+detail view always looks along a fixed world axis, only the X offset
+differs) - so the orbit offset's Z component is pinned at exactly 0 from
+start to finish, and X crosses from 0 to negative at the very first instant.
+atan2 of that is a step function: undefined at t=0, then locked to its
+final value for literally every t>0. OrbitControls re-derives orientation
+from position every frame, so the camera's roll snapped to its final value
+in the first rendered frame while its pitch was still easing in over the
+full 1.6s - seen as the whole grid skewing to a diagonal angle for the
+first several frames before settling square. Confirmed with frame-by-frame
+quaternion logging in a real browser: the resting quaternion
+`(-0.707,0,0,0.707)` (pure pitch) jumped to one with large Y/Z components
+within a single frame of the tween starting, well before position had
+moved any meaningful distance.
+
+Nudging the resting position off the exact pole was considered and
+rejected: the degeneracy isn't really about floating-point noise at a
+single point, it's structural (Z is pinned at 0 for the whole path by the
+detail view's own geometry, not just at the start), so avoiding it would
+need an offset large enough to be a visible tilt in the catalog rather than
+a true fix.
+
+`frameDetail` now captures the camera's current quaternion and separately
+computes what it will be once the camera actually reaches the final
+position/target (via a one-off `Matrix4.lookAt`, never by moving the real
+camera there first), then slerps between the two over the same duration as
+the position tween. This never re-derives orientation from a position that
+might be near-degenerate - it rotates from a known-good start to a
+known-good end directly. `cameraOrientationLocked` tells the render loop to
+skip `controls.update()` for that stretch, since OrbitControls would
+otherwise recompute orientation from the still-moving position every frame
+and fight the slerp; `cameraLockGeneration` guards against a second
+transition (closing the project before the first finishes opening)
+unlocking too late off a stale completion callback.
+
+The reverse (closing a project) was checked too and left alone - its
+pole is at the very last instant rather than the first, and OrbitControls'
+own `makeSafe()` keeps phi epsilon away from the exact pole, so the
+camera's azimuth is already resolved for the entire tween and there is
+nothing to fix. Confirmed with the same frame-by-frame logging: the
+quaternion eases smoothly the whole way, no jump.
+
+
 The detail view is a one-point perspective, square-on
 -----------------------------------------------------
 
