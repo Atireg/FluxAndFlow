@@ -55,3 +55,23 @@ Open at end of session: real project copy (year/role/context/body/credits
 are all intentionally blank — see DECISIONS.md), empty-cube messaging,
 per-project URLs, images in the drawer. See `README.md` for the full
 list.
+
+
+---
+
+## Session 2 — 2026-10-04
+
+`e0c070e`..`f96d640`
+
+Follow-up: the About handle was still invisible on the live site after
+Session 1. Confirmed `main` and the branch were in sync (they were) - the
+actual cause, still, was that every description field on the one live
+project was empty, so `hasDescription()` correctly returned false and
+rendered no handle at all. Not a deploy problem; a content problem.
+
+- Filled the fields with unmistakable `[PLACEHOLDER ...]` text specifically
+  to prove the drawer mechanism works end to end on the live site, and
+  verified it with Playwright in both layouts before merging.
+- The real copy is still not written. README now says explicitly that the
+  live site currently shows placeholder text that needs replacing, not
+  just a field that needs filling in for the first time.
