@@ -229,7 +229,8 @@ rendered no handle at all. Not a deploy problem; a content problem.
   fallback for a future title too long for a phone. Measured at eleven
   widths from 320px to 1920px: one line, nothing clipped. See DECISIONS.md.
 - **The send-off now drops the cubes instead of exploding them, and in
-  about half the time.** After a shorter shake (0.55s), the other cubes
+  about half the time.** *(The shake and the fast fall have since been
+  replaced by a flux and a slow fall - see below.)* After a shorter shake (0.55s), the other cubes
   fall down the screen under gravity, tumbling off the bottom edge with a
   slight stagger. The camera moves in at about 1.1s instead of 2s. It's
   the same per-frame mode with a new pose, renamed from `'exploding'` to
@@ -257,3 +258,10 @@ rendered no handle at all. Not a deploy problem; a content problem.
   replaces "Explore me..." rather than stacking on top of it. Checked on
   both layouts, including a tap on the pulsing cube on a phone, and that
   clicking a project still opens it. See DECISIONS.md.
+- **The send-off flows, then falls slowly.** The hard shake is replaced by
+  a wave of flux that ripples out from the clicked cube: the others swirl
+  around their places and hop towards the viewer, the further ones a beat
+  later. Then they fall down the screen over 1.2s instead of 0.45s. The
+  whole send-off is about 2.5s, up from 1.1s. Checked frame by frame on
+  both layouts; the project still opens after it, and every cube is back
+  home after a round trip. See DECISIONS.md.

@@ -1410,23 +1410,28 @@ function wasDrag(event) {
 }
 
 /**
- * The send-off after a project is clicked, before the camera moves in: every
- * other cube shakes, harder and harder, then drops - falling down the screen
- * under gravity, tumbling, out past the bottom edge - while the chosen one
- * holds still. Like the rest of the catalog's motion it's a pure function of
- * the clock - here, time since the click - and openProject takes over once
- * the last cube is gone.
+ * The send-off after a project is clicked, before the camera moves in: a
+ * wave of flux ripples out from the chosen cube, and every other cube is
+ * caught in it - swirling around its home and tossed up and down, the ones
+ * further away a beat behind - then drops, falling slowly down the screen,
+ * tumbling, out past the bottom edge, while the chosen one holds still.
+ * Like the rest of the catalog's motion it's a pure function of the clock -
+ * here, time since the click - and openProject takes over once the last
+ * cube is gone.
  */
-const DROP_SHAKE = 0.55; // seconds of escalating shake
-const DROP_STAGGER = 0.1; // seconds - cubes let go at slightly different moments
-const DROP_FALL = 0.45; // seconds to fall off the screen
-const DROP_SHAKE_POSITION = 0.9; // units, at the peak of the shake
-const DROP_SHAKE_ROTATION = 0.5; // radians, at the peak
-const DROP_SHAKE_SPEED = 48; // radians/second - several jolts a second
+const DROP_FLUX = 1.0; // seconds of flux before the cubes let go
+const DROP_FLUX_RAMP = 0.3; // seconds for the flux to build to full strength
+const DROP_STAGGER = 0.25; // seconds - cubes let go at slightly different moments
+const DROP_FALL = 1.2; // seconds to fall off the screen
+const FLUX_SWIRL = 0.9; // units - radius of each cube's swirl around its home
+const FLUX_TOSS = 2.2; // units - how high a cube is tossed towards the camera
+const FLUX_TILT = 0.3; // radians - rock along the swirl
+const FLUX_SPEED = Math.PI * 2 * 1.4; // radians/second - swirls a second
+const FLUX_RIPPLE = 0.22; // radians of lag per unit of distance from the chosen cube
 const DROP_DISTANCE = 75; // units down the screen - clears it at any aspect
 const DROP_SINK = 0.15; // share of the fall that also sinks away from the camera
 const DROP_DRIFT = 4; // units of sideways drift, at most
-const DROP_SPIN = 4; // radians of tumble over the fall
+const DROP_SPIN = 2.5; // radians of tumble over the fall
 
 let droppingFrom = null;
 let dropStartedAt = 0;
@@ -1442,18 +1447,18 @@ function startDrop(cube) {
             from: other.position.clone(),
             delay: Math.random() * DROP_STAGGER,
             drift: randomBetween(-1, 1) * DROP_DRIFT,
-            phase: Array.from({ length: 6 }, () => Math.random() * Math.PI * 2),
+            lag: other.position.distanceTo(cube.position) * FLUX_RIPPLE,
             spin: new THREE.Vector3(randomBetween(0.5, 1), randomBetween(-0.5, 0.5), randomBetween(-1, 1)),
         };
     });
 
     // Only once the last cube to let go has fallen clear - stopping any
     // earlier would leave one frozen on screen mid-fall
-    gsap.delayedCall(DROP_SHAKE + DROP_STAGGER + DROP_FALL, () => openProject(cube));
+    gsap.delayedCall(DROP_FLUX + DROP_STAGGER + DROP_FALL, () => openProject(cube));
 }
 
 function updateDroppingCube(cube, elapsedTime) {
-    const { from, delay, drift, phase, spin } = cube.userData.drop;
+    const { from, delay, drift, lag, spin } = cube.userData.drop;
 
     cube.material.opacity = 1;
     cube.material.color.set(cubesColor);
@@ -1474,24 +1479,28 @@ function updateDroppingCube(cube, elapsedTime) {
     // Gravity: distance grows with the square of time since letting go.
     // Down the screen is world +Z from the catalog's overhead camera; the
     // slight sink away from it also keeps falling cubes behind the chosen one
-    const fall = Math.min(Math.max((t - DROP_SHAKE - delay) / DROP_FALL, 0), 1);
+    const fall = Math.min(Math.max((t - DROP_FLUX - delay) / DROP_FALL, 0), 1);
     const drop = fall ** 2;
 
-    // The shake builds up, then dies away as the cube falls
-    const build = Math.min(t / DROP_SHAKE, 1) ** 2 * (1 - fall);
-    const shake = (i, rate) => Math.sin(t * DROP_SHAKE_SPEED * rate + phase[i]) * build;
+    // The flux: a swirl in the screen plane plus a toss towards the camera
+    // (which reads as a hop - the cube grows as it rises), on a wave that
+    // reaches cubes further from the chosen one later. Builds in smoothly,
+    // and is carried off into the fall rather than cut.
+    const strength = Math.min(t / DROP_FLUX_RAMP, 1) ** 2 * (1 - fall);
+    const angle = Math.max(t * FLUX_SPEED - lag, 0);
+    const swirl = Math.min(angle, Math.PI) / Math.PI * strength; // eases out from home over the first half-turn
 
     cube.position.set(
-        from.x + shake(0, 1) * DROP_SHAKE_POSITION + drift * drop,
-        from.y + shake(1, 1.3) * DROP_SHAKE_POSITION - DROP_SINK * DROP_DISTANCE * drop,
-        from.z + shake(2, 0.85) * DROP_SHAKE_POSITION + DROP_DISTANCE * drop,
+        from.x + Math.cos(angle) * FLUX_SWIRL * swirl - FLUX_SWIRL * swirl + drift * drop,
+        from.y + Math.abs(Math.sin(angle)) * FLUX_TOSS * strength - DROP_SINK * DROP_DISTANCE * drop,
+        from.z + Math.sin(angle) * FLUX_SWIRL * swirl + DROP_DISTANCE * drop,
     );
 
     const tumble = drop * DROP_SPIN;
     cube.rotation.set(
-        shake(3, 1.1) * DROP_SHAKE_ROTATION + spin.x * tumble,
-        shake(4, 0.9) * DROP_SHAKE_ROTATION + spin.y * tumble,
-        shake(5, 1.2) * DROP_SHAKE_ROTATION + spin.z * tumble,
+        Math.sin(angle) * FLUX_TILT * strength + spin.x * tumble,
+        spin.y * tumble,
+        -Math.cos(angle) * FLUX_TILT * swirl + spin.z * tumble,
     );
     cube.scale.setScalar(1);
 }

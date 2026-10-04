@@ -587,29 +587,42 @@ back to back - still possible later in the cycle, just not immediately.
 Clicking a project knocks the rest of the grid off the screen first
 --------------------------------------------------------------------
 
-A click no longer opens the project straight away. For about a second
-first, every other cube shakes harder and harder (`DROP_SHAKE`, 0.55s),
-then lets go and falls down the screen, tumbling off the bottom edge
-(`DROP_FALL`, 0.45s, staggered by up to `DROP_STAGGER`, 0.1s). The clicked
-cube holds still where it was. Only once the last cube to let go has fallen
-clear does `openProject` run and the camera move in.
+A click no longer opens the project straight away. For about two and a
+half seconds first, every other cube is caught in a wave of flux
+(`DROP_FLUX`, 1s), then lets go and falls slowly down the screen,
+tumbling off the bottom edge (`DROP_FALL`, 1.2s, staggered by up to
+`DROP_STAGGER`, 0.25s). The clicked cube holds still where it was. Only
+once the last cube to let go has fallen clear does `openProject` run and
+the camera move in.
+
+The flux is a swirl around each cube's home in the screen plane
+(`FLUX_SWIRL`) plus a toss towards the camera (`FLUX_TOSS`), which reads as
+a hop since the cube grows as it rises, and a rock along the swirl. It
+ripples outward: each cube's swirl lags by its distance from the chosen
+one (`FLUX_RIPPLE`), so the wave visibly spreads from the click across the
+grid. Every term starts at zero, so nothing jumps on the first frame - the
+swirl circle passes through the cube's home rather than being centred on
+it, and its radius eases in over the first half-turn.
 
 "Down" here means down the screen. The catalog camera looks straight down
 at the grid, so world-down would only shrink the cubes into the distance;
 down the screen is world +Z. They also sink a little away from the camera
 (`DROP_SINK`), which keeps a falling cube passing behind the chosen one
 rather than over it. The fall is quadratic in time, like gravity, and the
-shake dies away as the cube falls so it reads as letting go.
+flux dies away as the cube falls so it reads as letting go.
 
-This replaced a first version that blew the cubes outward and up towards
-the viewer over two seconds; it was asked to fall instead, and be faster.
+History: the first version blew the cubes outward and up towards the
+viewer over two seconds; it was asked to fall instead, and be faster, which
+gave a hard 0.55s shake and a 0.45s fall. That was then asked to flow -
+"juggle in a flux" - and to fall slowly, which is the current version. It's
+deliberately longer again than the fast one; the fall is the slower part.
 
 It's built as another mode in the same pure-function scheme as idle, hover
 and spotlight ("A cube's visual state is a pure function of its mode"
 above), not as gsap tweens on each cube. `viewState` is `'dropping'` for
 the send-off, and `updateDroppingCube` computes each cube's whole pose from
-time since the click plus a few random phases, a stagger and a drift fixed
-at the click. Tweens would have had to fight the per-frame pose writes, the
+time since the click plus a ripple lag, a stagger, a drift and a tumble
+fixed at the click. Tweens would have had to fight the per-frame pose writes, the
 same shape of bug the closing fade had.
 
 `openProject` is held until the last cube has finished its fall, not just
@@ -627,8 +640,8 @@ opacity tween. Click, hover, Escape and resize already only act in
 second click or Escape during the drop does nothing.
 
 Verified in a real browser on both layouts: frames through the sequence
-show the build-up, the fall and the zoom, with every cube gone by about
-0.85s on a phone; the state runs dropping > detail > returning > catalog;
+show the ripple spreading from the chosen cube, the fall and the zoom,
+with every cube gone by about 2.1s on a phone; the state runs dropping > detail > returning > catalog;
 the camera's only turn is the intentional 4° azimuth; and after a round
 trip every cube is back within its normal wander, fully opaque.
 
