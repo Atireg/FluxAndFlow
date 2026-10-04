@@ -199,3 +199,79 @@ at the same moment the drawer starts sliding out, which reads as the
 drawer absorbing the title rather than as a glitch, but it was not
 deliberately designed that way - a cross-fade would be the thing to add if
 it ever looks abrupt rather than intentional.
+
+A cube's visual state is a pure function of its mode, not an animation to start and stop
+----------------------------------------------------------------------------------------
+
+The catalog originally drove motion two ways: a per-cube linear Y-bounce
+inside the main render loop, and - only while hovered - a second,
+independent `requestAnimationFrame` loop that nudged position, scale and
+colour on top of it. Adding ambient wander and an occasional spotlight
+without a cleaner model would have meant a third loop, all three racing to
+write the same `position` fields on whichever cube any two of them agreed
+to touch at once.
+
+Instead a cube's entire visual state - position, rotation, scale, colour,
+opacity, its thumbnail's scale - is computed fresh every frame from two
+things only: which of `idle` / `hovered` / `spotlighted` it currently is,
+and the clock. Nothing is ever incremented or accumulated, so nothing can
+drift, and nothing needs an explicit reset when a mode ends: the next frame
+simply computes a different mode's state instead. `updateCube()` picks the
+mode, and `updateIdleCube()` / `updateHoveredCube()` / `updateSpotlightCube()`
+each define a complete state, not a diff against whatever was there before.
+
+This is also what caught two bugs that had been live since before this
+session, both in the old hover-only loop: un-hovering a cube reset its
+edges to grey rather than back to the resting cyan every other code path
+used (`closeProject` already used cyan; nothing had ever matched hover's
+reset to it), so a cube's edges dimmed permanently the first time anyone
+hovered it and stayed that way until an unrelated project open/close reset
+every cube at once. And the thumbnail's hover pulse set its scale to
+roughly 1.0 (meant to read as "±10% around resting size") while its actual
+resting scale was 0.2, then settled at 0.15 afterwards instead of back to
+0.2 - a visible jump to ~5x size on hover, then permanently 25% smaller
+than original once the cursor moved away. Both are gone by construction:
+every pulse is now computed as a multiple of a stored base value
+(`contentBaseScale`), and idle state always writes the resting colour
+outright rather than relying on some other code path to have already set it.
+
+The catalog's whole per-cube update, including the ambient wander, only
+runs while `viewState === 'catalog'`. A cube simply holds wherever it was
+the instant a project opens - `openProject`'s own fade covers for it - and
+the spotlight's dwell/gap timers are plain comparisons against the clock,
+so they self-correct however long detail view was open for without
+needing to be paused or reset on the way in or out. The one thing that does
+need an explicit reset is the clicked cube's own rotation: it parents the
+detail model, and the one-point elevation depends on its edges staying
+perfectly square to the canvas, so a residual spotlight-rock tilt would
+otherwise carry straight into it. `openProject` zeroes it explicitly for
+exactly this reason - verified by forcing a click while a cube was
+mid-rotation in a real browser, both before and after that line existed.
+
+
+Why the spotlight holds still rather than wandering, and reuses the
+drawer's warm colour
+---------------------------------------------------------------------------
+
+A spotlighted cube is deliberately held at its exact slot position - no
+ambient wander - while it rocks a few degrees and its edges glow. Letting
+it also drift would mean two independent motions on the same cube at once
+(a slow wander plus a faster rock), which read as busy rather than as "look
+at this one." Holding still while everything else keeps drifting is itself
+part of the signal.
+
+The glow blinks between the cube's resting cyan and `#c42941`, the exact
+colour the drawer's pull handle already pulses (`--warm` in styles.css).
+Reusing it rather than introducing a second accent makes "warm red = click
+me" the one consistent invitation in the palette, in the catalog and in the
+detail view alike, rather than two different colours trying to say the same
+thing.
+
+Only a cube holding a project is ever eligible, and never the one under the
+cursor. Spotlighting an empty slot would invite a click that does nothing,
+and spotlighting the hovered cube would fight the hover state outright
+(both would be setting colour, opacity and scale on the same frame). With
+only one project in the catalog today, the spotlight will land on it
+repeatedly rather than cycling - correct, not a bug, once the only eligible
+candidate pool has one member in it; it stops being near-constant as soon
+as a second project exists.

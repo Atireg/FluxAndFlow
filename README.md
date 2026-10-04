@@ -53,6 +53,10 @@ Catalog view
     [ ] Make the content swing and make the colors go crazy
     [x] Fixed number of slots (SLOT_COUNT = 10), stable per project, reachable
         at every viewport including portrait phones
+    [x] Cubes drift slowly and independently instead of bouncing on a fixed
+        beat, and one project cube at a time gets an occasional spotlight -
+        a glowing rock, never while hovered or while a project is open -
+        inviting a click. See DECISIONS.md.
 
 Details view (per project)
     [x] Integrate 2D content per project - text only so far

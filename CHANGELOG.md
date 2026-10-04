@@ -61,7 +61,7 @@ list.
 
 ## Session 2 — 2026-10-04
 
-`e0c070e`..`f96d640`
+`e0c070e`..`8f9b0a8`
 
 Follow-up: the About handle was still invisible on the live site after
 Session 1. Confirmed `main` and the branch were in sync (they were) - the
@@ -75,3 +75,15 @@ rendered no handle at all. Not a deploy problem; a content problem.
 - The real copy is still not written. README now says explicitly that the
   live site currently shows placeholder text that needs replacing, not
   just a field that needs filling in for the first time.
+- **Catalog motion.** Replaced the fixed Y-bounce with a slow independent
+  wander on all three axes, and added an occasional spotlight: one project
+  cube at a time rocks gently and blinks its edges between cyan and the
+  drawer's warm accent, inviting a click - never while hovered, never
+  while a project is open, never an empty slot. Rebuilt the whole per-cube
+  animation around one state function per frame to make the two coexist
+  cleanly, which in the process fixed two pre-existing bugs in hover's old
+  separate animation loop: edges that dimmed to grey permanently after
+  the first hover instead of returning to cyan, and a thumbnail that
+  jumped to ~5x size while hovered and settled smaller than its original
+  size afterwards. See DECISIONS.md. Not yet merged to main - holding for
+  a look at the feel before publishing a catalog-wide behaviour change.
