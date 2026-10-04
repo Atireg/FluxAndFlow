@@ -339,6 +339,17 @@ const DETAIL_PROJECTION = 'perspective';
 const DETAIL_FOV = { side: 45, stacked: 30 };
 const CATALOG_FOV = 45;
 
+/**
+ * How much room to leave around a project. Above 1 the whole box fits with
+ * air around it; below 1 the view crops into it.
+ *
+ * A phone's frame is far taller than the pavilion is deep, so the fit there
+ * is limited by width and fitting the whole box leaves the model marooned in
+ * a thin band with dead space above and below. Stacked layouts crop the ends
+ * instead, trading the sparse edges of the model for scale.
+ */
+const DETAIL_MARGIN = { side: 1.12, stacked: 0.88 };
+
 // Half the height of the orthographic frustum, in world units
 let orthoHalfHeight = 1;
 
@@ -675,7 +686,7 @@ function frameDetail(object, { duration = 1.6 } = {}) {
     const { mode, fraction } = getPanelLayout();
     const side = mode === 'side';
     const free = 1 - fraction;
-    const margin = 1.12;
+    const margin = DETAIL_MARGIN[mode];
 
     const ortho = DETAIL_PROJECTION === 'orthographic';
     const tan = Math.tan(THREE.MathUtils.degToRad(DETAIL_FOV[mode]) / 2);
