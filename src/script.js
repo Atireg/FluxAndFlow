@@ -203,8 +203,15 @@ function setDrawer(open, { reframe = true } = {}) {
     // the bar can give that height back - see the 859px query in styles.css
     document.body.classList.toggle('drawer-open', open);
 
-    // The model makes room for the drawer, and takes it back when it closes
-    if (reframe && selectedCube) frameDetail(selectedCube, { duration: 0.8 });
+    // Opening pulls in for a closer, more atmospheric crop instead of just
+    // making room for the drawer; closing returns to the full-fit view
+    if (!reframe || !selectedCube) return;
+
+    if (open) {
+        frameDetailCloseup(selectedCube, { duration: 1.1 });
+    } else {
+        frameDetail(selectedCube, { duration: 0.8 });
+    }
 }
 
 /**
@@ -915,6 +922,34 @@ function frameDetail(object, { duration = 1.6 } = {}) {
     }
 }
 
+/**
+ * A close, elevated crop of the model, used while the drawer is open - the
+ * description is the thing being read then, not the piece as a whole, so
+ * the shot trades the full-fit square-on view for a tighter, more
+ * atmospheric one. Deliberately not one-point and not fit to the whole
+ * box - see DECISIONS.md for why that's fine here specifically.
+ */
+const CLOSEUP_ELEVATION = THREE.MathUtils.degToRad(38);
+const CLOSEUP_DISTANCE_FACTOR = 1.1;
+
+function frameDetailCloseup(cube, { duration = 1.1 } = {}) {
+    const model = cube.userData.detail;
+    if (!model) return;
+
+    const box = new THREE.Box3().setFromObject(model);
+    if (box.isEmpty()) return;
+
+    const center = box.getCenter(new THREE.Vector3());
+    const radius = box.getSize(new THREE.Vector3()).length() / 2;
+
+    // Same side as the full-fit view (-X), tilted up to look down from above
+    const dir = new THREE.Vector3(-Math.cos(CLOSEUP_ELEVATION), Math.sin(CLOSEUP_ELEVATION), 0);
+    const position = center.clone().addScaledVector(dir, radius * CLOSEUP_DISTANCE_FACTOR);
+
+    gsap.to(camera.position, { x: position.x, y: position.y, z: position.z, duration, ease: 'power2.inOut' });
+    gsap.to(controls.target, { x: center.x, y: center.y, z: center.z, duration, ease: 'power2.inOut' });
+}
+
 // Changing the field of view changes how strongly depth converges, so the
 // catalog and a project can each have their own lens
 function animateFov(fov, duration) {
@@ -1337,8 +1372,13 @@ function openProject(cube) {
             cube.userData.detailRotateStartTime = clock.getElapsedTime();
 
             // The model is a child of the cube, so framing the cube frames
-            // both together
-            frameDetail(cube);
+            // both together. The drawer may already be open if it loaded
+            // slowly enough for the visitor to pull it out before this ran.
+            if (drawerOpen) {
+                frameDetailCloseup(cube);
+            } else {
+                frameDetail(cube);
+            }
         },
     });
 }
@@ -1402,6 +1442,27 @@ function closeProject() {
 }
 
 // Add event listener for mouse move
+window.__debugCatalog = () => ({
+    camPos: camera.position.toArray(),
+    camQuat: camera.quaternion.toArray(),
+    target: controls.target.toArray(),
+    locked: cameraOrientationLocked,
+    viewState,
+    drawerOpen,
+    fov: perspectiveCamera.fov,
+    near: perspectiveCamera.near,
+    far: perspectiveCamera.far,
+    cubes: cubes.slice(0, 3).map((c) => ({
+        slot: c.userData.slot,
+        pos: c.position.toArray(),
+        scale: c.scale.toArray(),
+        opacity: c.material.opacity,
+        depthWrite: c.material.depthWrite,
+        edgeOpacity: c.userData.edges.material.opacity,
+        visible: c.visible,
+    })),
+});
+
 window.addEventListener('mousemove', onMouseMove);
 
 // Add the click event listener

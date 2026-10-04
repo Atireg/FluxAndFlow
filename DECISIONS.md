@@ -104,6 +104,45 @@ below), but that turns the model only, parented inside a cube whose edges
 stay exactly where the fit put them. The two are not the same lever, and
 only one of them was ever the problem.
 
+Square-on and full-fit is the default, not an absolute - see "The drawer
+pulls the camera into a close-up, not just out of the way" below for the
+one deliberate exception, and why being deliberate about it there doesn't
+undermine the rule here.
+
+
+The drawer pulls the camera into a close-up, not just out of the way
+-----------------------------------------------------------------------
+
+Opening the About drawer used to just re-run the normal full-fit
+`frameDetail`, shifted over to leave room for the panel - the model
+stayed whole and square-on, only smaller. Reading the description isn't
+the moment to show the whole piece off, though, so `setDrawer` now calls
+a dedicated `frameDetailCloseup` instead while the drawer is open: a
+closer, elevated crop that deliberately abandons both halves of "one-point
+perspective, square-on" - framed from above at a fixed elevation
+(`CLOSEUP_ELEVATION`, 38°) rather than level, and close enough
+(`CLOSEUP_DISTANCE_FACTOR` of the model's own radius) that most projects
+won't fit the whole piece in frame. That's the brief, not a bug: an
+atmospheric detail shot to sit behind the text, not the reference view of
+the piece. Closing the drawer calls the normal `frameDetail` and returns
+to the square-on full-fit view exactly as before.
+
+This works without reintroducing the gimbal problem the opening
+transition had (see above) because neither end of this tween is anywhere
+near the pole - the square-on view looks along a level +X, the close-up
+looks along +X tipped up by a fixed 38°, and OrbitControls re-deriving
+orientation from a smoothly-changing, never-near-zero offset between two
+ordinary points is exactly the case that works fine. Confirmed with the
+same frame-by-frame quaternion logging used to catch the original
+problem: smooth and monotonic both ways, no lock needed.
+
+The elevation and distance are flat constants, not computed per project -
+the one existing project's pillars happen to suit a 38°/~1.1x-radius crop
+well, verified by eye in a real browser on both layouts. A future project
+with a very different silhouette (something tall and thin, say, rather
+than wide and low) might need its own values; nothing here derives them
+from the model's shape automatically.
+
 
 The model rotates slowly once a project is open
 -------------------------------------------------
@@ -291,11 +330,21 @@ already measures `bar.offsetHeight` live from the DOM, so the smaller bar
 is picked up on the next reframe with no change needed there - the fix is
 almost entirely a CSS/markup one, not a camera one.
 
-The switch is instant (a plain `display: none`), not animated. It happens
-at the same moment the drawer starts sliding out, which reads as the
-drawer absorbing the title rather than as a glitch, but it was not
-deliberately designed that way - a cross-fade would be the thing to add if
-it ever looks abrupt rather than intentional.
+The switch was originally instant (a plain `display: none`), not animated.
+Opening read fine that way - the bar's title vanishes the instant the
+drawer starts sliding out, absorbed into it rather than missing. Closing
+a project while the drawer was open did not: `drawer-open` comes off
+`body` the moment `closeProject` runs, so the bar's title switches back to
+`display: block` and is fully visible again instantly - while the
+drawer's own title is still sliding away, fading out over its own slower
+transition. For a brief window both titles rendered at once, stacked on
+top of each other. `.bar__title` now crossfades (`opacity`/`visibility`,
+not `display`) on the same 0.3s timing as the drawer content's own fade,
+so the two dissolve into each other instead of overlapping as two solid
+pieces of text. Caught by screenshotting the first few frames after
+closing a project with the drawer open, on a real browser, since neither
+the catalog-camera telemetry nor a parked-drawer close ever exercises this
+path.
 
 A cube's visual state is a pure function of its mode, not an animation to start and stop
 ----------------------------------------------------------------------------------------

@@ -117,6 +117,8 @@ canvas.webgl {
     font-weight: 600;
     line-height: 1.15;
     letter-spacing: -0.01em;
+    visibility: visible;
+    transition: opacity 0.3s ease, visibility 0s;
 }
 
 .bar__status:not(:empty) {
@@ -325,9 +327,16 @@ canvas.webgl {
     /* The bar's title would otherwise sit above a model that is already
        squeezed by the open drawer; moving it into the drawer's own header
        buys that height back. The back button and any loading status stay
-       in the bar regardless, so there is always a way out on screen. */
+       in the bar regardless, so there is always a way out on screen.
+       Opacity, not display:none, so this can cross-fade against the
+       drawer's own title instead of swapping instantly - closing a
+       project while the drawer was open used to show both at once for a
+       moment, the bar's title reappearing the instant drawer-open is
+       removed while the drawer's own title was still visible mid-slide. */
     body.drawer-open .bar__title {
-        display: none;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0s linear 0.3s;
     }
 
     .drawer__title {

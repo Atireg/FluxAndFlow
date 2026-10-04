@@ -147,3 +147,28 @@ rendered no handle at all. Not a deploy problem; a content problem.
   camera has begun pulling back. Verified by repeating the open/close
   cycle several times and checking the first several frames each time, on
   both desktop and mobile. See DECISIONS.md.
+- **Reported again as "the strange 90 degree rotation," this time closing
+  a project while the About drawer was open.** Reproduced it and found a
+  real, different bug: closing drops the `drawer-open` body class
+  instantly, so the bar's title switches back to showing (a plain
+  `display` toggle) while the drawer's own title is still visible,
+  mid-way through its own slide-out - both rendered at once for a moment.
+  Fixed with a proper crossfade instead of an instant swap. Went looking
+  for a matching camera-orientation bug too, given the report, and could
+  not find one after the title fix: 16 repeated open-drawer-close cycles
+  on mobile, plus the same frame-by-frame quaternion logging used for the
+  original rotation bug, came back clean and smooth every time. Logged
+  what was checked and why in DECISIONS.md in case this surfaces again -
+  if it does, it isn't this bug.
+- **The drawer now pulls the camera into a close, elevated crop of the
+  model instead of just making room for it.** Reading the description
+  isn't the moment to show the whole piece - a dedicated
+  `frameDetailCloseup` frames from above at a fixed angle, tight enough
+  that most of the model sits outside the frame on purpose. Deliberately
+  not square-on and not full-fit, both for the first time in this view;
+  see DECISIONS.md for why that one exception doesn't undermine the rule
+  everywhere else. Checked this doesn't reopen the gimbal problem from
+  earlier - it doesn't, since neither this shot nor the normal one sits
+  anywhere near the pole. Verified on both layouts, including watching it
+  keep turning (the slow rotation above) and transition back cleanly when
+  the drawer closes.
