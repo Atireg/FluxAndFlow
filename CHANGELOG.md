@@ -210,3 +210,12 @@ rendered no handle at all. Not a deploy problem; a content problem.
   visible on a phone. Transitions checked again on both layouts: no
   snaps, and the only turn is the intentional 4°. CLAUDE.md's
   project-entry example now shows `view`. See DECISIONS.md.
+- **Clicking a project blows the rest of the grid away first.** Two seconds
+  before the camera moves in: the other cubes shake harder and harder, then
+  blow outward and towards the viewer, tumbling off the screen, while the
+  chosen one holds still. Built as another per-frame mode (`'exploding'`)
+  rather than tweens, plus a `'returning'` mode on the way back so the cubes
+  are home before the grid fades in. Clicks and Escape during the explosion
+  are ignored. Verified on both layouts: frame-by-frame screenshots of the
+  sequence, clean camera transitions, and every cube back at rest after a
+  round trip. See DECISIONS.md.

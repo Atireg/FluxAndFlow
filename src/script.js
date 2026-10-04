@@ -547,7 +547,9 @@ scene.fog = null
  */
 let cubes = [];
 let gridShape = { cols: 1, rows: SLOT_COUNT };
-let viewState = 'catalog'; // 'catalog' | 'detail'
+// 'catalog' | 'exploding' (the send-off after a click, before the camera
+// moves) | 'detail' | 'returning' (closing, until the grid has faded back in)
+let viewState = 'catalog';
 let selectedCube = null; // the cube whose project is open, in detail view
 let hoveredCube = null; // the cube under the cursor, in the catalog
 
@@ -1108,14 +1110,20 @@ function animate() {
     smokeMaterial.uniforms.uTime.value = elapsedTime;
 
     // The catalog's own motion - wander, hover, spotlight - only runs while
-    // it is actually what's on screen. A cube simply holds wherever it was
-    // the instant a project opens; openProject's own fade covers for it,
-    // and the spotlight cycle's dwell/gap timers self-correct against the
-    // clock once this resumes, however long detail view was open for, so
-    // nothing needs pausing or resetting on the way in or out.
+    // it is actually what's on screen. A click hands every cube to the
+    // explosion until the project opens; they then hold wherever it left
+    // them, hidden by openProject's fade, until 'returning' places them
+    // back home. The spotlight cycle's dwell/gap timers self-correct
+    // against the clock once the catalog resumes, however long detail view
+    // was open for, so they need no pausing or resetting on the way in or out.
     if (viewState === 'catalog') {
         updateSpotlightCycle(elapsedTime);
         cubes.forEach((cube) => updateCube(cube, elapsedTime));
+    } else if (viewState === 'exploding') {
+        cubes.forEach((cube) => updateExplodingCube(cube, elapsedTime));
+    } else if (viewState === 'returning') {
+        // Back home before they fade in, wherever the explosion left them
+        cubes.forEach((cube) => placeAtRest(cube, elapsedTime));
     } else if (selectedCube && selectedCube.userData.detail) {
         // Turns the model itself, not the camera, so the cube's edges stay
         // square to the canvas - see DETAIL_ROTATE_SPEED
@@ -1165,13 +1173,19 @@ function updateCube(cube, elapsedTime) {
     }
 }
 
-function updateIdleCube(cube, elapsedTime) {
+// Where a cube sits while idle - shared with the grid's return after a project
+// closes, which places cubes without touching their fading opacity
+function placeAtRest(cube, elapsedTime) {
     const base = cube.userData.slotPosition;
     const offset = wanderOffset(cube.userData.wander, elapsedTime);
     cube.position.set(base.x + offset.x, offset.y, base.z + offset.z);
 
     cube.rotation.set(0, 0, 0);
     cube.scale.setScalar(1);
+}
+
+function updateIdleCube(cube, elapsedTime) {
+    placeAtRest(cube, elapsedTime);
     cube.material.opacity = 1;
     cube.material.color.set(cubesColor);
 
@@ -1330,6 +1344,99 @@ function wasDrag(event) {
     return Math.hypot(event.clientX - pointerDownAt.x, event.clientY - pointerDownAt.y) > DRAG_THRESHOLD;
 }
 
+/**
+ * The send-off after a project is clicked, before the camera moves in: every
+ * other cube shakes harder and harder, then blows outward and off the screen,
+ * while the chosen one holds still. Like the rest of the catalog's motion
+ * it's a pure function of the clock - here, time since the click - and
+ * openProject takes over once it's done.
+ */
+const EXPLODE_SHAKE = 1.2; // seconds of escalating shake
+const EXPLODE_FLY = 0.8; // seconds to blow off the screen
+const EXPLODE_SHAKE_POSITION = 0.9; // units, at the peak of the shake
+const EXPLODE_SHAKE_ROTATION = 0.5; // radians, at the peak
+const EXPLODE_SHAKE_SPEED = 42; // radians/second - several jolts a second
+const EXPLODE_DISTANCE = 90; // units - clears the screen at any aspect
+const EXPLODE_LIFT = 0.6; // share of the outward flight aimed up at the camera
+const EXPLODE_SPIN = 9; // radians of tumble over the flight
+
+let explodingFrom = null;
+let explodeStartedAt = 0;
+
+function startExplosion(cube) {
+    viewState = 'exploding';
+    explodingFrom = cube;
+    explodeStartedAt = clock.getElapsedTime();
+    hoveredCube = null;
+
+    const origin = cube.userData.slotPosition;
+
+    cubes.forEach((other) => {
+        // Straight out from the chosen cube, and up towards the camera
+        const direction = new THREE.Vector3(
+            other.userData.slotPosition.x - origin.x,
+            0,
+            other.userData.slotPosition.z - origin.z,
+        );
+        if (direction.lengthSq() === 0) direction.set(1, 0, 0);
+        direction.normalize();
+        direction.y = EXPLODE_LIFT;
+        direction.normalize();
+
+        other.userData.explode = {
+            from: other.position.clone(),
+            direction,
+            phase: Array.from({ length: 6 }, () => Math.random() * Math.PI * 2),
+            spin: new THREE.Vector3(randomBetween(-1, 1), randomBetween(-1, 1), randomBetween(-1, 1)),
+        };
+    });
+
+    gsap.delayedCall(EXPLODE_SHAKE + EXPLODE_FLY, () => openProject(cube));
+}
+
+function updateExplodingCube(cube, elapsedTime) {
+    const { from, direction, phase, spin } = cube.userData.explode;
+
+    cube.material.opacity = 1;
+    cube.material.color.set(cubesColor);
+    cube.userData.edges.material.opacity = 1;
+    cube.userData.edges.material.color.set(selectedCubeColor);
+    if (cube.userData.content) cube.userData.content.scale.setScalar(cube.userData.contentBaseScale);
+
+    // The chosen cube holds still where it was clicked
+    if (cube === explodingFrom) {
+        cube.position.copy(from);
+        cube.rotation.set(0, 0, 0);
+        cube.scale.setScalar(1);
+        return;
+    }
+
+    const t = elapsedTime - explodeStartedAt;
+
+    // The shake builds over EXPLODE_SHAKE and keeps going at full tilt
+    // through the flight, so the hand-off between the two doesn't show
+    const build = Math.min(t / EXPLODE_SHAKE, 1) ** 2;
+    const shake = (i, rate) => Math.sin(t * EXPLODE_SHAKE_SPEED * rate + phase[i]) * build;
+
+    // Accelerating away, like it was blown off rather than sent
+    const flight = Math.min(Math.max((t - EXPLODE_SHAKE) / EXPLODE_FLY, 0), 1);
+    const away = flight ** 3 * EXPLODE_DISTANCE;
+
+    cube.position.set(
+        from.x + shake(0, 1) * EXPLODE_SHAKE_POSITION + direction.x * away,
+        from.y + shake(1, 1.3) * EXPLODE_SHAKE_POSITION + direction.y * away,
+        from.z + shake(2, 0.85) * EXPLODE_SHAKE_POSITION + direction.z * away,
+    );
+
+    const tumble = flight ** 2 * EXPLODE_SPIN;
+    cube.rotation.set(
+        shake(3, 1.1) * EXPLODE_SHAKE_ROTATION + spin.x * tumble,
+        shake(4, 0.9) * EXPLODE_SHAKE_ROTATION + spin.y * tumble,
+        shake(5, 1.2) * EXPLODE_SHAKE_ROTATION + spin.z * tumble,
+    );
+    cube.scale.setScalar(1);
+}
+
 // Function to handle mouse clicks
 function onMouseClick(event) {
     if (viewState !== 'catalog' || wasDrag(event)) return;
@@ -1350,7 +1457,7 @@ function onMouseClick(event) {
     const cube = findCube(intersects[0].object);
 
     // Empty slots have nothing to open yet
-    if (cube && cube.userData.project) openProject(cube);
+    if (cube && cube.userData.project) startExplosion(cube);
 }
 
 /**
@@ -1453,6 +1560,11 @@ function closeProject() {
 
     const cube = selectedCube;
     selectedCube = null;
+
+    // Not 'catalog' yet - see below. 'returning' places the cubes back home
+    // each frame, wherever the explosion sent them, without touching the
+    // opacity the reveal is fading in
+    viewState = 'returning';
 
     hideProject();
     setProjectStatus(null);
