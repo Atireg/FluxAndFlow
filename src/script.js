@@ -1347,8 +1347,6 @@ function closeProject() {
     if (viewState !== 'detail') return;
 
     const cube = selectedCube;
-
-    viewState = 'catalog';
     selectedCube = null;
 
     hideProject();
@@ -1357,12 +1355,38 @@ function closeProject() {
 
     if (cube && cube.userData.detail) cube.userData.detail.visible = false;
 
+    /**
+     * The camera is still parked close against the clicked cube's own
+     * faces at this instant - fitCameraToGrid's pull-back starts slow
+     * (power2.inOut) and only clears the cube's own small bounding box
+     * partway in. Revealing the grid before that leaves you looking at
+     * the inside of a now-opaque, depth-writing box from point-blank
+     * range. revealDelay holds the reveal back until the camera has
+     * retreated clear of it.
+     *
+     * That alone isn't enough, though: `viewState` flips to 'catalog'
+     * below only once this whole reveal finishes, not immediately. Flip
+     * it right away instead and the very next frame's catalog update
+     * loop (`updateCube`/`updateIdleCube`) would call every cube back to
+     * its resting state - opacity included - as a plain, unconditional
+     * assignment, since a cube's visual state is a pure function of its
+     * mode each frame, not a diff against whatever a tween happens to be
+     * mid-way through writing. That function runs after these tweens
+     * start, every frame, for the rest of the fade, so it would win every
+     * time and the opacity tween below would have no visible effect at
+     * all - caught by logging the actual opacity value frame by frame
+     * after closing in a real browser: it read 1 within a single frame of
+     * calling this, regardless of any delay or duration given here.
+     */
+    const revealDelay = 0.35;
+    const revealDuration = 0.7;
+
     // Bring the catalog back
     cubes.forEach((other) => {
-        other.material.depthWrite = true;
+        gsap.delayedCall(revealDelay, () => { other.material.depthWrite = true; });
 
-        gsap.to(other.material, { opacity: 1, duration: 0.7, ease: 'power2.out' });
-        gsap.to(other.userData.edges.material, { opacity: 1, duration: 0.7, ease: 'power2.out' });
+        gsap.to(other.material, { opacity: 1, duration: revealDuration, ease: 'power2.inOut', delay: revealDelay });
+        gsap.to(other.userData.edges.material, { opacity: 1, duration: revealDuration, ease: 'power2.inOut', delay: revealDelay });
 
         other.material.color.set(cubesColor);
         other.userData.edges.material.color.set(selectedCubeColor);
@@ -1370,6 +1394,8 @@ function closeProject() {
 
         if (other.userData.content) other.userData.content.visible = true;
     });
+
+    gsap.delayedCall(revealDelay + revealDuration, () => { viewState = 'catalog'; });
 
     exitDetailProjection(1.1);
     fitCameraToGrid({ animate: true });

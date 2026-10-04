@@ -129,3 +129,21 @@ rendered no handle at all. Not a deploy problem; a content problem.
   the actual asset across a full rotation in both layouts, including the
   narrowest profile at 90°, and it stays inside the frame throughout. See
   DECISIONS.md.
+- **Fixed the closing transition popping the whole grid into view at full
+  opacity, point-blank against the camera, for a few frames.** The earlier
+  claim in this log that closing "was never broken" checked only the
+  camera's own orientation, which was true but was not the whole picture -
+  this was a different bug, in the opacity/depthWrite reveal, not the
+  camera. Root cause: flipping back to catalog mode immediately resumes
+  the per-frame update that writes every cube's opacity outright each
+  frame as a plain, unconditional value - not a diff - so it was
+  overwriting the closing tween's eased value back to full on every frame
+  before the tween could ever actually render partway through. The tween
+  always looked instant because, in effect, it was: caught by logging the
+  cube's own opacity frame by frame after closing, which read 1 within
+  about one frame regardless of the tween's given duration. Fixed by not
+  resuming that per-frame update until the reveal's own tweens finish, and
+  by delaying and re-easing the reveal itself so it only starts once the
+  camera has begun pulling back. Verified by repeating the open/close
+  cycle several times and checking the first several frames each time, on
+  both desktop and mobile. See DECISIONS.md.

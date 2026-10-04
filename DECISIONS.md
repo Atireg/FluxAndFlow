@@ -345,6 +345,43 @@ otherwise carry straight into it. `openProject` zeroes it explicitly for
 exactly this reason - verified by forcing a click while a cube was
 mid-rotation in a real browser, both before and after that line existed.
 
+The same "only runs while catalog" rule has a sharp edge on the way out
+that the paragraph above doesn't mention: closing a project used to flip
+`viewState` back to `'catalog'` immediately, in the same tick as
+`closeProject`'s own one-off tweens were created. That resumes
+`updateIdleCube()` on the very next frame - and because it writes a
+complete, unconditional state every frame rather than a diff, its
+`opacity = 1` assignment runs again on every subsequent frame too,
+stomping the closing opacity tween's eased value right back to 1 before
+it could ever render. The tween wasn't broken; it was just never allowed
+to finish a single frame before being overwritten, for the entire rest of
+the catalog's uncountable remaining frames. The result: the grid's faces
+and edges snapped to full opacity in a single frame regardless of the
+tween's nominal duration, while the camera - genuinely mid-tween, since
+nothing else touches camera position every frame - was still parked close
+against the clicked cube's own geometry. Seen together, a sudden wall of
+opaque, depth-writing faces at point-blank range: large, skewed,
+overlapping quads, for a few frames before the camera cleared it.
+Confirmed by logging the cube's own opacity value frame by frame after
+closing in a real browser: it read 1 within about one frame regardless of
+what duration or delay the tween was given.
+
+Fixed by not flipping `viewState` back to `'catalog'` until the reveal's
+own tweens finish (`gsap.delayedCall`, timed to the tween's delay plus
+duration) - `selectedCube` is still cleared immediately, so nothing
+reopens mid-fade, but the catalog's per-frame loop stays out of the
+picture until the tweens it would otherwise fight are done. The same
+window also holds back `other.material.depthWrite = true` behind a short
+delay and eases the opacity tweens in rather than out (`power2.inOut`
+instead of `power2.out`), so the reveal itself doesn't start until the
+camera has had a moment to begin pulling back, matching the shape of the
+camera's own tween rather than front-loading visibility before it. Any
+plain, unconditional per-frame write like `updateIdleCube()`'s competing
+with a one-off tween on the same property is the same shape of bug; this
+is the only place in the catalog where that currently happens, since
+every other per-frame catalog write only runs while a cube is actually in
+catalog mode and nothing else tweens those same properties concurrently.
+
 
 Why the spotlight holds still rather than wandering
 
