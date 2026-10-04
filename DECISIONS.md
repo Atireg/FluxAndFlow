@@ -459,9 +459,10 @@ every pulse is now computed as a multiple of a stored base value
 (`contentBaseScale`), and idle state always writes the resting colour
 outright rather than relying on some other code path to have already set it.
 
-Clicking a project now runs a send-off first (see "Clicking a project blows
-the rest of the grid away" below), so this paragraph's "holds wherever it
-was" applies from the end of that, not from the click.
+Clicking a project now runs a send-off first (see "Clicking a project
+knocks the rest of the grid off the screen first" below), so this
+paragraph's "holds wherever it was" applies from the end of that, not from
+the click.
 
 The catalog's whole per-cube update, including the ambient wander, only
 runs while `viewState === 'catalog'`. A cube simply holds wherever it was
@@ -569,26 +570,39 @@ visibly moves on around the grid rather than occasionally repeating itself
 back to back - still possible later in the cycle, just not immediately.
 
 
-Clicking a project blows the rest of the grid away
---------------------------------------------------
+Clicking a project knocks the rest of the grid off the screen first
+--------------------------------------------------------------------
 
-A click no longer opens the project straight away. For two seconds first
-(`EXPLODE_SHAKE` 1.2s, then `EXPLODE_FLY` 0.8s) every other cube shakes
-harder and harder, then blows outward from the clicked cube and up towards
-the camera, tumbling and accelerating off the screen. The clicked cube holds
-still where it was. Only then does `openProject` run and the camera move in.
+A click no longer opens the project straight away. For about a second
+first, every other cube shakes harder and harder (`DROP_SHAKE`, 0.55s),
+then lets go and falls down the screen, tumbling off the bottom edge
+(`DROP_FALL`, 0.45s, staggered by up to `DROP_STAGGER`, 0.1s). The clicked
+cube holds still where it was. Only once the last cube to let go has fallen
+clear does `openProject` run and the camera move in.
+
+"Down" here means down the screen. The catalog camera looks straight down
+at the grid, so world-down would only shrink the cubes into the distance;
+down the screen is world +Z. They also sink a little away from the camera
+(`DROP_SINK`), which keeps a falling cube passing behind the chosen one
+rather than over it. The fall is quadratic in time, like gravity, and the
+shake dies away as the cube falls so it reads as letting go.
+
+This replaced a first version that blew the cubes outward and up towards
+the viewer over two seconds; it was asked to fall instead, and be faster.
 
 It's built as another mode in the same pure-function scheme as idle, hover
 and spotlight ("A cube's visual state is a pure function of its mode"
-above), not as gsap tweens on each cube. `viewState` is `'exploding'` for
-those two seconds, and `updateExplodingCube` computes each cube's whole
-pose from time since the click plus a few random phases and an outward
-direction fixed at the click. Tweens would have had to fight the per-frame
-pose writes, the same shape of bug the closing fade had. The shake keeps
-running at full strength through the flight, so the hand-off between the
-two phases doesn't show.
+above), not as gsap tweens on each cube. `viewState` is `'dropping'` for
+the send-off, and `updateDroppingCube` computes each cube's whole pose from
+time since the click plus a few random phases, a stagger and a drift fixed
+at the click. Tweens would have had to fight the per-frame pose writes, the
+same shape of bug the closing fade had.
 
-The explosion leaves cubes 90 units away, rotated, and hidden behind
+`openProject` is held until the last cube has finished its fall, not just
+the average one. Stopping earlier would freeze a straggler on screen
+mid-fall, since the per-frame pose stops when the view leaves the drop.
+
+The drop leaves cubes far down the screen, rotated, and hidden behind
 `openProject`'s fade. Closing therefore needs its own mode: `viewState` is
 `'returning'` from the close until the grid has faded back in. It places
 every cube at its resting pose each frame (`placeAtRest`, the part of
@@ -596,15 +610,13 @@ idle that doesn't touch opacity), so the grid fades in already home. It
 doesn't snap there when the catalog resumes, and doesn't fight the reveal's
 opacity tween. Click, hover, Escape and resize already only act in
 `'catalog'` or `'detail'`, so all of them correctly ignore both new modes. A
-second click or Escape during the explosion does nothing.
+second click or Escape during the drop does nothing.
 
 Verified in a real browser on both layouts: frames through the sequence
-show the build-up, the blow-out and the zoom; the state runs
-exploding > detail > returning > catalog; the camera's only turn is the
-intentional 4° azimuth; and after a round trip every cube is back within
-its normal wander, fully opaque.
+show the build-up, the fall and the zoom, with every cube gone by about
+0.85s on a phone; the state runs dropping > detail > returning > catalog;
+the camera's only turn is the intentional 4° azimuth; and after a round
+trip every cube is back within its normal wander, fully opaque.
 
-To revisit: the timings and amplitudes are named constants next to
-`startExplosion`. The flight is aimed partly up at the camera
-(`EXPLODE_LIFT`) so cubes grow as they leave; at 0 they'd slide off flat
-instead.
+To revisit: the timings, distances and amplitudes are named constants next
+to `startDrop`.

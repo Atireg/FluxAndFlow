@@ -64,9 +64,9 @@ Catalog view
         seconds, a beat later another one starts, continuously - never
         the cube under the cursor or while a project is open.
         See DECISIONS.md.
-    [x] Clicking a project sets off a two-second send-off before the camera
-        moves in: the other cubes shake harder and harder, then blow
-        outward and towards the viewer, off the screen. The chosen one holds
+    [x] Clicking a project sets off a quick send-off (about a second) before
+        the camera moves in: the other cubes shake harder and harder, then
+        fall down the screen, tumbling off the bottom. The chosen one holds
         still. Going back brings them home as the grid fades in.
         See DECISIONS.md.
 

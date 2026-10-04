@@ -225,3 +225,11 @@ rendered no handle at all. Not a deploy problem; a content problem.
   `nowrap`, capped only at the screen's width, with an ellipsis as the
   fallback for a future title too long for a phone. Measured at eleven
   widths from 320px to 1920px: one line, nothing clipped. See DECISIONS.md.
+- **The send-off now drops the cubes instead of exploding them, and in
+  about half the time.** After a shorter shake (0.55s), the other cubes
+  fall down the screen under gravity, tumbling off the bottom edge with a
+  slight stagger. The camera moves in at about 1.1s instead of 2s. It's
+  the same per-frame mode with a new pose, renamed from `'exploding'` to
+  `'dropping'`. Checked on both layouts: frame-by-frame screenshots,
+  states in order, clicks and Escape mid-drop ignored, and every cube back
+  home after a round trip. See DECISIONS.md.

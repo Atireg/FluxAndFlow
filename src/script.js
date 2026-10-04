@@ -547,7 +547,7 @@ scene.fog = null
  */
 let cubes = [];
 let gridShape = { cols: 1, rows: SLOT_COUNT };
-// 'catalog' | 'exploding' (the send-off after a click, before the camera
+// 'catalog' | 'dropping' (the send-off after a click, before the camera
 // moves) | 'detail' | 'returning' (closing, until the grid has faded back in)
 let viewState = 'catalog';
 let selectedCube = null; // the cube whose project is open, in detail view
@@ -1111,7 +1111,7 @@ function animate() {
 
     // The catalog's own motion - wander, hover, spotlight - only runs while
     // it is actually what's on screen. A click hands every cube to the
-    // explosion until the project opens; they then hold wherever it left
+    // drop until the project opens; they then hold wherever it left
     // them, hidden by openProject's fade, until 'returning' places them
     // back home. The spotlight cycle's dwell/gap timers self-correct
     // against the clock once the catalog resumes, however long detail view
@@ -1119,10 +1119,10 @@ function animate() {
     if (viewState === 'catalog') {
         updateSpotlightCycle(elapsedTime);
         cubes.forEach((cube) => updateCube(cube, elapsedTime));
-    } else if (viewState === 'exploding') {
-        cubes.forEach((cube) => updateExplodingCube(cube, elapsedTime));
+    } else if (viewState === 'dropping') {
+        cubes.forEach((cube) => updateDroppingCube(cube, elapsedTime));
     } else if (viewState === 'returning') {
-        // Back home before they fade in, wherever the explosion left them
+        // Back home before they fade in, wherever the drop left them
         cubes.forEach((cube) => placeAtRest(cube, elapsedTime));
     } else if (selectedCube && selectedCube.userData.detail) {
         // Turns the model itself, not the camera, so the cube's edges stay
@@ -1346,56 +1346,49 @@ function wasDrag(event) {
 
 /**
  * The send-off after a project is clicked, before the camera moves in: every
- * other cube shakes harder and harder, then blows outward and off the screen,
- * while the chosen one holds still. Like the rest of the catalog's motion
- * it's a pure function of the clock - here, time since the click - and
- * openProject takes over once it's done.
+ * other cube shakes, harder and harder, then drops - falling down the screen
+ * under gravity, tumbling, out past the bottom edge - while the chosen one
+ * holds still. Like the rest of the catalog's motion it's a pure function of
+ * the clock - here, time since the click - and openProject takes over once
+ * the last cube is gone.
  */
-const EXPLODE_SHAKE = 1.2; // seconds of escalating shake
-const EXPLODE_FLY = 0.8; // seconds to blow off the screen
-const EXPLODE_SHAKE_POSITION = 0.9; // units, at the peak of the shake
-const EXPLODE_SHAKE_ROTATION = 0.5; // radians, at the peak
-const EXPLODE_SHAKE_SPEED = 42; // radians/second - several jolts a second
-const EXPLODE_DISTANCE = 90; // units - clears the screen at any aspect
-const EXPLODE_LIFT = 0.6; // share of the outward flight aimed up at the camera
-const EXPLODE_SPIN = 9; // radians of tumble over the flight
+const DROP_SHAKE = 0.55; // seconds of escalating shake
+const DROP_STAGGER = 0.1; // seconds - cubes let go at slightly different moments
+const DROP_FALL = 0.45; // seconds to fall off the screen
+const DROP_SHAKE_POSITION = 0.9; // units, at the peak of the shake
+const DROP_SHAKE_ROTATION = 0.5; // radians, at the peak
+const DROP_SHAKE_SPEED = 48; // radians/second - several jolts a second
+const DROP_DISTANCE = 75; // units down the screen - clears it at any aspect
+const DROP_SINK = 0.15; // share of the fall that also sinks away from the camera
+const DROP_DRIFT = 4; // units of sideways drift, at most
+const DROP_SPIN = 4; // radians of tumble over the fall
 
-let explodingFrom = null;
-let explodeStartedAt = 0;
+let droppingFrom = null;
+let dropStartedAt = 0;
 
-function startExplosion(cube) {
-    viewState = 'exploding';
-    explodingFrom = cube;
-    explodeStartedAt = clock.getElapsedTime();
+function startDrop(cube) {
+    viewState = 'dropping';
+    droppingFrom = cube;
+    dropStartedAt = clock.getElapsedTime();
     hoveredCube = null;
 
-    const origin = cube.userData.slotPosition;
-
     cubes.forEach((other) => {
-        // Straight out from the chosen cube, and up towards the camera
-        const direction = new THREE.Vector3(
-            other.userData.slotPosition.x - origin.x,
-            0,
-            other.userData.slotPosition.z - origin.z,
-        );
-        if (direction.lengthSq() === 0) direction.set(1, 0, 0);
-        direction.normalize();
-        direction.y = EXPLODE_LIFT;
-        direction.normalize();
-
-        other.userData.explode = {
+        other.userData.drop = {
             from: other.position.clone(),
-            direction,
+            delay: Math.random() * DROP_STAGGER,
+            drift: randomBetween(-1, 1) * DROP_DRIFT,
             phase: Array.from({ length: 6 }, () => Math.random() * Math.PI * 2),
-            spin: new THREE.Vector3(randomBetween(-1, 1), randomBetween(-1, 1), randomBetween(-1, 1)),
+            spin: new THREE.Vector3(randomBetween(0.5, 1), randomBetween(-0.5, 0.5), randomBetween(-1, 1)),
         };
     });
 
-    gsap.delayedCall(EXPLODE_SHAKE + EXPLODE_FLY, () => openProject(cube));
+    // Only once the last cube to let go has fallen clear - stopping any
+    // earlier would leave one frozen on screen mid-fall
+    gsap.delayedCall(DROP_SHAKE + DROP_STAGGER + DROP_FALL, () => openProject(cube));
 }
 
-function updateExplodingCube(cube, elapsedTime) {
-    const { from, direction, phase, spin } = cube.userData.explode;
+function updateDroppingCube(cube, elapsedTime) {
+    const { from, delay, drift, phase, spin } = cube.userData.drop;
 
     cube.material.opacity = 1;
     cube.material.color.set(cubesColor);
@@ -1404,35 +1397,36 @@ function updateExplodingCube(cube, elapsedTime) {
     if (cube.userData.content) cube.userData.content.scale.setScalar(cube.userData.contentBaseScale);
 
     // The chosen cube holds still where it was clicked
-    if (cube === explodingFrom) {
+    if (cube === droppingFrom) {
         cube.position.copy(from);
         cube.rotation.set(0, 0, 0);
         cube.scale.setScalar(1);
         return;
     }
 
-    const t = elapsedTime - explodeStartedAt;
+    const t = elapsedTime - dropStartedAt;
 
-    // The shake builds over EXPLODE_SHAKE and keeps going at full tilt
-    // through the flight, so the hand-off between the two doesn't show
-    const build = Math.min(t / EXPLODE_SHAKE, 1) ** 2;
-    const shake = (i, rate) => Math.sin(t * EXPLODE_SHAKE_SPEED * rate + phase[i]) * build;
+    // Gravity: distance grows with the square of time since letting go.
+    // Down the screen is world +Z from the catalog's overhead camera; the
+    // slight sink away from it also keeps falling cubes behind the chosen one
+    const fall = Math.min(Math.max((t - DROP_SHAKE - delay) / DROP_FALL, 0), 1);
+    const drop = fall ** 2;
 
-    // Accelerating away, like it was blown off rather than sent
-    const flight = Math.min(Math.max((t - EXPLODE_SHAKE) / EXPLODE_FLY, 0), 1);
-    const away = flight ** 3 * EXPLODE_DISTANCE;
+    // The shake builds up, then dies away as the cube falls
+    const build = Math.min(t / DROP_SHAKE, 1) ** 2 * (1 - fall);
+    const shake = (i, rate) => Math.sin(t * DROP_SHAKE_SPEED * rate + phase[i]) * build;
 
     cube.position.set(
-        from.x + shake(0, 1) * EXPLODE_SHAKE_POSITION + direction.x * away,
-        from.y + shake(1, 1.3) * EXPLODE_SHAKE_POSITION + direction.y * away,
-        from.z + shake(2, 0.85) * EXPLODE_SHAKE_POSITION + direction.z * away,
+        from.x + shake(0, 1) * DROP_SHAKE_POSITION + drift * drop,
+        from.y + shake(1, 1.3) * DROP_SHAKE_POSITION - DROP_SINK * DROP_DISTANCE * drop,
+        from.z + shake(2, 0.85) * DROP_SHAKE_POSITION + DROP_DISTANCE * drop,
     );
 
-    const tumble = flight ** 2 * EXPLODE_SPIN;
+    const tumble = drop * DROP_SPIN;
     cube.rotation.set(
-        shake(3, 1.1) * EXPLODE_SHAKE_ROTATION + spin.x * tumble,
-        shake(4, 0.9) * EXPLODE_SHAKE_ROTATION + spin.y * tumble,
-        shake(5, 1.2) * EXPLODE_SHAKE_ROTATION + spin.z * tumble,
+        shake(3, 1.1) * DROP_SHAKE_ROTATION + spin.x * tumble,
+        shake(4, 0.9) * DROP_SHAKE_ROTATION + spin.y * tumble,
+        shake(5, 1.2) * DROP_SHAKE_ROTATION + spin.z * tumble,
     );
     cube.scale.setScalar(1);
 }
@@ -1457,7 +1451,7 @@ function onMouseClick(event) {
     const cube = findCube(intersects[0].object);
 
     // Empty slots have nothing to open yet
-    if (cube && cube.userData.project) startExplosion(cube);
+    if (cube && cube.userData.project) startDrop(cube);
 }
 
 /**
@@ -1562,7 +1556,7 @@ function closeProject() {
     selectedCube = null;
 
     // Not 'catalog' yet - see below. 'returning' places the cubes back home
-    // each frame, wherever the explosion sent them, without touching the
+    // each frame, wherever the drop sent them, without touching the
     // opacity the reveal is fading in
     viewState = 'returning';
 
