@@ -190,6 +190,19 @@ function setDrawer(open, { reframe = true } = {}) {
     if (reframe && selectedCube) frameDetail(selectedCube, { duration: 0.8 });
 }
 
+/**
+ * How much of the viewport height the bar occupies, as a fraction.
+ *
+ * Only stacked layouts reserve it. Side-by-side the bar sits in the top-left
+ * corner, clear of a model framed into the other half, so reserving its full
+ * height across the whole width would shrink the model for nothing.
+ */
+function barFraction() {
+    if (!bar.classList.contains('is-open')) return 0;
+
+    return Math.min(bar.offsetHeight / screenHeight, 0.5);
+}
+
 function setProjectStatus(message) {
     barStatus.textContent = message ?? '';
 }
@@ -687,10 +700,18 @@ function frameDetail(object, { duration = 1.6 } = {}) {
 
     const { mode, fraction } = getPanelLayout();
     const side = mode === 'side';
-    const free = 1 - fraction;
     const margin = side
         ? DETAIL_MARGIN.side
         : (drawerOpen ? DETAIL_MARGIN.stackedOpen : DETAIL_MARGIN.stackedParked);
+
+    /**
+     * What is left of the viewport once the bar and the drawer have taken
+     * their share: the drawer eats width side-by-side and height stacked,
+     * and the bar eats height off the top.
+     */
+    const barShare = side ? 0 : barFraction();
+    const freeW = side ? 1 - fraction : 1;
+    const freeH = Math.max(1 - barShare - (side ? 0 : fraction), 0.15);
 
     const ortho = DETAIL_PROJECTION === 'orthographic';
     const tan = Math.tan(THREE.MathUtils.degToRad(DETAIL_FOV[mode]) / 2);
@@ -700,25 +721,30 @@ function frameDetail(object, { duration = 1.6 } = {}) {
 
     if (ortho) {
         // Nothing converges, so the fit is just the projected extent
-        const neededH = (halfH * margin) / (side ? 1 : free);
-        const neededW = (halfW * margin) / (aspectRatio * (side ? free : 1));
+        const neededH = (halfH * margin) / freeH;
+        const neededW = (halfW * margin) / (aspectRatio * freeW);
 
         halfHeight = Math.max(neededH, neededW);
         distance = ORTHO_VIEW_DISTANCE;
     } else {
         // Keep the nearest face inside the free area, not just the centre
-        const forWidth = (halfD + halfW / (tan * aspectRatio)) / (side ? free : 1);
-        const forHeight = (halfD + halfH / tan) / (side ? 1 : free);
+        const forWidth = (halfD + halfW / (tan * aspectRatio)) / freeW;
+        const forHeight = (halfD + halfH / tan) / freeH;
 
         distance = margin * Math.max(forWidth, forHeight);
         halfHeight = distance * tan;
     }
 
-    // Slide the view so the model sits in the free half, not behind the panel
-    const shift = fraction * (side ? halfHeight * aspectRatio : halfHeight);
-    const offset = side
-        ? right.clone().multiplyScalar(shift)
-        : up.clone().multiplyScalar(-shift);
+    /**
+     * Where the model should sit, in normalised screen coordinates: pushed
+     * away from whichever edges are spoken for. Moving the camera the
+     * opposite way puts it there.
+     */
+    const ndcX = side ? -fraction : 0;
+    const ndcY = (side ? 0 : fraction) - barShare;
+
+    const offset = right.clone().multiplyScalar(-ndcX * halfHeight * aspectRatio)
+        .add(up.clone().multiplyScalar(-ndcY * halfHeight));
 
     const position = center.clone().addScaledVector(DETAIL_VIEW_OFFSET, distance).add(offset);
     const target = center.clone().add(offset);
