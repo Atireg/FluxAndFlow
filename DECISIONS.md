@@ -640,7 +640,7 @@ The "Explore me..." tag is HTML laid over the canvas, not part of the scene
 ----------------------------------------------------------------------------
 
 The tag on the pulsing cube is a plain `<div>` (`#explore-tag`) placed every
-frame by `updateExploreTag`, which projects a point on the spotlit cube to
+frame by `updateCubeTags` (via `placeTagOnCube`), which projects a point on the spotlit cube to
 screen pixels. A sprite or text mesh in the scene was the alternative and
 was passed over: HTML gets the real Fira Sans at the project title's weight
 and tracking, stays sharp at any pixel ratio, and costs nothing to restyle
@@ -657,11 +657,32 @@ inside. Checked on the Rock Print cube at the peak of its glow on both
 layouts, and on several random spotlit cubes: always fully on screen.
 
 The spotlight picks any cube, empty slots included (see "Why every cube is
-eligible now"), and so does the tag, as asked. On an empty slot it invites
-a click that still does nothing - the README's "if a cube is empty" item is
-the fix for that, not restricting the tag.
+eligible now"), and so does the tag, as asked. Clicking an empty slot
+answers with the "Still empty..." tag (below) rather than restricting this
+one.
 
 `exploreTag` is looked up near the top of the file with the other elements,
-not next to `updateExploreTag`: `animate()` runs its first frame the moment
+not next to `updateCubeTags`: `animate()` runs its first frame the moment
 it's defined, before anything further down has executed, and the tag
 lookup has to exist by then.
+
+
+Clicking an empty slot answers with "Still empty..."
+----------------------------------------------------
+
+A click on a cube with no project used to do nothing at all. It now shows a
+second tag, `#empty-tag`, built the same way as "Explore me..." and pinned
+to the same spot on the cube by the same `placeTagOnCube`, so the two read
+as one system. Its timing is a pure function of the clock like everything
+else per-frame: the click records the cube and the time, and
+`updateCubeTags` holds it fully up for most of `EMPTY_TAG_DURATION` (1.6s)
+and fades it over the last `EMPTY_TAG_FADE` (0.3s). Clicking again
+restarts it; it's dropped as soon as the catalog isn't on screen.
+
+It's the same chip in the cool palette (`--panel-bg`, `--rule`,
+`--ink-dim`) rather than the warm red: red is the invitation, and an empty
+slot isn't one. If the clicked cube is also the pulsing one, "Still
+empty..." wins and "Explore me..." stays hidden until it's gone - one
+answer to the click, not two labels stacked on the same face. In practice
+a desktop click comes after a hover, which already ends the spotlight on
+that cube; on a touch screen the tap is what does it.

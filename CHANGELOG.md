@@ -250,3 +250,10 @@ rendered no handle at all. Not a deploy problem; a content problem.
   projects array's current line and notes that `DETAIL_MARGIN` only
   governs the square-on default, since a project with its own `view` is
   framed with `VIEW_FRAME_MARGIN`.
+- **Clicking an empty cube says "Still empty...".** It used to do nothing.
+  A tag like "Explore me..." appears on the clicked cube in the same spot,
+  but in the cool palette rather than the red, stays for about a second
+  and a half and fades. If the clicked cube was the one pulsing, it
+  replaces "Explore me..." rather than stacking on top of it. Checked on
+  both layouts, including a tap on the pulsing cube on a phone, and that
+  clicking a project still opens it. See DECISIONS.md.

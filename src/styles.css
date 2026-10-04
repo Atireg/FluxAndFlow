@@ -83,6 +83,13 @@ canvas.webgl {
     will-change: transform, opacity;
 }
 
+/* Same chip, out of the warm palette: an empty slot isn't an invitation */
+.explore-tag--empty {
+    color: var(--ink-dim);
+    background: var(--panel-bg);
+    border-color: var(--rule);
+}
+
 /**
  * Project bar - the minimum needed to orient, kept clear of the model
  */

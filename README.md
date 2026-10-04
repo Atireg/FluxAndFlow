@@ -48,8 +48,9 @@ Color palette and typography
 
 Catalog view
     [ ] The element of surprise or discovery - when hovered on a cube add little 3D objects representing each project (e.g. a rock, an aggregate, a spider...)
-    [ ] If a cube is empty - add a message saying (to be discovered later)
-        (clicking an empty cube is currently a silent no-op)
+    [x] If a cube is empty - add a message saying (to be discovered later)
+        (clicking one shows "Still empty..." on it for a moment - see
+        DECISIONS.md)
     [ ] Add a "magic/mystery" appearance (e.g. fog shader or lights)
         (the old fog was configured near-beyond-far and is now off - see
         DECISIONS.md before re-adding it)
@@ -66,7 +67,7 @@ Catalog view
         See DECISIONS.md.
     [x] An "Explore me..." tag rides on whichever cube is pulsing red, in the
         project title's font, fading in and out with the glow. It shows on
-        empty slots too, where a click still does nothing yet - see the
+        empty slots too, where a click answers "Still empty..." - see the
         empty-cube item above
     [x] Clicking a project sets off a quick send-off (about a second) before
         the camera moves in: the other cubes shake harder and harder, then

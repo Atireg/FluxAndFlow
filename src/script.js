@@ -134,10 +134,15 @@ const projectBySlot = new Map(projects.map((project) => [project.slot, project])
  */
 const bar = document.querySelector('#bar');
 
-// Up here rather than next to updateExploreTag: animate() runs its first
+// Up here rather than next to updateCubeTags: animate() runs its first
 // frame as soon as it's defined, before code further down has executed
 const exploreTag = document.querySelector('#explore-tag');
-const exploreTagAnchor = new THREE.Vector3();
+const emptyTag = document.querySelector('#empty-tag');
+const cubeTagAnchor = new THREE.Vector3();
+const EMPTY_TAG_DURATION = 1.6; // seconds "Still empty..." stays up after a click
+const EMPTY_TAG_FADE = 0.3; // seconds of that spent fading out
+let emptyTagCube = null;
+let emptyTagShownAt = 0;
 const barTitle = document.querySelector('#project-title');
 const barStatus = document.querySelector('#project-status');
 const projectClose = document.querySelector('#project-close');
@@ -1136,7 +1141,7 @@ function animate() {
         selectedCube.userData.detail.rotation.y = modelStartYaw(selectedCube.userData.project) + since * DETAIL_ROTATE_SPEED;
     }
 
-    updateExploreTag(elapsedTime);
+    updateCubeTags(elapsedTime);
 
     // Update controls - except while a camera move is driving orientation
     // itself (see moveCamera's cameraOrientationLocked), since controls.update()
@@ -1276,28 +1281,51 @@ function updateSpotlightCube(cube, elapsedTime) {
 }
 
 /**
- * "Explore me..." on the pulsing cube: placed over the lower part of its top
- * face, on screen, and faded with the spotlight. On the face rather than
- * above it, since a top-row cube has no room above it on a tight frame.
+ * Pins a tag over the lower part of a cube's top face, on screen. On the
+ * face rather than above it, since a top-row cube has no room above it on a
+ * tight frame.
  */
-function updateExploreTag(elapsedTime) {
-    const cube = viewState === 'catalog' ? spotlightCube : null;
-
-    if (!cube) {
-        exploreTag.style.opacity = 0;
-        return;
-    }
-
+function placeTagOnCube(tag, cube) {
     // Down the screen is world +Z from the overhead catalog camera
     cube.updateMatrixWorld();
-    exploreTagAnchor.set(0, cubeSize / 2, cubeSize * 0.36);
-    cube.localToWorld(exploreTagAnchor).project(camera);
+    cubeTagAnchor.set(0, cubeSize / 2, cubeSize * 0.36);
+    cube.localToWorld(cubeTagAnchor).project(camera);
 
-    const x = (exploreTagAnchor.x + 1) / 2 * screenWidth;
-    const y = (1 - exploreTagAnchor.y) / 2 * screenHeight;
+    const x = (cubeTagAnchor.x + 1) / 2 * screenWidth;
+    const y = (1 - cubeTagAnchor.y) / 2 * screenHeight;
 
-    exploreTag.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
-    exploreTag.style.opacity = spotlightIntensity(elapsedTime);
+    tag.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
+}
+
+/**
+ * The catalog's two tags: "Explore me..." on the pulsing cube, faded with
+ * the spotlight, and "Still empty..." for a moment on an empty slot that
+ * was just clicked. When both land on the same cube, the answer to the
+ * click wins.
+ */
+function updateCubeTags(elapsedTime) {
+    const inCatalog = viewState === 'catalog';
+
+    const emptySince = elapsedTime - emptyTagShownAt;
+    const emptyOpacity = inCatalog && emptyTagCube
+        ? Math.max(0, Math.min(1, (EMPTY_TAG_DURATION - emptySince) / EMPTY_TAG_FADE))
+        : 0;
+
+    if (emptyOpacity > 0) {
+        placeTagOnCube(emptyTag, emptyTagCube);
+    } else {
+        emptyTagCube = null;
+    }
+    emptyTag.style.opacity = emptyOpacity;
+
+    const exploreCube = inCatalog && spotlightCube !== emptyTagCube ? spotlightCube : null;
+
+    if (exploreCube) {
+        placeTagOnCube(exploreTag, exploreCube);
+        exploreTag.style.opacity = spotlightIntensity(elapsedTime);
+    } else {
+        exploreTag.style.opacity = 0;
+    }
 }
 
 // Any cube is fair game, project or empty - this is the grid feeling
@@ -1487,8 +1515,16 @@ function onMouseClick(event) {
     // Get the cube that was clicked, and the project sitting in its slot
     const cube = findCube(intersects[0].object);
 
-    // Empty slots have nothing to open yet
-    if (cube && cube.userData.project) startDrop(cube);
+    if (!cube) return;
+
+    if (cube.userData.project) {
+        startDrop(cube);
+    } else {
+        // Empty slots have nothing to open yet - say so rather than ignore
+        // the click. Clicking again restarts the timer.
+        emptyTagCube = cube;
+        emptyTagShownAt = clock.getElapsedTime();
+    }
 }
 
 /**
