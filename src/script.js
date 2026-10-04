@@ -600,6 +600,7 @@ let spotlightRotatePeriodZ = 0;
 let nextSpotlightAt = randomBetween(...SPOTLIGHT_GAP);
 
 const spotlightEdgeColor = new THREE.Color(); // reused each frame, never reallocated
+const spotlightFaceColor = new THREE.Color(); // same, for the cube's own face
 
 createPlayground();
 
@@ -1066,10 +1067,13 @@ function updateSpotlightCube(cube, elapsedTime) {
     cube.rotation.z = Math.sin((since / spotlightRotatePeriodZ) * Math.PI * 2 + 1.7) * SPOTLIGHT_ROTATE_AMPLITUDE * intensity;
     cube.scale.setScalar(1 + pulse * SPOTLIGHT_CUBE_SCALE_AMPLITUDE * intensity);
     cube.material.opacity = 1;
-    cube.material.color.set(cubesColor);
 
-    // Blink between the resting cyan and the spotlight's own light red -
-    // never fully off, so it reads as glowing rather than flickering.
+    // Blink the whole cube - face and edges alike - between its resting
+    // colours and the spotlight's own light red, never fully off so it
+    // reads as glowing rather than flickering.
+    spotlightFaceColor.copy(cubesColor).lerp(spotlightGlowColor, glow * intensity);
+    cube.material.color.copy(spotlightFaceColor);
+
     spotlightEdgeColor.copy(selectedCubeColor).lerp(spotlightGlowColor, glow * intensity);
     cube.userData.edges.material.color.copy(spotlightEdgeColor);
     cube.userData.edges.material.opacity = 1 - intensity * 0.35 * (1 - glow);
@@ -1222,6 +1226,11 @@ function openProject(cube) {
         if (other.userData.content) other.userData.content.visible = false;
     });
 
+    // The face fades out over the next 0.8s rather than vanishing
+    // instantly, so a residual glow colour would otherwise show through as
+    // a brief red tint while it fades - reset both, for the same reason
+    // rotation and scale are reset above.
+    cube.material.color.set(cubesColor);
     cube.userData.edges.material.color.set(selectedCubeColor);
 
     // Show the text straight away - it costs nothing and gives the click an
