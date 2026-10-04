@@ -61,11 +61,11 @@ Catalog view
     [x] Cubes drift slowly and independently instead of bouncing on a fixed
         beat. One cube at a time - any cube, empty slots included - jumps:
         a quick rock, a lift, a scale pulse on it and its thumbnail
-        together, lit up light red inside and out. Settles after 5
+        together, lit up orange inside and out. Settles after 5
         seconds, a beat later another one starts, continuously - never
         the cube under the cursor or while a project is open.
         See DECISIONS.md.
-    [x] An "Explore me..." tag rides on whichever cube is pulsing red, in the
+    [x] An "Explore me..." tag rides on whichever cube is pulsing orange, in the
         project title's font, fading in and out with the glow. It shows on
         empty slots too, where a click answers "Still empty..." - see the
         empty-cube item above

@@ -538,26 +538,45 @@ jump), which read as busy rather than as "look at this one." Holding still
 while everything else keeps drifting is itself part of the signal.
 
 
-The spotlight has its own colour, separate from the drawer's warm accent
+The invitation is one orange: the spotlit cube, its tag and the drawer handle
 
-It originally blinked to `#c42941`, the exact colour the drawer's pull
-handle pulses (`--warm` in styles.css), specifically so "warm red = click
-me" would be the one consistent invitation across the catalog and the
-detail view. It now blinks to a dedicated, lighter `#ff5c5c` instead,
-chosen for a brighter, more energetic flash to go with the faster rock and
-the jump - a deliberate request, not a drift back towards two colours
-saying the same thing. If the two ever need to read as one signal again,
-point `spotlightGlowColor` back at the drawer's `--warm`, `#c42941`,
-rather than inventing a third colour.
+The pulsing cube, its "Explore me..." tag and the drawer's About handle
+all use one orange, `#ff8c32` (`--warm` in styles.css, with `--warm-rgb`,
+`--warm-deep` and `--warm-deep-rgb` for the translucent and dark variants;
+`spotlightGlowColor` in script.js is kept in step by hand). One colour for
+"click me" across the catalog and the detail view, as asked.
 
-The blink was edges-only at first; the face (`cube.material.color`) now
-lerps the same way, on the same `glow * intensity` fraction, so the cube
-reads as lit up inside rather than only outlined. This exposed a gap
+History: the spotlight first blinked to the drawer's dark red `#c42941`
+for exactly this reason, then to a lighter `#ff5c5c` of its own for a
+brighter flash, and then everything moved to orange together.
+
+Getting the cube to actually look that orange took two things the code
+alone doesn't explain:
+
+- `spotlightGlowColor` is set from raw values
+  (`setRGB(..., LinearSRGBColorSpace)`), not a hex string like the other
+  scene colours. The renderer outputs linear values straight to the
+  screen (`outputColorSpace = LinearSRGBColorSpace`), and a hex string is
+  converted towards linear on the way in - twice, with
+  `convertSRGBToLinear()` on top. That's harmless for the cyans the scene
+  was tuned by eye in, but it crushed this orange's green channel and
+  rendered a brick red. Raw, the edges show `#ff8c32` exactly.
+- The face glows through its emissive colour, not its base colour. The
+  faces are lit by the scene's cyan lights (`#86cdff`), so an orange base
+  colour came out green; emissive isn't lit. The base colour is dimmed as
+  the glow rises (`SPOTLIGHT_FACE_DIM`), or the cyan-lit grey under it
+  washes the orange out to tan. `SPOTLIGHT_FACE_GLOW` sets the strength.
+  Every place that resets a cube's face colour also resets its emissive
+  to black.
+
+The blink was edges-only at first; the face now glows the same way, on
+the same `glow * intensity` fraction, so the cube reads as lit up inside
+rather than only outlined. This exposed a gap
 `openProject` already had a fix for on the rotation and scale fronts but
 not this one: the clicked cube's face fades out over 0.8s rather than
 vanishing instantly, so a residual glow colour would show through as a
-brief red tint during that fade if nothing reset it. `openProject` now
-resets face colour alongside edge colour, rotation and scale - the same
+brief orange tint during that fade if nothing reset it. `openProject` now
+resets face colour and emissive alongside edge colour, rotation and scale - the same
 shape of fix, found the same way (forcing the click to land mid-effect in
 a real browser) for the same underlying reason: anything the jump can
 change on the clicked cube has to be reset there, because the detail view
@@ -711,7 +730,7 @@ and fades it over the last `EMPTY_TAG_FADE` (0.3s). Clicking again
 restarts it; it's dropped as soon as the catalog isn't on screen.
 
 It's the same chip in the cool palette (`--panel-bg`, `--rule`,
-`--ink-dim`) rather than the warm red: red is the invitation, and an empty
+`--ink-dim`) rather than the warm orange: orange is the invitation, and an empty
 slot isn't one. If the clicked cube is also the pulsing one, "Still
 empty..." wins and "Explore me..." stays hidden until it's gone - one
 answer to the click, not two labels stacked on the same face. In practice

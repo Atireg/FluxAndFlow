@@ -9,9 +9,15 @@
     --rule: rgba(192, 255, 252, 0.16);
     --panel-bg: rgba(2, 16, 22, 0.9);
 
-    /* The one warm note in the palette: the invitation to pull the drawer */
-    --warm: #c42941;
-    --warm-deep: #5d1322;
+    /**
+     * The one warm note in the palette: the invitation - the pulsing cube,
+     * its tag and the drawer's pull handle all use this one orange.
+     * spotlightGlowColor in script.js is kept in step by hand.
+     */
+    --warm: #ff8c32;
+    --warm-rgb: 255, 140, 50; /* --warm, for rgba() */
+    --warm-deep: #5c2c0a;
+    --warm-deep-rgb: 92, 44, 10; /* --warm-deep, for rgba() */
 
     /**
      * How much of the viewport the drawer covers once it is open. script.js
@@ -74,8 +80,8 @@ canvas.webgl {
     white-space: nowrap;
     color: var(--ink);
 
-    background: rgba(93, 19, 34, 0.88);
-    border: 1px solid #ff5c5c; /* spotlightGlowColor in script.js */
+    background: rgba(var(--warm-deep-rgb), 0.88);
+    border: 1px solid var(--warm);
     border-radius: 0.4rem;
 
     opacity: 0;
@@ -256,8 +262,8 @@ canvas.webgl {
     text-transform: uppercase;
     color: var(--ink);
 
-    background: linear-gradient(to bottom, rgba(93, 19, 34, 0.92), rgba(60, 12, 22, 0.92));
-    border: 1px solid rgba(196, 41, 65, 0.55);
+    background: linear-gradient(to bottom, rgba(var(--warm-deep-rgb), 0.92), rgba(62, 29, 7, 0.92));
+    border: 1px solid rgba(var(--warm-rgb), 0.55);
     border-right: 0;
     border-radius: 0.5rem 0 0 0.5rem;
     cursor: pointer;
@@ -267,7 +273,7 @@ canvas.webgl {
 
 .drawer__handle:hover,
 .drawer__handle:focus-visible {
-    background: linear-gradient(to bottom, rgba(120, 25, 44, 0.95), rgba(80, 16, 29, 0.95));
+    background: linear-gradient(to bottom, rgba(130, 63, 15, 0.95), rgba(90, 43, 10, 0.95));
     border-color: var(--warm);
 }
 
@@ -286,7 +292,7 @@ canvas.webgl {
     transform: rotate(180deg);
 }
 
-/* The invitation: a dark red pulse that stops once the drawer is open */
+/* The invitation: an orange pulse that stops once the drawer is open */
 .drawer__pulse {
     width: 0.5rem;
     height: 0.5rem;
@@ -296,9 +302,9 @@ canvas.webgl {
 }
 
 @keyframes pull {
-    0%   { box-shadow: 0 0 0 0 rgba(196, 41, 65, 0.75); }
-    70%  { box-shadow: 0 0 0 0.85rem rgba(196, 41, 65, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(196, 41, 65, 0); }
+    0%   { box-shadow: 0 0 0 0 rgba(var(--warm-rgb), 0.75); }
+    70%  { box-shadow: 0 0 0 0.85rem rgba(var(--warm-rgb), 0); }
+    100% { box-shadow: 0 0 0 0 rgba(var(--warm-rgb), 0); }
 }
 
 .drawer.is-open .drawer__pulse {
@@ -413,7 +419,7 @@ canvas.webgl {
         width: auto;
         height: var(--handle);
         padding: 0 1.5rem;
-        border: 1px solid rgba(196, 41, 65, 0.55);
+        border: 1px solid rgba(var(--warm-rgb), 0.55);
         border-bottom: 0;
         border-radius: 0.5rem 0.5rem 0 0;
     }

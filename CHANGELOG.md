@@ -275,3 +275,12 @@ rendered no handle at all. Not a deploy problem; a content problem.
   model landing mid-zoom no longer restarts the move from rest. The
   project is fully framed about 2.2s after the click, down from about 4s.
   See DECISIONS.md.
+- **The invitation is orange.** The pulsing cube, its "Explore me..." tag
+  and the About handle (its pulse, border and hover) now share one orange,
+  `#ff8c32`, in place of the reds. The CSS takes it from one custom
+  property. Making the cube actually read orange took two fixes: the glow
+  colour is given as raw values, because the renderer's linear output had
+  been crushing it to brick red, and the face glows through its emissive
+  colour, because the scene's cyan lights turned an orange base colour
+  green. Checked on both layouts, catalog and project view, including the
+  handle's hover. See DECISIONS.md.

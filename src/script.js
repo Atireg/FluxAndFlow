@@ -46,10 +46,15 @@ const cubesColor = new THREE.Color("rgb(167, 167, 167)").convertSRGBToLinear();
 // const bordersColor = new THREE.Color("rgb(232, 237, 223)").convertSRGBToLinear();
 const selectedCubeColor = new THREE.Color("rgb(192, 255, 252)").convertSRGBToLinear();
 const backgroudCubesColor = new THREE.Color("rgb(190, 190, 190)").convertSRGBToLinear();
-// The spotlight's own glow colour - a light red, distinct from the cyan
-// the grid otherwise rests at, so a jumping cube reads as "look at me" and
-// not as a different flavour of idle.
-const spotlightGlowColor = new THREE.Color("#ff5c5c").convertSRGBToLinear();
+// The spotlight's glow colour - the same orange as the drawer's pull
+// handle (--warm in styles.css), distinct from the cyan the grid otherwise
+// rests at, so a jumping cube reads as "look at me" and not as a different
+// flavour of idle. Set as raw values rather than like the colours above:
+// the renderer outputs linear values straight to the screen, and a hex
+// string gets converted towards linear on the way in (twice, with
+// convertSRGBToLinear on top), which crushes this orange into a brick red.
+// Raw, the edges show exactly #ff8c32. See DECISIONS.md.
+const spotlightGlowColor = new THREE.Color().setRGB(255 / 255, 140 / 255, 50 / 255, THREE.LinearSRGBColorSpace);
 const lightColor = new THREE.Color("rgb(194, 238, 255)");
 
 /**
@@ -608,7 +613,7 @@ function wanderOffset(wander, elapsedTime) {
  *
  * One cube at a time, continuously: holds at its slot, jumps - a quick
  * rock on two axes, a lift and a scale pulse on both the cube and its
- * thumbnail, edges blinking cyan to light red - for a fixed dwell, settles,
+ * thumbnail, edges blinking cyan to orange - for a fixed dwell, settles,
  * and hands off to another a beat later. Every cube is fair game, project
  * or empty: this is the grid feeling alive, not only an invitation to
  * click a project, though it still reads as exactly that where one exists.
@@ -618,6 +623,8 @@ function wanderOffset(wander, elapsedTime) {
 const SPOTLIGHT_GAP = [0.3, 0.6]; // seconds between one settling and the next starting
 const SPOTLIGHT_DWELL = 5; // seconds a cube stays spotlighted
 const SPOTLIGHT_FADE = 0.6; // seconds to ramp the effect in, and back out, at each end of the dwell
+const SPOTLIGHT_FACE_GLOW = 0.55; // how strongly the face glows orange at the peak of a beat
+const SPOTLIGHT_FACE_DIM = 0.9; // how far the face's own lit colour drops out at that peak
 const SPOTLIGHT_PULSE_PERIOD = 1.1; // seconds per jump
 const SPOTLIGHT_ROTATE_PERIOD = [1.0, 1.4]; // seconds; x and z rock at different rates
 const SPOTLIGHT_ROTATE_AMPLITUDE = 0.14; // radians, ~8 degrees
@@ -1208,6 +1215,7 @@ function updateIdleCube(cube, elapsedTime) {
     placeAtRest(cube, elapsedTime);
     cube.material.opacity = 1;
     cube.material.color.set(cubesColor);
+    cube.material.emissive.setRGB(0, 0, 0);
 
     cube.userData.edges.material.opacity = 1;
     cube.userData.edges.material.color.set(selectedCubeColor);
@@ -1233,6 +1241,7 @@ function updateHoveredCube(cube, elapsedTime) {
     cube.scale.setScalar(1 + Math.sin(elapsedTime * HOVER_JITTER_FREQUENCY) * HOVER_SCALE_AMPLITUDE);
     cube.material.opacity = 0.4;
     cube.material.color.set(selectedCubeColor);
+    cube.material.emissive.setRGB(0, 0, 0);
 
     cube.userData.edges.material.opacity = 1;
     cube.userData.edges.material.color.set(selectedCubeColor);
@@ -1273,10 +1282,15 @@ function updateSpotlightCube(cube, elapsedTime) {
     cube.material.opacity = 1;
 
     // Blink the whole cube - face and edges alike - between its resting
-    // colours and the spotlight's own light red, never fully off so it
-    // reads as glowing rather than flickering.
-    spotlightFaceColor.copy(cubesColor).lerp(spotlightGlowColor, glow * intensity);
-    cube.material.color.copy(spotlightFaceColor);
+    // colours and the spotlight's orange, never fully off so it
+    // reads as glowing rather than flickering. The face glows through its
+    // emissive colour rather than its base colour: the base colour is lit
+    // by the scene's cyan lights, which turn an orange green - and it's
+    // dimmed as the glow rises, or that cyan-lit grey washes the orange out
+    // to tan.
+    cube.material.color.copy(cubesColor).multiplyScalar(1 - glow * intensity * SPOTLIGHT_FACE_DIM);
+    spotlightFaceColor.copy(spotlightGlowColor).multiplyScalar(glow * intensity * SPOTLIGHT_FACE_GLOW);
+    cube.material.emissive.copy(spotlightFaceColor);
 
     spotlightEdgeColor.copy(selectedCubeColor).lerp(spotlightGlowColor, glow * intensity);
     cube.userData.edges.material.color.copy(spotlightEdgeColor);
@@ -1478,6 +1492,7 @@ function dropInProgress(elapsedTime) {
 function updateDroppingCube(cube, elapsedTime) {
     cube.material.opacity = 1;
     cube.material.color.set(cubesColor);
+    cube.material.emissive.setRGB(0, 0, 0);
     cube.userData.edges.material.opacity = 1;
     cube.userData.edges.material.color.set(selectedCubeColor);
     if (cube.userData.content) cube.userData.content.scale.setScalar(cube.userData.contentBaseScale);
@@ -1599,9 +1614,10 @@ function openProject(cube) {
 
     // The face fades out over the next 0.8s rather than vanishing
     // instantly, so a residual glow colour would otherwise show through as
-    // a brief red tint while it fades - reset both, for the same reason
+    // a brief orange tint while it fades - reset both, for the same reason
     // rotation and scale are reset above.
     cube.material.color.set(cubesColor);
+    cube.material.emissive.setRGB(0, 0, 0);
     cube.userData.edges.material.color.set(selectedCubeColor);
 
     // Show the text straight away - it costs nothing and gives the click an
@@ -1721,6 +1737,8 @@ function closeProject() {
         gsap.to(other.userData.edges.material, { opacity: 1, duration: revealDuration, ease: 'power2.inOut', delay: revealDelay });
 
         other.material.color.set(cubesColor);
+
+        other.material.emissive.setRGB(0, 0, 0);
         other.userData.edges.material.color.set(selectedCubeColor);
         other.visible = true;
 
