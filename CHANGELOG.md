@@ -76,14 +76,24 @@ rendered no handle at all. Not a deploy problem; a content problem.
   live site currently shows placeholder text that needs replacing, not
   just a field that needs filling in for the first time.
 - **Catalog motion.** Replaced the fixed Y-bounce with a slow independent
-  wander on all three axes, and added an occasional spotlight: one project
-  cube at a time rocks gently and blinks its edges between cyan and the
-  drawer's warm accent, inviting a click - never while hovered, never
-  while a project is open, never an empty slot. Rebuilt the whole per-cube
-  animation around one state function per frame to make the two coexist
-  cleanly, which in the process fixed two pre-existing bugs in hover's old
-  separate animation loop: edges that dimmed to grey permanently after
-  the first hover instead of returning to cyan, and a thumbnail that
-  jumped to ~5x size while hovered and settled smaller than its original
-  size afterwards. See DECISIONS.md. Not yet merged to main - holding for
-  a look at the feel before publishing a catalog-wide behaviour change.
+  wander on all three axes, and added a spotlight cycle: one cube at a
+  time rocks and blinks its edges, inviting a click - never while hovered,
+  never while a project is open. Rebuilt the whole per-cube animation
+  around one state function per frame to make the two coexist cleanly,
+  which in the process fixed two pre-existing bugs in hover's old separate
+  animation loop: edges that dimmed to grey permanently after the first
+  hover instead of returning to cyan, and a thumbnail that jumped to ~5x
+  size while hovered and settled smaller than its original size
+  afterwards. See DECISIONS.md. Merged and deployed.
+- **Spotlight, take two**, after seeing it live: faster and wider rotation,
+  an actual jump (cube and thumbnail scale up together while the cube
+  lifts, out of the same beat that already drove the glow), edges now
+  blink to a dedicated light red rather than the drawer's dark warm
+  accent, and the whole effect ramps in and back out over the dwell
+  instead of popping and snapping. Opened eligibility to every cube, empty
+  slots included, and made the cycle continuous - a flat 5s dwell, a brief
+  gap, the next cube, never repeating the one that just finished. Fixed a
+  gap the jump exposed: openProject reset the clicked cube's rotation but
+  not its scale, so a residual jump-scale would have rendered the detail
+  model larger or smaller than it actually is - caught and confirmed fixed
+  by forcing a click mid-jump in a real browser. See DECISIONS.md.

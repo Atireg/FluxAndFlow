@@ -54,9 +54,11 @@ Catalog view
     [x] Fixed number of slots (SLOT_COUNT = 10), stable per project, reachable
         at every viewport including portrait phones
     [x] Cubes drift slowly and independently instead of bouncing on a fixed
-        beat, and one project cube at a time gets an occasional spotlight -
-        a glowing rock, never while hovered or while a project is open -
-        inviting a click. See DECISIONS.md.
+        beat. One cube at a time - any cube, empty slots included - jumps:
+        a quick rock, a lift, a scale pulse on it and its thumbnail
+        together, edges blinking to light red. Settles after 5 seconds,
+        a beat later another one starts, continuously - never the cube
+        under the cursor or while a project is open. See DECISIONS.md.
 
 Details view (per project)
     [x] Integrate 2D content per project - text only so far

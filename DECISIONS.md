@@ -249,29 +249,43 @@ exactly this reason - verified by forcing a click while a cube was
 mid-rotation in a real browser, both before and after that line existed.
 
 
-Why the spotlight holds still rather than wandering, and reuses the
-drawer's warm colour
----------------------------------------------------------------------------
+Why the spotlight holds still rather than wandering
 
 A spotlighted cube is deliberately held at its exact slot position - no
-ambient wander - while it rocks a few degrees and its edges glow. Letting
-it also drift would mean two independent motions on the same cube at once
-(a slow wander plus a faster rock), which read as busy rather than as "look
-at this one." Holding still while everything else keeps drifting is itself
-part of the signal.
+ambient wander - while it jumps. Letting it also drift would mean two
+independent motions on the same cube at once (a slow wander plus a faster
+jump), which read as busy rather than as "look at this one." Holding still
+while everything else keeps drifting is itself part of the signal.
 
-The glow blinks between the cube's resting cyan and `#c42941`, the exact
-colour the drawer's pull handle already pulses (`--warm` in styles.css).
-Reusing it rather than introducing a second accent makes "warm red = click
-me" the one consistent invitation in the palette, in the catalog and in the
-detail view alike, rather than two different colours trying to say the same
-thing.
 
-Only a cube holding a project is ever eligible, and never the one under the
-cursor. Spotlighting an empty slot would invite a click that does nothing,
-and spotlighting the hovered cube would fight the hover state outright
-(both would be setting colour, opacity and scale on the same frame). With
-only one project in the catalog today, the spotlight will land on it
-repeatedly rather than cycling - correct, not a bug, once the only eligible
-candidate pool has one member in it; it stops being near-constant as soon
-as a second project exists.
+The spotlight has its own colour, separate from the drawer's warm accent
+
+It originally blinked to `#c42941`, the exact colour the drawer's pull
+handle pulses (`--warm` in styles.css), specifically so "warm red = click
+me" would be the one consistent invitation across the catalog and the
+detail view. It now blinks to a dedicated, lighter `#ff5c5c` instead,
+chosen for a brighter, more energetic flash to go with the faster rock and
+the jump - a deliberate request, not a drift back towards two colours
+saying the same thing. If the two ever need to read as one signal again,
+point `spotlightGlowColor` back at `warmAccentColor`'s value rather than
+inventing a third colour.
+
+
+Why every cube is eligible now, not only ones holding a project
+
+Originally only project-holding cubes could be spotlighted, on the
+reasoning that spotlighting an empty slot would invite a click that does
+nothing. That reasoning held while the spotlight was a rare, occasional
+nudge towards clicking a specific project. It stopped holding once the
+brief changed to a continuous, grid-wide cycle, one cube every ~5.3-5.6
+seconds, with every cube getting a turn: at that cadence the spotlight
+reads as the grid's own ambient behaviour - closer to the wander than to a
+call to action - and restricting it to the one or two cubes that happen to
+hold a project would make most of a ten-slot grid look inert. An empty
+slot jumping invites nothing and costs nothing either.
+
+The hovered cube stays excluded regardless: spotlighting it would fight
+hover for the same fields (colour, opacity, scale) on the same frame. The
+cube that just finished is also excluded from the very next pick, so it
+visibly moves on around the grid rather than occasionally repeating itself
+back to back - still possible later in the cycle, just not immediately.
