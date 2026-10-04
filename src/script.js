@@ -133,6 +133,11 @@ const projectBySlot = new Map(projects.map((project) => [project.slot, project])
  * model gets the whole canvas; pulling it out hands part of that back.
  */
 const bar = document.querySelector('#bar');
+
+// Up here rather than next to updateExploreTag: animate() runs its first
+// frame as soon as it's defined, before code further down has executed
+const exploreTag = document.querySelector('#explore-tag');
+const exploreTagAnchor = new THREE.Vector3();
 const barTitle = document.querySelector('#project-title');
 const barStatus = document.querySelector('#project-status');
 const projectClose = document.querySelector('#project-close');
@@ -1131,6 +1136,8 @@ function animate() {
         selectedCube.userData.detail.rotation.y = modelStartYaw(selectedCube.userData.project) + since * DETAIL_ROTATE_SPEED;
     }
 
+    updateExploreTag(elapsedTime);
+
     // Update controls - except while a camera move is driving orientation
     // itself (see moveCamera's cameraOrientationLocked), since controls.update()
     // would re-derive orientation from the camera's raw position each frame
@@ -1223,15 +1230,20 @@ function updateHoveredCube(cube, elapsedTime) {
     }
 }
 
-function updateSpotlightCube(cube, elapsedTime) {
+// Ramp the whole effect in, and back out, rather than popping into a fast
+// rock on the first frame and snapping to rest the instant the dwell ends -
+// this is what makes it settle rather than just stop.
+function spotlightIntensity(elapsedTime) {
     const since = elapsedTime - spotlightStartedAt;
-
-    // Ramp the whole effect in, and back out, rather than popping into a
-    // fast rock on the first frame and snapping to rest the instant the
-    // dwell ends - this is what makes it settle rather than just stop.
     const fadeIn = Math.min(since / SPOTLIGHT_FADE, 1);
     const fadeOut = Math.min((SPOTLIGHT_DWELL - since) / SPOTLIGHT_FADE, 1);
-    const intensity = Math.max(0, Math.min(fadeIn, fadeOut));
+
+    return Math.max(0, Math.min(fadeIn, fadeOut));
+}
+
+function updateSpotlightCube(cube, elapsedTime) {
+    const since = elapsedTime - spotlightStartedAt;
+    const intensity = spotlightIntensity(elapsedTime);
 
     const pulse = Math.sin((since / SPOTLIGHT_PULSE_PERIOD) * Math.PI * 2); // -1..1
     const glow = (pulse + 1) / 2; // 0..1
@@ -1261,6 +1273,31 @@ function updateSpotlightCube(cube, elapsedTime) {
         const contentScale = cube.userData.contentBaseScale * (1 + pulse * SPOTLIGHT_SCALE_AMPLITUDE * intensity);
         cube.userData.content.scale.setScalar(contentScale);
     }
+}
+
+/**
+ * "Explore me..." on the pulsing cube: placed over the lower part of its top
+ * face, on screen, and faded with the spotlight. On the face rather than
+ * above it, since a top-row cube has no room above it on a tight frame.
+ */
+function updateExploreTag(elapsedTime) {
+    const cube = viewState === 'catalog' ? spotlightCube : null;
+
+    if (!cube) {
+        exploreTag.style.opacity = 0;
+        return;
+    }
+
+    // Down the screen is world +Z from the overhead catalog camera
+    cube.updateMatrixWorld();
+    exploreTagAnchor.set(0, cubeSize / 2, cubeSize * 0.36);
+    cube.localToWorld(exploreTagAnchor).project(camera);
+
+    const x = (exploreTagAnchor.x + 1) / 2 * screenWidth;
+    const y = (1 - exploreTagAnchor.y) / 2 * screenHeight;
+
+    exploreTag.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
+    exploreTag.style.opacity = spotlightIntensity(elapsedTime);
 }
 
 // Any cube is fair game, project or empty - this is the grid feeling

@@ -64,6 +64,10 @@ Catalog view
         seconds, a beat later another one starts, continuously - never
         the cube under the cursor or while a project is open.
         See DECISIONS.md.
+    [x] An "Explore me..." tag rides on whichever cube is pulsing red, in the
+        project title's font, fading in and out with the glow. It shows on
+        empty slots too, where a click still does nothing yet - see the
+        empty-cube item above
     [x] Clicking a project sets off a quick send-off (about a second) before
         the camera moves in: the other cubes shake harder and harder, then
         fall down the screen, tumbling off the bottom. The chosen one holds

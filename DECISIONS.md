@@ -620,3 +620,34 @@ trip every cube is back within its normal wander, fully opaque.
 
 To revisit: the timings, distances and amplitudes are named constants next
 to `startDrop`.
+
+
+The "Explore me..." tag is HTML laid over the canvas, not part of the scene
+----------------------------------------------------------------------------
+
+The tag on the pulsing cube is a plain `<div>` (`#explore-tag`) placed every
+frame by `updateExploreTag`, which projects a point on the spotlit cube to
+screen pixels. A sprite or text mesh in the scene was the alternative and
+was passed over: HTML gets the real Fira Sans at the project title's weight
+and tracking, stays sharp at any pixel ratio, and costs nothing to restyle
+in CSS. Its opacity follows `spotlightIntensity`, the same ramp as the
+glow, with a 0.25s CSS transition only to smooth the moments the spotlight
+hands over or the cursor takes the cube. It's `pointer-events: none`, so
+clicks go straight through to the cube.
+
+It sits on the lower part of the cube's top face (`cubeSize * 0.36` towards
+the bottom of the screen from its centre), not above the cube. The Rock
+Print cube is in the top row, and on a tight frame there's no room above a
+top-row cube. Lower than the face's centre so it clears the thumbnail model
+inside. Checked on the Rock Print cube at the peak of its glow on both
+layouts, and on several random spotlit cubes: always fully on screen.
+
+The spotlight picks any cube, empty slots included (see "Why every cube is
+eligible now"), and so does the tag, as asked. On an empty slot it invites
+a click that still does nothing - the README's "if a cube is empty" item is
+the fix for that, not restricting the tag.
+
+`exploreTag` is looked up near the top of the file with the other elements,
+not next to `updateExploreTag`: `animate()` runs its first frame the moment
+it's defined, before anything further down has executed, and the tag
+lookup has to exist by then.

@@ -55,6 +55,35 @@ canvas.webgl {
 }
 
 /**
+ * The tag on the catalog's pulsing cube. Positioned and faded from script.js
+ * every frame; the short transition only smooths the moment the spotlight
+ * hands over or the cursor takes the cube, which would otherwise pop.
+ */
+.explore-tag {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    pointer-events: none;
+
+    padding: 0.4rem 0.7rem;
+    font-size: 0.875rem;
+    font-weight: 600; /* the project title's weight and tracking */
+    letter-spacing: -0.01em;
+    line-height: 1;
+    white-space: nowrap;
+    color: var(--ink);
+
+    background: rgba(93, 19, 34, 0.88);
+    border: 1px solid #ff5c5c; /* spotlightGlowColor in script.js */
+    border-radius: 0.4rem;
+
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    will-change: transform, opacity;
+}
+
+/**
  * Project bar - the minimum needed to orient, kept clear of the model
  */
 .bar {

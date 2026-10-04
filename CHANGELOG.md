@@ -233,3 +233,10 @@ rendered no handle at all. Not a deploy problem; a content problem.
   `'dropping'`. Checked on both layouts: frame-by-frame screenshots,
   states in order, clicks and Escape mid-drop ignored, and every cube back
   home after a round trip. See DECISIONS.md.
+- **An "Explore me..." tag on the pulsing red cube**, in the project title's
+  font and weight, on the lower part of the cube's face and fading in and
+  out with its glow. It's HTML over the canvas, placed by projecting the
+  cube to the screen each frame, so it uses the real web font and doesn't
+  block clicks. Hidden during the drop and in the project view. Checked on
+  both layouts, including the Rock Print cube at the peak of its glow,
+  where it sits clear of the rock thumbnail. See DECISIONS.md.
