@@ -243,3 +243,10 @@ rendered no handle at all. Not a deploy problem; a content problem.
   block clicks. Hidden during the drop and in the project view. Checked on
   both layouts, including the Rock Print cube at the peak of its glow,
   where it sits clear of the rock thumbnail. See DECISIONS.md.
+- **Docs brought up to date with the code.** README, DECISIONS and this
+  file had drifted in places (the close-up heading, the rotation-start
+  formula, the list of cube modes, a colour value, and pointers from
+  superseded entries to their replacements). CLAUDE.md now gives the
+  projects array's current line and notes that `DETAIL_MARGIN` only
+  governs the square-on default, since a project with its own `view` is
+  framed with `VIEW_FRAME_MARGIN`.
