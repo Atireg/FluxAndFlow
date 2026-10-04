@@ -37,7 +37,7 @@ Vanilla three.js + GSAP + Vite. No framework, no test suite.
 ## Adding or editing a project
 
 Edit the `projects` array near the top of `src/script.js` (currently ~line
-66). Each entry:
+70). Each entry:
 
 ```js
 {
@@ -78,7 +78,9 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
   scale in a width-limited fit) and above 1 once the drawer is open (fit
   becomes height-limited; the same crop would take the cube's top off).
   These two states are not interchangeable — check both before changing
-  either.
+  either. This only governs the square-on default: a project with its own
+  `view` is framed on its cube with `VIEW_FRAME_MARGIN` instead (see
+  "A project can set its own camera angle" in DECISIONS.md).
 - **Fog is off** (`scene.fog = null`). The original config had near beyond
   far, which inverts it and made the detail-view cube fog out to the
   background colour. Don't re-enable without reading DECISIONS.md.
