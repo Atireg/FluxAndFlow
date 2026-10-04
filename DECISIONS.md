@@ -270,6 +270,19 @@ saying the same thing. If the two ever need to read as one signal again,
 point `spotlightGlowColor` back at `warmAccentColor`'s value rather than
 inventing a third colour.
 
+The blink was edges-only at first; the face (`cube.material.color`) now
+lerps the same way, on the same `glow * intensity` fraction, so the cube
+reads as lit up inside rather than only outlined. This exposed a gap
+`openProject` already had a fix for on the rotation and scale fronts but
+not this one: the clicked cube's face fades out over 0.8s rather than
+vanishing instantly, so a residual glow colour would show through as a
+brief red tint during that fade if nothing reset it. `openProject` now
+resets face colour alongside edge colour, rotation and scale - the same
+shape of fix, found the same way (forcing the click to land mid-effect in
+a real browser) for the same underlying reason: anything the jump can
+change on the clicked cube has to be reset there, because the detail view
+inherits whatever the click catches it holding.
+
 
 Why every cube is eligible now, not only ones holding a project
 

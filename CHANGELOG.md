@@ -97,3 +97,11 @@ rendered no handle at all. Not a deploy problem; a content problem.
   not its scale, so a residual jump-scale would have rendered the detail
   model larger or smaller than it actually is - caught and confirmed fixed
   by forcing a click mid-jump in a real browser. See DECISIONS.md.
+- **Spotlight, take three**: the face now blinks to the same light red as
+  the edges, not just the edges - lit up inside, not only outlined. Caught
+  the matching gap this opened before it shipped: openProject reset edge
+  colour on click but not face colour, and the face fades out over 0.8s
+  rather than vanishing instantly, so a residual glow would have shown as
+  a brief red tint during that fade. Reset both now, verified by forcing
+  a click mid-glow and confirming no tint and a clean settle. See
+  DECISIONS.md.
