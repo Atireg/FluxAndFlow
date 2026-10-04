@@ -61,7 +61,7 @@ list.
 
 ## Session 2 — 2026-10-04
 
-`e0c070e`..`8f9b0a8`
+`e0c070e` onwards (branch `ccr-584d8563-rtv32f`, merged to `main` as it went)
 
 Follow-up: the About handle was still invisible on the live site after
 Session 1. Confirmed `main` and the branch were in sync (they were) - the
@@ -159,7 +159,8 @@ rendered no handle at all. Not a deploy problem; a content problem.
   on mobile, plus the same frame-by-frame quaternion logging used for the
   original rotation bug, came back clean and smooth every time. Logged
   what was checked and why in DECISIONS.md in case this surfaces again -
-  if it does, it isn't this bug.
+  if it does, it isn't this bug. *(Wrong - see the next-but-one entry.
+  The logs did show the camera bug; it was misread.)*
 - **The drawer now pulls the camera into a close, elevated crop of the
   model instead of just making room for it.** Reading the description
   isn't the moment to show the whole piece - a dedicated
@@ -172,3 +173,22 @@ rendered no handle at all. Not a deploy problem; a content problem.
   anywhere near the pole. Verified on both layouts, including watching it
   keep turning (the slow rotation above) and transition back cleanly when
   the drawer closes.
+- **Actually fixed the 90° roll on going back to all projects** (and the
+  smaller one on opening). The two earlier "closing was never broken"
+  claims in this log and in DECISIONS.md were wrong. The logs showed the
+  camera arriving overhead rolled and then snapping upright in a single
+  frame, and that was misread as a smooth ease. Root cause: the catalog
+  has world +X to the right of the screen, but the detail view looked
+  along +X and so had world +Z to its right. Every move between them had
+  to roll 90°. The detail camera now looks along the catalog's own
+  screen-up (-Z), so every transition is a pure tilt. The model is turned
+  a quarter to compensate, so it shows exactly the same face as before.
+  Every animated camera move now goes through one `moveCamera` helper,
+  which states the end orientation instead of inferring it. It also
+  cancels any move still in flight, which fixes the camera and lens
+  getting dragged back towards the detail view on a quick open-then-back.
+  Verified with a probe that fails on the live build (90.00° in one frame
+  on every close, both layouts) and passes on the fix (0.0000 yaw/roll at
+  every frame of every transition, both layouts). Also removed a debug
+  hook that had shipped to the live site in the previous merge. See
+  DECISIONS.md.

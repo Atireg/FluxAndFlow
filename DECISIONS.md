@@ -26,63 +26,74 @@ desktop - but the ordering is row-major and constant, so "the first one" is
 always the first one.
 
 
-Opening a project slerps the camera's orientation, not just its position
---------------------------------------------------------------------------
+The detail camera looks along the catalog's screen-up, and every camera move slerps
+-----------------------------------------------------------------------------------
 
-Clicking a project used to tween `camera.position` and `controls.target`
-straight across to the detail framing and leave OrbitControls to work out
-the camera's orientation from them, as it does the rest of the time. That
-broke specifically for this one transition: the catalog camera sits exactly
-overhead (`position` and `target` share the same X/Z, differing only in Y),
-which is the pole of OrbitControls' spherical math - the azimuth is
-undefined there. Worse, `frameDetail`'s own geometry means `camera.position`
-and `controls.target` share the same Y and Z for the ENTIRE tween too (the
-detail view always looks along a fixed world axis, only the X offset
-differs) - so the orbit offset's Z component is pinned at exactly 0 from
-start to finish, and X crosses from 0 to negative at the very first instant.
-atan2 of that is a step function: undefined at t=0, then locked to its
-final value for literally every t>0. OrbitControls re-derives orientation
-from position every frame, so the camera's roll snapped to its final value
-in the first rendered frame while its pitch was still easing in over the
-full 1.6s - seen as the whole grid skewing to a diagonal angle for the
-first several frames before settling square. Confirmed with frame-by-frame
-quaternion logging in a real browser: the resting quaternion
-`(-0.707,0,0,0.707)` (pure pitch) jumped to one with large Y/Z components
-within a single frame of the tween starting, well before position had
-moved any meaningful distance.
+Opening and closing a project both rolled the whole grid 90°. The cause was
+the two views disagreeing about which world direction is "sideways". The
+catalog camera looks straight down with world +X to its right and world -Z
+up the screen. The detail camera used to look along +X, which put world +Z
+to its right. Any move between those two orientations has to roll 90°
+somewhere, whatever the easing or interpolation.
 
-Nudging the resting position off the exact pole was considered and
-rejected: the degeneracy isn't really about floating-point noise at a
-single point, it's structural (Z is pinned at 0 for the whole path by the
-detail view's own geometry, not just at the start), so avoiding it would
-need an offset large enough to be a visible tilt in the catalog rather than
-a true fix.
+Where the roll landed depended on how orientation was computed:
 
-`frameDetail` now captures the camera's current quaternion and separately
-computes what it will be once the camera actually reaches the final
-position/target (via a one-off `Matrix4.lookAt`, never by moving the real
-camera there first), then slerps between the two over the same duration as
-the position tween. This never re-derives orientation from a position that
-might be near-degenerate - it rotates from a known-good start to a
-known-good end directly. `cameraOrientationLocked` tells the render loop to
-skip `controls.update()` for that stretch, since OrbitControls would
-otherwise recompute orientation from the still-moving position every frame
-and fight the slerp; `cameraLockGeneration` guards against a second
-transition (closing the project before the first finishes opening)
-unlocking too late off a stale completion callback.
+- Opening, with OrbitControls re-deriving orientation from position every
+  frame, snapped the heading in the first frame. The catalog camera sits
+  exactly overhead, the pole of OrbitControls' spherical maths, where the
+  heading is undefined, and the first non-zero offset picked it. A slerp
+  was added for opening, which turned the snap into a combined
+  tilt-and-roll that still turned the grid.
+- Closing kept the detail view's heading all the way down, so the grid
+  arrived sideways. Then, the instant the camera reached the exact
+  overhead point, OrbitControls re-read the heading as 0 and rolled 90° in
+  a single frame. An earlier version of this entry said closing "was never
+  broken", based on logs that actually showed this. The camera reached
+  `(-0.5,-0.5,-0.5,0.5)` (looking down, rolled) and the next frame read
+  `(-0.707,0,0,0.707)` (looking down, upright). That is the same view
+  direction, 90° apart in roll, and it was misread as a smooth ease.
 
-The reverse (closing a project) was checked too and left alone - its
-pole is at the very last instant rather than the first, and OrbitControls'
-own `makeSafe()` keeps phi epsilon away from the exact pole, so the
-camera's azimuth is already resolved for the entire tween and there is
-nothing to fix. Confirmed with the same frame-by-frame logging: the
-quaternion eases smoothly the whole way, no jump.
+The fix removes the roll at its source. `DETAIL_VIEW_OFFSET` puts the
+detail camera on +Z looking along -Z, the catalog's own screen-up, so
+world +X is screen-right in both views. Every transition (catalog to
+detail, detail to the drawer close-up and back, detail to catalog) is now
+a pure tilt about world X. The model was authored to be seen from -X, so
+`DETAIL_MODEL_YAW` turns it a quarter, showing exactly the same face and
+framing as before. Screenshots of the old and new detail views match.
+
+Orientation is also no longer left to OrbitControls during any animated
+move. `moveCamera` tweens position and target as before, and separately
+slerps the quaternion from where it is to exactly where `Matrix4.lookAt`
+would leave it at the destination. `cameraOrientationLocked` keeps the
+render loop's `controls.update()` from fighting it until it lands. This is
+what keeps a close that starts from a user-orbited detail view from
+snapping at the pole: the end orientation is stated, not inferred. All
+three animated moves (`frameDetail`, `frameDetailCloseup`,
+`fitCameraToGrid({ animate: true })`) go through it.
+
+`moveCamera` cancels any move still in flight first, and `animateFov` does
+the same for the lens. Without that, opening (1.6s) outlasted a close
+started 300ms in (1.1s), and dragged the camera and lens back towards the
+detail view after the close had finished. That was the "camera stuck at
+the wrong position" behaviour noted earlier.
+
+How it was verified: a pure tilt about X means the quaternion's Y and Z
+components stay exactly 0. Logging them every frame through
+open / drawer open / drawer close / back, twice each on desktop and
+mobile, gives a maximum of 0.0000 on the fixed build. The same probe on
+the previously live build caught a 90.00° rotation in a single frame on
+every close, on both layouts. Large per-frame steps that remain are the
+software renderer running at about 12fps in the middle of the ease, and
+their rate matches the easing curve, with nothing at the end.
+
+To revisit: if the catalog grid's axes ever change, `DETAIL_VIEW_OFFSET`
+has to follow the catalog's screen-up, or the roll comes back.
 
 
 The detail view is a one-point perspective, square-on
 -----------------------------------------------------
 
-The camera sits on the X axis looking straight at the cube, so its vertical
+The camera sits on the Z axis looking straight at the cube, so its vertical
 and horizontal edges stay parallel to the canvas and depth converges on a
 single central vanishing point. The earlier oblique three-quarter view made
 edges converge in two directions at once and nothing read as square.
@@ -127,14 +138,11 @@ atmospheric detail shot to sit behind the text, not the reference view of
 the piece. Closing the drawer calls the normal `frameDetail` and returns
 to the square-on full-fit view exactly as before.
 
-This works without reintroducing the gimbal problem the opening
-transition had (see above) because neither end of this tween is anywhere
-near the pole - the square-on view looks along a level +X, the close-up
-looks along +X tipped up by a fixed 38°, and OrbitControls re-deriving
-orientation from a smoothly-changing, never-near-zero offset between two
-ordinary points is exactly the case that works fine. Confirmed with the
-same frame-by-frame quaternion logging used to catch the original
-problem: smooth and monotonic both ways, no lock needed.
+This goes through `moveCamera` like every other camera move. The square-on
+view looks along a level -Z and the close-up looks along -Z tipped down
+38°, so moving between them is a pure tilt with no roll, the same as
+opening and closing. Confirmed with the same frame-by-frame quaternion
+check: zero yaw and roll in both directions.
 
 The elevation and distance are flat constants, not computed per project -
 the one existing project's pillars happen to suit a 38°/~1.1x-radius crop

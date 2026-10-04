@@ -762,17 +762,7 @@ function fitCameraToGrid({ animate = false } = {}) {
     perspectiveCamera.updateProjectionMatrix();
 
     if (animate) {
-        // This path's own orientation (controls re-deriving it from position
-        // each frame) is fine - it's the one frameDetail bypasses. Invalidate
-        // any lock still pending from an opening transition interrupted by an
-        // immediate close, so controls.update() resumes driving orientation
-        // for this transition instead of staying frozen until that stale
-        // lock's own tween completes.
-        cameraLockGeneration += 1;
-        cameraOrientationLocked = false;
-
-        gsap.to(perspectiveCamera.position, { x: 0, y: height, z: 0, duration: 1.1, ease: 'power2.inOut' });
-        gsap.to(controls.target, { x: 0, y: 0, z: 0, duration: 1.1, ease: 'power2.inOut' });
+        moveCamera(new THREE.Vector3(0, height, 0), new THREE.Vector3(0, 0, 0), 1.1);
         return;
     }
 
@@ -785,23 +775,67 @@ function fitCameraToGrid({ animate = false } = {}) {
 /**
  * Frame a project for the detail view.
  *
- * The camera sits square-on to the cube, looking along +X, so the cube's
+ * The camera sits square-on to the cube, looking along -Z, so the cube's
  * vertical and horizontal edges stay parallel to the canvas. Under
  * perspective that is a one-point view - depth converges on a single central
  * vanishing point, nothing skews sideways. Under orthographic nothing
  * converges at all.
+ *
+ * -Z is the catalog's own screen-up, so screen-right is world +X in both
+ * views and moving between them is a pure tilt, with no roll. Looking along
+ * any other axis makes every open and close roll the whole grid - see
+ * DECISIONS.md.
  */
-const DETAIL_VIEW_OFFSET = new THREE.Vector3(-1, 0, 0); // camera sits on -X
+const DETAIL_VIEW_OFFSET = new THREE.Vector3(0, 0, 1); // camera sits on +Z
 const ORTHO_VIEW_DISTANCE = 50; // orthographic ignores distance; this just clears the scene
 
-/**
- * Whether the camera's orientation is being driven directly (see frameDetail)
- * rather than left for OrbitControls to re-derive from position each frame.
- * cameraLockGeneration guards against an in-flight lock surviving past the
- * transition that set it, if another one starts before it completes.
- */
+// The model was authored to be seen from -X; turning it a quarter shows that
+// same face to a camera on +Z
+const DETAIL_MODEL_YAW = Math.PI / 2;
+
+// Whether the camera's orientation is being driven directly by moveCamera
+// rather than left for OrbitControls to re-derive from position each frame
 let cameraOrientationLocked = false;
-let cameraLockGeneration = 0;
+const cameraOrientation = { t: 0 };
+
+/**
+ * Every animated camera move goes through here. Position and target tween as
+ * usual; orientation slerps from where it is to exactly where lookAt would
+ * leave it at the end, instead of OrbitControls re-deriving it from position
+ * every frame. Re-deriving breaks at the catalog's overhead pole, where the
+ * heading is undefined and snaps to whatever a near-zero offset implies.
+ *
+ * A move still in flight is cancelled first. Left running, a longer one
+ * (opening, 1.6s) outlasts a shorter one started after it (closing, 1.1s)
+ * and drags the camera back towards where it was heading.
+ */
+function moveCamera(position, target, duration) {
+    gsap.killTweensOf([camera.position, controls.target, cameraOrientation]);
+
+    const fromQuat = camera.quaternion.clone();
+    const toQuat = new THREE.Quaternion().setFromRotationMatrix(
+        new THREE.Matrix4().lookAt(position, target, camera.up)
+    );
+
+    cameraOrientationLocked = true;
+
+    gsap.to(camera.position, { x: position.x, y: position.y, z: position.z, duration, ease: 'power2.inOut' });
+    gsap.to(controls.target, { x: target.x, y: target.y, z: target.z, duration, ease: 'power2.inOut' });
+
+    // Created last so it completes after position and target have landed,
+    // and controls.update() resyncs from the final values
+    cameraOrientation.t = 0;
+    gsap.to(cameraOrientation, {
+        t: 1,
+        duration,
+        ease: 'power2.inOut',
+        onUpdate: () => camera.quaternion.slerpQuaternions(fromQuat, toQuat, cameraOrientation.t),
+        onComplete: () => {
+            cameraOrientationLocked = false;
+            controls.update();
+        },
+    });
+}
 
 function frameDetail(object, { duration = 1.6 } = {}) {
     const box = new THREE.Box3().setFromObject(object);
@@ -874,42 +908,7 @@ function frameDetail(object, { duration = 1.6 } = {}) {
 
     if (!ortho) animateFov(DETAIL_FOV[mode], duration);
 
-    /**
-     * The catalog camera sits directly overhead - position and target share
-     * the same X/Z, the one configuration where OrbitControls' spherical
-     * math can't tell which way is "around". Tweening position/target
-     * straight across that pole leaves it to re-derive orientation from an
-     * almost-zero offset every frame on the way out, which resolves to
-     * whatever direction floating-point noise points in rather than to a
-     * smooth turn - seen as the whole grid snapping to a skewed angle for
-     * the first few frames before settling square. Slerping the quaternion
-     * directly sidesteps that: it rotates from the actual starting
-     * orientation to the actual ending one, never re-deriving either from
-     * position. See DECISIONS.md.
-     */
-    const fromQuat = camera.quaternion.clone();
-    const toQuat = new THREE.Quaternion().setFromRotationMatrix(
-        new THREE.Matrix4().lookAt(position, target, camera.up)
-    );
-
-    const generation = ++cameraLockGeneration;
-    cameraOrientationLocked = true;
-
-    const orientation = { t: 0 };
-    gsap.to(orientation, {
-        t: 1,
-        duration,
-        ease: 'power2.inOut',
-        onUpdate: () => camera.quaternion.slerpQuaternions(fromQuat, toQuat, orientation.t),
-        onComplete: () => {
-            if (generation !== cameraLockGeneration) return;
-            cameraOrientationLocked = false;
-            controls.update();
-        },
-    });
-
-    gsap.to(camera.position, { x: position.x, y: position.y, z: position.z, duration, ease: 'power2.inOut' });
-    gsap.to(controls.target, { x: target.x, y: target.y, z: target.z, duration, ease: 'power2.inOut' });
+    moveCamera(position, target, duration);
 
     if (ortho) {
         const frustum = { halfHeight: orthoHalfHeight };
@@ -942,17 +941,21 @@ function frameDetailCloseup(cube, { duration = 1.1 } = {}) {
     const center = box.getCenter(new THREE.Vector3());
     const radius = box.getSize(new THREE.Vector3()).length() / 2;
 
-    // Same side as the full-fit view (-X), tilted up to look down from above
-    const dir = new THREE.Vector3(-Math.cos(CLOSEUP_ELEVATION), Math.sin(CLOSEUP_ELEVATION), 0);
+    // Same side as the full-fit view, tilted up to look down from above
+    const dir = DETAIL_VIEW_OFFSET.clone().multiplyScalar(Math.cos(CLOSEUP_ELEVATION))
+        .add(new THREE.Vector3(0, Math.sin(CLOSEUP_ELEVATION), 0));
     const position = center.clone().addScaledVector(dir, radius * CLOSEUP_DISTANCE_FACTOR);
 
-    gsap.to(camera.position, { x: position.x, y: position.y, z: position.z, duration, ease: 'power2.inOut' });
-    gsap.to(controls.target, { x: center.x, y: center.y, z: center.z, duration, ease: 'power2.inOut' });
+    moveCamera(position, center, duration);
 }
 
 // Changing the field of view changes how strongly depth converges, so the
 // catalog and a project can each have their own lens
 function animateFov(fov, duration) {
+    // Same reason as moveCamera: an older, longer lens change would otherwise
+    // outlast this one and leave the wrong lens behind
+    gsap.killTweensOf(perspectiveCamera, 'fov');
+
     gsap.to(perspectiveCamera, {
         fov,
         duration,
@@ -1030,7 +1033,13 @@ window.addEventListener('resize', () => {
     }
 
     // The panel changes size and may switch sides, so re-frame
-    if (selectedCube) frameDetail(selectedCube, { duration: 0.4 });
+    if (!selectedCube) return;
+
+    if (drawerOpen) {
+        frameDetailCloseup(selectedCube, { duration: 0.4 });
+    } else {
+        frameDetail(selectedCube, { duration: 0.4 });
+    }
 });
 
 const clock = new THREE.Clock();
@@ -1056,11 +1065,11 @@ function animate() {
         // Turns the model itself, not the camera, so the cube's edges stay
         // square to the canvas - see DETAIL_ROTATE_SPEED
         const since = elapsedTime - selectedCube.userData.detailRotateStartTime;
-        selectedCube.userData.detail.rotation.y = since * DETAIL_ROTATE_SPEED;
+        selectedCube.userData.detail.rotation.y = DETAIL_MODEL_YAW + since * DETAIL_ROTATE_SPEED;
     }
 
     // Update controls - except while a camera move is driving orientation
-    // itself (see frameDetail's cameraOrientationLocked), since controls.update()
+    // itself (see moveCamera's cameraOrientationLocked), since controls.update()
     // would re-derive orientation from the camera's raw position each frame
     // and fight it
     if (!cameraOrientationLocked) controls.update();
@@ -1345,7 +1354,7 @@ function openProject(cube) {
 
     if (cube.userData.detail) {
         cube.userData.detail.visible = true;
-        cube.userData.detail.rotation.y = 0;
+        cube.userData.detail.rotation.y = DETAIL_MODEL_YAW;
         cube.userData.detailRotateStartTime = clock.getElapsedTime();
         setProjectStatus(null);
         frameDetail(cube);
@@ -1361,6 +1370,7 @@ function openProject(cube) {
         parentObject: cube,
         onLoaded: (model) => {
             cube.userData.detail = model;
+            model.rotation.y = DETAIL_MODEL_YAW;
 
             // The visitor may have gone back while this was downloading
             if (viewState !== 'detail' || selectedCube !== cube) {
@@ -1442,27 +1452,6 @@ function closeProject() {
 }
 
 // Add event listener for mouse move
-window.__debugCatalog = () => ({
-    camPos: camera.position.toArray(),
-    camQuat: camera.quaternion.toArray(),
-    target: controls.target.toArray(),
-    locked: cameraOrientationLocked,
-    viewState,
-    drawerOpen,
-    fov: perspectiveCamera.fov,
-    near: perspectiveCamera.near,
-    far: perspectiveCamera.far,
-    cubes: cubes.slice(0, 3).map((c) => ({
-        slot: c.userData.slot,
-        pos: c.position.toArray(),
-        scale: c.scale.toArray(),
-        opacity: c.material.opacity,
-        depthWrite: c.material.depthWrite,
-        edgeOpacity: c.userData.edges.material.opacity,
-        visible: c.visible,
-    })),
-});
-
 window.addEventListener('mousemove', onMouseMove);
 
 // Add the click event listener
