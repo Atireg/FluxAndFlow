@@ -87,6 +87,26 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
 - **No per-project URLs yet.** The catalog/detail state is not reflected in
   the address bar. Don't assume a project is linkable.
 
+## After every fixed issue
+
+Before moving to the next task, update whichever of these actually
+changed - not as a separate pass at the end of the session, but right
+after the fix that makes them stale:
+
+- **README.md** — tick the TODO item if one covers it, add one if it
+  surfaces something new, correct the note on a partially-done item.
+- **DECISIONS.md** — add an entry if the fix involved a reason the code
+  alone wouldn't convey (why this approach, what it was chosen over, what
+  would have to change to revisit it). Skip it for fixes that are
+  self-explanatory from the diff.
+- **CHANGELOG.md** — amend the current session's entry to mention it. This
+  is not one entry per fix; it stays one entry per session, kept current as
+  the session goes. Only start a new entry when a new session begins.
+
+Commit the doc updates together with (or immediately after) the fix itself,
+not batched up for later — a fix and its documentation update drifting
+apart is exactly the staleness this process exists to prevent.
+
 ## Verifying a change
 
 There's no test suite — verification is: build (`npm run build`), serve

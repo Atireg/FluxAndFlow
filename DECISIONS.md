@@ -170,3 +170,32 @@ Clicks are distinguished from drags
 Orbiting the catalog ends in a click event, which opened whichever cube the
 pointer happened to come to rest on. A press that travels more than 5px is
 treated as a drag.
+
+
+The bar's title moves into the drawer on a narrow viewport
+----------------------------------------------------------
+
+On a small phone the bar's title and the open drawer were both claiming
+height off the same budget: the bar reserved space for a two-line title,
+the drawer then took 58% of what was left, and the model that had to fit
+in between shrank to a postage stamp.
+
+Shrinking the drawer was the other option and was rejected: it buys back
+some room everywhere, including in states that were not cramped to begin
+with, and it still leaves the duplication - the title visible in the bar
+at the same time the drawer's own content, which starts with year/role/
+context, has nowhere to say what project it belongs to.
+
+Instead the drawer's own header carries the title once it is open on a
+narrow viewport, and the bar's copy hides for exactly that state via a
+`body.drawer-open` class toggled in `setDrawer()`, scoped by the existing
+859px media query so side-by-side layouts are untouched. `barFraction()`
+already measures `bar.offsetHeight` live from the DOM, so the smaller bar
+is picked up on the next reframe with no change needed there - the fix is
+almost entirely a CSS/markup one, not a camera one.
+
+The switch is instant (a plain `display: none`), not animated. It happens
+at the same moment the drawer starts sliding out, which reads as the
+drawer absorbing the title rather than as a glitch, but it was not
+deliberately designed that way - a cross-fade would be the thing to add if
+it ever looks abrupt rather than intentional.

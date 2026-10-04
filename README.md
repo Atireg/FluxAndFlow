@@ -29,9 +29,10 @@ Navigation and general layout
     [ ] Add buttons to switch between views
     [ ] Add footer (Copyrights, )
     [x] Project bar with the title and a way back to the catalog
-    [ ] On a small phone the bar + the open drawer leave very little room for
-        the model. Move the title into the drawer on mobile and/or shrink the
-        drawer from 58%
+    [x] On a small phone the bar + the open drawer left very little room for
+        the model. Fixed by moving the title into the drawer's own header
+        once the drawer is open on a narrow viewport, rather than shrinking
+        the drawer itself - see DECISIONS.md
 
 Color palette and typography
     [x] Select one color palette and stick to it in all views

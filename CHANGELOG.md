@@ -30,8 +30,10 @@ layer, and no deployment — `git log` before this session shows a single
   model gets the full canvas by default.
 - **Mobile.** Separate lens and crop margin for the stacked (<860px)
   layout; the project bar's height is now reserved out of the fit so the
-  title doesn't land on the model. Still rough: the bar + open drawer
-  leaves very little vertical room on small phones (see README).
+  title doesn't land on the model. That reservation then combined with the
+  open drawer to leave very little vertical room on small phones - fixed
+  by moving the title into the drawer's own header once it is open on a
+  narrow viewport, rather than shrinking the drawer (see DECISIONS.md).
 - **Assets.** The point cloud declared Draco compression it didn't use and
   wasn't using it correctly even if it had (Draco doesn't apply to
   non-indexed point primitives). Quantized instead: 2.2 MB → 922 KB, and
@@ -43,7 +45,13 @@ layer, and no deployment — `git log` before this session shows a single
   this session; `README.md` existed only as the original TODO list and
   hadn't been touched.
 
+- **Process.** Added a standing instruction in `CLAUDE.md`: after a fixed
+  issue, update whichever of README/DECISIONS/CHANGELOG it made stale,
+  rather than letting the docs drift and catching them up later. This
+  entry and the mobile bullet above are themselves the first application
+  of it - they were out of date against `e0c070e` until this update.
+
 Open at end of session: real project copy (year/role/context/body/credits
-are all intentionally blank — see DECISIONS.md), the small-phone
-bar+drawer crowding above, empty-cube messaging, per-project URLs, images
-in the drawer. See `README.md` for the full list.
+are all intentionally blank — see DECISIONS.md), empty-cube messaging,
+per-project URLs, images in the drawer. See `README.md` for the full
+list.
