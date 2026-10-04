@@ -77,11 +77,18 @@ const projects = [
         //   context: studio, course or research group
         //   body:    ['paragraph', 'paragraph']
         //   credits: collaborators, and the research group to credit
-        year: '',
-        role: '',
-        context: '',
-        body: [],
-        credits: '',
+        // TEMP: placeholder text to verify the drawer renders on the live
+        // site. Unmistakably fake on purpose - replace with the real copy
+        // before sharing this link. See README.md.
+        year: '[PLACEHOLDER YEAR]',
+        role: '[PLACEHOLDER ROLE - replace before publishing]',
+        context: '[PLACEHOLDER CONTEXT]',
+        body: [
+            '[PLACEHOLDER BODY TEXT] This paragraph exists only to verify '
+            + 'that the About drawer opens, scrolls and closes correctly. '
+            + 'Replace it with the real project description.',
+        ],
+        credits: '[PLACEHOLDER CREDITS]',
 
         thumbModel: 'models/rock.gltf',
         detailModel: 'models/RockPrintStructureReduced.glb',

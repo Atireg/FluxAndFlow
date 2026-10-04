@@ -62,8 +62,10 @@ Details view (per project)
         so by default the model gets the whole canvas)
     [ ] Per-project URLs, so a single project can be linked to directly
     [ ] Write the real copy for Rock Print - year, role, context, body,
-        credits. Until at least one field is filled the drawer has no handle
-        and does not appear at all
+        credits. The fields currently hold unmistakable [PLACEHOLDER ...]
+        text, put there deliberately to verify the About drawer renders and
+        works on the live site - it is live now and needs replacing, not
+        just filling in for the first time
     [ ] Check the licensing/attribution for the Rock Print model now that the
         repository is public and the site serves the .glb
 
