@@ -46,9 +46,10 @@ const cubesColor = new THREE.Color("rgb(167, 167, 167)").convertSRGBToLinear();
 // const bordersColor = new THREE.Color("rgb(232, 237, 223)").convertSRGBToLinear();
 const selectedCubeColor = new THREE.Color("rgb(192, 255, 252)").convertSRGBToLinear();
 const backgroudCubesColor = new THREE.Color("rgb(190, 190, 190)").convertSRGBToLinear();
-// The one warm note in the palette (matches --warm in styles.css): the
-// catalog's spotlight blinks towards this, same as the drawer's handle.
-const warmAccentColor = new THREE.Color("#c42941").convertSRGBToLinear();
+// The spotlight's own glow colour - a light red, distinct from the cyan
+// the grid otherwise rests at, so a jumping cube reads as "look at me" and
+// not as a different flavour of idle.
+const spotlightGlowColor = new THREE.Color("#ff5c5c").convertSRGBToLinear();
 const lightColor = new THREE.Color("rgb(194, 238, 255)");
 
 /**
@@ -572,23 +573,28 @@ function wanderOffset(wander, elapsedTime) {
 /**
  * Spotlight
  *
- * Every so often, one project cube - never the one under the cursor, never
- * while a project is open - holds still and glows: edges pulsing between
- * their resting cyan and the site's one warm accent, its thumbnail
- * breathing, a slight rock rather than a spin. An occasional nudge towards
- * clicking it, not a persistent decoration. Only cubes that hold a project
- * are eligible - an empty slot has nothing to invite a click towards.
+ * One cube at a time, continuously: holds at its slot, jumps - a quick
+ * rock on two axes, a lift and a scale pulse on both the cube and its
+ * thumbnail, edges blinking cyan to light red - for a fixed dwell, settles,
+ * and hands off to another a beat later. Every cube is fair game, project
+ * or empty: this is the grid feeling alive, not only an invitation to
+ * click a project, though it still reads as exactly that where one exists.
+ * Never the cube under the cursor, and never the one that just finished,
+ * so it visibly moves rather than occasionally repeating itself.
  */
-const SPOTLIGHT_GAP = [3, 7]; // seconds between one ending and the next starting
-const SPOTLIGHT_DWELL = [4, 7]; // seconds a cube stays spotlighted
-const SPOTLIGHT_PULSE_PERIOD = 1.6; // seconds per glow breath
-const SPOTLIGHT_ROTATE_PERIOD = [2.4, 3.3]; // seconds; x and z rock at different rates
-const SPOTLIGHT_ROTATE_AMPLITUDE = 0.09; // radians, ~5 degrees
-const SPOTLIGHT_SCALE_AMPLITUDE = 0.12; // the thumbnail breathes +/- 12%
+const SPOTLIGHT_GAP = [0.3, 0.6]; // seconds between one settling and the next starting
+const SPOTLIGHT_DWELL = 5; // seconds a cube stays spotlighted
+const SPOTLIGHT_FADE = 0.6; // seconds to ramp the effect in, and back out, at each end of the dwell
+const SPOTLIGHT_PULSE_PERIOD = 1.1; // seconds per jump
+const SPOTLIGHT_ROTATE_PERIOD = [1.0, 1.4]; // seconds; x and z rock at different rates
+const SPOTLIGHT_ROTATE_AMPLITUDE = 0.14; // radians, ~8 degrees
+const SPOTLIGHT_SCALE_AMPLITUDE = 0.18; // the thumbnail scales +/- 18% at the peak of each jump
+const SPOTLIGHT_CUBE_SCALE_AMPLITUDE = 0.14; // the cube itself, kept well clear of its neighbours
+const SPOTLIGHT_JUMP_HEIGHT = 0.4; // units lifted at the peak of each jump
 
 let spotlightCube = null;
+let lastSpotlightCube = null; // excluded from the next pick, so it moves on
 let spotlightStartedAt = 0;
-let spotlightDwell = 0;
 let spotlightRotatePeriodX = 0;
 let spotlightRotatePeriodZ = 0;
 let nextSpotlightAt = randomBetween(...SPOTLIGHT_GAP);
@@ -1038,38 +1044,50 @@ function updateHoveredCube(cube, elapsedTime) {
 }
 
 function updateSpotlightCube(cube, elapsedTime) {
-    // Holds still at its slot - rather than also wandering - so it reads as
-    // paused and calling attention amid the others drifting around it.
-    const base = cube.userData.slotPosition;
-    cube.position.set(base.x, 0, base.z);
-
     const since = elapsedTime - spotlightStartedAt;
+
+    // Ramp the whole effect in, and back out, rather than popping into a
+    // fast rock on the first frame and snapping to rest the instant the
+    // dwell ends - this is what makes it settle rather than just stop.
+    const fadeIn = Math.min(since / SPOTLIGHT_FADE, 1);
+    const fadeOut = Math.min((SPOTLIGHT_DWELL - since) / SPOTLIGHT_FADE, 1);
+    const intensity = Math.max(0, Math.min(fadeIn, fadeOut));
+
     const pulse = Math.sin((since / SPOTLIGHT_PULSE_PERIOD) * Math.PI * 2); // -1..1
     const glow = (pulse + 1) / 2; // 0..1
+    const lift = Math.max(0, pulse); // only the upward half of each beat
 
-    cube.rotation.x = Math.sin((since / spotlightRotatePeriodX) * Math.PI * 2) * SPOTLIGHT_ROTATE_AMPLITUDE;
-    cube.rotation.z = Math.sin((since / spotlightRotatePeriodZ) * Math.PI * 2 + 1.7) * SPOTLIGHT_ROTATE_AMPLITUDE;
-    cube.scale.setScalar(1);
+    // Holds at its slot rather than also wandering, lifted on the upward
+    // half of each beat - a jump, not a drift - amid the others around it.
+    const base = cube.userData.slotPosition;
+    cube.position.set(base.x, lift * SPOTLIGHT_JUMP_HEIGHT * intensity, base.z);
+
+    cube.rotation.x = Math.sin((since / spotlightRotatePeriodX) * Math.PI * 2) * SPOTLIGHT_ROTATE_AMPLITUDE * intensity;
+    cube.rotation.z = Math.sin((since / spotlightRotatePeriodZ) * Math.PI * 2 + 1.7) * SPOTLIGHT_ROTATE_AMPLITUDE * intensity;
+    cube.scale.setScalar(1 + pulse * SPOTLIGHT_CUBE_SCALE_AMPLITUDE * intensity);
     cube.material.opacity = 1;
     cube.material.color.set(cubesColor);
 
-    // Blink between the resting cyan and the site's one warm accent -
+    // Blink between the resting cyan and the spotlight's own light red -
     // never fully off, so it reads as glowing rather than flickering.
-    spotlightEdgeColor.copy(selectedCubeColor).lerp(warmAccentColor, glow);
+    spotlightEdgeColor.copy(selectedCubeColor).lerp(spotlightGlowColor, glow * intensity);
     cube.userData.edges.material.color.copy(spotlightEdgeColor);
-    cube.userData.edges.material.opacity = 0.65 + glow * 0.35;
+    cube.userData.edges.material.opacity = 1 - intensity * 0.35 * (1 - glow);
 
     if (cube.userData.content) {
-        const contentScale = cube.userData.contentBaseScale * (1 + pulse * SPOTLIGHT_SCALE_AMPLITUDE);
+        const contentScale = cube.userData.contentBaseScale * (1 + pulse * SPOTLIGHT_SCALE_AMPLITUDE * intensity);
         cube.userData.content.scale.setScalar(contentScale);
     }
 }
 
-// Only a cube holding a project is ever worth spotlighting - clicking an
-// empty one does nothing, so there would be nothing to invite a click
-// towards - and never the one already under the cursor.
+// Any cube is fair game, project or empty - this is the grid feeling
+// alive, not only an invitation to click a project. Never the one already
+// under the cursor, and not the one that just finished, so it visibly
+// moves on rather than occasionally repeating itself.
 function pickSpotlightCube() {
-    const candidates = cubes.filter((cube) => cube.userData.project && cube !== hoveredCube);
+    const withoutRepeat = cubes.filter((cube) => cube !== hoveredCube && cube !== lastSpotlightCube);
+    const candidates = withoutRepeat.length ? withoutRepeat : cubes.filter((cube) => cube !== hoveredCube);
+
     if (!candidates.length) return null;
 
     return candidates[Math.floor(Math.random() * candidates.length)];
@@ -1080,9 +1098,10 @@ function updateSpotlightCycle(elapsedTime) {
         // The visitor started hovering the very cube that is glowing - let
         // the hover take it over immediately rather than contesting it.
         const hovered = spotlightCube === hoveredCube;
-        const dwelled = elapsedTime - spotlightStartedAt > spotlightDwell;
+        const dwelled = elapsedTime - spotlightStartedAt > SPOTLIGHT_DWELL;
 
         if (hovered || dwelled) {
+            lastSpotlightCube = spotlightCube;
             spotlightCube = null;
             nextSpotlightAt = elapsedTime + randomBetween(...SPOTLIGHT_GAP);
         }
@@ -1095,15 +1114,14 @@ function updateSpotlightCycle(elapsedTime) {
     const cube = pickSpotlightCube();
 
     if (!cube) {
-        // Nothing eligible right now - e.g. the only project cube is the
-        // one being hovered. Try again shortly rather than every frame.
+        // Nothing eligible right now - e.g. a one-cube grid with that one
+        // cube under the cursor. Try again shortly rather than every frame.
         nextSpotlightAt = elapsedTime + randomBetween(...SPOTLIGHT_GAP);
         return;
     }
 
     spotlightCube = cube;
     spotlightStartedAt = elapsedTime;
-    spotlightDwell = randomBetween(...SPOTLIGHT_DWELL);
     spotlightRotatePeriodX = randomBetween(...SPOTLIGHT_ROTATE_PERIOD);
     spotlightRotatePeriodZ = randomBetween(...SPOTLIGHT_ROTATE_PERIOD);
 }
@@ -1177,10 +1195,12 @@ function openProject(cube) {
     selectedCube = cube;
     hoveredCube = null;
 
-    // The cube parents the detail model, so any residual spotlight rock
-    // would carry straight into the one-point elevation, which depends on
-    // this cube's edges staying perfectly square to the canvas.
+    // The cube parents the detail model, so any residual spotlight rock or
+    // jump would carry straight into the one-point elevation: a tilt would
+    // skew edges that need to stay square to the canvas, and a residual
+    // scale would render the model larger or smaller than it actually is.
     cube.rotation.set(0, 0, 0);
+    cube.scale.setScalar(1);
 
     // Hold the catalog still and sink it into the background, so the project
     // is the only thing competing for attention
