@@ -849,7 +849,7 @@ const cameraOrientation = { t: 0 };
  * (opening, 1.6s) outlasts a shorter one started after it (closing, 1.1s)
  * and drags the camera back towards where it was heading.
  */
-function moveCamera(position, target, duration) {
+function moveCamera(position, target, duration, ease = 'power2.inOut') {
     gsap.killTweensOf([camera.position, controls.target, cameraOrientation]);
 
     const fromQuat = camera.quaternion.clone();
@@ -859,8 +859,8 @@ function moveCamera(position, target, duration) {
 
     cameraOrientationLocked = true;
 
-    gsap.to(camera.position, { x: position.x, y: position.y, z: position.z, duration, ease: 'power2.inOut' });
-    gsap.to(controls.target, { x: target.x, y: target.y, z: target.z, duration, ease: 'power2.inOut' });
+    gsap.to(camera.position, { x: position.x, y: position.y, z: position.z, duration, ease });
+    gsap.to(controls.target, { x: target.x, y: target.y, z: target.z, duration, ease });
 
     // Created last so it completes after position and target have landed,
     // and controls.update() resyncs from the final values
@@ -868,7 +868,7 @@ function moveCamera(position, target, duration) {
     gsap.to(cameraOrientation, {
         t: 1,
         duration,
-        ease: 'power2.inOut',
+        ease,
         onUpdate: () => camera.quaternion.slerpQuaternions(fromQuat, toQuat, cameraOrientation.t),
         onComplete: () => {
             cameraOrientationLocked = false;
@@ -877,7 +877,7 @@ function moveCamera(position, target, duration) {
     });
 }
 
-function frameDetail(object, { duration = 1.6 } = {}) {
+function frameDetail(object, { duration = 1.6, ease } = {}) {
     // A project with its own view is framed on the cube alone. Seen from
     // above at an angle, the bounding box of the model's scattered points
     // balloons and changes size as the model turns; the cube is the frame
@@ -975,7 +975,7 @@ function frameDetail(object, { duration = 1.6 } = {}) {
 
     if (!ortho) animateFov(DETAIL_FOV[mode], duration);
 
-    moveCamera(position, target, duration);
+    moveCamera(position, target, duration, ease);
 
     if (ortho) {
         const frustum = { halfHeight: orthoHalfHeight };
@@ -1134,11 +1134,19 @@ function animate() {
     } else if (viewState === 'returning') {
         // Back home before they fade in, wherever the drop left them
         cubes.forEach((cube) => placeAtRest(cube, elapsedTime));
-    } else if (selectedCube && selectedCube.userData.detail) {
-        // Turns the model itself, not the camera, so the cube's edges stay
-        // square to the canvas - see DETAIL_ROTATE_SPEED
-        const since = elapsedTime - selectedCube.userData.detailRotateStartTime;
-        selectedCube.userData.detail.rotation.y = modelStartYaw(selectedCube.userData.project) + since * DETAIL_ROTATE_SPEED;
+    } else {
+        // The camera starts moving in before the drop has finished - the
+        // rest of the fall plays out under openProject's fade
+        if (dropInProgress(elapsedTime)) {
+            cubes.forEach((cube) => { if (cube !== selectedCube) placeDroppingCube(cube, elapsedTime); });
+        }
+
+        if (selectedCube && selectedCube.userData.detail) {
+            // Turns the model itself, not the camera, so the cube's edges stay
+            // square to the canvas - see DETAIL_ROTATE_SPEED
+            const since = elapsedTime - selectedCube.userData.detailRotateStartTime;
+            selectedCube.userData.detail.rotation.y = modelStartYaw(selectedCube.userData.project) + since * DETAIL_ROTATE_SPEED;
+        }
     }
 
     updateCubeTags(elapsedTime);
@@ -1410,23 +1418,24 @@ function wasDrag(event) {
 }
 
 /**
- * The send-off after a project is clicked, before the camera moves in: a
- * wave of flux ripples out from the chosen cube, and every other cube is
- * caught in it - swirling around its home and tossed up and down, the ones
- * further away a beat behind - then drops, falling slowly down the screen,
- * tumbling, out past the bottom edge, while the chosen one holds still.
- * Like the rest of the catalog's motion it's a pure function of the clock -
- * here, time since the click - and openProject takes over once the last
- * cube is gone.
+ * The send-off after a project is clicked: a wave of flux ripples out from
+ * the chosen cube, and every other cube rides it - pushed out and back and
+ * tossed up and down, the ones further away a beat behind, without turning
+ * - then drops, falling slowly down the screen, out past the bottom edge,
+ * while the chosen one holds still. The camera starts moving in while
+ * they're still falling. Like the rest of the catalog's motion it's a pure
+ * function of the clock - here, time since the click.
  */
 const DROP_FLUX = 1.0; // seconds of flux before the cubes let go
 const DROP_FLUX_RAMP = 0.3; // seconds for the flux to build to full strength
 const DROP_STAGGER = 0.25; // seconds - cubes let go at slightly different moments
 const DROP_FALL = 1.2; // seconds to fall off the screen
-const FLUX_SWIRL = 0.9; // units - radius of each cube's swirl around its home
+const DROP_OPEN_AFTER = 0.3; // seconds into the fall that the camera starts moving in
+const OPEN_CAMERA_EASE = 'power2.out'; // see openProject
+const OPEN_CAMERA_DURATION_LOADING = 1; // seconds - the move in while the model is still downloading
+const FLUX_SWELL = 0.8; // units - how far the wave pushes a cube out from the chosen one
 const FLUX_TOSS = 2.2; // units - how high a cube is tossed towards the camera
-const FLUX_TILT = 0.3; // radians - rock along the swirl
-const FLUX_SPEED = Math.PI * 2 * 1.4; // radians/second - swirls a second
+const FLUX_SPEED = Math.PI * 2 * 1.1; // radians/second along the wave
 const FLUX_RIPPLE = 0.22; // radians of lag per unit of distance from the chosen cube
 const DROP_DISTANCE = 75; // units down the screen - clears it at any aspect
 const DROP_SINK = 0.15; // share of the fall that also sinks away from the camera
@@ -1434,7 +1443,7 @@ const DROP_DRIFT = 4; // units of sideways drift, at most
 const DROP_SPIN = 2.5; // radians of tumble over the fall
 
 let droppingFrom = null;
-let dropStartedAt = 0;
+let dropStartedAt = -Infinity;
 
 function startDrop(cube) {
     viewState = 'dropping';
@@ -1443,28 +1452,45 @@ function startDrop(cube) {
     hoveredCube = null;
 
     cubes.forEach((other) => {
+        // Out along the screen, away from the chosen cube
+        const away = other.position.clone().sub(cube.position).setY(0);
+
         other.userData.drop = {
             from: other.position.clone(),
             delay: Math.random() * DROP_STAGGER,
             drift: randomBetween(-1, 1) * DROP_DRIFT,
-            lag: other.position.distanceTo(cube.position) * FLUX_RIPPLE,
+            lag: away.length() * FLUX_RIPPLE,
+            away: away.lengthSq() > 0 ? away.normalize() : away,
             spin: new THREE.Vector3(randomBetween(0.5, 1), randomBetween(-0.5, 0.5), randomBetween(-1, 1)),
         };
     });
 
-    // Only once the last cube to let go has fallen clear - stopping any
-    // earlier would leave one frozen on screen mid-fall
-    gsap.delayedCall(DROP_FLUX + DROP_STAGGER + DROP_FALL, () => openProject(cube));
+    // Partway through the fall rather than after it, so the camera's move
+    // follows straight on from it. The fall keeps playing out in detail
+    // view (see placeDroppingCube) while openProject fades the cubes out.
+    gsap.delayedCall(DROP_FLUX + DROP_OPEN_AFTER, () => openProject(cube));
+}
+
+function dropInProgress(elapsedTime) {
+    return elapsedTime - dropStartedAt < DROP_FLUX + DROP_STAGGER + DROP_FALL;
 }
 
 function updateDroppingCube(cube, elapsedTime) {
-    const { from, delay, drift, lag, spin } = cube.userData.drop;
-
     cube.material.opacity = 1;
     cube.material.color.set(cubesColor);
     cube.userData.edges.material.opacity = 1;
     cube.userData.edges.material.color.set(selectedCubeColor);
     if (cube.userData.content) cube.userData.content.scale.setScalar(cube.userData.contentBaseScale);
+
+    placeDroppingCube(cube, elapsedTime);
+}
+
+/**
+ * Pose only, no material - this part carries on after openProject, which
+ * is fading the cubes out while they finish falling.
+ */
+function placeDroppingCube(cube, elapsedTime) {
+    const { from, delay, drift, lag, away, spin } = cube.userData.drop;
 
     // The chosen cube holds still where it was clicked
     if (cube === droppingFrom) {
@@ -1482,26 +1508,23 @@ function updateDroppingCube(cube, elapsedTime) {
     const fall = Math.min(Math.max((t - DROP_FLUX - delay) / DROP_FALL, 0), 1);
     const drop = fall ** 2;
 
-    // The flux: a swirl in the screen plane plus a toss towards the camera
-    // (which reads as a hop - the cube grows as it rises), on a wave that
-    // reaches cubes further from the chosen one later. Builds in smoothly,
-    // and is carried off into the fall rather than cut.
+    // The flux: a push out from the chosen cube and back, plus a toss
+    // towards the camera (which reads as a hop - the cube grows as it
+    // rises), on a wave that reaches cubes further from the chosen one
+    // later. No rotation - the cubes ride the wave square. Builds in
+    // smoothly, and is carried off into the fall rather than cut.
     const strength = Math.min(t / DROP_FLUX_RAMP, 1) ** 2 * (1 - fall);
-    const angle = Math.max(t * FLUX_SPEED - lag, 0);
-    const swirl = Math.min(angle, Math.PI) / Math.PI * strength; // eases out from home over the first half-turn
+    const wave = Math.max(t * FLUX_SPEED - lag, 0);
+    const swell = Math.sin(wave) * FLUX_SWELL * strength;
 
     cube.position.set(
-        from.x + Math.cos(angle) * FLUX_SWIRL * swirl - FLUX_SWIRL * swirl + drift * drop,
-        from.y + Math.abs(Math.sin(angle)) * FLUX_TOSS * strength - DROP_SINK * DROP_DISTANCE * drop,
-        from.z + Math.sin(angle) * FLUX_SWIRL * swirl + DROP_DISTANCE * drop,
+        from.x + away.x * swell + drift * drop,
+        from.y + Math.abs(Math.sin(wave)) * FLUX_TOSS * strength - DROP_SINK * DROP_DISTANCE * drop,
+        from.z + away.z * swell + DROP_DISTANCE * drop,
     );
 
     const tumble = drop * DROP_SPIN;
-    cube.rotation.set(
-        Math.sin(angle) * FLUX_TILT * strength + spin.x * tumble,
-        spin.y * tumble,
-        -Math.cos(angle) * FLUX_TILT * swirl + spin.z * tumble,
-    );
+    cube.rotation.set(spin.x * tumble, spin.y * tumble, spin.z * tumble);
     cube.scale.setScalar(1);
 }
 
@@ -1590,18 +1613,24 @@ function openProject(cube) {
 
     enterDetailProjection();
 
+    // This runs while the rest of the grid is still falling, which already
+    // carries the motion - so the camera sets off at speed and settles,
+    // rather than easing in from a standstill that reads as a pause
+    const ease = OPEN_CAMERA_EASE;
+
     if (cube.userData.detail) {
         cube.userData.detail.visible = true;
         cube.userData.detail.rotation.y = modelStartYaw(project);
         cube.userData.detailRotateStartTime = clock.getElapsedTime();
         setProjectStatus(null);
-        frameDetail(cube);
+        frameDetail(cube, { ease });
         return;
     }
 
     // Frame the cube now, then re-frame once the model is inside it
     setProjectStatus('Loading model');
-    frameDetail(cube, { duration: 1 });
+    const openMoveEndsAt = clock.getElapsedTime() + OPEN_CAMERA_DURATION_LOADING;
+    frameDetail(cube, { duration: OPEN_CAMERA_DURATION_LOADING, ease });
 
     loadPointCloudWithShaderMaterial({
         glbPath: assetUrl(project.detailModel),
@@ -1624,6 +1653,16 @@ function openProject(cube) {
             // slowly enough for the visitor to pull it out before this ran.
             if (drawerOpen) {
                 frameDetailCloseup(cube);
+                return;
+            }
+
+            // Loaded while the move in is still under way: carry on into the
+            // new frame within the time left, at speed, rather than restart
+            // from a standstill - which would stall the zoom halfway
+            const remaining = openMoveEndsAt - clock.getElapsedTime();
+
+            if (remaining > 0) {
+                frameDetail(cube, { duration: Math.max(remaining, 0.4), ease });
             } else {
                 frameDetail(cube);
             }

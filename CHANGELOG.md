@@ -258,10 +258,20 @@ rendered no handle at all. Not a deploy problem; a content problem.
   replaces "Explore me..." rather than stacking on top of it. Checked on
   both layouts, including a tap on the pulsing cube on a phone, and that
   clicking a project still opens it. See DECISIONS.md.
-- **The send-off flows, then falls slowly.** The hard shake is replaced by
+- **The send-off flows, then falls slowly.** *(The swirl and the wait
+  before the zoom have since gone - see below.)* The hard shake is replaced by
   a wave of flux that ripples out from the clicked cube: the others swirl
   around their places and hop towards the viewer, the further ones a beat
   later. Then they fall down the screen over 1.2s instead of 0.45s. The
   whole send-off is about 2.5s, up from 1.1s. Checked frame by frame on
   both layouts; the project still opens after it, and every cube is back
   home after a round trip. See DECISIONS.md.
+- **No more spin in the flux, and no pause before the zoom.** The cubes
+  now ride the wave square: pushed out from the clicked cube and back, and
+  tossed towards the viewer, without the swirl and rock. The camera starts
+  moving in 0.3s into the fall instead of waiting for the screen to clear,
+  and sets off at speed rather than easing in from a standstill. The
+  falling cubes finish their fall under the fade. On a first visit, the
+  model landing mid-zoom no longer restarts the move from rest. The
+  project is fully framed about 2.2s after the click, down from about 4s.
+  See DECISIONS.md.
