@@ -191,4 +191,6 @@ rendered no handle at all. Not a deploy problem; a content problem.
   on every close, both layouts) and passes on the fix (0.0000 yaw/roll at
   every frame of every transition, both layouts). Also removed a debug
   hook that had shipped to the live site in the previous merge. See
-  DECISIONS.md.
+  DECISIONS.md; README has a ticked item for it, and DECISIONS' slow-
+  rotation entry now matches the model's new quarter-turn base. Merged
+  and deployed.

@@ -69,6 +69,10 @@ Details view (per project)
     [x] Opening the About drawer pulls the camera into a close, elevated
         crop of the model rather than just reframing around it - see
         DECISIONS.md
+    [x] Moving between all projects and a project (and in and out of the
+        drawer's close-up) only tilts the camera - the grid no longer rolls
+        90° on the way in or out. The detail camera has to keep looking
+        along the catalog's screen-up for this to hold - see DECISIONS.md
     [ ] Images and video in the drawer
     [x] Split the screen in two: half for 3D content/half for the 2D content
         (then superseded: the text now lives in a drawer pulled from the edge,

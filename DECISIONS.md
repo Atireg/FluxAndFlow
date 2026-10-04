@@ -170,17 +170,20 @@ content inside does. The two looked like the same feature from the
 outside but are different levers entirely; one of them was the actual
 problem and the other was always fine.
 
-Computed as `(elapsedTime - startTime) * DETAIL_ROTATE_SPEED`, not
-accumulated per frame, matching the rest of the project's animation - see
-"A cube's visual state is a pure function of its mode", below.
-`startTime` is reset at the moment the model becomes visible (both the
-already-loaded path and the just-finished-downloading path in
-`openProject`), with rotation explicitly zeroed at the same moment, so the
-model is always seen square-on at the instant it appears - the same reason
-`openProject` already zeroes the cube's own rotation and scale on click.
+Computed as `DETAIL_MODEL_YAW + (elapsedTime - startTime) *
+DETAIL_ROTATE_SPEED`, not accumulated per frame, matching the rest of the
+project's animation - see "A cube's visual state is a pure function of its
+mode", below. `DETAIL_MODEL_YAW` is the fixed quarter turn that shows the
+camera on +Z the face the model was authored to show from -X (see the
+first camera entry above). `startTime` is reset at the moment the model
+becomes visible (both the already-loaded path and the
+just-finished-downloading path in `openProject`), with rotation set back
+to that base yaw at the same moment, so the model always appears showing
+the same face - the same reason `openProject` zeroes the cube's own
+rotation and scale on click.
 
 `frameDetail`'s fit is computed once, from the model's bounding box at
-that same zeroed instant, and is not recomputed as the model turns - a
+that same starting instant, and is not recomputed as the model turns - a
 rotating box's on-screen footprint does change shape as it turns (a
 structure that is wide and shallow presents narrower but deeper at 90°).
 Checked by sampling the actual asset across a full turn in a real browser,
