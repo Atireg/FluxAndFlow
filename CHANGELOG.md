@@ -119,6 +119,7 @@ rendered no handle at all. Not a deploy problem; a content problem.
   position that passes through the degenerate point. Checked the reverse
   (closing a project) too and confirmed it was never broken - verified
   before and after across desktop and mobile layouts. See DECISIONS.md.
+  *(Wrong about closing - see "Actually fixed the 90° roll" below.)*
 - **The model turns slowly while a project is open** - a full rotation
   every 40s, ambient rather than something to watch. This is not the
   auto-rotation that was removed early in Session 1: that orbited the
@@ -132,7 +133,8 @@ rendered no handle at all. Not a deploy problem; a content problem.
 - **Fixed the closing transition popping the whole grid into view at full
   opacity, point-blank against the camera, for a few frames.** The earlier
   claim in this log that closing "was never broken" checked only the
-  camera's own orientation, which was true but was not the whole picture -
+  camera's own orientation - and was wrong even about that (see "Actually
+  fixed the 90° roll" below) -
   this was a different bug, in the opacity/depthWrite reveal, not the
   camera. Root cause: flipping back to catalog mode immediately resumes
   the per-frame update that writes every cube's opacity outright each
@@ -210,7 +212,8 @@ rendered no handle at all. Not a deploy problem; a content problem.
   visible on a phone. Transitions checked again on both layouts: no
   snaps, and the only turn is the intentional 4°. CLAUDE.md's
   project-entry example now shows `view`. See DECISIONS.md.
-- **Clicking a project blows the rest of the grid away first.** Two seconds
+- **Clicking a project blows the rest of the grid away first** *(since
+  replaced by a faster drop - see below)*. Two seconds
   before the camera moves in: the other cubes shake harder and harder, then
   blow outward and towards the viewer, tumbling off the screen, while the
   chosen one holds still. Built as another per-frame mode (`'exploding'`)

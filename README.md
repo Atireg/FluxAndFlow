@@ -83,9 +83,11 @@ Details view (per project)
         crop of the model rather than just reframing around it - see
         DECISIONS.md
     [x] Moving between all projects and a project (and in and out of the
-        drawer's close-up) only tilts the camera - the grid no longer rolls
-        90° on the way in or out. The detail camera has to keep looking
-        along the catalog's screen-up for this to hold - see DECISIONS.md
+        drawer's close-up) only tilts the camera, plus whatever small turn a
+        project's own view asks for (4° for Rock Print) - the grid no longer
+        rolls 90° on the way in or out. The detail camera has to keep
+        looking along the catalog's screen-up for this to hold - see
+        DECISIONS.md
     [x] Per-project camera angle (`view` in the projects array). Rock Print
         opens on an elevated three-quarter view fitted to a screenshot of
         the shot wanted - see DECISIONS.md

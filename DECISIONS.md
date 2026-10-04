@@ -55,10 +55,12 @@ Where the roll landed depended on how orientation was computed:
 
 The fix removes the roll at its source. The detail camera's default
 heading (azimuth 0 in `viewDirection`) puts it on +Z looking along -Z, the
-catalog's own screen-up, so
-world +X is screen-right in both views. Every transition (catalog to
-detail, detail to the drawer close-up and back, detail to catalog) is now
-a pure tilt about world X. The model was authored to be seen from -X, so
+catalog's own screen-up, so world +X is screen-right in both views.
+Every transition (catalog to detail, detail to the drawer close-up and
+back, detail to catalog) is a pure tilt about world X for a project on
+the default view. A project's own `view.azimuth` adds exactly that much
+turn on top, 4° for Rock Print (see "A project can set its own camera
+angle" below). The model was authored to be seen from -X, so
 `DETAIL_MODEL_YAW` turns it a quarter, showing exactly the same face and
 framing as before. Screenshots of the old and new detail views match.
 
@@ -192,7 +194,8 @@ perspective, square-on" - framed from above at a fixed elevation
 won't fit the whole piece in frame. That's the brief, not a bug: an
 atmospheric detail shot to sit behind the text, not the reference view of
 the piece. Closing the drawer calls the normal `frameDetail` and returns
-to the square-on full-fit view exactly as before.
+to the project's normal view: square-on and full-fit by default, or its
+own `view` (Rock Print's elevated three-quarter shot).
 
 This goes through `moveCamera` like every other camera move. The detail
 view and the close-up share the project's heading and differ only in
@@ -226,12 +229,13 @@ content inside does. The two looked like the same feature from the
 outside but are different levers entirely; one of them was the actual
 problem and the other was always fine.
 
-Computed as `DETAIL_MODEL_YAW + (elapsedTime - startTime) *
-DETAIL_ROTATE_SPEED`, not accumulated per frame, matching the rest of the
+Computed as `modelStartYaw(project) + (elapsedTime - detailRotateStartTime)
+* DETAIL_ROTATE_SPEED`, not accumulated per frame, matching the rest of the
 project's animation - see "A cube's visual state is a pure function of its
-mode", below. `DETAIL_MODEL_YAW` is the fixed quarter turn that shows the
-camera on +Z the face the model was authored to show from -X (see the
-first camera entry above). `startTime` is reset at the moment the model
+mode", below. `modelStartYaw` is `DETAIL_MODEL_YAW`, the fixed quarter turn
+that shows the camera on +Z the face the model was authored to show from
+-X (see the first camera entry above), plus the project's own `view.turn`
+(145° for Rock Print). `detailRotateStartTime` is reset at the moment the model
 becomes visible (both the already-loaded path and the
 just-finished-downloading path in `openProject`), with rotation set back
 to that base yaw at the same moment, so the model always appears showing
@@ -264,8 +268,12 @@ the bar's measured height so the model frames below it rather than behind it;
 side-by-side layouts reserve nothing, because the bar sits in the top-left
 corner clear of a model framed into the other half.
 
-`DETAIL_MARGIN` is above 1 where the whole box should fit with air around it
-and below 1 where the view should crop into it. Phones crop when the drawer is
+`DETAIL_MARGIN` applies to the default square-on view only. A project
+with its own `view` is framed on the cube with `VIEW_FRAME_MARGIN` and its
+own vertical placement instead (see "A project can set its own camera
+angle"). For the default: `DETAIL_MARGIN` is above 1 where the whole box
+should fit with air around it and below 1 where the view should crop into
+it. Phones crop when the drawer is
 parked: the frame there is far taller than the pavilion is deep, the fit is
 limited by width, and fitting the whole box leaves the model marooned in a
 thin band. Once the drawer is out, height becomes the limit instead and the
@@ -438,7 +446,10 @@ to touch at once.
 Instead a cube's entire visual state - position, rotation, scale, colour,
 opacity, its thumbnail's scale - is computed fresh every frame from two
 things only: which of `idle` / `hovered` / `spotlighted` it currently is,
-and the clock. Nothing is ever incremented or accumulated, so nothing can
+and the clock. Two grid-wide modes were added later on the same terms:
+`'dropping'` (the send-off after a click, `updateDroppingCube`) and
+`'returning'` (the way back, `placeAtRest`) - see "Clicking a project
+knocks the rest of the grid off the screen first". Nothing is ever incremented or accumulated, so nothing can
 drift, and nothing needs an explicit reset when a mode ends: the next frame
 simply computes a different mode's state instead. `updateCube()` picks the
 mode, and `updateIdleCube()` / `updateHoveredCube()` / `updateSpotlightCube()`
@@ -500,7 +511,10 @@ what duration or delay the tween was given.
 
 Fixed by not flipping `viewState` back to `'catalog'` until the reveal's
 own tweens finish (`gsap.delayedCall`, timed to the tween's delay plus
-duration) - `selectedCube` is still cleared immediately, so nothing
+duration). It was held at `'detail'` for that window at first, and is now
+`'returning'`, which also places the cubes back home each frame without
+touching opacity (added with the drop - see "Clicking a project knocks the
+rest of the grid off the screen first"). `selectedCube` is still cleared immediately, so nothing
 reopens mid-fade, but the catalog's per-frame loop stays out of the
 picture until the tweens it would otherwise fight are done. The same
 window also holds back `other.material.depthWrite = true` behind a short
@@ -533,8 +547,8 @@ detail view. It now blinks to a dedicated, lighter `#ff5c5c` instead,
 chosen for a brighter, more energetic flash to go with the faster rock and
 the jump - a deliberate request, not a drift back towards two colours
 saying the same thing. If the two ever need to read as one signal again,
-point `spotlightGlowColor` back at `warmAccentColor`'s value rather than
-inventing a third colour.
+point `spotlightGlowColor` back at the drawer's `--warm`, `#c42941`,
+rather than inventing a third colour.
 
 The blink was edges-only at first; the face (`cube.material.color`) now
 lerps the same way, on the same `glow * intensity` fraction, so the cube
