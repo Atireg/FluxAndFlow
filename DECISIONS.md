@@ -413,6 +413,17 @@ closing a project with the drawer open, on a real browser, since neither
 the catalog-camera telemetry nor a parked-drawer close ever exercises this
 path.
 
+The bar's title is one line at every width. It used to wrap onto two: the
+bar was capped at `min(26rem, 60vw)`, which on a phone left "Rock Print
+Pavilion" no room past "Rock Print", and on desktops from about 1280px
+wide the title's font grows faster than 26rem allows. `.bar__title` is now
+`white-space: nowrap`, with the bar only capped at the screen's width. A
+future title too long for a narrow phone ellipsises rather than wrapping.
+Measured from 320px to 1920px wide: one line everywhere, nothing clipped,
+and even at 320px the title ends at 254px. The shorter bar is picked up by
+`barFraction()` on the next frame, which only gives the model more room
+below it.
+
 A cube's visual state is a pure function of its mode, not an animation to start and stop
 ----------------------------------------------------------------------------------------
 

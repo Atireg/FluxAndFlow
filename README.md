@@ -31,6 +31,8 @@ Navigation and general layout
     [ ] Add buttons to switch between views
     [ ] Add footer (Copyrights, )
     [x] Project bar with the title and a way back to the catalog
+    [x] The title stays on one line at every viewport width - it used to
+        wrap onto two on phones and on wide desktops
     [x] On a small phone the bar + the open drawer left very little room for
         the model. Fixed by moving the title into the drawer's own header
         once the drawer is open on a narrow viewport, rather than shrinking

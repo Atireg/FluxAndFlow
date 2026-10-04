@@ -219,3 +219,9 @@ rendered no handle at all. Not a deploy problem; a content problem.
   are ignored. Verified on both layouts: frame-by-frame screenshots of the
   sequence, clean camera transitions, and every cube back at rest after a
   round trip. See DECISIONS.md.
+- **The project title stays on one line at every viewport width.** It
+  wrapped onto two on phones (the bar was capped at 60% of the screen) and
+  on desktops 1280px and wider (capped at 26rem while the font grew). Now
+  `nowrap`, capped only at the screen's width, with an ellipsis as the
+  fallback for a future title too long for a phone. Measured at eleven
+  widths from 320px to 1920px: one line, nothing clipped. See DECISIONS.md.
