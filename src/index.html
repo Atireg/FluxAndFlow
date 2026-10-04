@@ -40,6 +40,10 @@
     </button>
 
     <div class="drawer__content" id="drawer-content">
+      <!-- Mirrors #project-title; shown only on narrow viewports, where the
+           bar's own title hides once the drawer is open (see styles.css) so
+           the two don't both eat vertical space at once. -->
+      <h2 class="drawer__title" id="drawer-title"></h2>
       <dl class="drawer__meta" id="project-meta"></dl>
       <div class="drawer__body" id="project-body"></div>
       <p class="drawer__credits" id="project-credits"></p>

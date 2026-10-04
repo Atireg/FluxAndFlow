@@ -266,6 +266,14 @@ canvas.webgl {
 /**
  * Drawer contents
  */
+
+/* Mirrors the bar's title; only ever shown on a narrow viewport - see the
+   859px media query, which also hides the bar's own title while this one
+   is visible so the two never compete for height at the same time. */
+.drawer__title {
+    display: none;
+}
+
 .drawer__meta:empty {
     display: none;
 }
@@ -312,6 +320,23 @@ canvas.webgl {
 @media (max-width: 859px) {
     :root {
         --drawer-size: 58%;
+    }
+
+    /* The bar's title would otherwise sit above a model that is already
+       squeezed by the open drawer; moving it into the drawer's own header
+       buys that height back. The back button and any loading status stay
+       in the bar regardless, so there is always a way out on screen. */
+    body.drawer-open .bar__title {
+        display: none;
+    }
+
+    .drawer__title {
+        display: block;
+        margin: 0 0 1.5rem;
+        font-size: clamp(1.5rem, 6vw, 2.25rem);
+        font-weight: 600;
+        line-height: 1.15;
+        letter-spacing: -0.01em;
     }
 
     .drawer {

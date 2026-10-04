@@ -120,6 +120,7 @@ const projectClose = document.querySelector('#project-close');
 
 const drawer = document.querySelector('#drawer');
 const drawerHandle = document.querySelector('#drawer-handle');
+const drawerTitle = document.querySelector('#drawer-title');
 const drawerMeta = document.querySelector('#project-meta');
 const drawerBody = document.querySelector('#project-body');
 const drawerCredits = document.querySelector('#project-credits');
@@ -135,6 +136,7 @@ function hasDescription(project) {
 
 function showProject(project) {
     barTitle.textContent = project.title;
+    drawerTitle.textContent = project.title;
     bar.classList.add('is-open');
     bar.setAttribute('aria-hidden', 'false');
 
@@ -185,6 +187,10 @@ function setDrawer(open, { reframe = true } = {}) {
 
     drawer.classList.toggle('is-open', open);
     drawerHandle.setAttribute('aria-expanded', String(open));
+
+    // On a narrow viewport the drawer's own header takes over the title, so
+    // the bar can give that height back - see the 859px query in styles.css
+    document.body.classList.toggle('drawer-open', open);
 
     // The model makes room for the drawer, and takes it back when it closes
     if (reframe && selectedCube) frameDetail(selectedCube, { duration: 0.8 });
