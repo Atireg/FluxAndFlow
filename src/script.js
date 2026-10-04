@@ -46,6 +46,9 @@ const cubesColor = new THREE.Color("rgb(167, 167, 167)").convertSRGBToLinear();
 // const bordersColor = new THREE.Color("rgb(232, 237, 223)").convertSRGBToLinear();
 const selectedCubeColor = new THREE.Color("rgb(192, 255, 252)").convertSRGBToLinear();
 const backgroudCubesColor = new THREE.Color("rgb(190, 190, 190)").convertSRGBToLinear();
+// The one warm note in the palette (matches --warm in styles.css): the
+// catalog's spotlight blinks towards this, same as the drawer's handle.
+const warmAccentColor = new THREE.Color("#c42941").convertSRGBToLinear();
 const lightColor = new THREE.Color("rgb(194, 238, 255)");
 
 /**
@@ -524,6 +527,74 @@ let cubes = [];
 let gridShape = { cols: 1, rows: SLOT_COUNT };
 let viewState = 'catalog'; // 'catalog' | 'detail'
 let selectedCube = null; // the cube whose project is open, in detail view
+let hoveredCube = null; // the cube under the cursor, in the catalog
+
+/**
+ * Ambient motion
+ *
+ * Each cube drifts slowly and independently instead of ticking through a
+ * fixed bounce, so the grid reads as something flowing rather than
+ * mechanical - the brief this project is named for. A single sine still
+ * looks like a metronome no matter how its period is randomised; summing
+ * two per axis, at different frequencies and phases, is a cheap stand-in
+ * for noise that breaks that up without pulling in a dependency for it.
+ */
+function randomBetween(min, max) {
+    return min + Math.random() * (max - min);
+}
+
+const WANDER_Y_PERIOD_A = [8, 14]; // seconds per cycle
+const WANDER_Y_PERIOD_B = [14, 24];
+const WANDER_Y_AMPLITUDE_A = 1.0; // units
+const WANDER_Y_AMPLITUDE_B = 0.5;
+const WANDER_XZ_PERIOD = [12, 20];
+const WANDER_XZ_AMPLITUDE = 0.18; // small horizontal sway
+
+function createWander() {
+    return {
+        yA: { period: randomBetween(...WANDER_Y_PERIOD_A), phase: Math.random() * Math.PI * 2 },
+        yB: { period: randomBetween(...WANDER_Y_PERIOD_B), phase: Math.random() * Math.PI * 2 },
+        x: { period: randomBetween(...WANDER_XZ_PERIOD), phase: Math.random() * Math.PI * 2 },
+        z: { period: randomBetween(...WANDER_XZ_PERIOD), phase: Math.random() * Math.PI * 2 },
+    };
+}
+
+function wanderOffset(wander, elapsedTime) {
+    const sine = (term) => Math.sin((elapsedTime / term.period) * Math.PI * 2 + term.phase);
+
+    return {
+        x: sine(wander.x) * WANDER_XZ_AMPLITUDE,
+        y: sine(wander.yA) * WANDER_Y_AMPLITUDE_A + sine(wander.yB) * WANDER_Y_AMPLITUDE_B,
+        z: sine(wander.z) * WANDER_XZ_AMPLITUDE,
+    };
+}
+
+/**
+ * Spotlight
+ *
+ * Every so often, one project cube - never the one under the cursor, never
+ * while a project is open - holds still and glows: edges pulsing between
+ * their resting cyan and the site's one warm accent, its thumbnail
+ * breathing, a slight rock rather than a spin. An occasional nudge towards
+ * clicking it, not a persistent decoration. Only cubes that hold a project
+ * are eligible - an empty slot has nothing to invite a click towards.
+ */
+const SPOTLIGHT_GAP = [3, 7]; // seconds between one ending and the next starting
+const SPOTLIGHT_DWELL = [4, 7]; // seconds a cube stays spotlighted
+const SPOTLIGHT_PULSE_PERIOD = 1.6; // seconds per glow breath
+const SPOTLIGHT_ROTATE_PERIOD = [2.4, 3.3]; // seconds; x and z rock at different rates
+const SPOTLIGHT_ROTATE_AMPLITUDE = 0.09; // radians, ~5 degrees
+const SPOTLIGHT_SCALE_AMPLITUDE = 0.12; // the thumbnail breathes +/- 12%
+
+let spotlightCube = null;
+let spotlightStartedAt = 0;
+let spotlightDwell = 0;
+let spotlightRotatePeriodX = 0;
+let spotlightRotatePeriodZ = 0;
+let nextSpotlightAt = randomBetween(...SPOTLIGHT_GAP);
+
+const spotlightEdgeColor = new THREE.Color(); // reused each frame, never reallocated
+
 createPlayground();
 
 // Cubes
@@ -561,10 +632,10 @@ function createPlayground() {
         cube.userData.slot = slot;
         cube.userData.project = projectBySlot.get(slot) ?? null;
 
-        // Add random Y offset and speed for animation
-        cube.userData.ySpeed = Math.random() * 0.01 + 0.001; // Speed of Y movement
-        cube.userData.yOffset = Math.random() * 5 - 2.5; // Initial random Y offset
-        cube.position.y = cube.userData.yOffset;
+        // How this cube drifts while idle - see wanderOffset(). Position is
+        // set every frame from this plus the slot, once layoutCubes() below
+        // has given it a slot to drift around.
+        cube.userData.wander = createWander();
 
         // Add the cube to the scene and the array
         scene.add(cube);
@@ -601,6 +672,7 @@ function addContentToCube(cube) {
             content.scale.set(0.2, 0.2, 0.2);
             cube.add(content);
             cube.userData.content = content;
+            cube.userData.contentBaseScale = 0.2;
         }
     );
 }
@@ -863,7 +935,6 @@ window.addEventListener('resize', () => {
 
 const clock = new THREE.Clock();
 
-// Animate the cubes' Y positions
 function animate() {
     requestAnimationFrame(animate);
 
@@ -872,15 +943,16 @@ function animate() {
     // Update smoke
     smokeMaterial.uniforms.uTime.value = elapsedTime;
 
-    cubes.forEach((cube) => {
-        // Move the cube along the Y-axis
-        cube.position.y += cube.userData.ySpeed;
-
-        // Reverse direction if the cube goes out of bounds
-        if (cube.position.y > 3 || cube.position.y < -3) {
-            cube.userData.ySpeed *= -1;
-        }
-    });
+    // The catalog's own motion - wander, hover, spotlight - only runs while
+    // it is actually what's on screen. A cube simply holds wherever it was
+    // the instant a project opens; openProject's own fade covers for it,
+    // and the spotlight cycle's dwell/gap timers self-correct against the
+    // clock once this resumes, however long detail view was open for, so
+    // nothing needs pausing or resetting on the way in or out.
+    if (viewState === 'catalog') {
+        updateSpotlightCycle(elapsedTime);
+        cubes.forEach((cube) => updateCube(cube, elapsedTime));
+    }
 
     // Update controls
     controls.update();
@@ -889,10 +961,6 @@ function animate() {
     renderer.render(scene, camera);
 }
 animate();
-
-// Variables to store hovered cube and animation state
-let hoveredCube = null;
-let fluxyAnimationId = null;
 
 // A ray can land on a cube's edges or on the model inside it, so walk back
 // up the hierarchy to the cube that owns whatever was hit.
@@ -905,6 +973,139 @@ function findCube(object) {
     }
 
     return null;
+}
+
+/**
+ * One cube's full visual state - position, rotation, scale, colour,
+ * opacity - is a pure function of its current mode and the clock,
+ * recomputed from scratch every frame. There is no separate animation loop
+ * to start or stop and nothing is ever incremented, so nothing can drift
+ * and nothing needs to be reset by hand when a mode ends: the next frame
+ * simply computes a different mode's state instead.
+ */
+function updateCube(cube, elapsedTime) {
+    if (cube === hoveredCube) {
+        updateHoveredCube(cube, elapsedTime);
+    } else if (cube === spotlightCube) {
+        updateSpotlightCube(cube, elapsedTime);
+    } else {
+        updateIdleCube(cube, elapsedTime);
+    }
+}
+
+function updateIdleCube(cube, elapsedTime) {
+    const base = cube.userData.slotPosition;
+    const offset = wanderOffset(cube.userData.wander, elapsedTime);
+    cube.position.set(base.x + offset.x, offset.y, base.z + offset.z);
+
+    cube.rotation.set(0, 0, 0);
+    cube.scale.setScalar(1);
+    cube.material.opacity = 1;
+    cube.material.color.set(cubesColor);
+
+    cube.userData.edges.material.opacity = 1;
+    cube.userData.edges.material.color.set(selectedCubeColor);
+
+    if (cube.userData.content) {
+        cube.userData.content.scale.setScalar(cube.userData.contentBaseScale);
+    }
+}
+
+// Quicker and more alert than the idle wander, since this cube is reacting
+// to the cursor right now rather than drifting on its own.
+const HOVER_JITTER_FREQUENCY = 18; // radians/second
+const HOVER_JITTER_AMPLITUDE = 0.025;
+const HOVER_SCALE_AMPLITUDE = 0.2;
+const HOVER_CONTENT_PULSE_AMPLITUDE = 0.1;
+
+function updateHoveredCube(cube, elapsedTime) {
+    const base = cube.userData.slotPosition;
+    const jitter = Math.sin(elapsedTime * HOVER_JITTER_FREQUENCY) * HOVER_JITTER_AMPLITUDE;
+    cube.position.set(base.x + jitter, jitter, base.z);
+
+    cube.rotation.set(0, 0, 0);
+    cube.scale.setScalar(1 + Math.sin(elapsedTime * HOVER_JITTER_FREQUENCY) * HOVER_SCALE_AMPLITUDE);
+    cube.material.opacity = 0.4;
+    cube.material.color.set(selectedCubeColor);
+
+    cube.userData.edges.material.opacity = 1;
+    cube.userData.edges.material.color.set(selectedCubeColor);
+
+    if (cube.userData.content) {
+        const pulse = 1 + Math.sin(elapsedTime * HOVER_JITTER_FREQUENCY * 0.15) * HOVER_CONTENT_PULSE_AMPLITUDE;
+        cube.userData.content.scale.setScalar(cube.userData.contentBaseScale * pulse);
+    }
+}
+
+function updateSpotlightCube(cube, elapsedTime) {
+    // Holds still at its slot - rather than also wandering - so it reads as
+    // paused and calling attention amid the others drifting around it.
+    const base = cube.userData.slotPosition;
+    cube.position.set(base.x, 0, base.z);
+
+    const since = elapsedTime - spotlightStartedAt;
+    const pulse = Math.sin((since / SPOTLIGHT_PULSE_PERIOD) * Math.PI * 2); // -1..1
+    const glow = (pulse + 1) / 2; // 0..1
+
+    cube.rotation.x = Math.sin((since / spotlightRotatePeriodX) * Math.PI * 2) * SPOTLIGHT_ROTATE_AMPLITUDE;
+    cube.rotation.z = Math.sin((since / spotlightRotatePeriodZ) * Math.PI * 2 + 1.7) * SPOTLIGHT_ROTATE_AMPLITUDE;
+    cube.scale.setScalar(1);
+    cube.material.opacity = 1;
+    cube.material.color.set(cubesColor);
+
+    // Blink between the resting cyan and the site's one warm accent -
+    // never fully off, so it reads as glowing rather than flickering.
+    spotlightEdgeColor.copy(selectedCubeColor).lerp(warmAccentColor, glow);
+    cube.userData.edges.material.color.copy(spotlightEdgeColor);
+    cube.userData.edges.material.opacity = 0.65 + glow * 0.35;
+
+    if (cube.userData.content) {
+        const contentScale = cube.userData.contentBaseScale * (1 + pulse * SPOTLIGHT_SCALE_AMPLITUDE);
+        cube.userData.content.scale.setScalar(contentScale);
+    }
+}
+
+// Only a cube holding a project is ever worth spotlighting - clicking an
+// empty one does nothing, so there would be nothing to invite a click
+// towards - and never the one already under the cursor.
+function pickSpotlightCube() {
+    const candidates = cubes.filter((cube) => cube.userData.project && cube !== hoveredCube);
+    if (!candidates.length) return null;
+
+    return candidates[Math.floor(Math.random() * candidates.length)];
+}
+
+function updateSpotlightCycle(elapsedTime) {
+    if (spotlightCube) {
+        // The visitor started hovering the very cube that is glowing - let
+        // the hover take it over immediately rather than contesting it.
+        const hovered = spotlightCube === hoveredCube;
+        const dwelled = elapsedTime - spotlightStartedAt > spotlightDwell;
+
+        if (hovered || dwelled) {
+            spotlightCube = null;
+            nextSpotlightAt = elapsedTime + randomBetween(...SPOTLIGHT_GAP);
+        }
+
+        return;
+    }
+
+    if (elapsedTime < nextSpotlightAt) return;
+
+    const cube = pickSpotlightCube();
+
+    if (!cube) {
+        // Nothing eligible right now - e.g. the only project cube is the
+        // one being hovered. Try again shortly rather than every frame.
+        nextSpotlightAt = elapsedTime + randomBetween(...SPOTLIGHT_GAP);
+        return;
+    }
+
+    spotlightCube = cube;
+    spotlightStartedAt = elapsedTime;
+    spotlightDwell = randomBetween(...SPOTLIGHT_DWELL);
+    spotlightRotatePeriodX = randomBetween(...SPOTLIGHT_ROTATE_PERIOD);
+    spotlightRotatePeriodZ = randomBetween(...SPOTLIGHT_ROTATE_PERIOD);
 }
 
 // Function to handle mouse move
@@ -922,75 +1123,7 @@ function onMouseMove(event) {
     const intersects = raycaster.intersectObjects(cubes);
     const cube = intersects.length > 0 ? findCube(intersects[0].object) : null;
 
-    if (cube) {
-        if (hoveredCube !== cube) {
-            // If a new cube is hovered, stop the old animation and start a new one
-            if (hoveredCube) stopFluxyMovement(hoveredCube);
-            hoveredCube = cube;
-            startFluxyMovement(hoveredCube);
-        }
-    } else {
-        // If no cube is hovered, stop any ongoing animation
-        if (hoveredCube) stopFluxyMovement(hoveredCube);
-        hoveredCube = null;
-    }
-}
-
-// Function to start fluxy movement on a cube
-function startFluxyMovement(cube) {
-    let time = 0;
-
-    const animateFluxy = () => {
-        time += 0.3; // Adjust speed of the animation
-        cube.position.x += Math.sin(time) * 0.02; // Add fluxy movement
-        cube.position.y += Math.sin(time) * 0.02; // Add fluxy movement
-        if (cube.userData.content) {
-            cube.userData.content.scale.setScalar(1 + Math.sin(time * 0.05) * 0.1);
-        }
-        cube.scale.setScalar(1 + Math.sin(time) * 0.2); // Optional: Add scaling effect
-
-        cube.material.color.set(selectedCubeColor);
-        cube.material.opacity = 0.4;
-
-        // Change the edges color
-        // if (cube.userData.content) {
-        //     // cube.userData.edges.material.color.set(selectedCubeColor); // Fixed edge color
-        //     cube.userData.content.scale.setScalar(1 + Math.sin(time * 0.05) * 0.05); // Fixed edge color
-
-        // }
-
-        fluxyAnimationId = requestAnimationFrame(animateFluxy);
-    };
-
-    animateFluxy();
-}
-
-// Function to stop fluxy movement on a cube
-function stopFluxyMovement(cube) {
-    if (fluxyAnimationId) {
-        cancelAnimationFrame(fluxyAnimationId);
-        fluxyAnimationId = null;
-    }
-
-    // Put the cube back in its slot - the hover nudges x/y as it animates,
-    // and those nudges would otherwise accumulate and drift it away
-    if (cube.userData.slotPosition) {
-        cube.position.x = cube.userData.slotPosition.x;
-        cube.position.z = cube.userData.slotPosition.z;
-    }
-
-    cube.scale.setScalar(1); // Reset scale
-    cube.material.color.set(backgroudCubesColor);
-
-    if (cube.userData.edges) {
-        cube.userData.edges.material.color.set(backgroudCubesColor); // Fixed edge color
-    }
-
-    // Reset the child plane's rotation
-    if (cube.userData.content) {
-        // cube.userData.content.rotation.set(-Math.PI / 2, 0, 0); // Reset rotation
-        cube.userData.content.scale.setScalar(0.15); // Reset scale
-    }
+    hoveredCube = cube;
 }
 
 /**
@@ -1042,15 +1175,16 @@ function openProject(cube) {
 
     viewState = 'detail';
     selectedCube = cube;
+    hoveredCube = null;
 
-    stopFluxyMovement(cube);
+    // The cube parents the detail model, so any residual spotlight rock
+    // would carry straight into the one-point elevation, which depends on
+    // this cube's edges staying perfectly square to the canvas.
+    cube.rotation.set(0, 0, 0);
 
     // Hold the catalog still and sink it into the background, so the project
     // is the only thing competing for attention
     cubes.forEach((other) => {
-        other.userData.restingYSpeed = other.userData.ySpeed;
-        other.userData.ySpeed = 0;
-
         // The faces fade to nothing but keep writing depth, which hides the
         // cube's own back edges and flattens the perspective away
         other.material.depthWrite = false;
@@ -1127,7 +1261,6 @@ function closeProject() {
 
     // Bring the catalog back
     cubes.forEach((other) => {
-        other.userData.ySpeed = other.userData.restingYSpeed ?? other.userData.ySpeed;
         other.material.depthWrite = true;
 
         gsap.to(other.material, { opacity: 1, duration: 0.7, ease: 'power2.out' });
