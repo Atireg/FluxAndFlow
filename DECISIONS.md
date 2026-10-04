@@ -53,8 +53,9 @@ Where the roll landed depended on how orientation was computed:
   `(-0.707,0,0,0.707)` (looking down, upright). That is the same view
   direction, 90° apart in roll, and it was misread as a smooth ease.
 
-The fix removes the roll at its source. `DETAIL_VIEW_OFFSET` puts the
-detail camera on +Z looking along -Z, the catalog's own screen-up, so
+The fix removes the roll at its source. The detail camera's default
+heading (azimuth 0 in `viewDirection`) puts it on +Z looking along -Z, the
+catalog's own screen-up, so
 world +X is screen-right in both views. Every transition (catalog to
 detail, detail to the drawer close-up and back, detail to catalog) is now
 a pure tilt about world X. The model was authored to be seen from -X, so
@@ -86,14 +87,19 @@ every close, on both layouts. Large per-frame steps that remain are the
 software renderer running at about 12fps in the middle of the ease, and
 their rate matches the easing curve, with nothing at the end.
 
-To revisit: if the catalog grid's axes ever change, `DETAIL_VIEW_OFFSET`
-has to follow the catalog's screen-up, or the roll comes back.
+To revisit: if the catalog grid's axes ever change, `viewDirection`'s
+azimuth 0 has to follow the catalog's screen-up, or the roll comes back. A
+project's own `view.azimuth` turns the grid by exactly that much on the way
+in and out (see "A project can set its own camera angle" below), so it
+should stay small.
 
 
-The detail view is a one-point perspective, square-on
------------------------------------------------------
+The detail view is a one-point perspective, square-on, by default
+-----------------------------------------------------------------
 
-The camera sits on the Z axis looking straight at the cube, so its vertical
+This is the view for a project that doesn't set its own `view` (Rock Print
+now does - see "A project can set its own camera angle" below). The camera
+sits on the Z axis looking straight at the cube, so its vertical
 and horizontal edges stay parallel to the canvas and depth converges on a
 single central vanishing point. The earlier oblique three-quarter view made
 edges converge in two directions at once and nothing read as square.
@@ -116,9 +122,59 @@ stay exactly where the fit put them. The two are not the same lever, and
 only one of them was ever the problem.
 
 Square-on and full-fit is the default, not an absolute - see "The drawer
-pulls the camera into a close-up, not just out of the way" below for the
-one deliberate exception, and why being deliberate about it there doesn't
-undermine the rule here.
+pulls the camera into a close-up, not just out of the way" and "A project
+can set its own camera angle" below for the deliberate exceptions.
+
+
+A project can set its own camera angle
+--------------------------------------
+
+Rock Print now opens on an elevated three-quarter view rather than
+square-on - a choice made from a screenshot of the shot wanted, not a
+drift back to the oblique view rejected above. A project entry's `view`
+holds it, in degrees: `elevation` above the horizon, `azimuth` around the
+model, and `turn`, how far the model is spun round when it appears before
+its slow rotation carries on. Rock Print's `{ elevation: 49, azimuth: 4,
+turn: 145 }` weren't eyeballed. Elevation and azimuth came from fitting a
+camera to the cube's seven visible corners in the screenshot: under 2px
+error per corner, and only at 30°, the phone's actual stacked lens, which
+cross-checks the fit. Turn came from rendering the model at 30° and then
+5° steps against the screenshot and picking the match.
+
+Framing a project with its own view differs from the default in three
+ways, all in `frameDetail` behind `framesCube`:
+
+- It fits the cube, not the model's bounding box. Seen from above at an
+  angle, the box around the model's scattered ground points balloons and
+  changes size as the model turns, which made the shot land a fifth
+  smaller than intended. The cube is the frame the shot is composed
+  around; stray points running off the screen edges read fine, as they do
+  in the screenshot.
+- Its margin is `VIEW_FRAME_MARGIN` (1.16), not `DETAIL_MARGIN`.
+  `DETAIL_MARGIN`'s stacked crop-in was tuned against the whole-model box
+  and puts the cube too close. 1.16 lands the camera 25.61 units from the
+  cube on the screenshot's phone viewport (411x761); the fit says 25.6.
+- On a phone with the drawer parked, it sits centred on the whole screen
+  when the cube's top already clears the title bar there, and only drops
+  as far as it has to otherwise. The default centres in the space below
+  the bar, which left the model about 10% of the screen lower than the
+  screenshot. The top is checked by projecting the cube's eight corners,
+  not estimated. The first, conservative estimate still dropped it 35px.
+
+Result, measured at the screenshot's viewport: the cube's corners land
+12px from where they are in the screenshot on average (about 1% of the
+screen width), the same on repeated runs. Transitions stay clean. The only
+off-tilt component left is the intentional 4° azimuth (quaternion Y/Z
+peaking at 0.032-0.033), with no snaps on either layout.
+
+The drawer close-up keeps the project's azimuth but not its elevation: it
+stays at `CLOSEUP_ELEVATION` (38°). Using the steeper 49° there left only
+fragments of two pillars in the strip a phone has above the open drawer.
+
+To revisit: a project's `turn` is relative to `DETAIL_MODEL_YAW`, so if
+that ever changes, every `turn` shifts with it. And the margin and the
+corner fit are both specific to the one screenshot; a project with a very
+different shape might want its own margin rather than reusing 1.16.
 
 
 The drawer pulls the camera into a close-up, not just out of the way
@@ -131,18 +187,18 @@ the moment to show the whole piece off, though, so `setDrawer` now calls
 a dedicated `frameDetailCloseup` instead while the drawer is open: a
 closer, elevated crop that deliberately abandons both halves of "one-point
 perspective, square-on" - framed from above at a fixed elevation
-(`CLOSEUP_ELEVATION`, 38°) rather than level, and close enough
+(`CLOSEUP_ELEVATION`, 38°) on the project's own heading, and close enough
 (`CLOSEUP_DISTANCE_FACTOR` of the model's own radius) that most projects
 won't fit the whole piece in frame. That's the brief, not a bug: an
 atmospheric detail shot to sit behind the text, not the reference view of
 the piece. Closing the drawer calls the normal `frameDetail` and returns
 to the square-on full-fit view exactly as before.
 
-This goes through `moveCamera` like every other camera move. The square-on
-view looks along a level -Z and the close-up looks along -Z tipped down
-38°, so moving between them is a pure tilt with no roll, the same as
+This goes through `moveCamera` like every other camera move. The detail
+view and the close-up share the project's heading and differ only in
+elevation, so moving between them is a pure tilt with no roll, the same as
 opening and closing. Confirmed with the same frame-by-frame quaternion
-check: zero yaw and roll in both directions.
+check, in both directions.
 
 The elevation and distance are flat constants, not computed per project -
 the one existing project's pillars happen to suit a 38°/~1.1x-radius crop

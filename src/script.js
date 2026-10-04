@@ -96,6 +96,14 @@ const projects = [
 
         thumbModel: 'models/rock.gltf',
         detailModel: 'models/RockPrintStructureReduced.glb',
+
+        // Camera angle in the detail view, in degrees: elevation above the
+        // horizon, azimuth around the model, and turn - how far the model
+        // is spun round when it first appears, before its slow rotation
+        // carries on from there. Leave any out for 0; leave `view` out
+        // altogether for the square-on default. These were fitted to a
+        // screenshot of the shot wanted, so they reproduce it.
+        view: { elevation: 49, azimuth: 4, turn: 145 },
     },
 ];
 
@@ -775,23 +783,43 @@ function fitCameraToGrid({ animate = false } = {}) {
 /**
  * Frame a project for the detail view.
  *
- * The camera sits square-on to the cube, looking along -Z, so the cube's
- * vertical and horizontal edges stay parallel to the canvas. Under
- * perspective that is a one-point view - depth converges on a single central
- * vanishing point, nothing skews sideways. Under orthographic nothing
- * converges at all.
+ * By default the camera sits square-on to the cube, looking along -Z, so the
+ * cube's vertical and horizontal edges stay parallel to the canvas - a
+ * one-point view. A project can ask for its own angle instead through
+ * `view` (see the projects array).
  *
- * -Z is the catalog's own screen-up, so screen-right is world +X in both
- * views and moving between them is a pure tilt, with no roll. Looking along
- * any other axis makes every open and close roll the whole grid - see
- * DECISIONS.md.
+ * Azimuth 0 means looking along -Z, the catalog's own screen-up, so
+ * screen-right is world +X in both views and moving between them is a tilt,
+ * with no roll. Azimuth turns the grid by that much on the way in and out,
+ * so keep it small - see DECISIONS.md.
  */
-const DETAIL_VIEW_OFFSET = new THREE.Vector3(0, 0, 1); // camera sits on +Z
+// Room around the cube for a project with its own view - calibrated so the
+// Rock Print shot lands at the same size as the screenshot it was fitted to
+const VIEW_FRAME_MARGIN = 1.16;
 const ORTHO_VIEW_DISTANCE = 50; // orthographic ignores distance; this just clears the scene
+
+// Unit vector from the model towards the camera for a project's view, or
+// for its heading at a different elevation
+function viewDirection(project, { elevation: elevationDeg = project?.view?.elevation ?? 0 } = {}) {
+    const elevation = THREE.MathUtils.degToRad(elevationDeg);
+    const azimuth = THREE.MathUtils.degToRad(project?.view?.azimuth ?? 0);
+
+    return new THREE.Vector3(
+        Math.sin(azimuth) * Math.cos(elevation),
+        Math.sin(elevation),
+        Math.cos(azimuth) * Math.cos(elevation),
+    );
+}
 
 // The model was authored to be seen from -X; turning it a quarter shows that
 // same face to a camera on +Z
 const DETAIL_MODEL_YAW = Math.PI / 2;
+
+// Where a project's model starts its slow rotation: the quarter turn above,
+// plus the project's own `view.turn`
+function modelStartYaw(project) {
+    return DETAIL_MODEL_YAW + THREE.MathUtils.degToRad(project?.view?.turn ?? 0);
+}
 
 // Whether the camera's orientation is being driven directly by moveCamera
 // rather than left for OrbitControls to re-derive from position each frame
@@ -838,13 +866,22 @@ function moveCamera(position, target, duration) {
 }
 
 function frameDetail(object, { duration = 1.6 } = {}) {
-    const box = new THREE.Box3().setFromObject(object);
+    // A project with its own view is framed on the cube alone. Seen from
+    // above at an angle, the bounding box of the model's scattered points
+    // balloons and changes size as the model turns; the cube is the frame
+    // the shot is composed around, and stray points running off the edges
+    // read fine.
+    const framesCube = Boolean(object.userData.project?.view);
+    const box = framesCube
+        ? new THREE.Box3().setFromCenterAndSize(object.position, new THREE.Vector3().setScalar(cubeSize))
+        : new THREE.Box3().setFromObject(object);
     if (box.isEmpty()) return;
 
     const center = box.getCenter(new THREE.Vector3());
     const half = box.getSize(new THREE.Vector3()).multiplyScalar(0.5);
 
-    const forward = DETAIL_VIEW_OFFSET.clone().negate();
+    const toCamera = viewDirection(object.userData.project);
+    const forward = toCamera.clone().negate();
     const right = forward.clone().cross(camera.up).normalize();
     const up = right.clone().cross(forward).normalize();
 
@@ -857,9 +894,13 @@ function frameDetail(object, { duration = 1.6 } = {}) {
 
     const { mode, fraction } = getPanelLayout();
     const side = mode === 'side';
-    const margin = side
+    let margin = side
         ? DETAIL_MARGIN.side
         : (drawerOpen ? DETAIL_MARGIN.stackedOpen : DETAIL_MARGIN.stackedParked);
+
+    // DETAIL_MARGIN was tuned against the whole model's box, scatter and
+    // all; the cube alone wants its own
+    if (framesCube) margin = VIEW_FRAME_MARGIN;
 
     /**
      * What is left of the viewport once the bar and the drawer have taken
@@ -898,12 +939,26 @@ function frameDetail(object, { duration = 1.6 } = {}) {
      * opposite way puts it there.
      */
     const ndcX = side ? -fraction : 0;
-    const ndcY = (side ? 0 : fraction) - barShare;
+    let ndcY = (side ? 0 : fraction) - barShare;
+
+    // A cube-framed view sits centred on the screen when its top already
+    // clears the bar there, and only drops as far as it has to otherwise -
+    // centring it in the space below the bar leaves it low on a tall phone
+    if (framesCube && !ortho && !side && !drawerOpen) {
+        // Highest point of the cube on screen, from its actual corners
+        const eye = center.clone().addScaledVector(toCamera, distance);
+        let top = -Infinity;
+        for (const sx of [-1, 1]) for (const sy of [-1, 1]) for (const sz of [-1, 1]) {
+            const v = new THREE.Vector3(sx * half.x, sy * half.y, sz * half.z).add(center).sub(eye);
+            top = Math.max(top, v.dot(up) / (v.dot(forward) * tan));
+        }
+        ndcY = -Math.min(barShare, Math.max(0, top - (1 - 2 * barShare)));
+    }
 
     const offset = right.clone().multiplyScalar(-ndcX * halfHeight * aspectRatio)
         .add(up.clone().multiplyScalar(-ndcY * halfHeight));
 
-    const position = center.clone().addScaledVector(DETAIL_VIEW_OFFSET, distance).add(offset);
+    const position = center.clone().addScaledVector(toCamera, distance).add(offset);
     const target = center.clone().add(offset);
 
     if (!ortho) animateFov(DETAIL_FOV[mode], duration);
@@ -928,7 +983,7 @@ function frameDetail(object, { duration = 1.6 } = {}) {
  * atmospheric one. Deliberately not one-point and not fit to the whole
  * box - see DECISIONS.md for why that's fine here specifically.
  */
-const CLOSEUP_ELEVATION = THREE.MathUtils.degToRad(38);
+const CLOSEUP_ELEVATION = 38; // degrees
 const CLOSEUP_DISTANCE_FACTOR = 1.1;
 
 function frameDetailCloseup(cube, { duration = 1.1 } = {}) {
@@ -941,9 +996,9 @@ function frameDetailCloseup(cube, { duration = 1.1 } = {}) {
     const center = box.getCenter(new THREE.Vector3());
     const radius = box.getSize(new THREE.Vector3()).length() / 2;
 
-    // Same side as the full-fit view, tilted up to look down from above
-    const dir = DETAIL_VIEW_OFFSET.clone().multiplyScalar(Math.cos(CLOSEUP_ELEVATION))
-        .add(new THREE.Vector3(0, Math.sin(CLOSEUP_ELEVATION), 0));
+    // The project's own heading, from CLOSEUP_ELEVATION above. Any steeper
+    // and on a phone the strip left above the drawer holds only fragments
+    const dir = viewDirection(cube.userData.project, { elevation: CLOSEUP_ELEVATION });
     const position = center.clone().addScaledVector(dir, radius * CLOSEUP_DISTANCE_FACTOR);
 
     moveCamera(position, center, duration);
@@ -1065,7 +1120,7 @@ function animate() {
         // Turns the model itself, not the camera, so the cube's edges stay
         // square to the canvas - see DETAIL_ROTATE_SPEED
         const since = elapsedTime - selectedCube.userData.detailRotateStartTime;
-        selectedCube.userData.detail.rotation.y = DETAIL_MODEL_YAW + since * DETAIL_ROTATE_SPEED;
+        selectedCube.userData.detail.rotation.y = modelStartYaw(selectedCube.userData.project) + since * DETAIL_ROTATE_SPEED;
     }
 
     // Update controls - except while a camera move is driving orientation
@@ -1354,7 +1409,7 @@ function openProject(cube) {
 
     if (cube.userData.detail) {
         cube.userData.detail.visible = true;
-        cube.userData.detail.rotation.y = DETAIL_MODEL_YAW;
+        cube.userData.detail.rotation.y = modelStartYaw(project);
         cube.userData.detailRotateStartTime = clock.getElapsedTime();
         setProjectStatus(null);
         frameDetail(cube);
@@ -1370,7 +1425,7 @@ function openProject(cube) {
         parentObject: cube,
         onLoaded: (model) => {
             cube.userData.detail = model;
-            model.rotation.y = DETAIL_MODEL_YAW;
+            model.rotation.y = modelStartYaw(project);
 
             // The visitor may have gone back while this was downloading
             if (viewState !== 'detail' || selectedCube !== cube) {

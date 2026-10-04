@@ -49,6 +49,7 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
     credits: '',
     thumbModel: 'models/rock.gltf',               // small model shown in the catalog cube
     detailModel: 'models/RockPrintStructureReduced.glb',  // loaded on click
+    view: { elevation: 49, azimuth: 4, turn: 145 },     // optional camera angle, degrees
 }
 ```
 

@@ -5,8 +5,10 @@ Live at https://atireg.github.io/FluxAndFlow/ (deployed from `main` by
 
 Adding a project: edit the `projects` array near the top of src/script.js.
 Each entry declares the slot it sits in and its own models, and any text
-field left empty is skipped rather than rendered blank. See DECISIONS.md for
-why things are built the way they are.
+field left empty is skipped rather than rendered blank. An optional `view`
+sets the camera angle the project opens on; without it the project gets the
+square-on default. See DECISIONS.md for why things are built the way they
+are.
 
     npm install
     npm run dev      # dev server
@@ -73,6 +75,9 @@ Details view (per project)
         drawer's close-up) only tilts the camera - the grid no longer rolls
         90° on the way in or out. The detail camera has to keep looking
         along the catalog's screen-up for this to hold - see DECISIONS.md
+    [x] Per-project camera angle (`view` in the projects array). Rock Print
+        opens on an elevated three-quarter view fitted to a screenshot of
+        the shot wanted - see DECISIONS.md
     [ ] Images and video in the drawer
     [x] Split the screen in two: half for 3D content/half for the 2D content
         (then superseded: the text now lives in a drawer pulled from the edge,

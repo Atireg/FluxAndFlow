@@ -194,3 +194,19 @@ rendered no handle at all. Not a deploy problem; a content problem.
   DECISIONS.md; README has a ticked item for it, and DECISIONS' slow-
   rotation entry now matches the model's new quarter-turn base. Merged
   and deployed.
+- **Rock Print opens on its own camera angle**, an elevated three-quarter
+  view, reproduced from a screenshot rather than eyeballed. Fitted a
+  camera to the cube's corners in the screenshot to get the angle (49°
+  elevation, 4° azimuth, under 2px error per corner, consistent only with
+  the phone's real 30° lens). Then matched the model's starting turn
+  (145°) by rendering it in steps against the shot. Projects now take an
+  optional `view` in the projects array; without one they keep the
+  square-on default. A custom view is framed on the cube rather than the
+  model's scattered points, with its own margin. It sits centred on the
+  screen when that already clears the title, and only drops as far as it
+  has to otherwise. Measured against the screenshot at its own viewport,
+  the cube's corners land 12px off on average. The drawer close-up keeps
+  the project's heading at its usual 38°, since 49° left only fragments
+  visible on a phone. Transitions checked again on both layouts: no
+  snaps, and the only turn is the intentional 4°. CLAUDE.md's
+  project-entry example now shows `view`. See DECISIONS.md.
