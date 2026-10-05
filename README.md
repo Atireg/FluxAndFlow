@@ -69,11 +69,11 @@ Catalog view
         project title's font, fading in and out with the glow. It shows on
         empty slots too, where a click answers "Still empty..." - see the
         empty-cube item above
-    [x] Clicking a project sets off a send-off: a wave of flux ripples out
-        from the chosen cube, pushing and tossing the others without turning
-        them, then they fall slowly down the screen. The camera starts
-        moving in while they're still falling. The chosen one holds
-        still. Going back brings them home as the grid fades in.
+    [x] Clicking a project sets off a send-off: an instant boom knocks the
+        other cubes out from the chosen one and up towards the viewer, they
+        hang for a moment, then fall slowly and straight down the screen.
+        The camera starts moving in while they're still falling. The chosen
+        one holds still. Going back brings them home as the grid fades in.
         See DECISIONS.md.
 
 Details view (per project)

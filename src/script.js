@@ -1432,25 +1432,24 @@ function wasDrag(event) {
 }
 
 /**
- * The send-off after a project is clicked: a wave of flux ripples out from
- * the chosen cube, and every other cube rides it - pushed out and back and
- * tossed up and down, the ones further away a beat behind, without turning
- * - then drops, falling slowly down the screen, out past the bottom edge,
- * while the chosen one holds still. The camera starts moving in while
+ * The send-off after a project is clicked: a boom - one shockwave out from
+ * the chosen cube that knocks every other cube outward and up towards the
+ * camera in an instant - then a moment's hang, then a slow fall down the
+ * screen, out past the bottom edge, while the chosen one holds still. No
+ * oscillation and no rotation anywhere. The camera starts moving in while
  * they're still falling. Like the rest of the catalog's motion it's a pure
  * function of the clock - here, time since the click.
  */
-const DROP_FLUX = 1.0; // seconds of flux before the cubes let go
-const DROP_FLUX_RAMP = 0.3; // seconds for the flux to build to full strength
-const DROP_STAGGER = 0.25; // seconds - cubes let go at slightly different moments
-const DROP_FALL = 1.2; // seconds to fall off the screen
-const DROP_OPEN_AFTER = 0.3; // seconds into the fall that the camera starts moving in
+const BOOM_PUSH = 3; // units each cube is knocked out, away from the chosen one
+const BOOM_LIFT = 4; // units each cube is knocked up towards the camera
+const BOOM_SNAP = 0.07; // seconds - time constant of the knock; ~0.2s to all but arrive
+const BOOM_WAVE = 0.006; // seconds for the shockwave to travel one unit
+const BOOM_HANG = 0.3; // seconds after the click before the cubes start to fall
+const DROP_STAGGER = 0.2; // seconds - cubes let go at slightly different moments
+const DROP_FALL = 1.4; // seconds to fall off the screen
+const DROP_OPEN_AFTER = 0.65; // seconds into the fall that the camera starts moving in
 const OPEN_CAMERA_EASE = 'power2.out'; // see openProject
 const OPEN_CAMERA_DURATION_LOADING = 1; // seconds - the move in while the model is still downloading
-const FLUX_SWELL = 0.8; // units - how far the wave pushes a cube out from the chosen one
-const FLUX_TOSS = 2.2; // units - how high a cube is tossed towards the camera
-const FLUX_SPEED = Math.PI * 2 * 1.1; // radians/second along the wave
-const FLUX_RIPPLE = 0.22; // radians of lag per unit of distance from the chosen cube
 const DROP_DISTANCE = 75; // units down the screen - clears it at any aspect
 const DROP_SINK = 0.15; // share of the fall that also sinks away from the camera
 
@@ -1470,7 +1469,7 @@ function startDrop(cube) {
         other.userData.drop = {
             from: other.position.clone(),
             delay: Math.random() * DROP_STAGGER,
-            lag: away.length() * FLUX_RIPPLE,
+            lag: away.length() * BOOM_WAVE,
             away: away.lengthSq() > 0 ? away.normalize() : away,
         };
     });
@@ -1478,11 +1477,11 @@ function startDrop(cube) {
     // Partway through the fall rather than after it, so the camera's move
     // follows straight on from it. The fall keeps playing out in detail
     // view (see placeDroppingCube) while openProject fades the cubes out.
-    gsap.delayedCall(DROP_FLUX + DROP_OPEN_AFTER, () => openProject(cube));
+    gsap.delayedCall(BOOM_HANG + DROP_OPEN_AFTER, () => openProject(cube));
 }
 
 function dropInProgress(elapsedTime) {
-    return elapsedTime - dropStartedAt < DROP_FLUX + DROP_STAGGER + DROP_FALL;
+    return elapsedTime - dropStartedAt < BOOM_HANG + DROP_STAGGER + DROP_FALL;
 }
 
 function updateDroppingCube(cube, elapsedTime) {
@@ -1516,22 +1515,21 @@ function placeDroppingCube(cube, elapsedTime) {
     // Gravity: distance grows with the square of time since letting go.
     // Down the screen is world +Z from the catalog's overhead camera; the
     // slight sink away from it also keeps falling cubes behind the chosen one
-    const fall = Math.min(Math.max((t - DROP_FLUX - delay) / DROP_FALL, 0), 1);
+    const fall = Math.min(Math.max((t - BOOM_HANG - delay) / DROP_FALL, 0), 1);
     const drop = fall ** 2;
 
-    // The flux: a push out from the chosen cube and back, plus a toss
-    // towards the camera (which reads as a hop - the cube grows as it
-    // rises), on a wave that reaches cubes further from the chosen one
-    // later. No rotation, here or in the fall - the cubes stay square. Builds in
-    // smoothly, and is carried off into the fall rather than cut.
-    const strength = Math.min(t / DROP_FLUX_RAMP, 1) ** 2 * (1 - fall);
-    const wave = Math.max(t * FLUX_SPEED - lag, 0);
-    const swell = Math.sin(wave) * FLUX_SWELL * strength;
+    // The boom: a single knock out from the chosen cube and up towards the
+    // camera (the cube grows as it rises), arriving at once and settling
+    // exponentially - fast, then dead still, no bounce. The shockwave
+    // reaches cubes further from the chosen one a few hundredths later.
+    const sinceHit = Math.max(t - lag, 0);
+    const knock = 1 - Math.exp(-sinceHit / BOOM_SNAP);
 
     cube.position.set(
-        from.x + away.x * swell,
-        from.y + Math.abs(Math.sin(wave)) * FLUX_TOSS * strength - DROP_SINK * DROP_DISTANCE * drop,
-        from.z + away.z * swell + DROP_DISTANCE * drop,
+        from.x + away.x * BOOM_PUSH * knock,
+        // The lift gives way as the cube falls, so it passes behind the chosen one
+        from.y + BOOM_LIFT * knock * (1 - fall) - DROP_SINK * DROP_DISTANCE * drop,
+        from.z + away.z * BOOM_PUSH * knock + DROP_DISTANCE * drop,
     );
 
     // Square and straight all the way down - no tumble, no sideways drift

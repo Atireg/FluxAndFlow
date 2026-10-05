@@ -266,7 +266,8 @@ rendered no handle at all. Not a deploy problem; a content problem.
   whole send-off is about 2.5s, up from 1.1s. Checked frame by frame on
   both layouts; the project still opens after it, and every cube is back
   home after a round trip. See DECISIONS.md.
-- **No more spin in the flux, and no pause before the zoom.** The cubes
+- **No more spin in the flux, and no pause before the zoom.** *(The flux
+  itself has since been replaced by a single boom - see below.)* The cubes
   now ride the wave square: pushed out from the clicked cube and back, and
   tossed towards the viewer, without the swirl and rock. The camera starts
   moving in 0.3s into the fall instead of waiting for the screen to clear,
@@ -289,3 +290,11 @@ rendered no handle at all. Not a deploy problem; a content problem.
   wave all the way off the screen, then the sideways drift went too. They
   still let go at slightly different moments. Compared frame by frame
   against the tumbling version on both layouts. See DECISIONS.md.
+- **An instant boom instead of the wave.** The second of flux still read
+  as a lot of shaking. Now one shockwave from the clicked cube knocks the
+  others outward and up towards the viewer in about a tenth of a second,
+  with no bounce. They hang for a moment, then fall slowly and straight
+  down. The camera starts moving in at about 0.95s, with cubes still on
+  screen, and has settled by about 2s. Checked frame by frame on both
+  layouts, and on a round trip including going back mid-fall. See
+  DECISIONS.md.
