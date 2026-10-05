@@ -619,9 +619,11 @@ grows as it rises. It ripples outward: each cube's wave lags by its
 distance from the chosen one (`FLUX_RIPPLE`), so it visibly spreads from
 the click across the grid. The cubes stay square throughout - no
 rotation in the wave or in the fall. Both terms start at zero, so nothing
-jumps on the first frame. The fall used to tumble each cube (up to 2.5
-radians, on a random axis); that was taken out on request, to see the
-drop with no shake at all.
+jumps on the first frame. The fall is straight down too: it used to
+tumble each cube (up to 2.5 radians, on a random axis) and drift it up to
+4 units sideways; both were taken out on request, for a drop with no
+shake at all. The cubes still let go at slightly different moments
+(`DROP_STAGGER`).
 
 "Down" here means down the screen. The catalog camera looks straight down
 at the grid, so world-down would only shrink the cubes into the distance;
@@ -642,7 +644,7 @@ It's built as another mode in the same pure-function scheme as idle, hover
 and spotlight ("A cube's visual state is a pure function of its mode"
 above), not as gsap tweens on each cube. `viewState` is `'dropping'` for
 the send-off, and `updateDroppingCube` computes each cube's whole pose from
-time since the click plus a ripple lag, a stagger and a drift
+time since the click plus a ripple lag and a stagger
 fixed at the click. Tweens would have had to fight the per-frame pose writes, the
 same shape of bug the closing fade had.
 

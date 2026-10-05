@@ -1453,7 +1453,6 @@ const FLUX_SPEED = Math.PI * 2 * 1.1; // radians/second along the wave
 const FLUX_RIPPLE = 0.22; // radians of lag per unit of distance from the chosen cube
 const DROP_DISTANCE = 75; // units down the screen - clears it at any aspect
 const DROP_SINK = 0.15; // share of the fall that also sinks away from the camera
-const DROP_DRIFT = 4; // units of sideways drift, at most
 
 let droppingFrom = null;
 let dropStartedAt = -Infinity;
@@ -1471,7 +1470,6 @@ function startDrop(cube) {
         other.userData.drop = {
             from: other.position.clone(),
             delay: Math.random() * DROP_STAGGER,
-            drift: randomBetween(-1, 1) * DROP_DRIFT,
             lag: away.length() * FLUX_RIPPLE,
             away: away.lengthSq() > 0 ? away.normalize() : away,
         };
@@ -1503,7 +1501,7 @@ function updateDroppingCube(cube, elapsedTime) {
  * is fading the cubes out while they finish falling.
  */
 function placeDroppingCube(cube, elapsedTime) {
-    const { from, delay, drift, lag, away } = cube.userData.drop;
+    const { from, delay, lag, away } = cube.userData.drop;
 
     // The chosen cube holds still where it was clicked
     if (cube === droppingFrom) {
@@ -1531,12 +1529,12 @@ function placeDroppingCube(cube, elapsedTime) {
     const swell = Math.sin(wave) * FLUX_SWELL * strength;
 
     cube.position.set(
-        from.x + away.x * swell + drift * drop,
+        from.x + away.x * swell,
         from.y + Math.abs(Math.sin(wave)) * FLUX_TOSS * strength - DROP_SINK * DROP_DISTANCE * drop,
         from.z + away.z * swell + DROP_DISTANCE * drop,
     );
 
-    // Square all the way down - no tumble
+    // Square and straight all the way down - no tumble, no sideways drift
     cube.rotation.set(0, 0, 0);
     cube.scale.setScalar(1);
 }
