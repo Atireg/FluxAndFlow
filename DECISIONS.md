@@ -608,7 +608,7 @@ Clicking a project knocks the rest of the grid off the screen first
 
 A click no longer opens the project straight away. First, every other cube
 is caught in a wave of flux (`DROP_FLUX`, 1s), then lets go and falls
-slowly down the screen, tumbling off the bottom edge (`DROP_FALL`, 1.2s,
+slowly down the screen, square, off the bottom edge (`DROP_FALL`, 1.2s,
 staggered by up to `DROP_STAGGER`, 0.25s). The clicked cube holds still
 where it was. `openProject` runs `DROP_OPEN_AFTER` (0.3s) into the fall, so
 the camera is already moving in while the others are still falling.
@@ -617,9 +617,11 @@ The flux is a push out from the chosen cube and back (`FLUX_SWELL`) plus a
 toss towards the camera (`FLUX_TOSS`), which reads as a hop since the cube
 grows as it rises. It ripples outward: each cube's wave lags by its
 distance from the chosen one (`FLUX_RIPPLE`), so it visibly spreads from
-the click across the grid. The cubes ride it square - no rotation until
-they let go. Both terms start at zero, so nothing jumps on the first
-frame.
+the click across the grid. The cubes stay square throughout - no
+rotation in the wave or in the fall. Both terms start at zero, so nothing
+jumps on the first frame. The fall used to tumble each cube (up to 2.5
+radians, on a random axis); that was taken out on request, to see the
+drop with no shake at all.
 
 "Down" here means down the screen. The catalog camera looks straight down
 at the grid, so world-down would only shrink the cubes into the distance;
@@ -640,7 +642,7 @@ It's built as another mode in the same pure-function scheme as idle, hover
 and spotlight ("A cube's visual state is a pure function of its mode"
 above), not as gsap tweens on each cube. `viewState` is `'dropping'` for
 the send-off, and `updateDroppingCube` computes each cube's whole pose from
-time since the click plus a ripple lag, a stagger, a drift and a tumble
+time since the click plus a ripple lag, a stagger and a drift
 fixed at the click. Tweens would have had to fight the per-frame pose writes, the
 same shape of bug the closing fade had.
 

@@ -284,3 +284,7 @@ rendered no handle at all. Not a deploy problem; a content problem.
   colour, because the scene's cyan lights turned an orange base colour
   green. Checked on both layouts, catalog and project view, including the
   handle's hover. See DECISIONS.md.
+- **The cubes fall straight, without tumbling.** Asked as a test of the
+  drop with no shake: the cubes now stay square from the wave all the way
+  off the screen. Compared frame by frame against the tumbling version on
+  both layouts. See DECISIONS.md.

@@ -1454,7 +1454,6 @@ const FLUX_RIPPLE = 0.22; // radians of lag per unit of distance from the chosen
 const DROP_DISTANCE = 75; // units down the screen - clears it at any aspect
 const DROP_SINK = 0.15; // share of the fall that also sinks away from the camera
 const DROP_DRIFT = 4; // units of sideways drift, at most
-const DROP_SPIN = 2.5; // radians of tumble over the fall
 
 let droppingFrom = null;
 let dropStartedAt = -Infinity;
@@ -1475,7 +1474,6 @@ function startDrop(cube) {
             drift: randomBetween(-1, 1) * DROP_DRIFT,
             lag: away.length() * FLUX_RIPPLE,
             away: away.lengthSq() > 0 ? away.normalize() : away,
-            spin: new THREE.Vector3(randomBetween(0.5, 1), randomBetween(-0.5, 0.5), randomBetween(-1, 1)),
         };
     });
 
@@ -1505,7 +1503,7 @@ function updateDroppingCube(cube, elapsedTime) {
  * is fading the cubes out while they finish falling.
  */
 function placeDroppingCube(cube, elapsedTime) {
-    const { from, delay, drift, lag, away, spin } = cube.userData.drop;
+    const { from, delay, drift, lag, away } = cube.userData.drop;
 
     // The chosen cube holds still where it was clicked
     if (cube === droppingFrom) {
@@ -1526,7 +1524,7 @@ function placeDroppingCube(cube, elapsedTime) {
     // The flux: a push out from the chosen cube and back, plus a toss
     // towards the camera (which reads as a hop - the cube grows as it
     // rises), on a wave that reaches cubes further from the chosen one
-    // later. No rotation - the cubes ride the wave square. Builds in
+    // later. No rotation, here or in the fall - the cubes stay square. Builds in
     // smoothly, and is carried off into the fall rather than cut.
     const strength = Math.min(t / DROP_FLUX_RAMP, 1) ** 2 * (1 - fall);
     const wave = Math.max(t * FLUX_SPEED - lag, 0);
@@ -1538,8 +1536,8 @@ function placeDroppingCube(cube, elapsedTime) {
         from.z + away.z * swell + DROP_DISTANCE * drop,
     );
 
-    const tumble = drop * DROP_SPIN;
-    cube.rotation.set(spin.x * tumble, spin.y * tumble, spin.z * tumble);
+    // Square all the way down - no tumble
+    cube.rotation.set(0, 0, 0);
     cube.scale.setScalar(1);
 }
 
