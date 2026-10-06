@@ -1139,6 +1139,10 @@ them muddied the frames.
 The cubes are labelled near the pointer, not on the spotlight
 -------------------------------------------------------------
 
+(The label chip described here has since become falling leaves - see
+"Project names fall like leaves". Which cube counts as near carried
+over.)
+
 Asked for: remove the "Explore me..." tag from the pulsing cube, and show
 "Project XX" when the pointer is on or close to a cube instead. `#project-tag`
 reads "Project 01" to "Project 10", by grid slot (`projectLabel`), for
@@ -1209,3 +1213,35 @@ fades in and out without the presses and ripples.
 
 Checked on both layouts: the first hint lands on the pavilion about 6s
 after opening, and after a double-click no further hint appears.
+
+
+Project names fall like leaves
+------------------------------
+
+Asked for: the project names on the grid not as tag-like chips, but text
+that appears when the pointer comes near a cube and then falls down like a
+leaf and leaves the screen. When the pointer arrives at a cube - the one
+under the cursor, or failing that the nearest within `LEAF_NEAR` (3.4
+units) of the pointer's position on the grid's plane - `dropLeaf` puts
+its name ("Project 01"...) as plain ink text where the tag used to sit,
+and it falls: a pause, then a pendulum sway down the screen, tilting with
+each swing, fading out near the bottom edge. Each leaf is its own element
+in `#leaves`, removed when its animation ends, so several can be falling
+at once as the pointer moves through the grid.
+
+The fall is a CSS animation (`leaf-fall`) driven by per-leaf custom
+properties set at drop time: the distance to the bottom of the screen
+(`--fall`), the sway's width and side (`--sway`), the tilt (`--tilt`) and
+the duration (`--duration`, longer for a longer fall, so it drifts rather
+than drops). The randomness is what stops a run of leaves along a row
+falling in lockstep. Once let go, a leaf no longer follows its cube.
+
+A cube drops its name on the pointer's arrival only, not continuously
+while it stays near (`cube.userData.near` tracks the edge), and not again
+within `LEAF_COOLDOWN` (1.6s), so hovering at the edge between two cubes
+doesn't shower names. A cube showing "Still empty..." doesn't drop its
+name over it. Under reduced motion a name appears and fades in place.
+
+Checked on both layouts: a sweep across the grid drops one leaf per cube
+reached; resting on a cube drops no more; all leaves are gone within
+about six seconds.

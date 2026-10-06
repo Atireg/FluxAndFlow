@@ -94,11 +94,11 @@ Catalog view
         seconds, a beat later another one starts, continuously - never
         the cube under the cursor or while a project is open.
         See DECISIONS.md.
-    [x] A "Project 01"... "Project 10" label appears on the cube under or
-        nearest the pointer, fading in as it comes close and out as it
-        moves away (replacing the "Explore me..." tag that used to ride on
-        the pulsing cube). An empty slot's click answers "Still empty..."
-        - see the empty-cube item above
+    [x] When the pointer comes near a cube, its name ("Project 01"...
+        "Project 10") appears as plain text and falls away down the screen
+        like a leaf (this replaced first an "Explore me..." tag on the
+        pulsing cube, then a label chip). An empty slot's click answers
+        "Still empty..." - see the empty-cube item above
     [x] Clicking a project sets off a send-off: an instant boom knocks the
         other cubes out from the chosen one and up towards the viewer, they
         hang for a moment, then fall slowly and straight down the screen.

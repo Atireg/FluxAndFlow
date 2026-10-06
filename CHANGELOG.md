@@ -404,3 +404,8 @@ rendered no handle at all. Not a deploy problem; a content problem.
   and fades. Not while zoomed, with the drawer open or the camera moving,
   and never again once the visitor has zoomed. Checked on both layouts.
   See DECISIONS.md.
+- **Project names fall like leaves.** The label chip is gone: as the
+  pointer comes near a cube, its name appears as plain text and falls
+  away down the screen, swaying and tilting, fading out at the bottom.
+  One leaf per arrival, with a cooldown, each falling its own way.
+  Checked on both layouts. See DECISIONS.md.
