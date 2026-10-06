@@ -388,3 +388,9 @@ rendered no handle at all. Not a deploy problem; a content problem.
   setting its `src` fills it. The drawer's panel is now near-solid so the
   model doesn't ghost through the pictures. Checked on both layouts. See
   DECISIONS.md.
+- **"Project 01"... labels near the pointer, instead of "Explore me...".**
+  The tag is gone from the pulsing cube (which still glows). The cube under
+  or nearest the pointer is labelled "Project 01" to "Project 10" by its
+  grid slot, fading in as the pointer approaches and out as it leaves.
+  "Still empty..." still answers a click on an empty slot. Checked on both
+  layouts. See DECISIONS.md.

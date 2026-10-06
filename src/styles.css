@@ -211,11 +211,12 @@ canvas.webgl {
 }
 
 /**
- * The tag on the catalog's pulsing cube. Positioned and faded from script.js
- * every frame; the short transition only smooths the moment the spotlight
- * hands over or the cursor takes the cube, which would otherwise pop.
+ * Tags on the catalog's cubes: "Project 01"... near the pointer, and "Still
+ * empty..." after clicking an empty slot. Positioned and faded from
+ * script.js every frame; the short transition only smooths the moment the
+ * label moves from one cube to the next, which would otherwise pop.
  */
-.explore-tag {
+.cube-tag {
     position: fixed;
     top: 0;
     left: 0;
@@ -228,21 +229,20 @@ canvas.webgl {
     letter-spacing: -0.01em;
     line-height: 1;
     white-space: nowrap;
-    color: var(--on-warm);
+    color: var(--ink);
 
-    background: rgba(var(--warm-deep-rgb), 0.88);
-    border: 1px solid var(--warm);
+    background: var(--panel-bg);
+    border: 1px solid var(--accent);
     border-radius: 0.4rem;
 
     opacity: 0;
-    transition: opacity 0.25s ease;
+    transition: opacity 0.2s ease;
     will-change: transform, opacity;
 }
 
-/* Same chip, out of the warm palette: an empty slot isn't an invitation */
-.explore-tag--empty {
+/* Quieter: an empty slot is an answer, not a label */
+.cube-tag--empty {
     color: var(--ink-dim);
-    background: var(--panel-bg);
     border-color: var(--rule);
 }
 

@@ -247,13 +247,13 @@
 
   <canvas class="webgl"></canvas>
 
-  <!-- Rides along on whichever catalog cube is pulsing orange; placed each
-       frame by updateCubeTags in script.js -->
-  <div class="explore-tag" id="explore-tag" aria-hidden="true">Explore me...</div>
+  <!-- "Project 01"... on whichever catalog cube the pointer is on or near;
+       placed and faded each frame by updateCubeTags in script.js -->
+  <div class="cube-tag" id="project-tag" aria-hidden="true"></div>
 
   <!-- The answer to clicking a slot with no project in it yet; placed by
        updateCubeTags in script.js for a moment after the click -->
-  <div class="explore-tag explore-tag--empty" id="empty-tag" aria-hidden="true">Still empty...</div>
+  <div class="cube-tag cube-tag--empty" id="empty-tag" aria-hidden="true">Still empty...</div>
 
   <!-- Always on screen while a project is open: just enough to say what you
        are looking at and how to get back -->

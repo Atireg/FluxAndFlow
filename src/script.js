@@ -202,10 +202,18 @@ const bar = document.querySelector('#bar');
 
 // Up here rather than next to updateCubeTags: animate() runs its first
 // frame as soon as it's defined, before code further down has executed
-const exploreTag = document.querySelector('#explore-tag');
+const projectTag = document.querySelector('#project-tag');
+
+// Whether the pointer is over the page at all - a cursor that has left the
+// window shouldn't keep a label lit on the cube it left from
+let pointerInPage = true;
+document.documentElement.addEventListener('mouseleave', () => { pointerInPage = false; });
+document.documentElement.addEventListener('mouseenter', () => { pointerInPage = true; });
 const fog = document.querySelector('#fog');
 const emptyTag = document.querySelector('#empty-tag');
 const cubeTagAnchor = new THREE.Vector3();
+const PROJECT_TAG_NEAR = 2.8; // units from a cube's centre - full strength within this
+const PROJECT_TAG_FAR = 5.5; // units - gone by here, about the next cube along
 const EMPTY_TAG_DURATION = 1.6; // seconds "Still empty..." stays up after a click
 const EMPTY_TAG_FADE = 0.3; // seconds of that spent fading out
 let emptyTagCube = null;
@@ -1710,10 +1718,10 @@ function placeTagOnCube(tag, cube) {
 }
 
 /**
- * The catalog's two tags: "Explore me..." on the pulsing cube, faded with
- * the spotlight, and "Still empty..." for a moment on an empty slot that
- * was just clicked. When both land on the same cube, the answer to the
- * click wins.
+ * The catalog's two tags: "Project 01"... on the cube under or nearest the
+ * pointer, fading in as the pointer comes close and out as it moves away,
+ * and "Still empty..." for a moment on an empty slot that was just
+ * clicked. When both land on the same cube, the answer to the click wins.
  */
 function updateCubeTags(elapsedTime) {
     const inCatalog = viewState === 'catalog';
@@ -1730,14 +1738,38 @@ function updateCubeTags(elapsedTime) {
     }
     emptyTag.style.opacity = emptyOpacity;
 
-    const exploreCube = inCatalog && spotlightCube !== emptyTagCube ? spotlightCube : null;
+    // The cube under the pointer, or failing that the nearest one to it
+    let labelCube = null;
+    let labelStrength = 0;
 
-    if (exploreCube) {
-        placeTagOnCube(exploreTag, exploreCube);
-        exploreTag.style.opacity = spotlightIntensity(elapsedTime);
-    } else {
-        exploreTag.style.opacity = 0;
+    if (inCatalog && hoveredCube) {
+        labelCube = hoveredCube;
+        labelStrength = 1;
+    } else if (inCatalog && flowPointerKnown && pointerInPage) {
+        let nearest = Infinity;
+        cubes.forEach((cube) => {
+            const distance = Math.hypot(cube.position.x - flowPointer.x, cube.position.z - flowPointer.z);
+            if (distance < nearest) {
+                nearest = distance;
+                labelCube = cube;
+            }
+        });
+        labelStrength = 1 - THREE.MathUtils.smoothstep(nearest, PROJECT_TAG_NEAR, PROJECT_TAG_FAR);
     }
+
+    if (labelCube === emptyTagCube) labelStrength = 0;
+
+    if (labelCube && labelStrength > 0) {
+        const label = projectLabel(labelCube);
+        if (projectTag.textContent !== label) projectTag.textContent = label;
+        placeTagOnCube(projectTag, labelCube);
+    }
+    projectTag.style.opacity = labelStrength;
+}
+
+// "Project 01" to "Project 10", by grid slot
+function projectLabel(cube) {
+    return `Project ${String(cube.userData.slot + 1).padStart(2, '0')}`;
 }
 
 // Any cube is fair game, project or empty - this is the grid feeling

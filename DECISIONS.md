@@ -704,6 +704,10 @@ to `startDrop`.
 The "Explore me..." tag is HTML laid over the canvas, not part of the scene
 ----------------------------------------------------------------------------
 
+(Since removed, and replaced by the "Project 01"... label - see "The cubes
+are labelled near the pointer". The HTML-over-canvas approach and
+`placeTagOnCube` carried over unchanged.)
+
 The tag on the pulsing cube is a plain `<div>` (`#explore-tag`) placed every
 frame by `updateCubeTags` (via `placeTagOnCube`), which projects a point on the spotlit cube to
 screen pixels. A sprite or text mesh in the scene was the alternative and
@@ -1125,3 +1129,36 @@ gets a drawer handle (`hasDescription` counts them).
 The drawer's background went from 94% to 98% opaque at the same time:
 with pictures to show, the point cloud ghosting through the panel behind
 them muddied the frames.
+
+
+The cubes are labelled near the pointer, not on the spotlight
+-------------------------------------------------------------
+
+Asked for: remove the "Explore me..." tag from the pulsing cube, and show
+"Project XX" when the pointer is on or close to a cube instead. `#project-tag`
+reads "Project 01" to "Project 10", by grid slot (`projectLabel`), for
+every cube - empty slots included, since every cube now holds a rock and
+reads as a project to come. The pulsing orange cube keeps its glow; it
+just no longer carries a label.
+
+Which cube, and how strongly: the cube under the cursor (`hoveredCube`)
+gets the label at full strength. Otherwise it's the cube nearest the
+pointer's position on the grid's plane - the same point the flow tracks
+(`flowPointer`), using each cube's current position, so a drifting cube
+keeps its label - faded by distance: full within `PROJECT_TAG_NEAR` (2.8
+units of its centre, about its own half-width), gone by `PROJECT_TAG_FAR`
+(5.5, roughly where the next cube begins). So moving across the grid hands
+the label from cube to cube, and the gaps between them go quiet. A cursor
+that leaves the window (`pointerInPage`) drops it; on a phone, it follows
+a finger dragged across the grid.
+
+It's the same HTML chip as "Still empty...", restyled for paper (ink on
+the panel colour, teal border; the empty tag quieter, with a grey
+border), and pinned to the cube by the same `placeTagOnCube`. When both
+would show on one cube, "Still empty..." wins. `pointerInPage` is declared
+up with the tag elements, not next to `updateCubeTags`, because
+`animate()` runs its first frame before the rest of the file has executed.
+
+Checked on both layouts: the label on the hovered cube, on the nearest
+cube between two, gone far from the grid, and replaced by "Still empty..."
+when an empty slot is clicked; no "Explore me..." anywhere.
