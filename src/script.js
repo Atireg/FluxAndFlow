@@ -109,6 +109,10 @@ const projects = [
         // altogether for the square-on default. These were fitted to a
         // screenshot of the shot wanted, so they reproduce it.
         view: { elevation: 49, azimuth: 4, turn: 145 },
+
+        // Each time the project opens, its points start out scattered and
+        // slowly gather into the pavilion - see GATHER_DURATION
+        gather: true,
     },
 ];
 
@@ -128,7 +132,26 @@ function getPanelLayout() {
     return { mode, fraction: drawerOpen ? PANEL_FRACTION[mode] : 0 };
 }
 
-const projectBySlot = new Map(projects.map((project) => [project.slot, project]));
+/**
+ * Load test: `?cloudtest` in the address fills every slot with a copy of the
+ * first project - its rock thumbnail in every cube at start-up, its point
+ * cloud loaded only when that cube is clicked - each with its own downloads,
+ * the way ten different projects would be. Off unless asked for - see
+ * DECISIONS.md.
+ */
+const CLOUD_TEST = new URLSearchParams(window.location.search).has('cloudtest');
+
+const catalogProjects = CLOUD_TEST
+    ? Array.from({ length: SLOT_COUNT }, (_, slot) => ({
+        ...projects[0],
+        id: `${projects[0].id}-copy-${slot}`,
+        slot,
+        thumbModel: `${projects[0].thumbModel}?copy=${slot}`,
+        detailModel: `${projects[0].detailModel}?copy=${slot}`,
+    }))
+    : projects;
+
+const projectBySlot = new Map(catalogProjects.map((project) => [project.slot, project]));
 
 /**
  * Project bar and description drawer
@@ -307,14 +330,6 @@ function sealBoot() {
 }
 
 /**
- * Load test: `?cloudtest` in the address puts a full point cloud in every
- * cube of the catalog, each downloaded separately as if it were a different
- * project's, to see how the page copes with ten of them at start-up. Off
- * unless asked for - see DECISIONS.md.
- */
-const CLOUD_TEST = new URLSearchParams(window.location.search).has('cloudtest');
-
-/**
  * Loaders
  */
 const textureLoader = new THREE.TextureLoader();
@@ -325,21 +340,71 @@ dracoLoader.setDecoderPath(assetUrl('draco/'));
 const gltfLoader = new GLTFLoader();
 gltfLoader.setDRACOLoader(dracoLoader);
 
+/**
+ * The gather (a project's `gather: true`): every point starts somewhere in a
+ * loose cloud around the model and spirals in to its own place, at its own
+ * moment, over GATHER_DURATION - the model condensing out of scattered
+ * points. Done in the vertex shader from two extra attributes, a start
+ * position and a delay, so it costs nothing per frame beyond one uniform.
+ */
+const GATHER_DURATION = 3.6; // seconds from opening the project to the last point home
+const GATHER_SPREAD = 0.4; // share of that over which points set off
+const GATHER_SWIRL = 2.4; // radians the scatter turns through on the way in
+const GATHER_SCATTER = 1.5; // scatter radius, as a multiple of the model's own half-width
+
+// Somewhere in a flattened ball around the model, in the cloud's own space
+function addGatherAttributes(geometry) {
+    geometry.computeBoundingBox();
+    const box = geometry.boundingBox;
+    const center = box.getCenter(new THREE.Vector3());
+    const size = box.getSize(new THREE.Vector3());
+    const radius = (Math.max(size.x, size.z) / 2) * GATHER_SCATTER;
+
+    const count = geometry.attributes.position.count;
+    const scatter = new Float32Array(count * 3);
+    const delay = new Float32Array(count);
+    const direction = new THREE.Vector3();
+
+    for (let i = 0; i < count; i++) {
+        direction.randomDirection().multiplyScalar(radius * Math.cbrt(Math.random()));
+        scatter[i * 3] = center.x + direction.x;
+        scatter[i * 3 + 1] = center.y + direction.y * 0.55;
+        scatter[i * 3 + 2] = center.z + direction.z;
+        delay[i] = Math.random();
+    }
+
+    geometry.setAttribute('aScatter', new THREE.BufferAttribute(scatter, 3));
+    geometry.setAttribute('aGatherDelay', new THREE.BufferAttribute(delay, 1));
+}
+
+function setGather(model, progress) {
+    // A cloud loaded without gather attributes would fly in from its origin
+    if (!model.userData.gathers) return;
+
+    model.userData.pointMaterials?.forEach((material) => {
+        material.uniforms.uGather.value = progress;
+    });
+}
+
 function loadPointCloudWithShaderMaterial({
     glbPath,
     parentObject,
     onLoaded,
     onProgress,
     onError,
+    gather = false,
 }) {
 
     // console.log(parentObject);
     
 
     gltfLoader.load(glbPath, (gltf) => {
+        const materials = [];
+
         gltf.scene.traverse((child) => {
             if (child.isPoints) {
                 const geometry = child.geometry;
+                if (gather) addGatherAttributes(geometry);
                 const pointsCount = geometry.attributes.position.count;
 
                  // Ensure the color attribute exists
@@ -380,17 +445,25 @@ function loadPointCloudWithShaderMaterial({
                         uLightColor: {value: lightColor},
                         uPerlinTexture: new THREE.Uniform(perlinTexture),
                         uPointScale: { value: 1 },
-                        uSizeAttenuation: { value: 1 }
+                        uSizeAttenuation: { value: 1 },
+                        // Starts scattered if it's going to gather, home otherwise
+                        uGather: { value: gather ? 0 : 1 },
+                        uGatherSpread: { value: GATHER_SPREAD },
+                        uGatherSwirl: { value: GATHER_SWIRL },
                     },
                 });
 
                 pointCloudMaterials.push(shaderMaterial);
+                materials.push(shaderMaterial);
                 refreshPointScale();
 
                 // Replace the material with the custom ShaderMaterial
                 child.material = shaderMaterial;
             }
         });
+
+        gltf.scene.userData.pointMaterials = materials;
+        gltf.scene.userData.gathers = gather;
 
         // Add the GLTF model to the specified parent object
         parentObject.add(gltf.scene);
@@ -754,9 +827,7 @@ function createPlayground() {
         scene.add(cube);
         cubes.push(cube);
 
-        if (CLOUD_TEST) {
-            addTestCloudToCube(cube);
-        } else if (cube.userData.project) {
+        if (cube.userData.project) {
             addContentToCube(cube);
         }
     }
@@ -794,26 +865,6 @@ function addContentToCube(cube) {
         boot.progress,
         boot.done,
     );
-}
-
-// ?cloudtest only: the first project's full point cloud as every cube's
-// thumbnail. The query string makes each a separate download, the way ten
-// different projects' clouds would be.
-function addTestCloudToCube(cube) {
-    const boot = bootAsset();
-
-    loadPointCloudWithShaderMaterial({
-        glbPath: `${assetUrl(projects[0].detailModel)}?copy=${cube.userData.slot}`,
-        parentObject: cube,
-        onProgress: boot.progress,
-        onError: boot.done,
-        onLoaded: (model) => {
-            model.rotation.y = DETAIL_MODEL_YAW;
-            cube.userData.content = model;
-            cube.userData.contentBaseScale = 1;
-            boot.done();
-        },
-    });
 }
 
 /**
@@ -1245,6 +1296,10 @@ function animate() {
             // square to the canvas - see DETAIL_ROTATE_SPEED
             const since = elapsedTime - selectedCube.userData.detailRotateStartTime;
             selectedCube.userData.detail.rotation.y = modelStartYaw(selectedCube.userData.project) + since * DETAIL_ROTATE_SPEED;
+
+            // Replays from scattered each time the project opens, since
+            // detailRotateStartTime is reset whenever the model is shown
+            setGather(selectedCube.userData.detail, Math.min(since / GATHER_DURATION, 1));
         }
     }
 
@@ -1737,6 +1792,7 @@ function openProject(cube) {
     loadPointCloudWithShaderMaterial({
         glbPath: assetUrl(project.detailModel),
         parentObject: cube,
+        gather: Boolean(project.gather),
         onLoaded: (model) => {
             cube.userData.detail = model;
             model.rotation.y = modelStartYaw(project);

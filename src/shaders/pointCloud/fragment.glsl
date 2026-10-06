@@ -5,6 +5,7 @@ uniform vec3 uLightColor;
 varying vec3 vNormal;
 // varying vec3 vColor;
 varying vec2 vUv;
+varying float vArrived; // see the gather in vertex.glsl
 
 void main() {
         // Disc
@@ -31,6 +32,9 @@ void main() {
 
         // Combine the absorbed light with the material's color
         vec3 finalColor = color * uLightColor * absorbedLight;
+
+        // Scattered points glow faintly and brighten as they arrive
+        finalColor *= mix(0.6, 1.0, vArrived);
 
         gl_FragColor = vec4(vec3(finalColor), strength);
 

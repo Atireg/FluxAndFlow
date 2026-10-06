@@ -307,10 +307,23 @@ rendered no handle at all. Not a deploy problem; a content problem.
   1.6s, can't get stuck (failed loads count as done; 30s cap), and
   respects reduced motion. Checked on both layouts on a throttled network.
   See DECISIONS.md.
-- **Load test: `?cloudtest` puts the point cloud in every cube.** Behind a
+- **Load test: `?cloudtest` puts the point cloud in every cube.** *(Since
+  changed to rocks in every cube - see below.)* Behind a
   query string, so the normal page is unchanged. Each cube downloads its
   own copy, as ten different projects would. Result: 9.7 MB instead of
   0.5 MB, and the grid appears after ~3s on Wi-Fi, ~9s on fast 4G and
   ~50s on slow 4G, against 1-2.5s now. Recommendation: small thumbnail
   clouds and/or letting clouds stream in after the loader. See
   DECISIONS.md.
+- **Point clouds load only on click; `?cloudtest` now uses rocks.** The
+  test fills every cube with a copy of Rock Print: its little rock loads
+  with the page, its point cloud only when that cube is clicked, each
+  downloaded separately. ~2 MB and ~2s to the grid on fast 4G, instead of
+  9.7 MB and ~9s with clouds at start-up. See DECISIONS.md.
+- **Rock Print's points gather out of a scattered cloud when it opens.**
+  Each time the project opens, its points start as a loose, dim cloud
+  around the model and spiral in to the pavilion over 3.6s, each at its
+  own moment, brightening as they arrive. Runs in the vertex shader (two
+  extra attributes and one uniform), opt-in per project with
+  `gather: true`. Checked frame by frame on desktop; the scatter was then
+  made a little brighter and tighter. See DECISIONS.md.

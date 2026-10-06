@@ -30,13 +30,12 @@ Loader
         "Loading model" in the project bar while the point cloud downloads -
         could borrow the start-up loader's flow field
 
-Point clouds as catalog thumbnails (tested with ?cloudtest - see DECISIONS.md)
-    [ ] Ten full-size clouds at start-up is too heavy: ~9.7 MB, about 9s on
-        a 4G phone and ~50s on a slow connection, against ~0.5 MB now.
-        If the catalog should show clouds, give each project a small
-        thumbnail cloud (a few thousand points, ~100 KB) and/or let the
-        loader wait only for the essentials while clouds fade in as they
-        arrive
+Loading many projects (tested with ?cloudtest - see DECISIONS.md)
+    [x] Point clouds load only when a project is opened, never with the
+        page: ten full clouds at start-up measured ~9.7 MB and ~9s on a 4G
+        phone. Ten rock thumbnails instead: ~2 MB, ~2s on 4G
+    [ ] Real thumbnails as binary .glb rather than .gltf with embedded
+        base64 - about a quarter smaller each
 
 Navigation and general layout
     [ ] Logo
@@ -102,6 +101,9 @@ Details view (per project)
         rolls 90° on the way in or out. The detail camera has to keep
         looking along the catalog's screen-up for this to hold - see
         DECISIONS.md
+    [x] Rock Print's points gather out of a scattered cloud, spiralling in
+        to the pavilion, each time it opens (`gather: true` in the projects
+        array) - see DECISIONS.md
     [x] Per-project camera angle (`view` in the projects array). Rock Print
         opens on an elevated three-quarter view fitted to a screenshot of
         the shot wanted - see DECISIONS.md

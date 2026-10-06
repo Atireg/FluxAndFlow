@@ -788,37 +788,81 @@ and fast 4G the loader leaves at about 2.7-2.8s, set mostly by
 `MIN_VISIBLE` plus the 0.9s exit; on slow 4G (1.6 Mbps) at about 3.9s.
 
 
-`?cloudtest`: a point cloud in every cube, as a load test
----------------------------------------------------------
+`?cloudtest`: ten copies of Rock Print, as a load test
+------------------------------------------------------
 
-Asked as a quick test of whether the page would still load reasonably fast
-with the point cloud in every cube. Rather than changing the catalog for
-everyone, it's behind a query string: `?cloudtest` in the address
-(`addTestCloudToCube`) puts Rock Print's full point cloud in all ten cubes
-in place of the thumbnails. Each copy is fetched with its own `?copy=n`,
-so the browser downloads it ten times, the way ten different projects'
-clouds would be - one cached file reused ten times would have flattered
-the result. The loader waits for all ten.
+Asked as a quick test of whether the page would still load reasonably
+fast with more projects in it. Rather than changing the catalog for
+everyone, it's behind a query string: `?cloudtest` fills every slot with
+a copy of the first project (`catalogProjects`) - its little rock as the
+thumbnail in every cube, loaded with the page, and its point cloud loaded
+only when that cube is clicked, exactly as a real project's is. Each copy
+fetches its files with its own `?copy=n`, so the browser downloads them
+as it would ten different projects' - one cached file reused ten times
+would have flattered the result.
 
-Results, phone-sized viewport, network throttled, cache disabled, text
-files gzipped as GitHub Pages serves them:
+The first version of the test put the full point cloud itself in every
+cube at start-up. That was measured and dropped, and the numbers are why
+the clouds stay load-on-click:
 
-| Connection              | Normal: models done | Normal: total | Cloud test: models done | Cloud test: total |
-|-------------------------|--------------------:|--------------:|------------------------:|------------------:|
-| Wi-Fi, 30 Mbps          |               0.8s  |       0.48 MB |                    3.2s |           9.66 MB |
-| Fast 4G, 9 Mbps         |               1.0s  |       0.48 MB |                    9.2s |           9.66 MB |
-| Slow 4G, 1.6 Mbps       |               2.5s  |       0.48 MB |                   49.2s |           9.66 MB |
+| Connection              | Normal: models done | Normal: total | Ten clouds at start-up: models done | total   |
+|-------------------------|--------------------:|--------------:|------------------------------------:|--------:|
+| Wi-Fi, 30 Mbps          |               0.8s  |       0.48 MB |                                3.2s | 9.66 MB |
+| Fast 4G, 9 Mbps         |               1.0s  |       0.48 MB |                                9.2s | 9.66 MB |
+| Slow 4G, 1.6 Mbps       |               2.5s  |       0.48 MB |                               49.2s | 9.66 MB |
 
-The clouds are 944 KB each (78,637 points: 16-bit positions, 8-bit
-colours), so ten of them are about twenty times everything else the page
-loads. Download is the bottleneck: on 4G the visitor would wait about
-nine seconds before seeing the grid. Rendering ~790,000 points is light
+(Phone-sized viewport, network throttled, cache disabled, text files
+gzipped as GitHub Pages serves them.) The clouds are 944 KB each (78,637
+points: 16-bit positions, 8-bit colours), so ten of them were about twenty
+times everything else the page loads. Rendering ~790,000 points is light
 for a real GPU, but couldn't be measured here - the software renderer used
-for testing dropped from ~30 to ~1 frames per second, which says the
-draw cost is real but not what it would be on an actual device.
+for testing dropped from ~30 to ~1 frames per second.
 
-Conclusion, if the catalog is to show clouds: give each project a small
-thumbnail cloud (a few thousand points, around 100 KB) rather than its
-full detail cloud, and/or have the loader wait only for the essentials and
-let the clouds fade into their cubes as they arrive. The flag can be
-removed once that's decided.
+With rocks in every cube and clouds only on click, the same
+measurement gives: thumbnails done at 1.2s on Wi-Fi, 2.0s on fast 4G and
+8.6s on slow 4G, about 2 MB in all - against 0.8s, 1.0s and 2.5s for the
+page as it is. Each rock is a 187 KB `.gltf` with its data embedded as
+base64 text (~170 KB gzipped); the same rock as a binary `.glb` would be
+around a quarter smaller, which is worth doing for real thumbnails. Ten
+light thumbnails is a reasonable cost; ten full clouds was not.
+
+The flag can be removed once there are real projects to fill the grid.
+
+
+Rock Print's points gather out of a scattered cloud when it opens
+-----------------------------------------------------------------
+
+Each time the project opens, its point cloud starts as a loose, scattered
+cloud around the model and slowly condenses into the pavilion
+(`GATHER_DURATION`, 3.6s), each point spiralling in to its own place at
+its own moment. It's opt-in per project (`gather: true` in the projects
+array), chosen from the three loader directions offered: "a scattered
+cloud of points slowly gathers into the Rock Print shape".
+
+It runs entirely in the point cloud's vertex shader. When a gathering
+cloud loads, `addGatherAttributes` gives every point two extra
+attributes: a start position somewhere in a flattened ball around the
+model (`GATHER_SCATTER` times its half-width, squashed vertically so it
+reads as a cloud drifting at the model's level rather than a sphere), and
+a random delay. The shader eases each point from its start to its real
+position as the `uGather` uniform goes 0 to 1, starting it within the
+first `GATHER_SPREAD` (40%) of the gather by its delay, and turns the
+start position round the vertical axis by up to `GATHER_SWIRL` as it goes
+so the points spiral in like a current rather than flying straight.
+Scattered points are drawn dimmer and brighten as they arrive. Per frame
+it costs one uniform write - nothing moves on the CPU, which matters with
+~79,000 points.
+
+The start positions are generated in the cloud's own attribute space,
+before the node's transform. That space is the quantized, normalized one
+(positions are 16-bit integers the GPU reads as -1..1 - see "The point
+cloud is quantized"), and three.js's bounding box is computed in it too,
+so the scatter lines up with the model without converting anything.
+
+It's driven from `detailRotateStartTime`, which is set whenever the model
+is shown - on a first open when it finishes downloading, on later opens
+straight away - so it replays from scattered every time, and shares a
+start with the slow rotation. A cloud loaded without the attributes is
+left alone: `setGather` only touches clouds that were loaded to gather,
+since the shader would otherwise read a missing start position as the
+origin and fly every point in from the middle.
