@@ -549,7 +549,10 @@ The pulsing cube, its "Explore me..." tag and the drawer's About handle
 all use one orange, `#ff8c32` (`--warm` in styles.css, with `--warm-rgb`,
 `--warm-deep` and `--warm-deep-rgb` for the translucent and dark variants;
 `spotlightGlowColor` in script.js is kept in step by hand). One colour for
-"click me" across the catalog and the detail view, as asked.
+"click me" across the catalog and the detail view, as asked. (The tag has
+since been removed - see "The cubes are labelled near the pointer" - and
+the "Project XX" label that replaced it is teal; the pulsing cube and the
+handle are still the orange.)
 
 History: the spotlight first blinked to the drawer's dark red `#c42941`
 for exactly this reason, then to a lighter `#ff5c5c` of its own for a
@@ -730,7 +733,7 @@ eligible now"), and so does the tag, as asked. Clicking an empty slot
 answers with the "Still empty..." tag (below) rather than restricting this
 one.
 
-`exploreTag` is looked up near the top of the file with the other elements,
+`exploreTag` (now `projectTag`) is looked up near the top of the file with the other elements,
 not next to `updateCubeTags`: `animate()` runs its first frame the moment
 it's defined, before anything further down has executed, and the tag
 lookup has to exist by then.
@@ -754,7 +757,8 @@ slot isn't one. If the clicked cube is also the pulsing one, "Still
 empty..." wins and "Explore me..." stays hidden until it's gone - one
 answer to the click, not two labels stacked on the same face. In practice
 a desktop click comes after a hover, which already ends the spotlight on
-that cube; on a touch screen the tap is what does it.
+that cube; on a touch screen the tap is what does it. (The same rule now
+applies to the "Project XX" label that replaced "Explore me...".)
 
 
 The start-up loader is inline in index.html, and waits for real progress
@@ -994,8 +998,9 @@ Asked for after the loader went "paper": rather than bridge a light
 loader and a dark site, make the site light too. The palette in
 styles.css is now dark ink (`--ink` #0e1d24) on a warm light ground
 (`--bg` #f0ede6), with a deep teal accent (#1f5f6b) and the orange
-invitation unchanged. Text on the orange tag and drawer handle uses
-`--on-warm`, since `--ink` is now dark.
+invitation unchanged. Text on the dark orange drawer handle uses
+`--on-warm`, since `--ink` is now dark (it also served the "Explore me..."
+tag, since removed).
 
 Three things in the scene had to change with it, and none of them is
 obvious from the colours alone:

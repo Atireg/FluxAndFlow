@@ -11,11 +11,11 @@
     --accent: #1f5f6b; /* deep teal - the cubes' edges, links, the loading dot */
     --rule: rgba(14, 29, 36, 0.14);
     --panel-bg: rgba(var(--bg-rgb), 0.98); /* near-solid: the drawer holds pictures */
-    --on-warm: #fff4ea; /* text on the dark orange of the tag and handle */
+    --on-warm: #fff4ea; /* text on the dark orange of the drawer handle */
 
     /**
-     * The one warm note in the palette: the invitation - the pulsing cube,
-     * its tag and the drawer's pull handle all use this one orange.
+     * The one warm note in the palette: the invitation - the pulsing cube
+     * and the drawer's pull handle use this one orange.
      * spotlightGlowColor in script.js is kept in step by hand.
      */
     --warm: #ff8c32;
