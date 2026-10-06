@@ -453,7 +453,10 @@ and the clock. Two grid-wide modes were added later on the same terms:
 `'returning'` (the way back, `placeAtRest`) - see "Clicking a project
 knocks the rest of the grid off the screen first". Nothing is ever incremented or accumulated, so nothing can
 drift, and nothing needs an explicit reset when a mode ends: the next frame
-simply computes a different mode's state instead. `updateCube()` picks the
+simply computes a different mode's state instead. (One deliberate
+exception sits on top of this: the pointer's flow, a spring with memory,
+added after each mode's state and zeroed on leaving the catalog - see
+"Moving the pointer through the grid stirs it".) `updateCube()` picks the
 mode, and `updateIdleCube()` / `updateHoveredCube()` / `updateSpotlightCube()`
 each define a complete state, not a diff against whatever was there before.
 
@@ -760,8 +763,9 @@ is needed. Inline, it's on screen with the first paint.
 
 Design: "flux and flow" taken literally - a field of particles streaming
 along slowly drifting, braided currents (a few layered sine waves give the
-flow direction at each point), in the site's cyan on its background, with
-the "Flux and Flow" wordmark and a hairline progress bar over it. The flow
+flow direction at each point), with the "Flux and Flow" wordmark and a
+hairline progress bar over it. It launched in the site's cyan on its dark
+background; its colours are now "paper" - see "The loader is "paper"". The flow
 gathers strength (speed and brightness) as loading progresses; on the way
 out, every stream pours into the centre while the loader fades and the
 grid, already drawn underneath, takes its place. Trails come from fading
@@ -769,8 +773,9 @@ the previous frame instead of clearing it. Under `prefers-reduced-motion`
 it draws a still set of streamlines once and only the bar moves.
 
 Progress is real, not a timer. script.js registers every asset the
-catalog needs at start-up with `bootAsset()` (the noise texture, each
-thumbnail, and in the cloud test every cloud), reports byte progress where
+catalog needs at start-up with `bootAsset()` (the noise texture and each
+thumbnail file, once per file however many cubes show it), reports byte
+progress where
 the server gives a length, and calls `window.fluxLoader.finish()` once
 `sealBoot()` has run and all of them are done - two frames later, so the
 grid has been drawn behind it. A failed load counts as done, so a missing

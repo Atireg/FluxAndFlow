@@ -59,9 +59,10 @@ list.
 
 ---
 
-## Session 2 — 2026-10-04
+## Session 2 — 2026-10-04 / 2026-10-06
 
-`e0c070e` onwards (branch `ccr-584d8563-rtv32f`, merged to `main` as it went)
+`e0c070e`..`3cd3bfe` and onwards (branch `ccr-584d8563-rtv32f`, merged to
+`main` as it went)
 
 Follow-up: the About handle was still invisible on the live site after
 Session 1. Confirmed `main` and the branch were in sync (they were) - the
@@ -237,7 +238,8 @@ rendered no handle at all. Not a deploy problem; a content problem.
   `'dropping'`. Checked on both layouts: frame-by-frame screenshots,
   states in order, clicks and Escape mid-drop ignored, and every cube back
   home after a round trip. See DECISIONS.md.
-- **An "Explore me..." tag on the pulsing red cube**, in the project title's
+- **An "Explore me..." tag on the pulsing red cube** *(orange since - see
+  below)*, in the project title's
   font and weight, on the lower part of the cube's face and fading in and
   out with its glow. It's HTML over the canvas, placed by projecting the
   cube to the screen each frame, so it uses the real web font and doesn't
@@ -331,7 +333,8 @@ rendered no handle at all. Not a deploy problem; a content problem.
   say "Still empty..." when clicked). It downloads once and is cloned into
   each cube. Fixed a start-up crash in the first version along the way.
   See DECISIONS.md.
-- **Loader colours to explore.** Six palettes: tide (default), ember,
+- **Loader colours to explore.** *(Paper was chosen and the rest removed -
+  see below.)* Six palettes: tide (default), ember,
   current, aurora, magma, paper. Streams are shaded between two colours by
   the direction they flow. `?loaderpreview` holds the loader on screen and
   cycles palettes with a tap; `?loader=<name>` picks one for a normal

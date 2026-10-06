@@ -37,7 +37,7 @@ Vanilla three.js + GSAP + Vite. No framework, no test suite.
 ## Adding or editing a project
 
 Edit the `projects` array near the top of `src/script.js` (currently ~line
-70). Each entry:
+75). Each entry:
 
 ```js
 {
@@ -50,6 +50,7 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
     thumbModel: 'models/rock.gltf',               // small model shown in the catalog cube
     detailModel: 'models/RockPrintStructureReduced.glb',  // loaded on click
     view: { elevation: 49, azimuth: 4, turn: 145 },     // optional camera angle, degrees
+    gather: true,                                 // optional: points gather from a scattered cloud on open
 }
 ```
 

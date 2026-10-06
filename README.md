@@ -7,8 +7,13 @@ Adding a project: edit the `projects` array near the top of src/script.js.
 Each entry declares the slot it sits in and its own models, and any text
 field left empty is skipped rather than rendered blank. An optional `view`
 sets the camera angle the project opens on; without it the project gets the
-square-on default. See DECISIONS.md for why things are built the way they
-are.
+square-on default. An optional `gather: true` makes its points gather out
+of a scattered cloud each time it opens. Slots with no project show the
+rock thumbnail and answer a click with "Still empty...". See DECISIONS.md
+for why things are built the way they are.
+
+Add `?cloudtest` to the address to fill every slot with a copy of the
+first project - a load test, see DECISIONS.md.
 
     npm install
     npm run dev      # dev server
@@ -149,4 +154,5 @@ TECH STUFF
         (uPointScale now carries pixels-per-world-unit from the JS side, so a
         point keeps the same size across pixel ratios and under either
         projection)
-    [ ] src/loader/ is dead code - nothing imports it
+    [ ] src/loader/ is dead code - nothing imports it (an old, unused
+        preloader; the start-up loader lives inline in src/index.html)
