@@ -733,7 +733,7 @@ eligible now"), and so does the tag, as asked. Clicking an empty slot
 answers with the "Still empty..." tag (below) rather than restricting this
 one.
 
-`exploreTag` (later `projectTag`, now the `leaves` container) is looked up near the top of the file with the other elements,
+`exploreTag` (later `projectTag`, then a container for falling names - all since removed) was looked up near the top of the file with the other elements,
 not next to `updateCubeTags`: `animate()` runs its first frame the moment
 it's defined, before anything further down has executed, and the tag
 lookup has to exist by then.
@@ -757,9 +757,9 @@ slot isn't one. If the clicked cube is also the pulsing one, "Still
 empty..." wins and "Explore me..." stays hidden until it's gone - one
 answer to the click, not two labels stacked on the same face. In practice
 a desktop click comes after a hover, which already ends the spotlight on
-that cube; on a touch screen the tap is what does it. (The same rule
-carried over to what replaced "Explore me...": a cube showing "Still
-empty..." doesn't drop its falling name over it.)
+that cube; on a touch screen the tap is what does it. ("Explore me..."
+and the project names that replaced it have since been removed; "Still
+empty..." is the grid's only word now.)
 
 
 The start-up loader is inline in index.html, and waits for real progress
@@ -1203,7 +1203,7 @@ point.
 When and where (`maybeShowTapHint`, called each frame in the project
 view): first once the points have gathered (`GATHER_DURATION` plus
 `TAP_HINT_AFTER_GATHER`, about 5s after the model appears), then every
-`TAP_HINT_GAP` (7-13s, at random). Each time it lands on a random point of
+`TAP_HINT_GAP` (first 7-13s at random; now a steady 5s, as asked). Each time it lands on a random point of
 the cloud, projected to the screen, retrying until it finds one
 comfortably on screen and clear of the bar along the top. It skips its
 turn while zoomed in, with the drawer open or while the camera is moving,
@@ -1218,6 +1218,9 @@ after opening, and after a double-click no further hint appears.
 
 Project names fall like leaves
 ------------------------------
+
+(Since removed on request: the grid shows no project names at all now.
+Kept here as a record of what was tried.)
 
 Asked for: the project names on the grid not as tag-like chips, but text
 that appears when the pointer comes near a cube and then falls down like a

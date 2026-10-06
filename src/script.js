@@ -210,25 +210,16 @@ const bar = document.querySelector('#bar');
 
 // Up here rather than next to updateCubeTags: animate() runs its first
 // frame as soon as it's defined, before code further down has executed
-const leaves = document.querySelector('#leaves');
-
-// Whether the pointer is over the page at all - a cursor that has left the
-// window shouldn't keep a label lit on the cube it left from
-let pointerInPage = true;
-document.documentElement.addEventListener('mouseleave', () => { pointerInPage = false; });
-document.documentElement.addEventListener('mouseenter', () => { pointerInPage = true; });
 const fog = document.querySelector('#fog');
 
 // The double-tap hint - see maybeShowTapHint
 const tapHint = document.querySelector('#tap-hint');
 const TAP_HINT_AFTER_GATHER = 1.2; // seconds after the points have gathered before the first one
-const TAP_HINT_GAP = [7, 13]; // seconds between one hint and the next
+const TAP_HINT_GAP = 5; // seconds from one hint to the next
 let tapHintNext = Infinity; // seconds into the model's showing (see detailRotateStartTime)
 let tapHintLearned = false; // once the visitor has zoomed, it never shows again
 const emptyTag = document.querySelector('#empty-tag');
 const cubeTagAnchor = new THREE.Vector3();
-const LEAF_NEAR = 3.4; // units from a cube's centre - the pointer counts as near within this
-const LEAF_COOLDOWN = 1.6; // seconds before the same cube drops another leaf
 const EMPTY_TAG_DURATION = 1.6; // seconds "Still empty..." stays up after a click
 const EMPTY_TAG_FADE = 0.3; // seconds of that spent fading out
 let emptyTagCube = null;
@@ -1742,10 +1733,8 @@ function cubeTagPoint(cube) {
 }
 
 /**
- * The catalog's words on its cubes: "Still empty..." for a moment on an
- * empty slot that was just clicked, and each project's name, dropped like a
- * leaf as the pointer comes near its cube (see dropLeaf). A cube showing
- * "Still empty..." doesn't drop its name on top of it.
+ * The catalog's one word on its cubes: "Still empty..." for a moment on an
+ * empty slot that was just clicked.
  */
 function updateCubeTags(elapsedTime) {
     const inCatalog = viewState === 'catalog';
@@ -1761,67 +1750,6 @@ function updateCubeTags(elapsedTime) {
         emptyTagCube = null;
     }
     emptyTag.style.opacity = emptyOpacity;
-
-    // The cube under the pointer, or failing that the nearest one to it if
-    // the pointer is close enough
-    let nearCube = null;
-
-    if (inCatalog && hoveredCube) {
-        nearCube = hoveredCube;
-    } else if (inCatalog && flowPointerKnown && pointerInPage) {
-        let nearest = LEAF_NEAR;
-        cubes.forEach((cube) => {
-            const distance = Math.hypot(cube.position.x - flowPointer.x, cube.position.z - flowPointer.z);
-            if (distance < nearest) {
-                nearest = distance;
-                nearCube = cube;
-            }
-        });
-    }
-
-    // A cube drops its name as the pointer arrives, not continuously while
-    // it stays - and not twice in quick succession
-    cubes.forEach((cube) => {
-        const isNear = cube === nearCube && cube !== emptyTagCube;
-        const rested = elapsedTime - (cube.userData.leafAt ?? -Infinity) > LEAF_COOLDOWN;
-
-        if (isNear && !cube.userData.near && rested) {
-            dropLeaf(cube);
-            cube.userData.leafAt = elapsedTime;
-        }
-        cube.userData.near = isNear;
-    });
-}
-
-/**
- * A project's name, let go from its cube like a leaf: it appears where a tag
- * would sit, then sways down the screen and fades out near the bottom (the
- * fall itself is .leaf's CSS animation). Each gets its own sway, tilt and
- * speed, so a run of them along the grid doesn't fall in lockstep.
- */
-function dropLeaf(cube) {
-    const { x, y } = cubeTagPoint(cube);
-    const fall = Math.max(screenHeight - y + 24, 120);
-    const side = Math.random() < 0.5 ? -1 : 1;
-
-    const leaf = document.createElement('span');
-    leaf.className = 'leaf';
-    leaf.textContent = projectLabel(cube);
-    leaf.style.left = `${x}px`;
-    leaf.style.top = `${y}px`;
-    leaf.style.setProperty('--fall', `${fall}px`);
-    leaf.style.setProperty('--sway', `${side * randomBetween(18, 42)}px`);
-    leaf.style.setProperty('--tilt', `${side * randomBetween(10, 24)}deg`);
-    // Slower the further it has to fall, so it drifts rather than drops
-    leaf.style.setProperty('--duration', `${(2.6 + fall / 400 + Math.random() * 0.8).toFixed(2)}s`);
-    leaf.addEventListener('animationend', () => leaf.remove());
-
-    leaves.append(leaf);
-}
-
-// "Project 01" to "Project 10", by grid slot
-function projectLabel(cube) {
-    return `Project ${String(cube.userData.slot + 1).padStart(2, '0')}`;
 }
 
 // Any cube is fair game, project or empty - this is the grid feeling
@@ -2295,7 +2223,7 @@ const tapHintPoint = new THREE.Vector3();
 function maybeShowTapHint(model, since) {
     if (tapHintLearned || since < tapHintNext) return;
 
-    tapHintNext = since + randomBetween(...TAP_HINT_GAP);
+    tapHintNext = since + TAP_HINT_GAP;
 
     // Not now - try again next time round
     if (detailZoomed || drawerOpen || cameraOrientationLocked) return;

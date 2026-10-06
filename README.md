@@ -94,11 +94,10 @@ Catalog view
         seconds, a beat later another one starts, continuously - never
         the cube under the cursor or while a project is open.
         See DECISIONS.md.
-    [x] When the pointer comes near a cube, its name ("Project 01"...
-        "Project 10") appears as plain text and falls away down the screen
-        like a leaf (this replaced first an "Explore me..." tag on the
-        pulsing cube, then a label chip). An empty slot's click answers
-        "Still empty..." - see the empty-cube item above
+    [x] No project names on the grid: an "Explore me..." tag, a "Project
+        XX" label and falling-leaf names were each tried and removed. An
+        empty slot's click answers "Still empty..." - see the empty-cube
+        item above
     [x] Clicking a project sets off a send-off: an instant boom knocks the
         other cubes out from the chosen one and up towards the viewer, they
         hang for a moment, then fall slowly and straight down the screen.
@@ -124,8 +123,10 @@ Details view (per project)
         clears on the way back - see DECISIONS.md
     [x] Double-click (or double-tap) on the model zooms in towards that
         spot; again zooms back out - see DECISIONS.md
-    [x] A little hand turns up now and then over the model and taps twice,
-        hinting at the zoom, until the visitor has used it
+    [x] A little hand turns up every 5 seconds over the model and taps
+        twice, hinting at the zoom, until the visitor has used it
+    [ ] A more beautiful hand for that hint - options drawn, awaiting a
+        choice
     [x] Rock Print's points gather out of a scattered cloud, spiralling in
         to the pavilion, each time it opens (`gather: true` in the projects
         array) - see DECISIONS.md

@@ -409,3 +409,7 @@ rendered no handle at all. Not a deploy problem; a content problem.
   away down the screen, swaying and tilting, fading out at the bottom.
   One leaf per arrival, with a cooldown, each falling its own way.
   Checked on both layouts. See DECISIONS.md.
+- **No more project names on the grid; the hand hint every 5s.** The
+  falling-leaf names are removed, along with what supported them. The
+  tap hint now comes every 5 seconds instead of every 7-13. Checked: a
+  sweep across the grid shows no names, and the hint repeats at 5.0-5.1s.

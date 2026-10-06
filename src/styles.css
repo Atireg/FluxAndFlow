@@ -295,10 +295,8 @@ canvas.webgl {
 }
 
 /**
- * Tags on the catalog's cubes: "Project 01"... near the pointer, and "Still
- * empty..." after clicking an empty slot. Positioned and faded from
- * script.js every frame; the short transition only smooths the moment the
- * label moves from one cube to the next, which would otherwise pop.
+ * The tag on a catalog cube: "Still empty..." after clicking an empty slot.
+ * Positioned and faded from script.js every frame.
  */
 .cube-tag {
     position: fixed;
@@ -322,52 +320,6 @@ canvas.webgl {
     opacity: 0;
     transition: opacity 0.2s ease;
     will-change: transform, opacity;
-}
-
-/**
- * A project's name, dropped like a leaf when the pointer comes near its
- * cube: appears where a tag would sit, then sways and tilts down the screen
- * and fades out at the bottom. Each leaf gets its own sway, tilt, fall and
- * duration from script.js (dropLeaf), so no two fall alike.
- */
-.leaves {
-    position: fixed;
-    inset: 0;
-    z-index: 1;
-    overflow: hidden;
-    pointer-events: none;
-}
-
-.leaf {
-    position: absolute;
-    font-size: 0.9375rem;
-    font-weight: 600; /* the project title's weight and tracking */
-    letter-spacing: -0.01em;
-    line-height: 1;
-    white-space: nowrap;
-    color: var(--ink);
-    opacity: 0;
-    translate: -50% -50%;
-    animation: leaf-fall var(--duration, 3.4s) linear forwards;
-    will-change: transform, opacity;
-}
-
-@keyframes leaf-fade {
-    0%   { opacity: 0; }
-    15%  { opacity: 1; }
-    70%  { opacity: 1; }
-    100% { opacity: 0; }
-}
-
-/* A leaf's fall: a pendulum sway, tilting with each swing, as it drops */
-@keyframes leaf-fall {
-    0%   { opacity: 0; transform: translate(0, 0.4rem) rotate(0deg); }
-    8%   { opacity: 1; transform: translate(0, 0) rotate(0deg); }
-    18%  { opacity: 1; transform: translate(0, 0) rotate(0deg); animation-timing-function: ease-in-out; }
-    36%  { transform: translate(var(--sway), calc(var(--fall) * 0.2)) rotate(var(--tilt)); animation-timing-function: ease-in-out; }
-    54%  { transform: translate(calc(var(--sway) * -1), calc(var(--fall) * 0.45)) rotate(calc(var(--tilt) * -1)); animation-timing-function: ease-in-out; }
-    72%  { opacity: 1; transform: translate(var(--sway), calc(var(--fall) * 0.7)) rotate(var(--tilt)); animation-timing-function: ease-in-out; }
-    100% { opacity: 0; transform: translate(calc(var(--sway) * -0.5), var(--fall)) rotate(calc(var(--tilt) * -0.6)); }
 }
 
 /* Quieter: an empty slot is an answer, not a label */
@@ -765,11 +717,6 @@ canvas.webgl {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    /* A name just appears and fades where it is - no fall */
-    .leaf {
-        animation: leaf-fade 1.8s ease forwards;
-    }
-
     /* The hint just appears and fades - no presses or ripples */
     .tap-hint.is-showing .tap-hint__hand,
     .tap-hint.is-showing .tap-hint__ripple {
