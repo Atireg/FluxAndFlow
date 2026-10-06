@@ -892,28 +892,30 @@ first version had them further down and crashed on load with a
 temporal-dead-zone error.
 
 
-The loader's colours are palettes, to choose between
-----------------------------------------------------
+The loader is "paper": light, against the dark site
+---------------------------------------------------
 
-Asked to explore different colours for the loader. Rather than pick one,
-the loader has a set of named palettes (`PALETTES` in index.html): tide
-(the cyan it launched with, still the default), ember (the invitation
-orange), current (cyan streams turning orange), aurora (green to violet),
-magma (red to magenta) and paper (dark ink on a light ground). Each is a
-background, two stream colours and the wordmark's text colours; the CSS
-reads them through `--loader-*` properties set from the script, falling
-back to the site's own colours.
+Asked to explore different colours for the loader. Six palettes were put
+side by side on the live site, behind a `?loaderpreview` mode that held
+the loader on screen and cycled them with a tap: tide (the cyan it
+launched with), ember (the invitation orange), current (cyan turning
+orange), aurora (green to violet), magma (red to magenta) and paper (dark
+ink on a light ground). Paper was chosen; the others and the preview mode
+were then removed.
 
-Each stream is shaded between the palette's two colours by the direction
-it's flowing, in `SHADES` steps, drawn as one stroke per shade rather than
-one per particle. That gives the field currents with some depth even in
-the single-hue palettes.
+The palette is one object in index.html: a background, two stream
+colours and the wordmark's text colours. The CSS reads them through
+`--loader-*` properties the script sets, falling back to the site's own
+colours. Each stream is shaded between the two stream colours by the
+direction it's flowing, in `SHADES` steps, drawn as one stroke per shade
+rather than one per particle - in paper, that's dark teal-black ink
+turning to the site's orange.
 
-`?loader=<name>` uses that palette for a normal load. `?loaderpreview`
-keeps the loader on screen, loops a pretend load, shows the palette's name
-and moves to the next one on a tap - for choosing, on a real device,
-without having to reload and catch a 2-second loader each time. Once a
-palette is chosen, it becomes the default and the others can go.
+Paper is the one light screen on a dark site. That's deliberate: the
+loader is an opening, and its exit - a fade while the streams pour into
+the centre - reveals the dark grid underneath rather than blending into
+it. To change it, edit `palette` in index.html; nothing else needs to
+follow.
 
 
 Moving the pointer through the grid stirs it; the grid no longer orbits

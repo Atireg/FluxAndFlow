@@ -344,3 +344,6 @@ rendered no handle at all. Not a deploy problem; a content problem.
   overshoot a little and settle back. A still cursor doesn't move
   anything, so the cube under it stays put to be clicked. See
   DECISIONS.md.
+- **The loader is "paper".** Dark ink streams with touches of orange on a
+  light ground, chosen from the six palettes. The other palettes and the
+  `?loaderpreview` mode are gone. See DECISIONS.md.

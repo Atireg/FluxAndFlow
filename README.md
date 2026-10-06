@@ -26,10 +26,8 @@ Loader
         "Flux and Flow" wordmark, gathering strength as the catalog loads
         and pouring into the centre as it hands over to the grid - see
         DECISIONS.md
-    [ ] Pick the loader's colours: six palettes to compare (tide - the
-        current default - ember, current, aurora, magma, paper). Open the
-        site with ?loaderpreview to see the loader held on screen and tap
-        to cycle them; ?loader=<name> shows a normal load in one
+    [x] Loader colours: "paper" - dark ink streams with touches of orange
+        on a light ground - chosen from six palettes compared live
     [ ] The project view's own loading state is still a plain pulsing dot +
         "Loading model" in the project bar while the point cloud downloads -
         could borrow the start-up loader's flow field

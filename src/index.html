@@ -39,34 +39,21 @@
       var count = document.getElementById('loader-count');
       var ctx = canvas.getContext('2d');
       var still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      var params = new URLSearchParams(window.location.search);
 
       var MIN_VISIBLE = 1600; // ms - long enough to read as an opening, not a flash
       var EXIT = 900; // ms - keep in step with .loader.is-leaving in styles.css
       var SHADES = 8; // steps between a palette's two flow colours
 
-      // Colour schemes. Each stream is shaded between `from` and `to` by the
-      // direction it's flowing, so the field reads as currents with depth
-      // rather than one flat colour. ?loader=<name> picks one;
-      // ?loaderpreview keeps the loader up and cycles them with a tap.
-      var PALETTES = {
-        tide:   { bg: [1, 11, 16],    from: [192, 255, 252], to: [70, 150, 190],  ink: '#e2f4f6', dim: '#86a9b1' },
-        ember:  { bg: [10, 6, 4],     from: [255, 140, 50],  to: [255, 220, 150], ink: '#fff0e2', dim: '#b98d6d' },
-        current:{ bg: [1, 11, 16],    from: [192, 255, 252], to: [255, 140, 50],  ink: '#e2f4f6', dim: '#86a9b1' },
-        aurora: { bg: [3, 6, 18],     from: [110, 255, 210], to: [165, 120, 255], ink: '#eef0ff', dim: '#8f92b8' },
-        magma:  { bg: [14, 4, 12],    from: [255, 95, 60],   to: [255, 60, 170],  ink: '#ffe4ee', dim: '#b07f92' },
-        paper:  { bg: [240, 237, 230], from: [15, 45, 55],   to: [200, 110, 50],  ink: '#0e1d24', dim: '#5b6b70' },
-      };
-      var NAMES = Object.keys(PALETTES);
-      var preview = params.has('loaderpreview');
-      var paletteName = PALETTES[params.get('loader')] ? params.get('loader') : 'tide';
-      var palette, bgFade, shades;
+      // "Paper", chosen from six palettes: dark ink streams on a light ground,
+      // with touches of the site's orange. Each stream is shaded between
+      // `from` and `to` by the direction it's flowing, so the field reads as
+      // currents with depth rather than one flat colour.
+      var palette = { bg: [240, 237, 230], from: [15, 45, 55], to: [200, 110, 50], ink: '#0e1d24', dim: '#5b6b70' };
+      var shades;
 
       function rgba(c, a) { return 'rgba(' + c[0] + ', ' + c[1] + ', ' + c[2] + ', ' + a + ')'; }
 
-      function usePalette(name) {
-        paletteName = name;
-        palette = PALETTES[name];
+      function usePalette() {
         shades = [];
         for (var i = 0; i < SHADES; i++) {
           var k = i / (SHADES - 1);
@@ -77,7 +64,6 @@
         root.style.setProperty('--loader-dim', palette.dim);
         root.style.setProperty('--loader-accent', rgba(palette.from, 1));
         root.style.setProperty('--loader-rule', rgba(palette.from, 0.2));
-        if (label) label.textContent = name + ' - tap for the next';
         ctx.fillStyle = rgba(palette.bg, 1);
         ctx.fillRect(0, 0, width, height);
         if (still) drawStillField();
@@ -91,7 +77,6 @@
       var leavingSince = null;
       var width = 0, height = 0, dpr = 1, particles = [];
       var segments = new Float32Array(0), bins = new Uint8Array(0);
-      var label = null;
 
       // The direction the field flows at a point: a few slow, layered waves,
       // drifting over time, so the streams curl and braid like a current
@@ -131,17 +116,13 @@
         segments = new Float32Array(n * 4);
         bins = new Uint8Array(n);
 
-        usePalette(paletteName);
+        usePalette();
       }
 
       function step(now) {
         // Eased by time, not per frame, so a slow device doesn't drag it out
         var dt = lastFrame === null ? 16 : Math.min(now - lastFrame, 100);
         lastFrame = now;
-
-        // The preview loops a pretend load instead of waiting for a real one
-        if (preview) target = Math.min(((now - startedAt) % 6000) / 5000, 1);
-        if (preview && target < shown - 0.5) shown = 0;
 
         shown += (target - shown) * (1 - Math.exp(-dt / 180));
 
@@ -240,20 +221,11 @@
           target = Math.max(target, Math.min(fraction, 1));
         },
         finish: function () {
-          if (finishAt !== null || preview) return;
+          if (finishAt !== null) return;
           target = 1;
           finishAt = Math.max(performance.now(), startedAt + MIN_VISIBLE);
         },
       };
-
-      if (preview) {
-        label = document.createElement('p');
-        label.className = 'loader__palette';
-        root.appendChild(label);
-        root.addEventListener('click', function () {
-          usePalette(NAMES[(NAMES.indexOf(paletteName) + 1) % NAMES.length]);
-        });
-      }
 
       resize();
       window.addEventListener('resize', resize);
@@ -261,7 +233,7 @@
       window.requestAnimationFrame(step);
 
       // Whatever happens to the rest of the page, never trap the visitor here
-      if (!preview) setTimeout(function () { window.fluxLoader.finish(); }, 30000);
+      setTimeout(function () { window.fluxLoader.finish(); }, 30000);
     })();
   </script>
 

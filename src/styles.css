@@ -70,7 +70,8 @@ canvas.webgl {
     z-index: 20;
     display: grid;
     place-items: center;
-    /* The --loader-* colours are set from the palette in index.html */
+    /* The --loader-* colours are set from the palette in index.html -
+       light "paper", against the dark site */
     background: var(--loader-bg, var(--bg));
     transition: opacity 0.9s ease; /* EXIT in index.html */
 }
@@ -142,24 +143,6 @@ canvas.webgl {
     line-height: 1;
     color: var(--loader-dim, var(--ink-dim));
     font-variant-numeric: tabular-nums;
-}
-
-/* ?loaderpreview only: which palette is showing */
-.loader__palette {
-    position: absolute;
-    bottom: 1.5rem;
-    left: 50%;
-    transform: translateX(-50%);
-    margin: 0;
-    font-size: 0.7rem;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--loader-dim, var(--ink-dim));
-    white-space: nowrap;
-}
-
-.loader:has(.loader__palette) {
-    cursor: pointer;
 }
 
 /**
