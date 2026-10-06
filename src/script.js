@@ -153,6 +153,17 @@ const catalogProjects = CLOUD_TEST
 
 const projectBySlot = new Map(catalogProjects.map((project) => [project.slot, project]));
 
+// The thumbnail for a slot with no project yet - every cube gets something
+// inside it, so the grid reads as full rather than as one find among blanks
+const EMPTY_SLOT_THUMB = 'models/rock.gltf';
+
+// Up here, not next to loadThumb: createPlayground() runs before that
+// part of the file has executed.
+// One download per file, however many cubes show it: each cube gets its own
+// clone of the loaded scene (geometry and materials shared). Under
+// ?cloudtest each copy has its own URL, so there it's still ten downloads.
+const thumbScenes = new Map();
+
 /**
  * Project bar and description drawer
  *
@@ -827,9 +838,7 @@ function createPlayground() {
         scene.add(cube);
         cubes.push(cube);
 
-        if (cube.userData.project) {
-            addContentToCube(cube);
-        }
+        addContentToCube(cube);
     }
 
     layoutCubes();
@@ -846,25 +855,41 @@ function clearCubes() {
 }
 
 // Helper function to add a project's thumbnail to its cube
-function addContentToCube(cube) {
-    const { project } = cube.userData;
-    const boot = bootAsset();
+function loadThumb(path) {
+    if (!thumbScenes.has(path)) {
+        const boot = bootAsset();
 
-    // Load 3D project representation
-    gltfLoader.load(
-        assetUrl(project.thumbModel),
-        (gltf) => {
-            const content = gltf.scene;
-            content.position.set(0, -1, 0);
-            content.scale.set(0.2, 0.2, 0.2);
-            cube.add(content);
-            cube.userData.content = content;
-            cube.userData.contentBaseScale = 0.2;
-            boot.done();
-        },
-        boot.progress,
-        boot.done,
-    );
+        thumbScenes.set(path, new Promise((resolve) => {
+            gltfLoader.load(
+                assetUrl(path),
+                (gltf) => { boot.done(); resolve(gltf.scene); },
+                boot.progress,
+                () => { boot.done(); resolve(null); },
+            );
+        }));
+    }
+
+    return thumbScenes.get(path);
+}
+
+// Helper function to add a project's thumbnail to its cube
+function addContentToCube(cube) {
+    const path = cube.userData.project?.thumbModel ?? EMPTY_SLOT_THUMB;
+
+    loadThumb(path).then((scene) => {
+        if (!scene) return;
+
+        const content = scene.clone();
+        content.position.set(0, -1, 0);
+        content.scale.set(0.2, 0.2, 0.2);
+        cube.add(content);
+        cube.userData.content = content;
+        cube.userData.contentBaseScale = 0.2;
+
+        // A project already open hides every cube's thumbnail; one that
+        // arrives late must not pop back in
+        if (viewState === 'detail') content.visible = false;
+    });
 }
 
 /**

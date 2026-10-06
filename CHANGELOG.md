@@ -327,3 +327,12 @@ rendered no handle at all. Not a deploy problem; a content problem.
   extra attributes and one uniform), opt-in per project with
   `gather: true`. Checked frame by frame on desktop; the scatter was then
   made a little brighter and tighter. See DECISIONS.md.
+- **The little rock in every cube.** Empty slots show it too (they still
+  say "Still empty..." when clicked). It downloads once and is cloned into
+  each cube. Fixed a start-up crash in the first version along the way.
+  See DECISIONS.md.
+- **Loader colours to explore.** Six palettes: tide (default), ember,
+  current, aurora, magma, paper. Streams are shaded between two colours by
+  the direction they flow. `?loaderpreview` holds the loader on screen and
+  cycles palettes with a tap; `?loader=<name>` picks one for a normal
+  load. See DECISIONS.md.

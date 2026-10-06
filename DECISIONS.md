@@ -866,3 +866,49 @@ start with the slow rotation. A cloud loaded without the attributes is
 left alone: `setGather` only touches clouds that were loaded to gather,
 since the shader would otherwise read a missing start position as the
 origin and fly every point in from the middle.
+
+
+Every cube shows the rock, from one download
+--------------------------------------------
+
+Asked for: the little rock inside every cube on the normal page, not only
+in Rock Print's. Slots with no project use `EMPTY_SLOT_THUMB` (the same
+rock) and still answer a click with "Still empty..." - the rock fills the
+grid out visually, it doesn't make the slot a project.
+
+`loadThumb` keeps one promise per file path, and each cube adds its own
+`clone()` of the loaded scene (geometry and materials shared). Ten cubes
+showing the same rock is one 187 KB download, not ten. `?cloudtest` gives
+each copy its own URL, so the test still measures ten separate downloads.
+A thumbnail that arrives while a project is open stays hidden, as every
+other cube's does, until the project is closed.
+
+`EMPTY_SLOT_THUMB` and the `thumbScenes` cache sit next to the projects
+rather than next to `loadThumb`, because `createPlayground()` runs (and
+loads the thumbnails) before that part of the file has executed - the
+first version had them further down and crashed on load with a
+temporal-dead-zone error.
+
+
+The loader's colours are palettes, to choose between
+----------------------------------------------------
+
+Asked to explore different colours for the loader. Rather than pick one,
+the loader has a set of named palettes (`PALETTES` in index.html): tide
+(the cyan it launched with, still the default), ember (the invitation
+orange), current (cyan streams turning orange), aurora (green to violet),
+magma (red to magenta) and paper (dark ink on a light ground). Each is a
+background, two stream colours and the wordmark's text colours; the CSS
+reads them through `--loader-*` properties set from the script, falling
+back to the site's own colours.
+
+Each stream is shaded between the palette's two colours by the direction
+it's flowing, in `SHADES` steps, drawn as one stroke per shade rather than
+one per particle. That gives the field currents with some depth even in
+the single-hue palettes.
+
+`?loader=<name>` uses that palette for a normal load. `?loaderpreview`
+keeps the loader on screen, loops a pretend load, shows the palette's name
+and moves to the next one on a tap - for choosing, on a real device,
+without having to reload and catch a 2-second loader each time. Once a
+palette is chosen, it becomes the default and the others can go.

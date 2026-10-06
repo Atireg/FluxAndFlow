@@ -26,6 +26,10 @@ Loader
         "Flux and Flow" wordmark, gathering strength as the catalog loads
         and pouring into the centre as it hands over to the grid - see
         DECISIONS.md
+    [ ] Pick the loader's colours: six palettes to compare (tide - the
+        current default - ember, current, aurora, magma, paper). Open the
+        site with ?loaderpreview to see the loader held on screen and tap
+        to cycle them; ?loader=<name> shows a normal load in one
     [ ] The project view's own loading state is still a plain pulsing dot +
         "Loading model" in the project bar while the point cloud downloads -
         could borrow the start-up loader's flow field
@@ -59,6 +63,8 @@ Color palette and typography
 
 Catalog view
     [ ] The element of surprise or discovery - when hovered on a cube add little 3D objects representing each project (e.g. a rock, an aggregate, a spider...)
+    [x] Every cube has the little rock inside it, empty slots included
+        (one download, cloned into each cube)
     [x] If a cube is empty - add a message saying (to be discovered later)
         (clicking one shows "Still empty..." on it for a moment - see
         DECISIONS.md)

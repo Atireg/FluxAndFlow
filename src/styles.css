@@ -70,7 +70,8 @@ canvas.webgl {
     z-index: 20;
     display: grid;
     place-items: center;
-    background: var(--bg);
+    /* The --loader-* colours are set from the palette in index.html */
+    background: var(--loader-bg, var(--bg));
     transition: opacity 0.9s ease; /* EXIT in index.html */
 }
 
@@ -107,28 +108,29 @@ canvas.webgl {
     font-weight: 300;
     letter-spacing: 0.06em;
     line-height: 1;
-    color: var(--ink);
-    text-shadow: 0 0 1.2rem var(--bg), 0 0 0.4rem var(--bg); /* lifts it off the streams */
+    color: var(--loader-ink, var(--ink));
+    /* lifts it off the streams */
+    text-shadow: 0 0 1.2rem var(--loader-bg, var(--bg)), 0 0 0.4rem var(--loader-bg, var(--bg));
 }
 
 .loader__and {
     font-size: 0.55em;
     letter-spacing: 0.12em;
-    color: var(--ink-dim);
+    color: var(--loader-dim, var(--ink-dim));
     vertical-align: 0.25em;
 }
 
 .loader__line {
     width: clamp(8rem, 30vw, 12rem);
     height: 1px;
-    background: var(--rule);
+    background: var(--loader-rule, var(--rule));
     overflow: hidden;
 }
 
 .loader__fill {
     display: block;
     height: 100%;
-    background: var(--accent);
+    background: var(--loader-accent, var(--accent));
     transform: scaleX(0);
     transform-origin: left center;
 }
@@ -138,8 +140,26 @@ canvas.webgl {
     font-size: 0.7rem;
     letter-spacing: 0.18em;
     line-height: 1;
-    color: var(--ink-dim);
+    color: var(--loader-dim, var(--ink-dim));
     font-variant-numeric: tabular-nums;
+}
+
+/* ?loaderpreview only: which palette is showing */
+.loader__palette {
+    position: absolute;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 0;
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--loader-dim, var(--ink-dim));
+    white-space: nowrap;
+}
+
+.loader:has(.loader__palette) {
+    cursor: pointer;
 }
 
 /**

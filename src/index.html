@@ -39,11 +39,49 @@
       var count = document.getElementById('loader-count');
       var ctx = canvas.getContext('2d');
       var still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var params = new URLSearchParams(window.location.search);
 
       var MIN_VISIBLE = 1600; // ms - long enough to read as an opening, not a flash
       var EXIT = 900; // ms - keep in step with .loader.is-leaving in styles.css
-      var BG = 'rgba(1, 11, 16, '; // --bg
-      var INK = 'rgba(192, 255, 252, '; // --accent
+      var SHADES = 8; // steps between a palette's two flow colours
+
+      // Colour schemes. Each stream is shaded between `from` and `to` by the
+      // direction it's flowing, so the field reads as currents with depth
+      // rather than one flat colour. ?loader=<name> picks one;
+      // ?loaderpreview keeps the loader up and cycles them with a tap.
+      var PALETTES = {
+        tide:   { bg: [1, 11, 16],    from: [192, 255, 252], to: [70, 150, 190],  ink: '#e2f4f6', dim: '#86a9b1' },
+        ember:  { bg: [10, 6, 4],     from: [255, 140, 50],  to: [255, 220, 150], ink: '#fff0e2', dim: '#b98d6d' },
+        current:{ bg: [1, 11, 16],    from: [192, 255, 252], to: [255, 140, 50],  ink: '#e2f4f6', dim: '#86a9b1' },
+        aurora: { bg: [3, 6, 18],     from: [110, 255, 210], to: [165, 120, 255], ink: '#eef0ff', dim: '#8f92b8' },
+        magma:  { bg: [14, 4, 12],    from: [255, 95, 60],   to: [255, 60, 170],  ink: '#ffe4ee', dim: '#b07f92' },
+        paper:  { bg: [240, 237, 230], from: [15, 45, 55],   to: [200, 110, 50],  ink: '#0e1d24', dim: '#5b6b70' },
+      };
+      var NAMES = Object.keys(PALETTES);
+      var preview = params.has('loaderpreview');
+      var paletteName = PALETTES[params.get('loader')] ? params.get('loader') : 'tide';
+      var palette, bgFade, shades;
+
+      function rgba(c, a) { return 'rgba(' + c[0] + ', ' + c[1] + ', ' + c[2] + ', ' + a + ')'; }
+
+      function usePalette(name) {
+        paletteName = name;
+        palette = PALETTES[name];
+        shades = [];
+        for (var i = 0; i < SHADES; i++) {
+          var k = i / (SHADES - 1);
+          shades.push([0, 1, 2].map(function (j) { return Math.round(palette.from[j] + (palette.to[j] - palette.from[j]) * k); }));
+        }
+        root.style.setProperty('--loader-bg', rgba(palette.bg, 1));
+        root.style.setProperty('--loader-ink', palette.ink);
+        root.style.setProperty('--loader-dim', palette.dim);
+        root.style.setProperty('--loader-accent', rgba(palette.from, 1));
+        root.style.setProperty('--loader-rule', rgba(palette.from, 0.2));
+        if (label) label.textContent = name + ' - tap for the next';
+        ctx.fillStyle = rgba(palette.bg, 1);
+        ctx.fillRect(0, 0, width, height);
+        if (still) drawStillField();
+      }
 
       var startedAt = performance.now();
       var target = 0; // reported progress, 0..1
@@ -52,6 +90,8 @@
       var finishAt = null; // when the exit may start
       var leavingSince = null;
       var width = 0, height = 0, dpr = 1, particles = [];
+      var segments = new Float32Array(0), bins = new Uint8Array(0);
+      var label = null;
 
       // The direction the field flows at a point: a few slow, layered waves,
       // drifting over time, so the streams curl and braid like a current
@@ -59,6 +99,10 @@
         return Math.sin(x * 0.0035 + t * 0.00025) * 1.6
              + Math.cos(y * 0.0042 - t * 0.0002) * 1.4
              + Math.sin((x - y) * 0.0018 + t * 0.00012) * 1.1;
+      }
+
+      function shadeOf(a) {
+        return Math.min(SHADES - 1, Math.floor(((Math.sin(a) + 1) / 2) * SHADES));
       }
 
       function spawn(p) {
@@ -76,8 +120,6 @@
         canvas.width = Math.round(width * dpr);
         canvas.height = Math.round(height * dpr);
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        ctx.fillStyle = BG + '1)';
-        ctx.fillRect(0, 0, width, height);
 
         var n = Math.min(1200, Math.round((width * height) / 650));
         particles = [];
@@ -86,14 +128,21 @@
           p.age = Math.random() * p.life; // not all born on the same frame
           particles.push(p);
         }
+        segments = new Float32Array(n * 4);
+        bins = new Uint8Array(n);
 
-        if (still) drawStillField();
+        usePalette(paletteName);
       }
 
       function step(now) {
         // Eased by time, not per frame, so a slow device doesn't drag it out
         var dt = lastFrame === null ? 16 : Math.min(now - lastFrame, 100);
         lastFrame = now;
+
+        // The preview loops a pretend load instead of waiting for a real one
+        if (preview) target = Math.min(((now - startedAt) % 6000) / 5000, 1);
+        if (preview && target < shown - 0.5) shown = 0;
+
         shown += (target - shown) * (1 - Math.exp(-dt / 180));
 
         if (!still) drawField(now, dt / 16.7);
@@ -121,14 +170,13 @@
       // and fades at the same pace whatever the device's frame rate
       function drawField(now, frames) {
         // Fading the last frame rather than clearing it leaves the trails
-        ctx.fillStyle = BG + (1 - Math.pow(1 - 0.09, frames)).toFixed(3) + ')';
+        ctx.fillStyle = rgba(palette.bg, (1 - Math.pow(1 - 0.09, frames)).toFixed(3));
         ctx.fillRect(0, 0, width, height);
 
         var flux = 0.3 + 0.7 * shown; // the flow gathers strength as loading goes
         var pull = leavingSince === null ? 0 : Math.min((now - leavingSince) / EXIT, 1);
         var cx = width / 2, cy = height / 2;
 
-        ctx.beginPath();
         for (var i = 0; i < particles.length; i++) {
           var p = particles[i];
           var a = angle(p.x, p.y, now);
@@ -142,33 +190,48 @@
             vy += (cy - p.y) * Math.min(pull * 0.09 * frames, 1);
           }
 
-          ctx.moveTo(p.x, p.y);
-          ctx.lineTo(p.x + vx, p.y + vy);
+          segments[i * 4] = p.x;
+          segments[i * 4 + 1] = p.y;
+          segments[i * 4 + 2] = p.x + vx;
+          segments[i * 4 + 3] = p.y + vy;
+          bins[i] = shadeOf(a);
+
           p.x += vx;
           p.y += vy;
           p.age += frames;
 
           if (pull === 0 && (p.age > p.life || p.x < 0 || p.x > width || p.y < 0 || p.y > height)) spawn(p);
         }
-        ctx.strokeStyle = INK + (0.18 + 0.42 * flux) + ')';
+
+        // One stroke per shade, rather than one per particle
+        var alpha = 0.18 + 0.42 * flux;
         ctx.lineWidth = 1;
-        ctx.stroke();
+        for (var b = 0; b < SHADES; b++) {
+          ctx.beginPath();
+          for (var j = 0; j < particles.length; j++) {
+            if (bins[j] !== b) continue;
+            ctx.moveTo(segments[j * 4], segments[j * 4 + 1]);
+            ctx.lineTo(segments[j * 4 + 2], segments[j * 4 + 3]);
+          }
+          ctx.strokeStyle = rgba(shades[b], alpha);
+          ctx.stroke();
+        }
       }
 
       // A still screen still says what the page is: a few streamlines drawn
       // once, then only the bar and the count move
       function drawStillField() {
         for (var k = 0; k < 40; k++) {
-          ctx.beginPath();
           for (var j = 0; j < particles.length; j++) {
             var q = particles[j], b = angle(q.x, q.y, 0);
+            ctx.beginPath();
             ctx.moveTo(q.x, q.y);
             q.x += Math.cos(b) * 2;
             q.y += Math.sin(b) * 2;
             ctx.lineTo(q.x, q.y);
+            ctx.strokeStyle = rgba(shades[shadeOf(b)], 0.14);
+            ctx.stroke();
           }
-          ctx.strokeStyle = INK + '0.12)';
-          ctx.stroke();
         }
       }
 
@@ -177,11 +240,20 @@
           target = Math.max(target, Math.min(fraction, 1));
         },
         finish: function () {
-          if (finishAt !== null) return;
+          if (finishAt !== null || preview) return;
           target = 1;
           finishAt = Math.max(performance.now(), startedAt + MIN_VISIBLE);
         },
       };
+
+      if (preview) {
+        label = document.createElement('p');
+        label.className = 'loader__palette';
+        root.appendChild(label);
+        root.addEventListener('click', function () {
+          usePalette(NAMES[(NAMES.indexOf(paletteName) + 1) % NAMES.length]);
+        });
+      }
 
       resize();
       window.addEventListener('resize', resize);
@@ -189,7 +261,7 @@
       window.requestAnimationFrame(step);
 
       // Whatever happens to the rest of the page, never trap the visitor here
-      setTimeout(function () { window.fluxLoader.finish(); }, 30000);
+      if (!preview) setTimeout(function () { window.fluxLoader.finish(); }, 30000);
     })();
   </script>
 
