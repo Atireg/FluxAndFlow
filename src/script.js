@@ -64,8 +64,13 @@ const selectedCubeColor = screenColor(31, 95, 107);
 // flavour of idle
 const spotlightGlowColor = screenColor(255, 140, 50);
 
-// The point clouds' ink - see the point cloud fragment shader
-const pointInkColor = screenColor(22, 62, 72);
+// The point clouds' inks: every point is given one of these at random when
+// its cloud loads, in these proportions - see the point cloud fragment shader
+const POINT_INKS = [
+    { color: screenColor(128, 24, 36), share: 1 / 3 }, // dark red
+    { color: screenColor(255, 140, 50), share: 1 / 3 }, // orange - the invitation's
+    { color: screenColor(120, 116, 110), share: 1 / 3 }, // warm grey
+];
 
 /**
  * Assets
@@ -449,6 +454,20 @@ function loadPointCloudWithShaderMaterial({
                 }
 
                 geometry.setAttribute('aScale', new THREE.BufferAttribute(scales, 1));
+
+                // Which ink each point is drawn in, picked at random once so
+                // the speckle holds still as the model turns
+                const tones = new Float32Array(pointsCount);
+                for (let i = 0; i < pointsCount; i++) {
+                    let pick = Math.random();
+                    let tone = 0;
+                    while (tone < POINT_INKS.length - 1 && pick >= POINT_INKS[tone].share) {
+                        pick -= POINT_INKS[tone].share;
+                        tone++;
+                    }
+                    tones[i] = tone;
+                }
+                geometry.setAttribute('aTone', new THREE.BufferAttribute(tones, 1));
                 // geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
                 // Define a custom ShaderMaterial
@@ -464,7 +483,7 @@ function loadPointCloudWithShaderMaterial({
                     uniforms:
                     {
                         // uTime: new THREE.Uniform(0),
-                        uInkColor: { value: pointInkColor },
+                        uInks: { value: POINT_INKS.map((ink) => ink.color) },
                         uPerlinTexture: new THREE.Uniform(perlinTexture),
                         uPointScale: { value: 1 },
                         uSizeAttenuation: { value: 1 },

@@ -366,3 +366,6 @@ rendered no handle at all. Not a deploy problem; a content problem.
   blending (invisible on a light ground): faces are tinted glass, points
   are dark ink. The loader's exit is a plain fade again. Checked on both
   layouts in every main state. See DECISIONS.md.
+- **The point cloud is dark red, orange and grey.** Each point is given
+  one of the three at random (a third each) when the cloud loads, so the
+  speckle is fixed and turns with the model. See DECISIONS.md.

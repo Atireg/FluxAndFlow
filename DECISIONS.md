@@ -1004,9 +1004,9 @@ obvious from the colours alone:
   tinted glass (`CUBE_FACE_OPACITY` 0.14 at rest, `HOVER_FACE_OPACITY`
   0.3, rising to `SPOTLIGHT_FACE_OPACITY` 0.6 at the peak of a glow -
   every place that used to reset a face to opacity 1 now uses these), and
-  the points are ink: one colour (`pointInkColor`, a dark teal) whose
-  weight varies with the noise texture, and with the gather. The point
-  material no longer writes depth.
+  the points are ink, whose weight varies with the noise texture and
+  with the gather. The point material no longer writes depth. (The ink
+  was first a single dark teal; see "Each point is one of three inks".)
 - **Scene colours are given as screen values.** `screenColor(r, g, b)`
   sets a colour so it shows on screen as exactly those values, for the
   same reason as the spotlight's orange (see "The invitation is one
@@ -1019,3 +1019,21 @@ obvious from the colours alone:
 Checked on both layouts: the grid, a cube at the peak of its glow with
 its tag, hover, the project view with the point cloud, and the drawer
 open, plus the loader's exit with and without reduced motion.
+
+
+Each point is one of three inks, at random
+------------------------------------------
+
+Asked for: the point cloud in dark red, orange and grey, with the colours
+randomly distributed. Every point is given one of `POINT_INKS` - dark red,
+the invitation's orange, a warm grey - when its cloud loads, picked at
+random in the proportions each ink's `share` sets (a third each). The
+pick is stored per point as an attribute (`aTone`), so the speckle is
+fixed: it turns with the model rather than flickering from frame to
+frame, and stays the same across the gather.
+
+The model's own `COLOR_0` (its scanned colours) is still not used - these
+inks replace it, as the single teal did before. To change the mix, edit
+`POINT_INKS`: its colours, how many there are (the shader takes three;
+change `uInks[3]` and the pick in fragment.glsl to match), or their
+shares.

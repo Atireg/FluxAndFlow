@@ -11,6 +11,7 @@ uniform float uGatherSpread; // the latest any point starts, as a share of the g
 uniform float uGatherSwirl; // radians the scatter turns through on the way in
 
 attribute float aScale;
+attribute float aTone; // which of the inks this point is drawn in: 0, 1 or 2
 attribute vec3 aScatter; // where this point starts, in the cloud's own space
 attribute float aGatherDelay; // 0..1, when it sets off within the spread
 // attribute vec3 color;
@@ -19,6 +20,7 @@ varying vec2 vUv;
 // varying vec3 vColor;
 varying vec3 vNormal;
 varying float vArrived;
+varying float vTone;
 
 void main() {
         // Each point sets off at its own moment and eases home, settling
@@ -34,6 +36,7 @@ void main() {
 
         vec3 gathered = mix(scatter, position, arrived);
         vArrived = arrived;
+        vTone = aTone;
 
         vec4 modelPosition = modelMatrix * vec4(gathered, 1.0);
         vec4 viewPosition = viewMatrix * modelPosition;
