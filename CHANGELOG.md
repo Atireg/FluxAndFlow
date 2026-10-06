@@ -382,3 +382,9 @@ rendered no handle at all. Not a deploy problem; a content problem.
   detected by hand, and the browser's own double-click is ignored for
   touch so the two can't cancel out. Checked on both layouts. See
   DECISIONS.md.
+- **Frames for pictures in the About drawer.** Three empty, dashed frames
+  under the text in Rock Print's drawer - one full width, two side by side
+  - waiting for the images. Each is an entry in the project's `images`;
+  setting its `src` fills it. The drawer's panel is now near-solid so the
+  model doesn't ghost through the pictures. Checked on both layouts. See
+  DECISIONS.md.

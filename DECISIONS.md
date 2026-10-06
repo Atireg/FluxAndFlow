@@ -1101,3 +1101,27 @@ and a second one zooms back out (confirmed by logging the decisions, since
 the software renderer used for testing draws the close-up at a frame or
 two a second, which GSAP's lag smoothing stretches into many seconds of
 move).
+
+
+The drawer has frames for pictures, open until the pictures exist
+-----------------------------------------------------------------
+
+Asked for: space for images in the About drawer, with the frames in place
+and left empty until the pictures are supplied. A project's `images` is a
+list of `{ src, alt, caption, ratio }`; `showProject` renders each as a
+`<figure>` under the body text (`imageFigure`). The first spans the full
+width and the rest sit two to a row - a lead picture and a grid of
+details, which fits the drawer's width on both layouts. `ratio` is a CSS
+aspect ratio (3 / 2 by default), so a frame has its size before its
+picture loads, and the drawer's layout doesn't jump when it does.
+
+An entry with no `src` is an open frame: a dashed outline the size of the
+picture to come, marked `aria-hidden` so a screen reader doesn't announce
+an empty image. Rock Print has three such entries for now; filling one in
+is only setting its `src` (and `alt`). Pictures load lazily, since the
+drawer is often never opened. A project with images but no text still
+gets a drawer handle (`hasDescription` counts them).
+
+The drawer's background went from 94% to 98% opaque at the same time:
+with pictures to show, the point cloud ghosting through the panel behind
+them muddied the frames.

@@ -129,7 +129,10 @@ Details view (per project)
     [x] Per-project camera angle (`view` in the projects array). Rock Print
         opens on an elevated three-quarter view fitted to a screenshot of
         the shot wanted - see DECISIONS.md
-    [ ] Images and video in the drawer
+    [~] Images and video in the drawer: three empty frames are in place in
+        Rock Print's drawer (one full width, two side by side), waiting
+        for the pictures - set each `src` in the project's `images`. Video
+        not started
     [x] Split the screen in two: half for 3D content/half for the 2D content
         (then superseded: the text now lives in a drawer pulled from the edge,
         so by default the model gets the whole canvas)

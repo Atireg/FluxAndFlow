@@ -128,6 +128,18 @@ const projects = [
         // Each time the project opens, its points start out scattered and
         // slowly gather into the pavilion - see GATHER_DURATION
         gather: true,
+
+        // Pictures in the About drawer, in order: the first spans the full
+        // width, the rest sit two to a row. An entry with no `src` yet shows
+        // as an empty frame, holding its place. Paths are like the models'
+        // (e.g. 'images/rock-print-1.jpg', in static/). `ratio` is optional,
+        // as a CSS aspect ratio, '3 / 2' if left out.
+        //   { src: '', alt: 'what it shows', caption: '', ratio: '4 / 5' }
+        images: [
+            { src: '', alt: '', caption: '' },
+            { src: '', alt: '', caption: '' },
+            { src: '', alt: '', caption: '' },
+        ],
     },
 ];
 
@@ -208,6 +220,7 @@ const drawerTitle = document.querySelector('#drawer-title');
 const drawerMeta = document.querySelector('#project-meta');
 const drawerBody = document.querySelector('#project-body');
 const drawerCredits = document.querySelector('#project-credits');
+const drawerImages = document.querySelector('#project-images');
 
 let drawerOpen = false;
 
@@ -219,6 +232,7 @@ function hasDescription(project) {
     return Boolean(
         project.year || project.role || project.context || project.credits
         || (project.body && project.body.length)
+        || (project.images && project.images.length)
     );
 }
 
@@ -252,12 +266,45 @@ function showProject(project) {
         })
     );
 
+    drawerImages.replaceChildren(...(project.images ?? []).map(imageFigure));
+
     drawerCredits.textContent = project.credits ?? '';
 
     // Nothing written yet means nothing to pull out, so no handle appears
     const available = hasDescription(project);
     drawer.classList.toggle('is-available', available);
     drawer.setAttribute('aria-hidden', available ? 'false' : 'true');
+}
+
+// One picture in the drawer, or an empty frame holding its place
+function imageFigure(image) {
+    const figure = document.createElement('figure');
+    figure.className = 'drawer__image';
+
+    const frame = document.createElement('div');
+    frame.className = 'drawer__frame';
+    frame.style.aspectRatio = image.ratio || '3 / 2';
+
+    if (image.src) {
+        const img = document.createElement('img');
+        img.src = assetUrl(image.src);
+        img.alt = image.alt ?? '';
+        img.loading = 'lazy';
+        frame.append(img);
+    } else {
+        figure.classList.add('is-empty');
+        frame.setAttribute('aria-hidden', 'true');
+    }
+
+    figure.append(frame);
+
+    if (image.caption) {
+        const caption = document.createElement('figcaption');
+        caption.textContent = image.caption;
+        figure.append(caption);
+    }
+
+    return figure;
 }
 
 function hideProject() {

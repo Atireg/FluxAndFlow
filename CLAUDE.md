@@ -51,12 +51,16 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
     detailModel: 'models/RockPrintStructureReduced.glb',  // loaded on click
     view: { elevation: 49, azimuth: 4, turn: 145 },     // optional camera angle, degrees
     gather: true,                                 // optional: points gather from a scattered cloud on open
+    images: [{ src: 'images/x.jpg', alt: '', caption: '', ratio: '3 / 2' }],  // drawer pictures; no src = empty frame
 }
 ```
 
 - The grid always has `SLOT_COUNT` (10) cubes regardless of viewport; an
   empty slot renders as a plain cube. Project count should not exceed
   `SLOT_COUNT` without raising it.
+- `images` go in `static/images/`. The first spans the drawer's width, the
+  rest sit two to a row. An entry without a `src` renders as an empty
+  dashed frame, holding its place until the picture exists.
 - Leaving `year`/`role`/`context`/`body`/`credits` empty is intentional, not
   a placeholder bug: a project with no description gets no drawer handle at
   all, rather than a handle onto an empty panel. See DECISIONS.md. **State
