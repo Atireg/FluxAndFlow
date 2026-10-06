@@ -4,7 +4,6 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { gsap } from 'gsap';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
-import { Sky } from 'three/addons/objects/Sky.js'
 
 import pointCloudVertexShader from './shaders/pointCloud/vertex.glsl';
 import pointCloudFragmentShader from './shaders/pointCloud/fragment.glsl';
@@ -39,23 +38,34 @@ const spacing = 1.2;
  */
 const SLOT_COUNT = 10;
 
+// The cubes' faces are tinted glass over the paper: mostly see-through at
+// rest, filling in when hovered or glowing
+const CUBE_FACE_OPACITY = 0.14;
+const HOVER_FACE_OPACITY = 0.3;
+const SPOTLIGHT_FACE_OPACITY = 0.6; // at the peak of a beat
+
 /**
  * Colors 
  */
-const cubesColor = new THREE.Color("rgb(167, 167, 167)").convertSRGBToLinear();
-// const bordersColor = new THREE.Color("rgb(232, 237, 223)").convertSRGBToLinear();
-const selectedCubeColor = new THREE.Color("rgb(192, 255, 252)").convertSRGBToLinear();
-const backgroudCubesColor = new THREE.Color("rgb(190, 190, 190)").convertSRGBToLinear();
+// Scene colours are given as the values they should show on screen. The
+// renderer outputs linear values straight to the screen, and a hex string
+// is converted towards linear on the way in, which darkens and shifts it -
+// so these bypass that. See DECISIONS.md.
+const screenColor = (r, g, b) => new THREE.Color().setRGB(r / 255, g / 255, b / 255, THREE.LinearSRGBColorSpace);
+
+// On the paper ground (--bg in styles.css): the cubes are faintly tinted
+// glass (see CUBE_FACE_OPACITY) with ink edges in the deep teal of --accent
+const cubesColor = screenColor(120, 150, 158);
+const selectedCubeColor = screenColor(31, 95, 107);
+
 // The spotlight's glow colour - the same orange as the drawer's pull
-// handle (--warm in styles.css), distinct from the cyan the grid otherwise
+// handle (--warm in styles.css), distinct from the teal the grid otherwise
 // rests at, so a jumping cube reads as "look at me" and not as a different
-// flavour of idle. Set as raw values rather than like the colours above:
-// the renderer outputs linear values straight to the screen, and a hex
-// string gets converted towards linear on the way in (twice, with
-// convertSRGBToLinear on top), which crushes this orange into a brick red.
-// Raw, the edges show exactly #ff8c32. See DECISIONS.md.
-const spotlightGlowColor = new THREE.Color().setRGB(255 / 255, 140 / 255, 50 / 255, THREE.LinearSRGBColorSpace);
-const lightColor = new THREE.Color("rgb(194, 238, 255)");
+// flavour of idle
+const spotlightGlowColor = screenColor(255, 140, 50);
+
+// The point clouds' ink - see the point cloud fragment shader
+const pointInkColor = screenColor(22, 62, 72);
 
 /**
  * Assets
@@ -443,17 +453,18 @@ function loadPointCloudWithShaderMaterial({
 
                 // Define a custom ShaderMaterial
                 const shaderMaterial = new THREE.ShaderMaterial({
-                    // depthWrite: false,
+                    // Ink laid over the paper, not light added to a dark
+                    // ground - additive points vanish on a light background
+                    depthWrite: false,
                     depthTest: false,
-                    blending: THREE.AdditiveBlending,
+                    transparent: true,
                     vertexColors: true,
                     vertexShader: pointCloudVertexShader,
                     fragmentShader: pointCloudFragmentShader,
                     uniforms:
                     {
                         // uTime: new THREE.Uniform(0),
-                        uLightDirection: {value: lightDirection.normalize()},
-                        uLightColor: {value: lightColor},
+                        uInkColor: { value: pointInkColor },
                         uPerlinTexture: new THREE.Uniform(perlinTexture),
                         uPointScale: { value: 1 },
                         uSizeAttenuation: { value: 1 },
@@ -503,8 +514,6 @@ ambientLight.intensity = 5;
 scene.add(ambientLight);
 
 const directionalLight = new THREE.DirectionalLight('#86cdff', 1);
-const lightDirection = new THREE.Vector3();
-directionalLight.target.getWorldPosition(lightDirection);
 scene.add(directionalLight)
 
 /**
@@ -682,18 +691,13 @@ const smoke = new THREE.Mesh(smokeGeometry, smokeMaterial)
 // scene.add(smoke);
 
 /**
- * Sky
-*/
-
-const sky = new Sky();
-sky.scale.set(1000, 1000, 1000)
-scene.add(sky)
-
-sky.material.uniforms['turbidity'].value = 5
-sky.material.uniforms['rayleigh'].value = 3
-sky.material.uniforms['mieCoefficient'].value = 0.8
-sky.material.uniforms['mieDirectionalG'].value = 0.7
-sky.material.uniforms['sunPosition'].value.set(0.6, -0.038, -0.95)
+ * Background
+ *
+ * None in the scene: the renderer is transparent and the page's own --bg
+ * (the paper, in styles.css) shows through. There used to be a three.js Sky
+ * dome here with its sun just below the horizon, which is what painted the
+ * near-black night behind everything - see DECISIONS.md.
+ */
 
 /**
  * Fog
@@ -782,7 +786,7 @@ function wanderOffset(wander, elapsedTime) {
 const SPOTLIGHT_GAP = [0.3, 0.6]; // seconds between one settling and the next starting
 const SPOTLIGHT_DWELL = 5; // seconds a cube stays spotlighted
 const SPOTLIGHT_FADE = 0.6; // seconds to ramp the effect in, and back out, at each end of the dwell
-const SPOTLIGHT_FACE_GLOW = 0.55; // how strongly the face glows orange at the peak of a beat
+const SPOTLIGHT_FACE_GLOW = 1.0; // how strongly the face glows orange at the peak of a beat
 const SPOTLIGHT_FACE_DIM = 0.9; // how far the face's own lit colour drops out at that peak
 const SPOTLIGHT_PULSE_PERIOD = 1.1; // seconds per jump
 const SPOTLIGHT_ROTATE_PERIOD = [1.0, 1.4]; // seconds; x and z rock at different rates
@@ -818,9 +822,7 @@ function createPlayground() {
             metalness: 0.2,
             roughness: 0.6,
             transparent: true,
-            opacity: 1,
-            blending: THREE.AdditiveBlending,
-
+            opacity: CUBE_FACE_OPACITY,
         });
 
         const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
@@ -1524,7 +1526,7 @@ function applyFlow(cube) {
 
 function updateIdleCube(cube, elapsedTime) {
     placeAtRest(cube, elapsedTime);
-    cube.material.opacity = 1;
+    cube.material.opacity = CUBE_FACE_OPACITY;
     cube.material.color.set(cubesColor);
     cube.material.emissive.setRGB(0, 0, 0);
 
@@ -1550,7 +1552,7 @@ function updateHoveredCube(cube, elapsedTime) {
 
     cube.rotation.set(0, 0, 0);
     cube.scale.setScalar(1 + Math.sin(elapsedTime * HOVER_JITTER_FREQUENCY) * HOVER_SCALE_AMPLITUDE);
-    cube.material.opacity = 0.4;
+    cube.material.opacity = HOVER_FACE_OPACITY;
     cube.material.color.set(selectedCubeColor);
     cube.material.emissive.setRGB(0, 0, 0);
 
@@ -1590,7 +1592,9 @@ function updateSpotlightCube(cube, elapsedTime) {
     cube.rotation.x = Math.sin((since / spotlightRotatePeriodX) * Math.PI * 2) * SPOTLIGHT_ROTATE_AMPLITUDE * intensity;
     cube.rotation.z = Math.sin((since / spotlightRotatePeriodZ) * Math.PI * 2 + 1.7) * SPOTLIGHT_ROTATE_AMPLITUDE * intensity;
     cube.scale.setScalar(1 + pulse * SPOTLIGHT_CUBE_SCALE_AMPLITUDE * intensity);
-    cube.material.opacity = 1;
+
+    // Clear glass at rest; the glow fills it in
+    cube.material.opacity = CUBE_FACE_OPACITY + (SPOTLIGHT_FACE_OPACITY - CUBE_FACE_OPACITY) * glow * intensity;
 
     // Blink the whole cube - face and edges alike - between its resting
     // colours and the spotlight's orange, never fully off so it
@@ -1797,7 +1801,7 @@ function dropInProgress(elapsedTime) {
 }
 
 function updateDroppingCube(cube, elapsedTime) {
-    cube.material.opacity = 1;
+    cube.material.opacity = CUBE_FACE_OPACITY;
     cube.material.color.set(cubesColor);
     cube.material.emissive.setRGB(0, 0, 0);
     cube.userData.edges.material.opacity = 1;
@@ -2044,7 +2048,7 @@ function closeProject() {
     cubes.forEach((other) => {
         gsap.delayedCall(revealDelay, () => { other.material.depthWrite = true; });
 
-        gsap.to(other.material, { opacity: 1, duration: revealDuration, ease: 'power2.inOut', delay: revealDelay });
+        gsap.to(other.material, { opacity: CUBE_FACE_OPACITY, duration: revealDuration, ease: 'power2.inOut', delay: revealDelay });
         gsap.to(other.userData.edges.material, { opacity: 1, duration: revealDuration, ease: 'power2.inOut', delay: revealDelay });
 
         other.material.color.set(cubesColor);

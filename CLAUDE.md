@@ -82,6 +82,12 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
   either. This only governs the square-on default: a project with its own
   `view` is framed on its cube with `VIEW_FRAME_MARGIN` instead (see
   "A project can set its own camera angle" in DECISIONS.md).
+- **The background is the page's CSS `--bg`, not the scene.** The renderer
+  is transparent and there is nothing behind the cubes (an old `Sky` dome
+  that painted a dark night was removed). The ground is light "paper", so
+  **don't use additive blending** - it renders as nothing on a light
+  background. Give scene colours with `screenColor()`. See DECISIONS.md,
+  "The whole site is paper".
 - **Fog is off** (`scene.fog = null`). The original config had near beyond
   far, which inverts it and made the detail-view cube fog out to the
   background colour. Don't re-enable without reading DECISIONS.md.

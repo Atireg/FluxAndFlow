@@ -351,9 +351,18 @@ rendered no handle at all. Not a deploy problem; a content problem.
   light ground, chosen from the six palettes. The other palettes and the
   `?loaderpreview` mode are gone. See DECISIONS.md.
 - **The paper loader hands over to the dark grid through spreading ink.**
+  *(Disliked, and replaced by making the whole site paper - see below.)*
   The cut from light paper to the dark grid was too sudden. Now the
   streams pour into the centre, a pool of the site's dark spreads out from
   there with a soft, wavering edge until the paper is gone (~1s), and only
   then does the loader fade into the grid. Under reduced motion the paper
   dims to dark instead. Checked frame by frame on a phone viewport, both
   modes. See DECISIONS.md.
+- **The whole site is paper.** Instead of bridging a light loader and a
+  dark site, the site went light: dark ink on a warm light ground, teal
+  accents, the orange invitation unchanged. The dark background turned out
+  to be a three.js sky dome set to night, now removed so the page's own
+  background shows. Cube faces and point clouds stopped using additive
+  blending (invisible on a light ground): faces are tinted glass, points
+  are dark ink. The loader's exit is a plain fade again. Checked on both
+  layouts in every main state. See DECISIONS.md.

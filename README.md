@@ -32,9 +32,8 @@ Loader
         and pouring into the centre as it hands over to the grid - see
         DECISIONS.md
     [x] Loader colours: "paper" - dark ink streams with touches of orange
-        on a light ground - chosen from six palettes compared live. It
-        hands over to the dark grid through a pool of dark ink spreading
-        from the centre, rather than cutting from light to dark
+        on a light ground - chosen from six palettes compared live, and
+        then carried through the whole site (see below)
     [ ] The project view's own loading state is still a plain pulsing dot +
         "Loading model" in the project bar while the point cloud downloads -
         could borrow the start-up loader's flow field
@@ -62,6 +61,9 @@ Color palette and typography
     [x] Select one color palette and stick to it in all views
         (CSS custom properties on :root in styles.css; the scene colours in
         script.js are kept in step with them by hand)
+    [x] The whole site is "paper": dark ink on a warm light ground, the
+        loader's palette, so the two meet without a jump. Cubes are tinted
+        glass with teal edges, point clouds are dark ink - see DECISIONS.md
     [x] Select the fonts and stick to them in all views
         (Fira Sans - the old <link> pointed at a Google Fonts share page
         rather than a stylesheet, so it had never actually loaded)

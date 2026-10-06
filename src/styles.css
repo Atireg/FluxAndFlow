@@ -1,13 +1,17 @@
 /**
- * Palette - kept in step with the scene colours in script.js
+ * Palette - kept in step with the scene colours in script.js. "Paper": dark
+ * ink on a warm light ground, the loader's palette carried through the
+ * whole site so the two meet without a jump.
  */
 :root {
-    --bg: #010b10;
-    --ink: #e2f4f6;
-    --ink-dim: #86a9b1;
-    --accent: rgb(192, 255, 252);
-    --rule: rgba(192, 255, 252, 0.16);
-    --panel-bg: rgba(2, 16, 22, 0.9);
+    --bg: #f0ede6;
+    --bg-rgb: 240, 237, 230; /* --bg, for rgba() */
+    --ink: #0e1d24;
+    --ink-dim: #5b6b70;
+    --accent: #1f5f6b; /* deep teal - the cubes' edges, links, the loading dot */
+    --rule: rgba(14, 29, 36, 0.14);
+    --panel-bg: rgba(var(--bg-rgb), 0.94);
+    --on-warm: #fff4ea; /* text on the dark orange of the tag and handle */
 
     /**
      * The one warm note in the palette: the invitation - the pulsing cube,
@@ -70,18 +74,15 @@ canvas.webgl {
     z-index: 20;
     display: grid;
     place-items: center;
-    /* The --loader-* colours are set from the palette in index.html -
-       light "paper", against the dark site */
+    /* The --loader-* colours are set from the palette in index.html - the
+       same paper as the site's own --bg */
     background: var(--loader-bg, var(--bg));
-    transition: background-color 0.9s ease; /* reduced motion's dimming, below */
+    transition: opacity 0.9s ease; /* EXIT in index.html */
 }
 
-/* Waits for the ink to cover the paper (see EXIT in index.html: this delay
-   plus this duration), then fades from dark into the dark grid */
 .loader.is-leaving {
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.75s ease 1.35s, background-color 0.9s ease;
 }
 
 .loader__field {
@@ -89,12 +90,6 @@ canvas.webgl {
     inset: 0;
     width: 100%;
     height: 100%;
-    transition: opacity 0.9s ease;
-}
-
-/* Reduced motion: no ink, the still field just fades out with the paper */
-.loader.is-dimming .loader__field {
-    opacity: 0;
 }
 
 .loader__mark {
@@ -172,7 +167,7 @@ canvas.webgl {
     letter-spacing: -0.01em;
     line-height: 1;
     white-space: nowrap;
-    color: var(--ink);
+    color: var(--on-warm);
 
     background: rgba(var(--warm-deep-rgb), 0.88);
     border: 1px solid var(--warm);
@@ -297,7 +292,7 @@ canvas.webgl {
     width: var(--drawer-size);
     height: 100%;
 
-    background: linear-gradient(to left, var(--panel-bg) 70%, rgba(2, 16, 22, 0.72));
+    background: linear-gradient(to left, var(--panel-bg) 70%, rgba(var(--bg-rgb), 0.78));
     border-left: 1px solid var(--rule);
 
     visibility: hidden;
@@ -354,7 +349,7 @@ canvas.webgl {
     font-size: 0.7rem;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: var(--ink);
+    color: var(--on-warm);
 
     background: linear-gradient(to bottom, rgba(var(--warm-deep-rgb), 0.92), rgba(62, 29, 7, 0.92));
     border: 1px solid rgba(var(--warm-rgb), 0.55);
@@ -496,7 +491,7 @@ canvas.webgl {
         height: var(--drawer-size);
         border-left: 0;
         border-top: 1px solid var(--rule);
-        background: linear-gradient(to top, var(--panel-bg) 70%, rgba(2, 16, 22, 0.72));
+        background: linear-gradient(to top, var(--panel-bg) 70%, rgba(var(--bg-rgb), 0.78));
         transform: translateY(100%);
     }
 

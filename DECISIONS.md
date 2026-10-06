@@ -559,13 +559,14 @@ Getting the cube to actually look that orange took two things the code
 alone doesn't explain:
 
 - `spotlightGlowColor` is set from raw values
-  (`setRGB(..., LinearSRGBColorSpace)`), not a hex string like the other
-  scene colours. The renderer outputs linear values straight to the
-  screen (`outputColorSpace = LinearSRGBColorSpace`), and a hex string is
-  converted towards linear on the way in - twice, with
-  `convertSRGBToLinear()` on top. That's harmless for the cyans the scene
-  was tuned by eye in, but it crushed this orange's green channel and
-  rendered a brick red. Raw, the edges show `#ff8c32` exactly.
+  (`setRGB(..., LinearSRGBColorSpace)`), not a hex string. The renderer
+  outputs linear values straight to the screen (`outputColorSpace =
+  LinearSRGBColorSpace`), and a hex string is converted towards linear on
+  the way in - twice, with `convertSRGBToLinear()` on top. That had been
+  harmless for the cyans the dark scene was tuned by eye in, but it
+  crushed this orange's green channel and rendered a brick red. Raw, the
+  edges show `#ff8c32` exactly. Since the move to paper every scene colour
+  is given this way, through `screenColor()`.
 - The face glows through its emissive colour, not its base colour. The
   faces are lit by the scene's cyan lights (`#86cdff`), so an orange base
   colour came out green; emissive isn't lit. The base colour is dimmed as
@@ -765,11 +766,11 @@ Design: "flux and flow" taken literally - a field of particles streaming
 along slowly drifting, braided currents (a few layered sine waves give the
 flow direction at each point), with the "Flux and Flow" wordmark and a
 hairline progress bar over it. It launched in the site's cyan on its dark
-background; its colours are now "paper" - see "The loader is "paper"". The flow
-gathers strength (speed and brightness) as loading progresses; on the way
-out, every stream pours into the centre and the loader hands over to the
-grid, already drawn underneath (see "The loader is "paper"" for how the
-light loader meets the dark grid). Trails come from fading
+background; its colours are now "paper", like the whole site - see "The
+loader is "paper"". The flow gathers strength (speed and brightness) as
+loading progresses; on the way out, every stream pours into the centre
+while the loader fades, onto the same paper, and the grid - already drawn
+underneath - is all that's left. Trails come from fading
 the previous frame instead of clearing it. Under `prefers-reduced-motion`
 it draws a still set of streamlines once and only the bar moves.
 
@@ -918,27 +919,18 @@ direction it's flowing, in `SHADES` steps, drawn as one stroke per shade
 rather than one per particle - in paper, that's dark teal-black ink
 turning to the site's orange.
 
-Paper is the one light screen on a dark site, so its exit has to get from
-light to dark without a jump - a plain fade of the paper over the dark
-grid read as a sudden change. The exit (`EXIT`, 2.1s) runs in three
-overlapping parts:
+A light loader in front of the dark site made the hand-over a jump from
+light to dark. A plain fade read as too sudden; a pool of dark ink
+spreading from the centre until the paper was covered (2.1s) was tried
+next and disliked. Of the alternatives offered - an even dusk, a
+see-through crossfade, the paper draining away along the flow, the whole
+site going light, or a dark loader - the site went light: see "The whole
+site is paper". The loader's background is now the site's own, so its
+exit is a plain 0.9s fade with the streams pouring into the centre, and
+nothing needs bridging.
 
-- The streams pour into the centre (`POUR`, 0.9s).
-- From there a pool of the site's own dark (`--bg`) spreads outward like
-  ink in water (`INK_FROM` to `INK_TO`, 0.15-1.35s, eased), until the
-  paper is gone - about 1s in on a phone. Its edge is a closed curve with
-  three slowly drifting ripples on the radius and a canvas shadow for
-  softness, so it reads as ink rather than a growing disc. At full size
-  even the deepest dip of the edge clears the screen's corners.
-- Only then does the loader fade (`.loader.is-leaving`: 0.75s after a
-  1.35s delay) - from dark into the dark grid, so nothing jumps.
-
-Under reduced motion there's no spreading ink: the loader's background
-transitions from paper to the site's dark while the still field fades
-out, then the same fade reveals the grid.
-
-To change the colours, edit `palette` in index.html; the ink always uses
-`SITE_BG`, which has to match `--bg` in styles.css.
+To change the loader's colours, edit `palette` in index.html; its `bg`
+should stay equal to `--bg` in styles.css, or the jump comes back.
 
 
 Moving the pointer through the grid stirs it; the grid no longer orbits
@@ -986,3 +978,44 @@ Checked on desktop: a drag across the grid moves and tilts the nearby
 cubes without turning the view, they settle back within a couple of
 seconds, clicking a project still opens it, and orbiting by hand inside
 the project still works.
+
+
+The whole site is paper
+-----------------------
+
+Asked for after the loader went "paper": rather than bridge a light
+loader and a dark site, make the site light too. The palette in
+styles.css is now dark ink (`--ink` #0e1d24) on a warm light ground
+(`--bg` #f0ede6), with a deep teal accent (#1f5f6b) and the orange
+invitation unchanged. Text on the orange tag and drawer handle uses
+`--on-warm`, since `--ink` is now dark.
+
+Three things in the scene had to change with it, and none of them is
+obvious from the colours alone:
+
+- **There was a sky.** The near-black background was never the page's
+  `--bg`: a three.js `Sky` dome, its sun set just below the horizon,
+  filled the whole view with a dark night. The renderer was already
+  transparent (`alpha: true`), so removing the sky is what lets the page's
+  own background show through. The background is now only ever `--bg`.
+- **Nothing can be drawn by adding light.** The cube faces and the point
+  clouds used additive blending, which on a dark ground reads as glow and
+  on paper reads as nothing at all. Both now blend normally: the faces are
+  tinted glass (`CUBE_FACE_OPACITY` 0.14 at rest, `HOVER_FACE_OPACITY`
+  0.3, rising to `SPOTLIGHT_FACE_OPACITY` 0.6 at the peak of a glow -
+  every place that used to reset a face to opacity 1 now uses these), and
+  the points are ink: one colour (`pointInkColor`, a dark teal) whose
+  weight varies with the noise texture, and with the gather. The point
+  material no longer writes depth.
+- **Scene colours are given as screen values.** `screenColor(r, g, b)`
+  sets a colour so it shows on screen as exactly those values, for the
+  same reason as the spotlight's orange (see "The invitation is one
+  orange"). The edges and hover tint are the teal accent; the faces' base
+  colour is a pale slate, which the scene's cyan lights cool slightly.
+  The spotlight's face glow is at full strength now (`SPOTLIGHT_FACE_GLOW`
+  1.0), since it shows over a light ground through a partly transparent
+  face.
+
+Checked on both layouts: the grid, a cube at the peak of its glow with
+its tag, hover, the project view with the point cloud, and the drawer
+open, plus the loader's exit with and without reduced motion.
