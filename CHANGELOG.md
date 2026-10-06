@@ -61,8 +61,8 @@ list.
 
 ## Session 2 — 2026-10-04 / 2026-10-06
 
-`e0c070e`..`3cd3bfe` and onwards (branch `ccr-584d8563-rtv32f`, merged to
-`main` as it went)
+`e0c070e`..`40a7edf` (branch `ccr-584d8563-rtv32f`, merged to `main` as it
+went)
 
 Follow-up: the About handle was still invisible on the live site after
 Session 1. Confirmed `main` and the branch were in sync (they were) - the
@@ -325,7 +325,7 @@ rendered no handle at all. Not a deploy problem; a content problem.
 - **Rock Print's points gather out of a scattered cloud when it opens.**
   Each time the project opens, its points start as a loose, dim cloud
   around the model and spiral in to the pavilion over 3.6s, each at its
-  own moment, brightening as they arrive. Runs in the vertex shader (two
+  own moment, strengthening as they arrive. Runs in the vertex shader (two
   extra attributes and one uniform), opt-in per project with
   `gather: true`. Checked frame by frame on desktop; the scatter was then
   made a little brighter and tighter. See DECISIONS.md.
@@ -364,7 +364,8 @@ rendered no handle at all. Not a deploy problem; a content problem.
   to be a three.js sky dome set to night, now removed so the page's own
   background shows. Cube faces and point clouds stopped using additive
   blending (invisible on a light ground): faces are tinted glass, points
-  are dark ink. The loader's exit is a plain fade again. Checked on both
+  are dark ink (since three inks - see below). The loader's exit is a
+  plain fade again. Checked on both
   layouts in every main state. See DECISIONS.md.
 - **The point cloud is dark red, orange and grey.** Each point is given
   one of the three at random (a third each) when the cloud loads, so the

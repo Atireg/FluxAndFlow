@@ -562,8 +562,9 @@ alone doesn't explain:
   (`setRGB(..., LinearSRGBColorSpace)`), not a hex string. The renderer
   outputs linear values straight to the screen (`outputColorSpace =
   LinearSRGBColorSpace`), and a hex string is converted towards linear on
-  the way in - twice, with `convertSRGBToLinear()` on top. That had been
-  harmless for the cyans the dark scene was tuned by eye in, but it
+  the way in - twice, as the colours here then were, with
+  `convertSRGBToLinear()` on top. That had been harmless for the cyans the
+  dark scene was tuned by eye in, but it
   crushed this orange's green channel and rendered a brick red. Raw, the
   edges show `#ff8c32` exactly. Since the move to paper every scene colour
   is given this way, through `screenColor()`.
@@ -859,7 +860,9 @@ position as the `uGather` uniform goes 0 to 1, starting it within the
 first `GATHER_SPREAD` (40%) of the gather by its delay, and turns the
 start position round the vertical axis by up to `GATHER_SWIRL` as it goes
 so the points spiral in like a current rather than flying straight.
-Scattered points are drawn dimmer and brighten as they arrive. Per frame
+Scattered points are drawn fainter (on the dark site that meant dimmer;
+on paper it's lighter ink) and reach full strength as they arrive. Per
+frame
 it costs one uniform write - nothing moves on the CPU, which matters with
 ~79,000 points.
 
@@ -900,8 +903,8 @@ first version had them further down and crashed on load with a
 temporal-dead-zone error.
 
 
-The loader is "paper": light, against the dark site
----------------------------------------------------
+The loader is "paper", and so is the site
+-----------------------------------------
 
 Asked to explore different colours for the loader. Six palettes were put
 side by side on the live site, behind a `?loaderpreview` mode that held

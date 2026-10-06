@@ -63,7 +63,8 @@ Color palette and typography
         script.js are kept in step with them by hand)
     [x] The whole site is "paper": dark ink on a warm light ground, the
         loader's palette, so the two meet without a jump. Cubes are tinted
-        glass with teal edges, point clouds are dark ink - see DECISIONS.md
+        glass with teal edges, point clouds are ink - a random mix of dark
+        red, orange and grey - see DECISIONS.md
     [x] Select the fonts and stick to them in all views
         (Fira Sans - the old <link> pointed at a Google Fonts share page
         rather than a stylesheet, so it had never actually loaded)
