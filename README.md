@@ -129,9 +129,10 @@ Details view (per project)
     [x] Rock Print's points gather out of a scattered cloud, spiralling in
         to the pavilion, each time it opens (`gather: true` in the projects
         array) - see DECISIONS.md
-    [x] Per-project camera angle (`view` in the projects array). Rock Print
-        opens on an elevated three-quarter view fitted to a screenshot of
-        the shot wanted - see DECISIONS.md
+    [x] Per-project camera angle (`view` in the projects array), with
+        optional `zoom` and `lift`, per layout. Rock Print lands on a
+        close, steep view fitted to a phone screenshot of the shot wanted
+        (a gentler zoom on desktop) - see DECISIONS.md
     [~] Images and video in the drawer: three empty frames are in place in
         Rock Print's drawer (one full width, two side by side), waiting
         for the pictures - set each `src` in the project's `images`. Video

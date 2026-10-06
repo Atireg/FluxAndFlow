@@ -418,3 +418,10 @@ rendered no handle at all. Not a deploy problem; a content problem.
   paper cut); the fingertip was chosen, in the About handle's orange at
   75% opacity, with two rings as it taps. Checked on both layouts. See
   DECISIONS.md.
+- **Rock Print lands on the screenshot's view.** Closer and steeper: a
+  project's `view` gained `zoom` and `lift`, per layout. Fitted to the
+  phone screenshot by scoring renders against it (elevation 58, turn 118,
+  zoom 1.9, lift 0.14 on a phone; zoom 1.4, no lift on desktop), with the
+  turn set back 32 degrees so the shot is on screen as the gather
+  completes. Checked on both layouts; drawer and double-tap zoom return to
+  it. See DECISIONS.md.

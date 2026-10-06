@@ -129,9 +129,20 @@ const projects = [
         // horizon, azimuth around the model, and turn - how far the model
         // is spun round when it first appears, before its slow rotation
         // carries on from there. Leave any out for 0; leave `view` out
-        // altogether for the square-on default. These were fitted to a
-        // screenshot of the shot wanted, so they reproduce it.
-        view: { elevation: 49, azimuth: 4, turn: 145 },
+        // altogether for the square-on default. `zoom` comes in closer than
+        // fitting the cube, `lift` raises the model on screen (a share of
+        // its height); each can be per layout. These were fitted to a phone
+        // screenshot of the shot wanted, so they reproduce it there.
+        view: {
+            elevation: 58,
+            azimuth: 4,
+            // 118 in the screenshot, minus the 32 the model turns while its
+            // points gather (GATHER_DURATION at DETAIL_ROTATE_SPEED), so the
+            // shot is what's on screen as the gather completes
+            turn: 86,
+            zoom: { stacked: 1.9, side: 1.4 },
+            lift: { stacked: 0.14, side: 0 },
+        },
 
         // Each time the project opens, its points start out scattered and
         // slowly gather into the pavilion - see GATHER_DURATION
@@ -1161,6 +1172,13 @@ function frameDetail(object, { duration = 1.6, ease } = {}) {
     // the shot is composed around, and stray points running off the edges
     // read fine.
     const framesCube = Boolean(object.userData.project?.view);
+
+    // A project's view can come in closer than the cube's fit (`zoom`), so
+    // the cube runs off the edges and the model fills the screen, and be
+    // nudged up the screen (`lift`, a share of the screen's height). Either
+    // can be one number, or { side, stacked } per layout. Not with the
+    // drawer open, which has its own close-up.
+    const ownView = framesCube && !drawerOpen ? object.userData.project.view : {};
     const box = framesCube
         ? new THREE.Box3().setFromCenterAndSize(object.position, new THREE.Vector3().setScalar(cubeSize))
         : new THREE.Box3().setFromObject(object);
@@ -1183,6 +1201,9 @@ function frameDetail(object, { duration = 1.6, ease } = {}) {
 
     const { mode, fraction } = getPanelLayout();
     const side = mode === 'side';
+    const perLayout = (value, fallback) => (typeof value === 'object' ? value[mode] : value) ?? fallback;
+    const zoom = perLayout(ownView.zoom, 1);
+    const lift = perLayout(ownView.lift, 0);
     let margin = side
         ? DETAIL_MARGIN.side
         : (drawerOpen ? DETAIL_MARGIN.stackedOpen : DETAIL_MARGIN.stackedParked);
@@ -1218,7 +1239,7 @@ function frameDetail(object, { duration = 1.6, ease } = {}) {
         const forWidth = (halfD + halfW / (tan * aspectRatio)) / freeW;
         const forHeight = (halfD + halfH / tan) / freeH;
 
-        distance = margin * Math.max(forWidth, forHeight);
+        distance = margin * Math.max(forWidth, forHeight) / zoom;
         halfHeight = distance * tan;
     }
 
@@ -1233,7 +1254,7 @@ function frameDetail(object, { duration = 1.6, ease } = {}) {
     // A cube-framed view sits centred on the screen when its top already
     // clears the bar there, and only drops as far as it has to otherwise -
     // centring it in the space below the bar leaves it low on a tall phone
-    if (framesCube && !ortho && !side && !drawerOpen) {
+    if (framesCube && !ortho && !side && !drawerOpen && zoom === 1) {
         // Highest point of the cube on screen, from its actual corners
         const eye = center.clone().addScaledVector(toCamera, distance);
         let top = -Infinity;
@@ -1243,6 +1264,8 @@ function frameDetail(object, { duration = 1.6, ease } = {}) {
         }
         ndcY = -Math.min(barShare, Math.max(0, top - (1 - 2 * barShare)));
     }
+
+    ndcY += 2 * lift;
 
     const offset = right.clone().multiplyScalar(-ndcX * halfHeight * aspectRatio)
         .add(up.clone().multiplyScalar(-ndcY * halfHeight));

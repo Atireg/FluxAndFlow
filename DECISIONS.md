@@ -131,6 +131,10 @@ can set its own camera angle" below for the deliberate exceptions.
 A project can set its own camera angle
 --------------------------------------
 
+(Rock Print's view has since been re-fitted, closer and steeper, with
+`zoom` and `lift` added - see "Rock Print lands on a closer, steeper
+view". The mechanism below is unchanged.)
+
 Rock Print now opens on an elevated three-quarter view rather than
 square-on - a choice made from a screenshot of the shot wanted, not a
 drift back to the oblique view rejected above. A project entry's `view`
@@ -1254,3 +1258,48 @@ name over it. Under reduced motion a name appears and fades in place.
 Checked on both layouts: a sweep across the grid drops one leaf per cube
 reached; resting on a cube drops no more; all leaves are gone within
 about six seconds.
+
+
+Rock Print lands on a closer, steeper view
+------------------------------------------
+
+Asked for: make a phone screenshot (taken after zooming in by double-tap)
+the landing view of the Rock Print Pavilion. The shot is closer and
+steeper than the old one, with the pavilion filling the phone's width -
+closer than fitting the cube allows - so a project's `view` gained two
+settings:
+
+- `zoom`: how much closer than the cube's fit the camera comes, straight
+  along the line of sight. When it's above 1 the cube runs off the edges,
+  so the "drop the cube until its top clears the bar" placement is
+  skipped.
+- `lift`: how far up the screen the model sits, as a share of the
+  screen's height.
+
+Either can be one number or `{ side, stacked }`, per layout, and both are
+ignored with the drawer open, which has its own close-up.
+
+The values were fitted, not eyeballed. A throwaway build (never committed)
+froze the model's slow turn, finished the gather instantly and exposed a
+hook to set the view; renders at the screenshot's own viewport (412x762 -
+the screenshot's 1080x2000 page at the phone's pixel ratio) were scored
+against it by how well their orange/red point masks overlap, first on a
+coarse grid of elevation, turn and zoom, then finer. Scoring with the
+render allowed to slide showed the remaining error was placement, not
+angle - hence `lift`. Result: elevation 58, azimuth 4, turn 118, zoom
+1.9, lift 0.14, overlapping the screenshot's mask at about 0.8-0.9
+(1 would be identical) with a 3px residual shift.
+
+On desktop the same zoom and lift push the pavilion's top off the screen,
+so the side layout uses zoom 1.4 and no lift: the same angle, comfortably
+framed.
+
+The model never stops turning (`DETAIL_ROTATE_SPEED`, 9 degrees a
+second), so "landing view" needs a moment. The shot is set to be on
+screen as the gather completes - the moment the pavilion first appears
+whole - so `turn` is 86: the screenshot's 118 less the 32 degrees the
+model turns during `GATHER_DURATION`. A real-time check confirmed the
+mechanism: a frame 20s after opening matched the fitted view turned by the
+expected amount (0.81 overlap), with the same elevation and zoom.
+
+Double-tap zoom and the drawer's close-up both return to this view.
