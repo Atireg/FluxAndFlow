@@ -211,6 +211,10 @@ const drawerCredits = document.querySelector('#project-credits');
 
 let drawerOpen = false;
 
+// Whether a double-click/tap has zoomed in on the model - see toggleDetailZoom.
+// Any re-framing (drawer, resize, a new project) clears it.
+let detailZoomed = false;
+
 function hasDescription(project) {
     return Boolean(
         project.year || project.role || project.context || project.credits
@@ -1087,6 +1091,8 @@ function moveCamera(position, target, duration, ease = 'power2.inOut') {
 }
 
 function frameDetail(object, { duration = 1.6, ease } = {}) {
+    detailZoomed = false;
+
     // A project with its own view is framed on the cube alone. Seen from
     // above at an angle, the bounding box of the model's scattered points
     // balloons and changes size as the model turns; the cube is the frame
@@ -1208,6 +1214,8 @@ const CLOSEUP_ELEVATION = 38; // degrees
 const CLOSEUP_DISTANCE_FACTOR = 1.1;
 
 function frameDetailCloseup(cube, { duration = 1.1 } = {}) {
+    detailZoomed = false;
+
     const model = cube.userData.detail;
     if (!model) return;
 
@@ -2089,6 +2097,79 @@ function closeProject() {
     exitDetailProjection(1.1);
     fitCameraToGrid({ animate: true });
 }
+
+/**
+ * Double-click (or double-tap) on the model zooms in towards the spot under
+ * the pointer; doing it again zooms back out to the view it came from. The
+ * spot is the nearest point of the cloud along the pointer's ray, so it
+ * zooms to what was actually tapped; if the tap missed the model, it zooms
+ * towards the middle of the view instead. The viewing direction is kept,
+ * so it's a straight move in, not a turn.
+ */
+const DETAIL_ZOOM = 0.4; // the camera ends up this fraction of its distance away
+const DETAIL_ZOOM_DURATION = 0.9; // seconds
+const DOUBLE_TAP_TIME = 350; // ms between taps, by when they happened
+const DOUBLE_TAP_DISTANCE = 30; // px between taps
+
+const zoomRaycaster = new THREE.Raycaster();
+zoomRaycaster.params.Points.threshold = 0.06;
+
+function toggleDetailZoom(clientX, clientY) {
+    if (viewState !== 'detail' || !selectedCube) return;
+
+    if (detailZoomed) {
+        if (drawerOpen) {
+            frameDetailCloseup(selectedCube, { duration: DETAIL_ZOOM_DURATION });
+        } else {
+            frameDetail(selectedCube, { duration: DETAIL_ZOOM_DURATION });
+        }
+        return;
+    }
+
+    const pointer = new THREE.Vector2(
+        (clientX / window.innerWidth) * 2 - 1,
+        -(clientY / window.innerHeight) * 2 + 1,
+    );
+    zoomRaycaster.setFromCamera(pointer, camera);
+
+    const model = selectedCube.userData.detail;
+    const hits = model && model.visible ? zoomRaycaster.intersectObject(model, true) : [];
+    const aim = hits.length ? hits[0].point.clone() : controls.target.clone();
+
+    // Same direction of view, closer in, centred on the spot
+    const offset = camera.position.clone().sub(controls.target).multiplyScalar(DETAIL_ZOOM);
+    moveCamera(aim.clone().add(offset), aim, DETAIL_ZOOM_DURATION);
+    detailZoomed = true;
+}
+
+// A mouse sends dblclick; a finger often doesn't, so taps are timed by hand.
+// Some browsers do send dblclick for a double-tap as well, which would zoom
+// in and straight back out - so dblclick only counts for a mouse.
+let lastPointerType = 'mouse';
+canvas.addEventListener('pointerdown', (event) => { lastPointerType = event.pointerType; });
+
+canvas.addEventListener('dblclick', (event) => {
+    if (lastPointerType === 'mouse') toggleDetailZoom(event.clientX, event.clientY);
+});
+
+let lastTap = null;
+canvas.addEventListener('pointerup', (event) => {
+    if (event.pointerType === 'mouse' || wasDrag(event)) return;
+
+    // The event's own time, not when it was handled - a busy frame can
+    // delay handling enough to split a real double-tap in two
+    const now = event.timeStamp;
+    const isDouble = lastTap
+        && now - lastTap.time < DOUBLE_TAP_TIME
+        && Math.hypot(event.clientX - lastTap.x, event.clientY - lastTap.y) < DOUBLE_TAP_DISTANCE;
+
+    if (isDouble) {
+        lastTap = null;
+        toggleDetailZoom(event.clientX, event.clientY);
+    } else {
+        lastTap = { time: now, x: event.clientX, y: event.clientY };
+    }
+});
 
 // Add event listener for mouse move
 window.addEventListener('mousemove', onMouseMove);

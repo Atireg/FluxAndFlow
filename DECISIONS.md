@@ -1070,3 +1070,34 @@ touches nothing in the scene and costs nothing in the renderer.
 Checked on both layouts: the fog's opacity climbs over about three
 seconds after the click, the drawer opens over it normally, and after
 going back it is fully gone.
+
+
+Double-click or double-tap zooms in on the model
+------------------------------------------------
+
+Asked for: zoom in on the 3D model with a double-click or double-tap. In a
+project, `toggleDetailZoom` moves the camera to `DETAIL_ZOOM` (40%) of its
+distance, towards the spot under the pointer, over 0.9s; doing it again
+returns to the view it came from (`frameDetail`, or the drawer's close-up
+if the drawer is open). The spot is the nearest point of the cloud along
+the pointer's ray (a points raycast, `threshold` 0.06), so it zooms to
+what was tapped; a tap that misses the model zooms towards the middle of
+the view. The direction of view is kept, so it's a straight move in with
+no turn - the same rule as every other camera move here. Any re-frame
+(drawer, resize, opening a project) clears the zoomed state.
+
+Mouse and touch are handled separately. A mouse sends `dblclick`. Touch
+double-taps are timed by hand on `pointerup` (`DOUBLE_TAP_TIME` 350ms,
+`DOUBLE_TAP_DISTANCE` 30px), since phones don't reliably send `dblclick`
+- but some do, which would zoom in and straight back out, so `dblclick`
+is ignored unless the last pointer was a mouse. Taps are timed by the
+events' own `timeStamp`, not when they're handled: in testing, a busy
+frame delayed handling enough to push a real 285ms double-tap past a
+300ms limit. A drag isn't a tap (`wasDrag`), so orbiting by hand never
+triggers it.
+
+Checked on both layouts: a double-click/double-tap zooms in to the spot,
+and a second one zooms back out (confirmed by logging the decisions, since
+the software renderer used for testing draws the close-up at a frame or
+two a second, which GSAP's lag smoothing stretches into many seconds of
+move).

@@ -376,3 +376,9 @@ rendered no handle at all. Not a deploy problem; a content problem.
   It clears in ~1s when going back. Not three.js fog, which would grey
   the model itself. Checked on both layouts, drawer open and closed. See
   DECISIONS.md.
+- **Double-click or double-tap to zoom in on the model.** In a project,
+  it moves the camera in towards the tapped spot of the point cloud (to
+  40% of the distance); again zooms back out. Phone double-taps are
+  detected by hand, and the browser's own double-click is ignored for
+  touch so the two can't cancel out. Checked on both layouts. See
+  DECISIONS.md.

@@ -121,6 +121,8 @@ Details view (per project)
         DECISIONS.md
     [x] A grey fog rolls in behind the project as the camera zooms in, and
         clears on the way back - see DECISIONS.md
+    [x] Double-click (or double-tap) on the model zooms in towards that
+        spot; again zooms back out - see DECISIONS.md
     [x] Rock Print's points gather out of a scattered cloud, spiralling in
         to the pavilion, each time it opens (`gather: true` in the projects
         array) - see DECISIONS.md
