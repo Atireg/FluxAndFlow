@@ -71,6 +71,10 @@ Catalog view
     [ ] Add a "magic/mystery" appearance (e.g. fog shader or lights)
         (the old fog was configured near-beyond-far and is now off - see
         DECISIONS.md before re-adding it)
+    [x] The cubes float more (bigger drift, a gentle rock) and the pointer
+        stirs them: moving through the grid carries nearby cubes along and
+        they lean with it, then settle back. Works with a finger too. The
+        grid view no longer orbits when dragged - see DECISIONS.md
     [ ] Change the shape of the cubes when hovering on them
     [ ] Make the content swing and make the colors go crazy
     [x] Fixed number of slots (SLOT_COUNT = 10), stable per project, reachable

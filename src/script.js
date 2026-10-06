@@ -624,6 +624,12 @@ const controls = new OrbitControls(camera, canvas);
 controls.enableDamping = true;
 controls.dampingFactor = 0.08;
 
+// The grid of all projects holds still under the visitor's hand - dragging
+// across it stirs the cubes instead (see the flow, below). Orbiting is only
+// switched on inside a project. update() still runs either way: `enabled`
+// only gates input, and moveCamera relies on update() to resync.
+controls.enabled = false;
+
 /**
  * Renderer
  */
@@ -731,10 +737,12 @@ function randomBetween(min, max) {
 
 const WANDER_Y_PERIOD_A = [8, 14]; // seconds per cycle
 const WANDER_Y_PERIOD_B = [14, 24];
-const WANDER_Y_AMPLITUDE_A = 1.0; // units
-const WANDER_Y_AMPLITUDE_B = 0.5;
-const WANDER_XZ_PERIOD = [12, 20];
-const WANDER_XZ_AMPLITUDE = 0.18; // small horizontal sway
+const WANDER_Y_AMPLITUDE_A = 1.4; // units
+const WANDER_Y_AMPLITUDE_B = 0.6;
+const WANDER_XZ_PERIOD = [9, 16];
+const WANDER_XZ_AMPLITUDE = 0.38; // horizontal sway - kept under half the 1-unit gap between cubes
+const WANDER_TILT_PERIOD = [7, 12];
+const WANDER_TILT = 0.05; // radians - a floating thing rocks a little as it drifts
 
 function createWander() {
     return {
@@ -742,6 +750,8 @@ function createWander() {
         yB: { period: randomBetween(...WANDER_Y_PERIOD_B), phase: Math.random() * Math.PI * 2 },
         x: { period: randomBetween(...WANDER_XZ_PERIOD), phase: Math.random() * Math.PI * 2 },
         z: { period: randomBetween(...WANDER_XZ_PERIOD), phase: Math.random() * Math.PI * 2 },
+        tiltX: { period: randomBetween(...WANDER_TILT_PERIOD), phase: Math.random() * Math.PI * 2 },
+        tiltZ: { period: randomBetween(...WANDER_TILT_PERIOD), phase: Math.random() * Math.PI * 2 },
     };
 }
 
@@ -752,6 +762,8 @@ function wanderOffset(wander, elapsedTime) {
         x: sine(wander.x) * WANDER_XZ_AMPLITUDE,
         y: sine(wander.yA) * WANDER_Y_AMPLITUDE_A + sine(wander.yB) * WANDER_Y_AMPLITUDE_B,
         z: sine(wander.z) * WANDER_XZ_AMPLITUDE,
+        tiltX: sine(wander.tiltX) * WANDER_TILT,
+        tiltZ: sine(wander.tiltZ) * WANDER_TILT,
     };
 }
 
@@ -1284,7 +1296,26 @@ window.addEventListener('resize', () => {
     }
 });
 
+// The flow's settings and state - see trackFlowPointer. Up here because
+// animate() runs its first frame as soon as it is defined.
+const FLOW_RADIUS = cubeSize * 1.4; // units - how far from the pointer cubes feel it
+const FLOW_CARRY = 0.07; // seconds of pointer travel a cube right under it is carried
+const FLOW_MAX = 2.2; // units - the furthest a cube is carried
+const FLOW_STIFFNESS = 28; // 1/s² - pull back towards home
+const FLOW_DAMPING = 5.5; // 1/s - under-damped, so a cube overshoots a touch and settles
+const FLOW_TILT = 0.06; // radians of lean per unit/second of the cube's own speed
+const FLOW_TILT_MAX = 0.35; // radians
+const FLOW_POINTER_FADE = 0.12; // seconds for the pointer's speed to die away once it stops
+
+const flowPointer = new THREE.Vector3();
+const flowPointerVelocity = new THREE.Vector2();
+const flowPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+const flowHit = new THREE.Vector3();
+let flowPointerKnown = false;
+let flowPointerAt = 0;
+
 const clock = new THREE.Clock();
+let lastFrameTime = 0;
 
 function animate() {
     requestAnimationFrame(animate);
@@ -1301,9 +1332,16 @@ function animate() {
     // back home. The spotlight cycle's dwell/gap timers self-correct
     // against the clock once the catalog resumes, however long detail view
     // was open for, so they need no pausing or resetting on the way in or out.
+    const frameTime = Math.min(elapsedTime - lastFrameTime, 0.05);
+    lastFrameTime = elapsedTime;
+
     if (viewState === 'catalog') {
         updateSpotlightCycle(elapsedTime);
-        cubes.forEach((cube) => updateCube(cube, elapsedTime));
+        updateFlow(frameTime);
+        cubes.forEach((cube) => {
+            updateCube(cube, elapsedTime);
+            applyFlow(cube);
+        });
     } else if (viewState === 'dropping') {
         cubes.forEach((cube) => updateDroppingCube(cube, elapsedTime));
     } else if (viewState === 'returning') {
@@ -1379,8 +1417,109 @@ function placeAtRest(cube, elapsedTime) {
     const offset = wanderOffset(cube.userData.wander, elapsedTime);
     cube.position.set(base.x + offset.x, offset.y, base.z + offset.z);
 
-    cube.rotation.set(0, 0, 0);
+    cube.rotation.set(offset.tiltX, 0, offset.tiltZ);
     cube.scale.setScalar(1);
+}
+
+/**
+ * The flow: the cursor (or a finger) moving through the grid carries the
+ * cubes near it along, like a hand drawn through water. They lean the way
+ * they're carried and drift back on a soft, slightly bouncy spring once it
+ * passes.
+ *
+ * Unlike the rest of the catalog's motion this has memory - a spring
+ * integrated frame by frame - since a push has to linger after the pointer
+ * moves on. It's added on top of whatever mode a cube is in, only in the
+ * catalog, and zeroed whenever the catalog is left, so it never carries a
+ * stale shove into the drop or back out of a project.
+ *
+ * Only motion pushes: a resting cursor exerts nothing, so the cube under it
+ * stays put to be clicked.
+ */
+
+function trackFlowPointer(event) {
+    if (viewState !== 'catalog') return;
+
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    raycaster.setFromCamera(mouse, camera);
+    if (!raycaster.ray.intersectPlane(flowPlane, flowHit)) return;
+
+    const now = performance.now() / 1000;
+
+    if (flowPointerKnown) {
+        const dt = Math.max(now - flowPointerAt, 1 / 240);
+        const vx = (flowHit.x - flowPointer.x) / dt;
+        const vz = (flowHit.z - flowPointer.z) / dt;
+
+        // Smoothed, since pointer events arrive unevenly
+        flowPointerVelocity.x += (vx - flowPointerVelocity.x) * 0.5;
+        flowPointerVelocity.y += (vz - flowPointerVelocity.y) * 0.5;
+    }
+
+    flowPointer.copy(flowHit);
+    flowPointerAt = now;
+    flowPointerKnown = true;
+}
+
+function resetFlow() {
+    flowPointerVelocity.set(0, 0);
+    flowPointerKnown = false;
+    cubes.forEach((cube) => {
+        cube.userData.flow = { x: 0, z: 0, vx: 0, vz: 0 };
+    });
+}
+
+function updateFlow(dt) {
+    // The pointer's push dies away once it stops moving
+    flowPointerVelocity.multiplyScalar(Math.exp(-dt / FLOW_POINTER_FADE));
+
+    cubes.forEach((cube) => {
+        const flow = cube.userData.flow ?? (cube.userData.flow = { x: 0, z: 0, vx: 0, vz: 0 });
+        const home = cube.userData.slotPosition;
+
+        // Where the pointer's motion would carry this cube right now
+        let targetX = 0;
+        let targetZ = 0;
+
+        if (flowPointerKnown && home) {
+            const distance = Math.hypot(home.x - flowPointer.x, home.z - flowPointer.z);
+            const reach = Math.exp(-((distance / FLOW_RADIUS) ** 2));
+            targetX = flowPointerVelocity.x * FLOW_CARRY * reach;
+            targetZ = flowPointerVelocity.y * FLOW_CARRY * reach;
+
+            const length = Math.hypot(targetX, targetZ);
+            if (length > FLOW_MAX) {
+                targetX *= FLOW_MAX / length;
+                targetZ *= FLOW_MAX / length;
+            }
+        }
+
+        // A damped spring towards that, integrated in small steps
+        const steps = Math.ceil(dt / (1 / 120));
+        const h = dt / steps;
+        for (let i = 0; i < steps; i++) {
+            flow.vx += (FLOW_STIFFNESS * (targetX - flow.x) - FLOW_DAMPING * flow.vx) * h;
+            flow.vz += (FLOW_STIFFNESS * (targetZ - flow.z) - FLOW_DAMPING * flow.vz) * h;
+            flow.x += flow.vx * h;
+            flow.z += flow.vz * h;
+        }
+    });
+}
+
+// On top of whatever the cube's mode has just set
+function applyFlow(cube) {
+    const flow = cube.userData.flow;
+    if (!flow) return;
+
+    cube.position.x += flow.x;
+    cube.position.z += flow.z;
+
+    // Leaning into the direction it's being carried. Down the screen is +Z,
+    // and a positive turn about X tips the top of the cube that way.
+    const lean = (value) => THREE.MathUtils.clamp(value * FLOW_TILT, -FLOW_TILT_MAX, FLOW_TILT_MAX);
+    cube.rotation.x += lean(flow.vz);
+    cube.rotation.z -= lean(flow.vx);
 }
 
 function updateIdleCube(cube, elapsedTime) {
@@ -1630,6 +1769,7 @@ let dropStartedAt = -Infinity;
 
 function startDrop(cube) {
     viewState = 'dropping';
+    resetFlow();
     droppingFrom = cube;
     dropStartedAt = clock.getElapsedTime();
     hoveredCube = null;
@@ -1793,6 +1933,9 @@ function openProject(cube) {
     // The elevation is the point of this view, so nothing rotates it off-axis
     controls.autoRotate = false;
 
+    // ...but the visitor may orbit it by hand
+    controls.enabled = true;
+
     enterDetailProjection();
 
     // This runs while the rest of the grid is still falling, which already
@@ -1867,6 +2010,7 @@ function closeProject() {
     hideProject();
     setProjectStatus(null);
     controls.autoRotate = false;
+    controls.enabled = false;
 
     if (cube && cube.userData.detail) cube.userData.detail.visible = false;
 
@@ -1920,6 +2064,9 @@ function closeProject() {
 
 // Add event listener for mouse move
 window.addEventListener('mousemove', onMouseMove);
+
+// Pointer, not mouse, so a finger dragged across the grid stirs it too
+window.addEventListener('pointermove', trackFlowPointer);
 
 // Add the click event listener
 window.addEventListener('click', onMouseClick);

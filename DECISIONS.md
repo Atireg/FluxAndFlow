@@ -378,9 +378,11 @@ under a sub-path, so moving to a custom domain needs no code change.
 Clicks are distinguished from drags
 -----------------------------------
 
-Orbiting the catalog ends in a click event, which opened whichever cube the
+Orbiting the catalog ended in a click event, which opened whichever cube the
 pointer happened to come to rest on. A press that travels more than 5px is
-treated as a drag.
+treated as a drag. The catalog no longer orbits at all (see "Moving the
+pointer through the grid stirs it"), but the rule stays: a drag across the
+grid now stirs the cubes, and letting go after it shouldn't open one.
 
 
 The bar's title moves into the drawer on a narrow viewport
@@ -912,3 +914,50 @@ keeps the loader on screen, loops a pretend load, shows the palette's name
 and moves to the next one on a tap - for choosing, on a real device,
 without having to reload and catch a 2-second loader each time. Once a
 palette is chosen, it becomes the default and the others can go.
+
+
+Moving the pointer through the grid stirs it; the grid no longer orbits
+------------------------------------------------------------------------
+
+Asked for: stop the orbit in the all-projects view, make the cubes float
+more, and have them respond to the mouse.
+
+Orbit: `controls.enabled` is false in the catalog and switched on only
+while a project is open. OrbitControls' `update()` still runs every frame
+either way - `enabled` only gates input - and moveCamera depends on that
+to resync after its moves.
+
+Float: the idle wander is bigger and a little quicker
+(`WANDER_XZ_AMPLITUDE` 0.18 to 0.38 units, `WANDER_Y_*` up by about a
+third), and each cube now rocks gently as it drifts (`WANDER_TILT`, 0.05
+rad on slow periods of its own). The sideways sway stays under half the
+1-unit gap between neighbours, so two cubes drifting towards each other
+don't meet.
+
+The flow: the pointer moving through the grid carries the cubes near it
+along, like a hand through water, and they lean the way they're carried.
+Each cube has a target offset - the pointer's recent velocity times
+`FLOW_CARRY`, scaled by a Gaussian of its distance from the pointer
+(`FLOW_RADIUS`) and capped at `FLOW_MAX` - and follows it on an
+under-damped spring (`FLOW_STIFFNESS`, `FLOW_DAMPING`), so it overshoots a
+touch and settles back once the pointer has passed. Only motion pushes: a
+resting cursor exerts nothing, so the cube under it stays put to be
+clicked. Pulling cubes towards the cursor, or pushing them away from it,
+was passed over for exactly that reason - either moves the cube you're
+aiming at. It listens to `pointermove`, so a finger dragged across the
+grid on a phone stirs it too.
+
+This is the one part of the catalog's motion that isn't a pure function
+of mode and clock (see "A cube's visual state is a pure function of its
+mode"): a push has to linger after the pointer moves on, so it's a spring
+integrated frame by frame, in fixed small steps for stability. It's kept
+contained: applied on top of whatever each mode has just set, only in
+`'catalog'`, and zeroed by `resetFlow()` when the drop starts, so no stale
+shove survives into the send-off or back out of a project. Its constants
+and state sit above `animate()`, which runs its first frame as soon as it
+is defined.
+
+Checked on desktop: a drag across the grid moves and tilts the nearby
+cubes without turning the view, they settle back within a couple of
+seconds, clicking a project still opens it, and orbiting by hand inside
+the project still works.

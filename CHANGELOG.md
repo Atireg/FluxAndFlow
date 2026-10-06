@@ -336,3 +336,11 @@ rendered no handle at all. Not a deploy problem; a content problem.
   the direction they flow. `?loaderpreview` holds the loader on screen and
   cycles palettes with a tap; `?loader=<name>` picks one for a normal
   load. See DECISIONS.md.
+- **The grid no longer orbits; the cubes float more and follow the
+  pointer.** Dragging in the all-projects view doesn't turn the camera any
+  more (orbiting still works inside a project). The idle drift is bigger,
+  with a gentle rock, and moving the pointer through the grid carries the
+  nearby cubes along like a hand through water: they lean with the push,
+  overshoot a little and settle back. A still cursor doesn't move
+  anything, so the cube under it stays put to be clicked. See
+  DECISIONS.md.
