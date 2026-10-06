@@ -55,6 +55,67 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
+/**
+ * The fog that rolls in behind a project while it's open (toggled from
+ * openProject/closeProject). Thicker at the edges than in the middle, so
+ * the model sits in a clearing; two soft banks drift slowly across it so
+ * it reads as fog rather than a flat tint. Slow to come in, quicker to
+ * clear when going back to all projects.
+ */
+.fog {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 1.2s ease;
+    background: radial-gradient(
+        ellipse 75% 70% at 50% 50%,
+        rgba(214, 216, 216, 0.55) 0%,
+        rgba(192, 196, 197, 0.88) 60%,
+        rgba(176, 181, 183, 1) 100%
+    );
+}
+
+.fog.is-in {
+    opacity: 1;
+    transition: opacity 3.2s ease-in-out;
+}
+
+.fog::before,
+.fog::after {
+    content: "";
+    position: absolute;
+    width: 90vmax;
+    height: 60vmax;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(232, 233, 232, 0.7), rgba(232, 233, 232, 0));
+    animation: drift 26s ease-in-out infinite alternate;
+    animation-play-state: paused;
+}
+
+.fog::before {
+    left: -30vmax;
+    top: -10vmax;
+}
+
+.fog::after {
+    right: -35vmax;
+    bottom: -15vmax;
+    animation-duration: 34s;
+    animation-direction: alternate-reverse;
+}
+
+.fog.is-in::before,
+.fog.is-in::after {
+    animation-play-state: running;
+}
+
+@keyframes drift {
+    from { transform: translate(0, 0) scale(1); }
+    to   { transform: translate(18vmax, 8vmax) scale(1.15); }
+}
+
 canvas.webgl {
     position: fixed;
     inset: 0;
@@ -527,6 +588,12 @@ canvas.webgl {
 }
 
 @media (prefers-reduced-motion: reduce) {
+    /* The fog still comes in, but holds still */
+    .fog::before,
+    .fog::after {
+        animation: none;
+    }
+
     .bar,
     .drawer,
     .drawer__content,

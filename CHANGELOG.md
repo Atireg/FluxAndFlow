@@ -370,3 +370,9 @@ rendered no handle at all. Not a deploy problem; a content problem.
 - **The point cloud is dark red, orange and grey.** Each point is given
   one of the three at random (a third each) when the cloud loads, so the
   speckle is fixed and turns with the model. See DECISIONS.md.
+- **A grey fog rolls in as you zoom into a project.** A page layer behind
+  the 3D canvas fades in over ~3s once the camera starts moving: grey at
+  the edges, lighter around the model, with soft banks drifting across.
+  It clears in ~1s when going back. Not three.js fog, which would grey
+  the model itself. Checked on both layouts, drawer open and closed. See
+  DECISIONS.md.

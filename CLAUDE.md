@@ -88,9 +88,11 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
   **don't use additive blending** - it renders as nothing on a light
   background. Give scene colours with `screenColor()`. See DECISIONS.md,
   "The whole site is paper".
-- **Fog is off** (`scene.fog = null`). The original config had near beyond
-  far, which inverts it and made the detail-view cube fog out to the
-  background colour. Don't re-enable without reading DECISIONS.md.
+- **Scene fog is off** (`scene.fog = null`). The original config had near
+  beyond far, which inverts it and made the detail-view cube fog out to the
+  background colour. Don't re-enable without reading DECISIONS.md. The
+  grey fog in the project view is something else: a CSS layer (`#fog`)
+  behind the transparent canvas.
 - **Faded cube faces have `depthWrite = false`** while a project is open,
   restored on close. Without this the invisible front face occludes the
   cube's own back edges and the one-point perspective reads as flat.

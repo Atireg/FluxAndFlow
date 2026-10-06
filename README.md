@@ -119,6 +119,8 @@ Details view (per project)
         rolls 90° on the way in or out. The detail camera has to keep
         looking along the catalog's screen-up for this to hold - see
         DECISIONS.md
+    [x] A grey fog rolls in behind the project as the camera zooms in, and
+        clears on the way back - see DECISIONS.md
     [x] Rock Print's points gather out of a scattered cloud, spiralling in
         to the pavilion, each time it opens (`gather: true` in the projects
         array) - see DECISIONS.md

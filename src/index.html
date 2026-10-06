@@ -240,6 +240,11 @@
     })();
   </script>
 
+  <!-- A grey fog that rolls in behind the scene while a project is open:
+       a page layer under the transparent canvas, not three.js fog - see
+       DECISIONS.md -->
+  <div class="fog" id="fog" aria-hidden="true"></div>
+
   <canvas class="webgl"></canvas>
 
   <!-- Rides along on whichever catalog cube is pulsing orange; placed each

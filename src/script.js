@@ -191,6 +191,7 @@ const bar = document.querySelector('#bar');
 // Up here rather than next to updateCubeTags: animate() runs its first
 // frame as soon as it's defined, before code further down has executed
 const exploreTag = document.querySelector('#explore-tag');
+const fog = document.querySelector('#fog');
 const emptyTag = document.querySelector('#empty-tag');
 const cubeTagAnchor = new THREE.Vector3();
 const EMPTY_TAG_DURATION = 1.6; // seconds "Still empty..." stays up after a click
@@ -1959,6 +1960,9 @@ function openProject(cube) {
     // ...but the visitor may orbit it by hand
     controls.enabled = true;
 
+    // The grey fog rolls in behind the project as the camera moves in
+    fog.classList.add('is-in');
+
     enterDetailProjection();
 
     // This runs while the rest of the grid is still falling, which already
@@ -2034,6 +2038,7 @@ function closeProject() {
     setProjectStatus(null);
     controls.autoRotate = false;
     controls.enabled = false;
+    fog.classList.remove('is-in');
 
     if (cube && cube.userData.detail) cube.userData.detail.visible = false;
 

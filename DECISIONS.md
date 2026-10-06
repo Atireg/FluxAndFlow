@@ -1040,3 +1040,33 @@ inks replace it, as the single teal did before. To change the mix, edit
 `POINT_INKS`: its colours, how many there are (the shader takes three;
 change `uInks[3]` and the pick in fragment.glsl to match), or their
 shares.
+
+
+A grey fog rolls in behind an open project - a page layer, not scene fog
+------------------------------------------------------------------------
+
+Asked for: the background changing slowly while the camera zooms in to a
+project, "like a slow grey fog coming in". `#fog` is a fixed layer in the
+page, between the page's paper background and the 3D canvas (which is
+transparent - see "The whole site is paper"). `openProject` adds
+`.is-in`; `closeProject` removes it. It comes in over 3.2s, starting as
+the camera begins to move, and clears in 1.2s on the way back so the grid
+returns on paper.
+
+The fog is grey at the edges and lighter in the middle - a radial
+gradient - so the model sits in a clearing rather than in a uniform grey
+that would flatten it. Two large, soft, lighter banks drift slowly across
+it (CSS keyframes, paused while the fog is out), so it reads as fog moving
+rather than a tint. Under reduced motion the banks hold still and only the
+fade remains. The middle of the fog is kept light enough that the point
+cloud's grey ink still stands out against it.
+
+Why not three.js fog: the scene's own fog fades objects towards a colour
+by their distance from the camera, which is a different effect - it would
+grey out the model itself, not the space around it - and the scene's fog
+has a history here (see "Fog is off"). A page layer behind the canvas
+touches nothing in the scene and costs nothing in the renderer.
+
+Checked on both layouts: the fog's opacity climbs over about three
+seconds after the click, the drawer opens over it normally, and after
+going back it is fully gone.
