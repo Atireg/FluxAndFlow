@@ -73,12 +73,15 @@ canvas.webgl {
     /* The --loader-* colours are set from the palette in index.html -
        light "paper", against the dark site */
     background: var(--loader-bg, var(--bg));
-    transition: opacity 0.9s ease; /* EXIT in index.html */
+    transition: background-color 0.9s ease; /* reduced motion's dimming, below */
 }
 
+/* Waits for the ink to cover the paper (see EXIT in index.html: this delay
+   plus this duration), then fades from dark into the dark grid */
 .loader.is-leaving {
     opacity: 0;
     pointer-events: none;
+    transition: opacity 0.75s ease 1.35s, background-color 0.9s ease;
 }
 
 .loader__field {
@@ -86,6 +89,12 @@ canvas.webgl {
     inset: 0;
     width: 100%;
     height: 100%;
+    transition: opacity 0.9s ease;
+}
+
+/* Reduced motion: no ink, the still field just fades out with the paper */
+.loader.is-dimming .loader__field {
+    opacity: 0;
 }
 
 .loader__mark {

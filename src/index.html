@@ -41,7 +41,14 @@
       var still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
       var MIN_VISIBLE = 1600; // ms - long enough to read as an opening, not a flash
-      var EXIT = 900; // ms - keep in step with .loader.is-leaving in styles.css
+      // The exit: the streams pour into the centre, a pool of the site's own
+      // dark spreads out from there like ink in water until the paper is
+      // gone, and only then does the loader fade - from dark to the dark
+      // grid, so there's no jump from light to dark at any point
+      var EXIT = 2100; // ms in all - keep in step with .loader.is-leaving in styles.css
+      var POUR = 900; // ms for the streams to pour into the centre
+      var INK_FROM = 150, INK_TO = 1350; // ms into the exit that the ink spreads over
+      var SITE_BG = [1, 11, 16]; // --bg in styles.css
       var SHADES = 8; // steps between a palette's two flow colours
 
       // "Paper", chosen from six palettes: dark ink streams on a light ground,
@@ -136,6 +143,13 @@
         if (finishAt !== null && leavingSince === null && now >= finishAt && shown > 0.97) {
           leavingSince = now;
           root.classList.add('is-leaving');
+
+          // No spreading ink without motion: the paper just dims to the
+          // site's dark (a CSS transition) before the loader fades
+          if (still) {
+            root.classList.add('is-dimming');
+            root.style.setProperty('--loader-bg', rgba(SITE_BG, 1));
+          }
         }
 
         if (leavingSince !== null && now - leavingSince > EXIT) {
@@ -155,7 +169,7 @@
         ctx.fillRect(0, 0, width, height);
 
         var flux = 0.3 + 0.7 * shown; // the flow gathers strength as loading goes
-        var pull = leavingSince === null ? 0 : Math.min((now - leavingSince) / EXIT, 1);
+        var pull = leavingSince === null ? 0 : Math.min((now - leavingSince) / POUR, 1);
         var cx = width / 2, cy = height / 2;
 
         for (var i = 0; i < particles.length; i++) {
@@ -197,6 +211,37 @@
           ctx.strokeStyle = rgba(shades[b], alpha);
           ctx.stroke();
         }
+
+        if (leavingSince !== null) drawInk(now);
+      }
+
+      // The site's dark, spreading from the centre where the streams pour in:
+      // a pool with a slowly wavering, soft edge, like ink in water
+      function drawInk(now) {
+        var t = (now - leavingSince - INK_FROM) / (INK_TO - INK_FROM);
+        if (t <= 0) return;
+        t = Math.min(t, 1);
+
+        var eased = t * t * (3 - 2 * t);
+        // At its fullest, even the edge's deepest dip clears the corners
+        var radius = (Math.hypot(width, height) / 2 / 0.86) * 1.05 * eased;
+        if (radius < 1) return;
+
+        var cx = width / 2, cy = height / 2, wave = now * 0.002;
+        ctx.save();
+        ctx.fillStyle = rgba(SITE_BG, 1);
+        ctx.shadowColor = rgba(SITE_BG, 1);
+        ctx.shadowBlur = 40;
+        ctx.beginPath();
+        for (var k = 0; k <= 64; k++) {
+          var theta = (k / 64) * Math.PI * 2;
+          var r = radius * (1 + 0.08 * Math.sin(3 * theta + wave) + 0.05 * Math.sin(5 * theta - wave * 1.3) + 0.03 * Math.sin(8 * theta + wave * 0.7));
+          var x = cx + Math.cos(theta) * r;
+          var y = cy + Math.sin(theta) * r;
+          if (k === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.fill();
+        ctx.restore();
       }
 
       // A still screen still says what the page is: a few streamlines drawn

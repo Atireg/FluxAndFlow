@@ -767,8 +767,9 @@ flow direction at each point), with the "Flux and Flow" wordmark and a
 hairline progress bar over it. It launched in the site's cyan on its dark
 background; its colours are now "paper" - see "The loader is "paper"". The flow
 gathers strength (speed and brightness) as loading progresses; on the way
-out, every stream pours into the centre while the loader fades and the
-grid, already drawn underneath, takes its place. Trails come from fading
+out, every stream pours into the centre and the loader hands over to the
+grid, already drawn underneath (see "The loader is "paper"" for how the
+light loader meets the dark grid). Trails come from fading
 the previous frame instead of clearing it. Under `prefers-reduced-motion`
 it draws a still set of streamlines once and only the bar moves.
 
@@ -792,7 +793,8 @@ phone, and frame rate shouldn't decide how long a loader takes.
 
 Measured on a phone-sized viewport with the network throttled: on Wi-Fi
 and fast 4G the loader leaves at about 2.7-2.8s, set mostly by
-`MIN_VISIBLE` plus the 0.9s exit; on slow 4G (1.6 Mbps) at about 3.9s.
+`MIN_VISIBLE` plus what was then a 0.9s exit; on slow 4G (1.6 Mbps) at
+about 3.9s. The exit is now 2.1s (the ink, below), so add about 1.2s.
 
 
 `?cloudtest`: ten copies of Rock Print, as a load test
@@ -916,11 +918,27 @@ direction it's flowing, in `SHADES` steps, drawn as one stroke per shade
 rather than one per particle - in paper, that's dark teal-black ink
 turning to the site's orange.
 
-Paper is the one light screen on a dark site. That's deliberate: the
-loader is an opening, and its exit - a fade while the streams pour into
-the centre - reveals the dark grid underneath rather than blending into
-it. To change it, edit `palette` in index.html; nothing else needs to
-follow.
+Paper is the one light screen on a dark site, so its exit has to get from
+light to dark without a jump - a plain fade of the paper over the dark
+grid read as a sudden change. The exit (`EXIT`, 2.1s) runs in three
+overlapping parts:
+
+- The streams pour into the centre (`POUR`, 0.9s).
+- From there a pool of the site's own dark (`--bg`) spreads outward like
+  ink in water (`INK_FROM` to `INK_TO`, 0.15-1.35s, eased), until the
+  paper is gone - about 1s in on a phone. Its edge is a closed curve with
+  three slowly drifting ripples on the radius and a canvas shadow for
+  softness, so it reads as ink rather than a growing disc. At full size
+  even the deepest dip of the edge clears the screen's corners.
+- Only then does the loader fade (`.loader.is-leaving`: 0.75s after a
+  1.35s delay) - from dark into the dark grid, so nothing jumps.
+
+Under reduced motion there's no spreading ink: the loader's background
+transitions from paper to the site's dark while the still field fades
+out, then the same fade reveals the grid.
+
+To change the colours, edit `palette` in index.html; the ink always uses
+`SITE_BG`, which has to match `--bg` in styles.css.
 
 
 Moving the pointer through the grid stirs it; the grid no longer orbits
