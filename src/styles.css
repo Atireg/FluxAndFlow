@@ -116,6 +116,90 @@ body {
     to   { transform: translate(18vmax, 8vmax) scale(1.15); }
 }
 
+/**
+ * The double-tap hint over an open model: a hand that fades in, presses
+ * twice with a ripple from its fingertip each time, and fades out (2.2s).
+ * The fingertip (8, 2 in the icon's 24-unit box) sits on the chosen point.
+ */
+.tap-hint {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin: calc(2.75rem * -2 / 24) 0 0 calc(2.75rem * -8 / 24);
+    pointer-events: none;
+    opacity: 0;
+}
+
+.tap-hint.is-showing {
+    animation: tap-hint-life 2.2s ease forwards;
+}
+
+.tap-hint__hand {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    stroke: var(--ink);
+    transform-origin: calc(100% * 8 / 24) calc(100% * 2 / 24);
+    filter: drop-shadow(0 1px 2px rgba(14, 29, 36, 0.25));
+}
+
+.tap-hint__fill {
+    fill: var(--bg);
+    stroke: none;
+}
+
+.tap-hint.is-showing .tap-hint__hand {
+    animation: tap-hint-press 2.2s ease forwards;
+}
+
+.tap-hint__ripple {
+    position: absolute;
+    left: calc(100% * 8 / 24);
+    top: calc(100% * 2 / 24);
+    width: 2.6rem;
+    height: 2.6rem;
+    margin: -1.3rem 0 0 -1.3rem;
+    border: 2px solid var(--warm);
+    border-radius: 50%;
+    opacity: 0;
+    transform: scale(0.2);
+}
+
+.tap-hint.is-showing .tap-hint__ripple {
+    animation: tap-hint-ripple 0.6s ease-out 0.55s;
+}
+
+.tap-hint.is-showing .tap-hint__ripple--second {
+    animation-delay: 1.05s;
+}
+
+@keyframes tap-hint-life {
+    0%   { opacity: 0; }
+    12%  { opacity: 1; }
+    80%  { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+/* Two presses, landing with the two ripples */
+@keyframes tap-hint-press {
+    0%   { transform: translateY(6px) scale(0.92); }
+    15%  { transform: translateY(0) scale(1); }
+    25%  { transform: scale(0.84); }
+    33%  { transform: scale(1); }
+    48%  { transform: scale(0.84); }
+    56%  { transform: scale(1); }
+    100% { transform: scale(1); }
+}
+
+@keyframes tap-hint-ripple {
+    0%   { opacity: 0.8; transform: scale(0.2); }
+    100% { opacity: 0; transform: scale(1.4); }
+}
+
 canvas.webgl {
     position: fixed;
     inset: 0;
@@ -635,6 +719,12 @@ canvas.webgl {
 }
 
 @media (prefers-reduced-motion: reduce) {
+    /* The hint just appears and fades - no presses or ripples */
+    .tap-hint.is-showing .tap-hint__hand,
+    .tap-hint.is-showing .tap-hint__ripple {
+        animation: none;
+    }
+
     /* The fog still comes in, but holds still */
     .fog::before,
     .fog::after {

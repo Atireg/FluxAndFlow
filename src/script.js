@@ -218,6 +218,13 @@ let pointerInPage = true;
 document.documentElement.addEventListener('mouseleave', () => { pointerInPage = false; });
 document.documentElement.addEventListener('mouseenter', () => { pointerInPage = true; });
 const fog = document.querySelector('#fog');
+
+// The double-tap hint - see maybeShowTapHint
+const tapHint = document.querySelector('#tap-hint');
+const TAP_HINT_AFTER_GATHER = 1.2; // seconds after the points have gathered before the first one
+const TAP_HINT_GAP = [7, 13]; // seconds between one hint and the next
+let tapHintNext = Infinity; // seconds into the model's showing (see detailRotateStartTime)
+let tapHintLearned = false; // once the visitor has zoomed, it never shows again
 const emptyTag = document.querySelector('#empty-tag');
 const cubeTagAnchor = new THREE.Vector3();
 const PROJECT_TAG_NEAR = 2.8; // units from a cube's centre - full strength within this
@@ -497,6 +504,7 @@ function loadPointCloudWithShaderMaterial({
 
         gltf.scene.traverse((child) => {
             if (child.isPoints) {
+                gltf.scene.userData.points ??= child;
                 const geometry = child.geometry;
                 if (gather) addGatherAttributes(geometry);
                 const pointsCount = geometry.attributes.position.count;
@@ -1456,6 +1464,8 @@ function animate() {
             // Replays from scattered each time the project opens, since
             // detailRotateStartTime is reset whenever the model is shown
             setGather(selectedCube.userData.detail, Math.min(since / GATHER_DURATION, 1));
+
+            maybeShowTapHint(selectedCube.userData.detail, since);
         }
     }
 
@@ -2058,6 +2068,9 @@ function openProject(cube) {
     // The grey fog rolls in behind the project as the camera moves in
     fog.classList.add('is-in');
 
+    // The first double-tap hint waits until the points have gathered
+    tapHintNext = GATHER_DURATION + TAP_HINT_AFTER_GATHER;
+
     enterDetailProjection();
 
     // This runs while the rest of the grid is still falling, which already
@@ -2134,6 +2147,8 @@ function closeProject() {
     controls.autoRotate = false;
     controls.enabled = false;
     fog.classList.remove('is-in');
+    tapHint.classList.remove('is-showing');
+    tapHintNext = Infinity;
 
     if (cube && cube.userData.detail) cube.userData.detail.visible = false;
 
@@ -2227,6 +2242,51 @@ function toggleDetailZoom(clientX, clientY) {
     const offset = camera.position.clone().sub(controls.target).multiplyScalar(DETAIL_ZOOM);
     moveCamera(aim.clone().add(offset), aim, DETAIL_ZOOM_DURATION);
     detailZoomed = true;
+
+    // They've found it - no more hints
+    tapHintLearned = true;
+    tapHint.classList.remove('is-showing');
+}
+
+/**
+ * Now and then, a hand turns up over a random point of the open model and
+ * taps twice - a hint that double-click/double-tap zooms in. First once the
+ * points have gathered, then every TAP_HINT_GAP seconds, at a new point each
+ * time; never while zoomed in, with the drawer open or the camera moving,
+ * and never again once the visitor has zoomed. `since` is seconds since the
+ * model was shown.
+ */
+const tapHintPoint = new THREE.Vector3();
+
+function maybeShowTapHint(model, since) {
+    if (tapHintLearned || since < tapHintNext) return;
+
+    tapHintNext = since + randomBetween(...TAP_HINT_GAP);
+
+    // Not now - try again next time round
+    if (detailZoomed || drawerOpen || cameraOrientationLocked) return;
+
+    const points = model.userData.points;
+    if (!points || !model.visible) return;
+
+    // A random point of the cloud that's comfortably on screen, clear of
+    // the bar along the top
+    const positions = points.geometry.attributes.position;
+    for (let tries = 0; tries < 12; tries++) {
+        tapHintPoint.fromBufferAttribute(positions, Math.floor(Math.random() * positions.count));
+        points.localToWorld(tapHintPoint).project(camera);
+
+        if (Math.abs(tapHintPoint.x) < 0.7 && tapHintPoint.y > -0.7 && tapHintPoint.y < 0.5) {
+            tapHint.style.left = `${(tapHintPoint.x + 1) / 2 * screenWidth}px`;
+            tapHint.style.top = `${(1 - tapHintPoint.y) / 2 * screenHeight}px`;
+
+            // Restart the animation even if the last one hasn't finished
+            tapHint.classList.remove('is-showing');
+            void tapHint.offsetWidth;
+            tapHint.classList.add('is-showing');
+            return;
+        }
+    }
 }
 
 // A mouse sends dblclick; a finger often doesn't, so taps are timed by hand.

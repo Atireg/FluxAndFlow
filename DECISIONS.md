@@ -1182,3 +1182,30 @@ capped at `POINT_OPACITY` (0.6) in the fragment shader, on top of the
 existing grain and gather weighting; overlapping points build up density
 instead of reading as a solid surface, which is what makes the different
 sizes and colours legible up close.
+
+
+A hand hints at the double-tap zoom, until it's been used
+---------------------------------------------------------
+
+Asked for: a little hand appearing at random above the point cloud,
+inviting a double-click, pulsing twice and disappearing. `#tap-hint` is
+an HTML hand (Lucide's "pointer" icon, ISC licence, inline SVG) over the
+canvas. Each showing is one 2.2s CSS animation: it fades in, presses twice
+with an orange ripple from the fingertip on each press - the double-tap
+gesture itself - and fades out. The fingertip is what's placed on the
+point.
+
+When and where (`maybeShowTapHint`, called each frame in the project
+view): first once the points have gathered (`GATHER_DURATION` plus
+`TAP_HINT_AFTER_GATHER`, about 5s after the model appears), then every
+`TAP_HINT_GAP` (7-13s, at random). Each time it lands on a random point of
+the cloud, projected to the screen, retrying until it finds one
+comfortably on screen and clear of the bar along the top. It skips its
+turn while zoomed in, with the drawer open or while the camera is moving,
+and stops for good (`tapHintLearned`) the first time the visitor zooms -
+at that point the hint has done its job, and repeating it would only nag.
+Closing the project cancels any pending hint. Under reduced motion it
+fades in and out without the presses and ripples.
+
+Checked on both layouts: the first hint lands on the pavilion about 6s
+after opening, and after a double-click no further hint appears.

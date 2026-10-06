@@ -398,3 +398,9 @@ rendered no handle at all. Not a deploy problem; a content problem.
   (the old size) or large at random, a third each, fixed at load, and no
   point lays down more than 60% ink, so overlaps build depth. Checked on
   both layouts. See DECISIONS.md.
+- **A hand hints at the double-tap zoom.** In the project view, once the
+  points have gathered and then every 7-13s, a small hand appears over a
+  random point of the model, taps twice with an orange ripple each time,
+  and fades. Not while zoomed, with the drawer open or the camera moving,
+  and never again once the visitor has zoomed. Checked on both layouts.
+  See DECISIONS.md.
