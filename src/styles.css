@@ -61,6 +61,88 @@ canvas.webgl {
 }
 
 /**
+ * Start-up loader - see the inline script in index.html. Opaque until it
+ * leaves, then fades out over the catalog, already drawn underneath.
+ */
+.loader {
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    display: grid;
+    place-items: center;
+    background: var(--bg);
+    transition: opacity 0.9s ease; /* EXIT in index.html */
+}
+
+.loader.is-leaving {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.loader__field {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.loader__mark {
+    position: relative; /* above the field */
+    display: grid;
+    justify-items: center;
+    gap: 0.9rem;
+    padding: 1.5rem 2rem;
+    text-align: center;
+    transition: transform 0.9s ease, opacity 0.6s ease;
+}
+
+.loader.is-leaving .loader__mark {
+    transform: scale(0.96);
+    opacity: 0;
+}
+
+.loader__title {
+    margin: 0;
+    font-size: clamp(1.75rem, 6vw, 3rem);
+    font-weight: 300;
+    letter-spacing: 0.06em;
+    line-height: 1;
+    color: var(--ink);
+    text-shadow: 0 0 1.2rem var(--bg), 0 0 0.4rem var(--bg); /* lifts it off the streams */
+}
+
+.loader__and {
+    font-size: 0.55em;
+    letter-spacing: 0.12em;
+    color: var(--ink-dim);
+    vertical-align: 0.25em;
+}
+
+.loader__line {
+    width: clamp(8rem, 30vw, 12rem);
+    height: 1px;
+    background: var(--rule);
+    overflow: hidden;
+}
+
+.loader__fill {
+    display: block;
+    height: 100%;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left center;
+}
+
+.loader__count {
+    margin: 0;
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    line-height: 1;
+    color: var(--ink-dim);
+    font-variant-numeric: tabular-nums;
+}
+
+/**
  * The tag on the catalog's pulsing cube. Positioned and faded from script.js
  * every frame; the short transition only smooths the moment the spotlight
  * hands over or the cursor takes the cube, which would otherwise pop.

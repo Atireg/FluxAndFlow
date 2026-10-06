@@ -255,6 +255,66 @@ function setProjectStatus(message) {
 }
 
 /**
+ * Start-up progress, reported to the loader screen in index.html
+ * (window.fluxLoader). Everything the catalog needs before it's worth showing
+ * registers here as it starts loading; once sealBoot() has been called and
+ * every registered asset has finished - or failed, which still counts, so a
+ * missing file can't hold the page hostage - the loader is told to leave.
+ */
+const bootAssets = [];
+let bootSealed = false;
+let bootFinished = false;
+
+function bootAsset() {
+    const entry = { fraction: 0, done: false };
+    bootAssets.push(entry);
+    reportBoot();
+
+    return {
+        progress: (event) => {
+            if (event && event.lengthComputable && event.total) {
+                entry.fraction = Math.min(event.loaded / event.total, 1);
+                reportBoot();
+            }
+        },
+        done: () => {
+            entry.fraction = 1;
+            entry.done = true;
+            reportBoot();
+        },
+    };
+}
+
+function reportBoot() {
+    const fraction = bootAssets.length
+        ? bootAssets.reduce((sum, entry) => sum + entry.fraction, 0) / bootAssets.length
+        : 0;
+
+    window.fluxLoader?.progress(fraction);
+
+    if (bootSealed && !bootFinished && bootAssets.every((entry) => entry.done)) {
+        bootFinished = true;
+
+        // Two frames on, so the catalog has actually been drawn behind the
+        // loader by the time it starts to fade
+        requestAnimationFrame(() => requestAnimationFrame(() => window.fluxLoader?.finish()));
+    }
+}
+
+function sealBoot() {
+    bootSealed = true;
+    reportBoot();
+}
+
+/**
+ * Load test: `?cloudtest` in the address puts a full point cloud in every
+ * cube of the catalog, each downloaded separately as if it were a different
+ * project's, to see how the page copes with ten of them at start-up. Off
+ * unless asked for - see DECISIONS.md.
+ */
+const CLOUD_TEST = new URLSearchParams(window.location.search).has('cloudtest');
+
+/**
  * Loaders
  */
 const textureLoader = new THREE.TextureLoader();
@@ -269,6 +329,8 @@ function loadPointCloudWithShaderMaterial({
     glbPath,
     parentObject,
     onLoaded,
+    onProgress,
+    onError,
 }) {
 
     // console.log(parentObject);
@@ -334,7 +396,7 @@ function loadPointCloudWithShaderMaterial({
         parentObject.add(gltf.scene);
 
         if (onLoaded) onLoaded(gltf.scene);
-    });
+    }, onProgress, onError);
 
 }
 
@@ -505,7 +567,8 @@ const smokeGeometry = new THREE.PlaneGeometry(20, 20, 32, 64);
 smokeGeometry.rotateX(Math.PI / 2);
 // smokeGeometry.scale(1.5, 6, 1.5);
 
-const perlinTexture = textureLoader.load(assetUrl('textures/perlin.png'));
+const perlinBoot = bootAsset();
+const perlinTexture = textureLoader.load(assetUrl('textures/perlin.png'), perlinBoot.done, undefined, perlinBoot.done);
 perlinTexture.wrapS = THREE.RepeatWrapping
 perlinTexture.wrapT = THREE.RepeatWrapping
 
@@ -644,6 +707,9 @@ const spotlightFaceColor = new THREE.Color(); // same, for the cube's own face
 
 createPlayground();
 
+// Everything the catalog loads at start-up has registered by now
+sealBoot();
+
 // Cubes
 function createPlayground() {
     clearCubes();
@@ -688,7 +754,9 @@ function createPlayground() {
         scene.add(cube);
         cubes.push(cube);
 
-        if (cube.userData.project) {
+        if (CLOUD_TEST) {
+            addTestCloudToCube(cube);
+        } else if (cube.userData.project) {
             addContentToCube(cube);
         }
     }
@@ -709,6 +777,7 @@ function clearCubes() {
 // Helper function to add a project's thumbnail to its cube
 function addContentToCube(cube) {
     const { project } = cube.userData;
+    const boot = bootAsset();
 
     // Load 3D project representation
     gltfLoader.load(
@@ -720,8 +789,31 @@ function addContentToCube(cube) {
             cube.add(content);
             cube.userData.content = content;
             cube.userData.contentBaseScale = 0.2;
-        }
+            boot.done();
+        },
+        boot.progress,
+        boot.done,
     );
+}
+
+// ?cloudtest only: the first project's full point cloud as every cube's
+// thumbnail. The query string makes each a separate download, the way ten
+// different projects' clouds would be.
+function addTestCloudToCube(cube) {
+    const boot = bootAsset();
+
+    loadPointCloudWithShaderMaterial({
+        glbPath: `${assetUrl(projects[0].detailModel)}?copy=${cube.userData.slot}`,
+        parentObject: cube,
+        onProgress: boot.progress,
+        onError: boot.done,
+        onLoaded: (model) => {
+            model.rotation.y = DETAIL_MODEL_YAW;
+            cube.userData.content = model;
+            cube.userData.contentBaseScale = 1;
+            boot.done();
+        },
+    });
 }
 
 /**

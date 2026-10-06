@@ -744,3 +744,81 @@ empty..." wins and "Explore me..." stays hidden until it's gone - one
 answer to the click, not two labels stacked on the same face. In practice
 a desktop click comes after a hover, which already ends the spotlight on
 that cube; on a touch screen the tap is what does it.
+
+
+The start-up loader is inline in index.html, and waits for real progress
+-------------------------------------------------------------------------
+
+The loader (`#loader`) is markup, CSS and a small classic script written
+straight into index.html, ahead of everything else in `<body>`. The main
+bundle is ~690 KB of JavaScript (~180 KB over the wire); a loader built
+inside it couldn't appear until all of that had downloaded and run, which
+on a slow connection is the first second or more - exactly when a loader
+is needed. Inline, it's on screen with the first paint.
+
+Design: "flux and flow" taken literally - a field of particles streaming
+along slowly drifting, braided currents (a few layered sine waves give the
+flow direction at each point), in the site's cyan on its background, with
+the "Flux and Flow" wordmark and a hairline progress bar over it. The flow
+gathers strength (speed and brightness) as loading progresses; on the way
+out, every stream pours into the centre while the loader fades and the
+grid, already drawn underneath, takes its place. Trails come from fading
+the previous frame instead of clearing it. Under `prefers-reduced-motion`
+it draws a still set of streamlines once and only the bar moves.
+
+Progress is real, not a timer. script.js registers every asset the
+catalog needs at start-up with `bootAsset()` (the noise texture, each
+thumbnail, and in the cloud test every cloud), reports byte progress where
+the server gives a length, and calls `window.fluxLoader.finish()` once
+`sealBoot()` has run and all of them are done - two frames later, so the
+grid has been drawn behind it. A failed load counts as done, so a missing
+file can't hold the page hostage, and the loader finishes on its own after
+30 seconds whatever happens. It stays up at least 1.6s (`MIN_VISIBLE`), so
+a fast load reads as an opening rather than a flash. Fonts aren't waited
+for.
+
+Everything in its animation is scaled by elapsed time, not frame count:
+the bar's easing, the particle speed, the trail fade. The first version
+was per-frame, and in a slow software renderer the bar took seconds to
+crawl through its last few percent - the same would happen on a slow
+phone, and frame rate shouldn't decide how long a loader takes.
+
+Measured on a phone-sized viewport with the network throttled: on Wi-Fi
+and fast 4G the loader leaves at about 2.7-2.8s, set mostly by
+`MIN_VISIBLE` plus the 0.9s exit; on slow 4G (1.6 Mbps) at about 3.9s.
+
+
+`?cloudtest`: a point cloud in every cube, as a load test
+---------------------------------------------------------
+
+Asked as a quick test of whether the page would still load reasonably fast
+with the point cloud in every cube. Rather than changing the catalog for
+everyone, it's behind a query string: `?cloudtest` in the address
+(`addTestCloudToCube`) puts Rock Print's full point cloud in all ten cubes
+in place of the thumbnails. Each copy is fetched with its own `?copy=n`,
+so the browser downloads it ten times, the way ten different projects'
+clouds would be - one cached file reused ten times would have flattered
+the result. The loader waits for all ten.
+
+Results, phone-sized viewport, network throttled, cache disabled, text
+files gzipped as GitHub Pages serves them:
+
+| Connection              | Normal: models done | Normal: total | Cloud test: models done | Cloud test: total |
+|-------------------------|--------------------:|--------------:|------------------------:|------------------:|
+| Wi-Fi, 30 Mbps          |               0.8s  |       0.48 MB |                    3.2s |           9.66 MB |
+| Fast 4G, 9 Mbps         |               1.0s  |       0.48 MB |                    9.2s |           9.66 MB |
+| Slow 4G, 1.6 Mbps       |               2.5s  |       0.48 MB |                   49.2s |           9.66 MB |
+
+The clouds are 944 KB each (78,637 points: 16-bit positions, 8-bit
+colours), so ten of them are about twenty times everything else the page
+loads. Download is the bottleneck: on 4G the visitor would wait about
+nine seconds before seeing the grid. Rendering ~790,000 points is light
+for a real GPU, but couldn't be measured here - the software renderer used
+for testing dropped from ~30 to ~1 frames per second, which says the
+draw cost is real but not what it would be on an actual device.
+
+Conclusion, if the catalog is to show clouds: give each project a small
+thumbnail cloud (a few thousand points, around 100 KB) rather than its
+full detail cloud, and/or have the loader wait only for the essentials and
+let the clouds fade into their cubes as they arrive. The flag can be
+removed once that's decided.

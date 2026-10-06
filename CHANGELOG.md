@@ -298,3 +298,19 @@ rendered no handle at all. Not a deploy problem; a content problem.
   screen, and has settled by about 2s. Checked frame by frame on both
   layouts, and on a round trip including going back mid-fall. See
   DECISIONS.md.
+- **A start-up loader, themed on flux and flow.** Particles stream along
+  slowly braiding currents around the "Flux and Flow" wordmark, with a
+  hairline progress bar and percentage. The flow strengthens as the
+  catalog loads, and on the way out the streams pour into the centre as
+  the grid fades in. It's inline in index.html so it shows before the main
+  script has downloaded, tracks real asset progress, stays up at least
+  1.6s, can't get stuck (failed loads count as done; 30s cap), and
+  respects reduced motion. Checked on both layouts on a throttled network.
+  See DECISIONS.md.
+- **Load test: `?cloudtest` puts the point cloud in every cube.** Behind a
+  query string, so the normal page is unchanged. Each cube downloads its
+  own copy, as ten different projects would. Result: 9.7 MB instead of
+  0.5 MB, and the grid appears after ~3s on Wi-Fi, ~9s on fast 4G and
+  ~50s on slow 4G, against 1-2.5s now. Recommendation: small thumbnail
+  clouds and/or letting clouds stream in after the loader. See
+  DECISIONS.md.

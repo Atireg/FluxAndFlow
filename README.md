@@ -22,9 +22,21 @@ Landing/welcome view
     [ ] How does that transform into the cubes/catalog view - maybe just a semi-transparent surface with the text and the figure on top of the moving cubes?
 
 Loader
-    [ ] Develop something flow-related
-        (there is a plain pulsing dot + "Loading model" in the project bar
-        while the point cloud downloads - functional, not yet flow-related)
+    [x] Start-up loader: a field of flowing particles around the
+        "Flux and Flow" wordmark, gathering strength as the catalog loads
+        and pouring into the centre as it hands over to the grid - see
+        DECISIONS.md
+    [ ] The project view's own loading state is still a plain pulsing dot +
+        "Loading model" in the project bar while the point cloud downloads -
+        could borrow the start-up loader's flow field
+
+Point clouds as catalog thumbnails (tested with ?cloudtest - see DECISIONS.md)
+    [ ] Ten full-size clouds at start-up is too heavy: ~9.7 MB, about 9s on
+        a 4G phone and ~50s on a slow connection, against ~0.5 MB now.
+        If the catalog should show clouds, give each project a small
+        thumbnail cloud (a few thousand points, ~100 KB) and/or let the
+        loader wait only for the essentials while clouds fade in as they
+        arrive
 
 Navigation and general layout
     [ ] Logo
