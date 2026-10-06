@@ -1193,12 +1193,17 @@ A hand hints at the double-tap zoom, until it's been used
 ---------------------------------------------------------
 
 Asked for: a little hand appearing at random above the point cloud,
-inviting a double-click, pulsing twice and disappearing. `#tap-hint` is
-an HTML hand (Lucide's "pointer" icon, ISC licence, inline SVG) over the
-canvas. Each showing is one 2.2s CSS animation: it fades in, presses twice
-with an orange ripple from the fingertip on each press - the double-tap
-gesture itself - and fades out. The fingertip is what's placed on the
-point.
+inviting a double-click, pulsing twice and disappearing. It started as a
+hand (Lucide's "pointer" icon); four redrawn designs were then put side by
+side over the pavilion - a fine-line hand, a solid teal silhouette, a
+paper-cut hand and a handless fingertip - and the fingertip was chosen, in
+the About handle's orange and a little transparent. `#tap-hint` is now a
+soft orange touch point (a radial gradient) with two rings, over the
+canvas. Each showing is one 2.2s CSS animation: it fades in to 75%
+opacity, presses twice with a ring spreading from it on each press - the
+double-tap gesture itself - and fades out. Its centre is placed on the
+point. Over the orange points it's deliberately quiet; the rings are what
+catch the eye.
 
 When and where (`maybeShowTapHint`, called each frame in the project
 view): first once the points have gathered (`GATHER_DURATION` plus

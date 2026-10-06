@@ -413,3 +413,8 @@ rendered no handle at all. Not a deploy problem; a content problem.
   falling-leaf names are removed, along with what supported them. The
   tap hint now comes every 5 seconds instead of every 7-13. Checked: a
   sweep across the grid shows no names, and the hint repeats at 5.0-5.1s.
+- **The tap hint is a soft orange touch point.** Four designs were drawn
+  and shown over the pavilion (fine line, ink silhouette, fingertip,
+  paper cut); the fingertip was chosen, in the About handle's orange at
+  75% opacity, with two rings as it taps. Checked on both layouts. See
+  DECISIONS.md.

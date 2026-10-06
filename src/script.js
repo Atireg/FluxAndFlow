@@ -2211,8 +2211,8 @@ function toggleDetailZoom(clientX, clientY) {
 }
 
 /**
- * Now and then, a hand turns up over a random point of the open model and
- * taps twice - a hint that double-click/double-tap zooms in. First once the
+ * Every few seconds, a touch point turns up over a random point of the open
+ * model and taps twice - a hint that double-click/double-tap zooms in. First once the
  * points have gathered, then every TAP_HINT_GAP seconds, at a new point each
  * time; never while zoomed in, with the drawer open or the camera moving,
  * and never again once the visitor has zoomed. `since` is seconds since the

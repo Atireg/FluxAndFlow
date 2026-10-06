@@ -117,18 +117,18 @@ body {
 }
 
 /**
- * The double-tap hint over an open model: a hand that fades in, presses
- * twice with a ripple from its fingertip each time, and fades out (2.2s).
- * The fingertip (8, 2 in the icon's 24-unit box) sits on the chosen point.
+ * The double-tap hint over an open model: a soft touch point in the About
+ * handle's orange, a little see-through, that fades in, presses twice with
+ * a ring spreading from it each time, and fades out (2.2s). Its centre sits
+ * on the chosen point of the model.
  */
 .tap-hint {
     position: fixed;
     top: 0;
     left: 0;
     z-index: 1;
-    width: 2.75rem;
-    height: 2.75rem;
-    margin: calc(2.75rem * -2 / 24) 0 0 calc(2.75rem * -8 / 24);
+    width: 0;
+    height: 0;
     pointer-events: none;
     opacity: 0;
 }
@@ -137,67 +137,67 @@ body {
     animation: tap-hint-life 2.2s ease forwards;
 }
 
-.tap-hint__hand {
+.tap-hint__dot,
+.tap-hint__ripple {
     position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    stroke: var(--ink);
-    transform-origin: calc(100% * 8 / 24) calc(100% * 2 / 24);
-    filter: drop-shadow(0 1px 2px rgba(14, 29, 36, 0.25));
+    border-radius: 50%;
 }
 
-.tap-hint__fill {
-    fill: var(--bg);
-    stroke: none;
+.tap-hint__dot {
+    width: 1.75rem;
+    height: 1.75rem;
+    margin: -0.875rem 0 0 -0.875rem;
+    background: radial-gradient(
+        circle,
+        rgba(var(--warm-rgb), 0.9) 0%,
+        rgba(var(--warm-rgb), 0.55) 45%,
+        rgba(var(--warm-rgb), 0) 72%
+    );
 }
 
-.tap-hint.is-showing .tap-hint__hand {
+.tap-hint.is-showing .tap-hint__dot {
     animation: tap-hint-press 2.2s ease forwards;
 }
 
 .tap-hint__ripple {
-    position: absolute;
-    left: calc(100% * 8 / 24);
-    top: calc(100% * 2 / 24);
-    width: 2.6rem;
-    height: 2.6rem;
-    margin: -1.3rem 0 0 -1.3rem;
+    width: 3rem;
+    height: 3rem;
+    margin: -1.5rem 0 0 -1.5rem;
     border: 2px solid var(--warm);
-    border-radius: 50%;
     opacity: 0;
-    transform: scale(0.2);
+    transform: scale(0.3);
 }
 
 .tap-hint.is-showing .tap-hint__ripple {
-    animation: tap-hint-ripple 0.6s ease-out 0.55s;
+    animation: tap-hint-ripple 0.7s ease-out 0.55s;
 }
 
 .tap-hint.is-showing .tap-hint__ripple--second {
     animation-delay: 1.05s;
 }
 
+/* Never fully solid: the model stays visible through it */
 @keyframes tap-hint-life {
     0%   { opacity: 0; }
-    12%  { opacity: 1; }
-    80%  { opacity: 1; }
+    12%  { opacity: 0.75; }
+    80%  { opacity: 0.75; }
     100% { opacity: 0; }
 }
 
-/* Two presses, landing with the two ripples */
+/* Two presses, landing with the two rings */
 @keyframes tap-hint-press {
-    0%   { transform: translateY(6px) scale(0.92); }
-    15%  { transform: translateY(0) scale(1); }
-    25%  { transform: scale(0.84); }
+    0%   { transform: scale(0.6); }
+    15%  { transform: scale(1); }
+    25%  { transform: scale(0.72); }
     33%  { transform: scale(1); }
-    48%  { transform: scale(0.84); }
+    48%  { transform: scale(0.72); }
     56%  { transform: scale(1); }
     100% { transform: scale(1); }
 }
 
 @keyframes tap-hint-ripple {
-    0%   { opacity: 0.8; transform: scale(0.2); }
-    100% { opacity: 0; transform: scale(1.4); }
+    0%   { opacity: 0.9; transform: scale(0.3); }
+    100% { opacity: 0; transform: scale(1.5); }
 }
 
 canvas.webgl {
@@ -717,8 +717,8 @@ canvas.webgl {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    /* The hint just appears and fades - no presses or ripples */
-    .tap-hint.is-showing .tap-hint__hand,
+    /* The hint just appears and fades - no presses or rings */
+    .tap-hint.is-showing .tap-hint__dot,
     .tap-hint.is-showing .tap-hint__ripple {
         animation: none;
     }

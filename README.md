@@ -123,10 +123,9 @@ Details view (per project)
         clears on the way back - see DECISIONS.md
     [x] Double-click (or double-tap) on the model zooms in towards that
         spot; again zooms back out - see DECISIONS.md
-    [x] A little hand turns up every 5 seconds over the model and taps
-        twice, hinting at the zoom, until the visitor has used it
-    [ ] A more beautiful hand for that hint - options drawn, awaiting a
-        choice
+    [x] A soft orange touch point turns up every 5 seconds over the model
+        and taps twice, hinting at the zoom, until the visitor has used it
+        (chosen from four drawn options, replacing an icon hand)
     [x] Rock Print's points gather out of a scattered cloud, spiralling in
         to the pavilion, each time it opens (`gather: true` in the projects
         array) - see DECISIONS.md
