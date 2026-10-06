@@ -72,6 +72,14 @@ const POINT_INKS = [
     { color: screenColor(120, 116, 110), share: 1 / 3 }, // warm grey
 ];
 
+// Each point is also given one of these sizes at random, a third each - the
+// middle one is the size every point used to be
+const POINT_SIZES = [0.6, 1, 1.6];
+
+// How much ink a point lays down at most: semi-transparent, so overlapping
+// points build up depth instead of a solid surface
+const POINT_OPACITY = 0.6;
+
 /**
  * Assets
  *
@@ -509,8 +517,7 @@ function loadPointCloudWithShaderMaterial({
                 // const colors = new Float32Array(pointsCount * 3);
 
                 for (let i = 0; i < pointsCount; i++) {
-                    // scales[i] = Math.random();  
-                    scales[i] = 1;  
+                    scales[i] = POINT_SIZES[Math.floor(Math.random() * POINT_SIZES.length)];
                 }
 
                 geometry.setAttribute('aScale', new THREE.BufferAttribute(scales, 1));
@@ -544,6 +551,7 @@ function loadPointCloudWithShaderMaterial({
                     {
                         // uTime: new THREE.Uniform(0),
                         uInks: { value: POINT_INKS.map((ink) => ink.color) },
+                        uOpacity: { value: POINT_OPACITY },
                         uPerlinTexture: new THREE.Uniform(perlinTexture),
                         uPointScale: { value: 1 },
                         uSizeAttenuation: { value: 1 },

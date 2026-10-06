@@ -1162,3 +1162,18 @@ up with the tag elements, not next to `updateCubeTags`, because
 Checked on both layouts: the label on the hovered cube, on the nearest
 cube between two, gone far from the grid, and replaced by "Still empty..."
 when an empty slot is clicked; no "Explore me..." anywhere.
+
+
+Points come in three sizes and are semi-transparent
+---------------------------------------------------
+
+Asked for: semi-transparent points, in three random sizes, with the
+existing size as the middle one. Each point's `aScale` - which the vertex
+shader already multiplied into the point size, but which was 1 for every
+point - is now one of `POINT_SIZES` (0.6, 1, 1.6) at random, a third
+each. Like the inks, it's picked once when the cloud loads, so a point
+keeps its size as the model turns. The most ink any point lays down is
+capped at `POINT_OPACITY` (0.6) in the fragment shader, on top of the
+existing grain and gather weighting; overlapping points build up density
+instead of reading as a solid surface, which is what makes the different
+sizes and colours legible up close.

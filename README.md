@@ -155,7 +155,8 @@ Performance Check
     [ ] Add shaders for the colors of the point clouds
         (COLOR_0 is deliberately kept in the .glb for this, although nothing
         reads it yet - the points are currently a random mix of three inks,
-        dark red, orange and grey; see DECISIONS.md)
+        dark red, orange and grey, in three random sizes, semi-transparent;
+        see DECISIONS.md)
     [x] Deploy at least part of the project early on
     [x] Point cloud down from 2.2 MB to 922 KB, and the Draco decoder it used
         to pull for nothing is gone

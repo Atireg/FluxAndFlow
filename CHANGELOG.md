@@ -394,3 +394,7 @@ rendered no handle at all. Not a deploy problem; a content problem.
   grid slot, fading in as the pointer approaches and out as it leaves.
   "Still empty..." still answers a click on an empty slot. Checked on both
   layouts. See DECISIONS.md.
+- **Points in three sizes, semi-transparent.** Each point is small, medium
+  (the old size) or large at random, a third each, fixed at load, and no
+  point lays down more than 60% ink, so overlaps build depth. Checked on
+  both layouts. See DECISIONS.md.
