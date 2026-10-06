@@ -61,7 +61,7 @@ list.
 
 ## Session 2 — 2026-10-04 / 2026-10-06
 
-`e0c070e`..`07376a4` (branch `ccr-584d8563-rtv32f`, merged to `main` as it
+`e0c070e`..`6c64b14` (branch `ccr-584d8563-rtv32f`, merged to `main` as it
 went)
 
 Follow-up: the About handle was still invisible on the live site after

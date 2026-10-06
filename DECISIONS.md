@@ -733,7 +733,7 @@ eligible now"), and so does the tag, as asked. Clicking an empty slot
 answers with the "Still empty..." tag (below) rather than restricting this
 one.
 
-`exploreTag` (now `projectTag`) is looked up near the top of the file with the other elements,
+`exploreTag` (later `projectTag`, now the `leaves` container) is looked up near the top of the file with the other elements,
 not next to `updateCubeTags`: `animate()` runs its first frame the moment
 it's defined, before anything further down has executed, and the tag
 lookup has to exist by then.
@@ -757,8 +757,9 @@ slot isn't one. If the clicked cube is also the pulsing one, "Still
 empty..." wins and "Explore me..." stays hidden until it's gone - one
 answer to the click, not two labels stacked on the same face. In practice
 a desktop click comes after a hover, which already ends the spotlight on
-that cube; on a touch screen the tap is what does it. (The same rule now
-applies to the "Project XX" label that replaced "Explore me...".)
+that cube; on a touch screen the tap is what does it. (The same rule
+carried over to what replaced "Explore me...": a cube showing "Still
+empty..." doesn't drop its falling name over it.)
 
 
 The start-up loader is inline in index.html, and waits for real progress
