@@ -61,7 +61,7 @@ list.
 
 ## Session 2 — 2026-10-04 / 2026-10-07
 
-`e0c070e`..`4dca501`, then the docs clean-up `b905cbe` and three tweaks after it (branch
+`e0c070e`..`4dca501`, then the docs clean-up `b905cbe` and four tweaks after it (branch
 `ccr-584d8563-rtv32f`, fast-forward merged to `main` on each "merge and
 build"). Every feature below is live and has a DECISIONS.md entry; features
 that were tried and removed are listed under "Tried and removed" there.
@@ -108,12 +108,14 @@ that were tried and removed are listed under "Tried and removed" there.
   list and a "Tried and removed" section, this entry condensed, README's
   TODO split into open and done, CLAUDE.md given a "where to pick up" and
   testing tips.
-- **After the clean-up, three tweaks**: Rock Print's phone view zoomed
+- **After the clean-up, four tweaks**: Rock Print's phone view zoomed
   out a touch (stacked zoom 1.9 -> 1.75) since it cropped the pavilion; the
   tap hint is now the floating cubes' blue instead of orange; the spotlit
   cube now eases out of and back into its float (longer, smoothstepped
   fade-out, pose blended with the float) - it used to snap up to 2 units
-  in one frame as the jump ended.
+  in one frame as the jump ended. And the camera now slowly nods up and
+  down over Rock Print once its points have gathered (`view.sway`, 8°
+  either side over 20s), riding on the drawer, zoom and orbiting.
 
 Open at end of session (see README, "Next up"):
 - The user will supply pictures for Rock Print's three empty drawer frames.
@@ -121,5 +123,5 @@ Open at end of session (see README, "Next up"):
   accurately once written.
 - Model licensing/attribution for the public .glb is unchecked.
 - No per-project URLs; `?cloudtest` and `src/loader/` (dead code) can go.
-- Check whether `main` has the branch's last commits (the three tweaks are
+- Check whether `main` has the branch's last commits (the tweaks are
   merged only if the user said "merge and build").

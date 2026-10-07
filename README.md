@@ -116,6 +116,7 @@ Details view
     [x] Per-project camera angle (`view`, with `zoom` and `lift` per
         layout); Rock Print lands on a view fitted to a phone screenshot
     [x] Slow ambient rotation of the model (the model, not the camera)
+    [x] The camera slowly nods up and down over Rock Print (`view.sway`)
     [x] Rock Print's points gather out of a scattered cloud on open
     [x] Points: three inks (dark red, orange, grey), three sizes,
         semi-transparent

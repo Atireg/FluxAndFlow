@@ -30,6 +30,7 @@ The project view: camera
 - Fitting has to allow for depth, and for what else is on screen
 - The drawer pulls the camera into a close-up
 - The model rotates slowly once a project is open
+- The camera nods slowly up and down (`view.sway`)
 - Double-click or double-tap zooms in on the model
 - A touch point hints at the double-tap zoom, until it's been used
 
@@ -436,6 +437,35 @@ The fit is computed once, at that starting angle, not as the model turns.
 Sampled across a full turn on both layouts and drawer states, Rock Print
 stays inside the frame; a project whose footprint is closer to the frame's
 edges would need this revisited.
+
+
+The camera nods slowly up and down (`view.sway`)
+-------------------------------------------------
+
+Asked for: the camera slowly rotating upwards and back down while Rock
+Print turns. A project's `view.sway` (degrees; Rock Print 8) makes the
+camera swing that far above and below its place, around what it's looking
+at, over `SWAY_PERIOD` (20s) - a second, slower motion under the model's
+40s turn. Opt-in, since on a default square-on project it would break the
+one-point perspective.
+
+`updateSway` applies it as a change from last frame's angle - a turn about
+the camera's own screen-right axis through `controls.target` - not as an
+absolute pose. So it rides on whatever the camera is doing: the landing
+view, the drawer's close-up, a double-tap zoom, or wherever the visitor
+has orbited to; OrbitControls just sees a camera that moved and re-aims it.
+It holds while anything else drives the camera (`cameraOrientationLocked`,
+the visitor's hand via OrbitControls' `start`/`end`) and, for a gathering
+cloud, until the gather is done - so the fitted landing shot is untouched.
+Every time it resumes it restarts from zero at the camera's current place
+and grows in over `SWAY_EASE_IN` (3s, smoothstep), so there's never a jump;
+a pause mid-nod simply leaves the camera where the nod had it, as the new
+base. It only changes elevation (the axis is horizontal, the camera having
+no roll), so the "transitions only tilt" rule holds.
+
+Checked on both layouts, frames 5s apart after the gather: the camera
+rises, passes back through the view, dips below and returns; on a phone
+the pavilion stays in frame at the low point.
 
 
 Double-click or double-tap zooms in on the model

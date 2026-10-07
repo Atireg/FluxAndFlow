@@ -142,6 +142,9 @@ const projects = [
             turn: 86,
             zoom: { stacked: 1.75, side: 1.4 },
             lift: { stacked: 0.14, side: 0 },
+            // Once the points have gathered, the camera slowly nods this many
+            // degrees up and back down past the view while the model turns
+            sway: 8,
         },
 
         // Each time the project opens, its points start out scattered and
@@ -732,6 +735,11 @@ controls.dampingFactor = 0.08;
 // only gates input, and moveCamera relies on update() to resync.
 controls.enabled = false;
 
+// True while the visitor is orbiting by hand - the camera's sway holds off
+let visitorOrbiting = false;
+controls.addEventListener('start', () => { visitorOrbiting = true; });
+controls.addEventListener('end', () => { visitorOrbiting = false; });
+
 /**
  * Renderer
  */
@@ -1122,6 +1130,28 @@ let cameraOrientationLocked = false;
 const cameraOrientation = { t: 0 };
 
 /**
+ * Sway: a project with `view.sway` has its camera slowly nod up and back
+ * down around what it's looking at, by that many degrees either side, while
+ * the model turns - a second, slower motion, so the piece is seen from a
+ * little above and below its view as well as all the way round.
+ *
+ * Applied as a change from the last frame's angle rather than as an
+ * absolute pose, so it rides on top of wherever the camera is: the
+ * project's view, the drawer's close-up, a double-tap zoom, or wherever the
+ * visitor has orbited to. It holds while anything else moves the camera (a
+ * move in flight, the visitor's hand) and, for a gathering cloud, until the
+ * gather is done, so the landing shot is exactly the fitted one. Each time
+ * it resumes it starts from zero where the camera now is and grows in over
+ * SWAY_EASE_IN - no jump.
+ */
+const SWAY_PERIOD = 20; // seconds for one nod up, down and back
+const SWAY_EASE_IN = 3; // seconds to grow into the full nod after resuming
+let swayStartedAt = null; // elapsed time the current run began; null while held
+let swayApplied = 0; // radians currently applied on top of the camera's own place
+const swayOffset = new THREE.Vector3();
+const swayAxis = new THREE.Vector3();
+
+/**
  * Every animated camera move goes through here. Position and target tween as
  * usual; orientation slerps from where it is to exactly where lookAt would
  * leave it at the end, instead of OrbitControls re-deriving it from position
@@ -1158,6 +1188,32 @@ function moveCamera(position, target, duration, ease = 'power2.inOut') {
             controls.update();
         },
     });
+}
+
+function updateSway(project, since, elapsedTime) {
+    const amplitude = THREE.MathUtils.degToRad(project?.view?.sway ?? 0);
+    const gathering = project?.gather && since < GATHER_DURATION;
+
+    if (!amplitude || gathering || cameraOrientationLocked || visitorOrbiting || viewState !== 'detail') {
+        swayStartedAt = null;
+        return;
+    }
+
+    if (swayStartedAt === null) {
+        swayStartedAt = elapsedTime;
+        swayApplied = 0;
+    }
+
+    const t = elapsedTime - swayStartedAt;
+    const ramp = Math.min(t / SWAY_EASE_IN, 1);
+    const angle = amplitude * ramp * ramp * (3 - 2 * ramp) * Math.sin((t / SWAY_PERIOD) * Math.PI * 2);
+
+    // Turn the camera about its own screen-right axis through the target
+    // (negative raises it); controls.update() then re-aims it at the target
+    swayAxis.set(1, 0, 0).applyQuaternion(camera.quaternion);
+    swayOffset.copy(camera.position).sub(controls.target).applyAxisAngle(swayAxis, -(angle - swayApplied));
+    camera.position.copy(controls.target).add(swayOffset);
+    swayApplied = angle;
 }
 
 function frameDetail(object, { duration = 1.6, ease } = {}) {
@@ -1477,6 +1533,7 @@ function animate() {
             setGather(selectedCube.userData.detail, Math.min(since / GATHER_DURATION, 1));
 
             maybeShowTapHint(selectedCube.userData.detail, since);
+            updateSway(selectedCube.userData.project, since, elapsedTime);
         }
     }
 

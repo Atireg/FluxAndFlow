@@ -65,7 +65,8 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
     detailModel: 'models/RockPrintStructureReduced.glb',  // loaded on click
     view: { elevation: 58, azimuth: 4, turn: 86,       // optional camera angle, degrees,
             zoom: { stacked: 1.75, side: 1.4 },            // closer than the cube's fit
-            lift: { stacked: 0.14, side: 0 } },           // raised on screen (share of height)
+            lift: { stacked: 0.14, side: 0 },             // raised on screen (share of height)
+            sway: 8 },                                    // camera nods ± degrees, slowly
     gather: true,                                 // optional: points gather from a scattered cloud on open
     images: [{ src: 'images/x.jpg', alt: '', caption: '', ratio: '3 / 2' }],  // drawer pictures; no src = empty frame
 }
