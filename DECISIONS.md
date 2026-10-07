@@ -39,6 +39,7 @@ The project view: point cloud
 - Point size: computed in JS, three random sizes, semi-transparent
 - Each point is one of three inks, at random
 - Rock Print's points gather out of a scattered cloud when it opens
+- Safari: shaders stay within defined GLSL, and failures say so
 
 Page, colour and drawer
 - The whole site is paper
@@ -611,6 +612,31 @@ converting. It's driven from `detailRotateStartTime`, so it replays every
 open and shares a start with the rotation. `setGather` only touches clouds
 loaded to gather - otherwise the shader reads a missing start as the origin
 and flies every point in from the middle.
+
+
+Safari: shaders stay within defined GLSL, and failures say so
+--------------------------------------------------------------
+
+Reported: Rock Print didn't load on Safari. It couldn't be reproduced here -
+there's no WebKit in the cloud sessions and its download is blocked - so the
+fix closes off the likely causes rather than a confirmed one:
+
+- **No undefined GLSL.** The fragment shader used `smoothstep(1.0, 0.01, x)`
+  - reversed edges, which GLSL leaves undefined. Chrome happens to compute
+  the formula anyway; Safari draws WebGL through Metal, which needn't, and a
+  NaN there makes every point invisible. It's now `1.0 - smoothstep(0.01,
+  1.0, x)`, identical in value. `pow(1.0 - t, 3.0)`, undefined at 0, is now
+  multiplied out. An unused, never-written varying (`vNormal`) is gone.
+  Keep new shader code inside what the GLSL ES spec defines.
+- **The fog is explicitly under the canvas** (`z-index` 0 and 1) rather
+  than relying on page order, since Safari has composited animating layers
+  like it over a WebGL canvas.
+- **Failures are visible.** The model load has an `onError`, and
+  `renderer.debug.onShaderError` catches a shader that won't compile: either
+  puts a message in the project bar ("The model could not be loaded" /
+  "...could not be drawn") instead of "Loading model" forever or a blank
+  view, with the real error in the browser console. If Safari still fails,
+  which message shows - or neither - says where to look next.
 
 
 Page, colour and drawer

@@ -67,6 +67,9 @@ body {
 .fog {
     position: fixed;
     inset: 0;
+    /* Explicitly under the canvas (z-index 1), not left to page order:
+       Safari has drawn an animating layer like this over a WebGL canvas */
+    z-index: 0;
     overflow: hidden;
     pointer-events: none;
     opacity: 0;
@@ -202,6 +205,7 @@ body {
 canvas.webgl {
     position: fixed;
     inset: 0;
+    z-index: 1; /* above the fog (0); the overlays after it in the page sit above it */
     display: block;
     width: 100%;
     height: 100%;

@@ -128,6 +128,12 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
   "A cube's visual state is a pure function"). A GSAP tween on a property
   the per-frame update also writes gets silently overwritten - add a mode or
   keep the per-frame update out of that window instead.
+- **Safari can't be tested here.** Cloud sessions only have Chromium, and
+  downloading Playwright's WebKit is blocked. Safari draws WebGL through
+  Metal, which is strict where Chrome is lenient: keep GLSL inside defined
+  behaviour (no reversed `smoothstep` edges, no `pow(0, y)`), and don't rely
+  on page order to stack the canvas over animating layers. See DECISIONS.md,
+  "Safari".
 - **No per-project URLs yet.** The catalog/detail state is not reflected in
   the address bar. Don't assume a project is linkable.
 

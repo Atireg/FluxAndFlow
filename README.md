@@ -33,6 +33,9 @@ Next up (waiting on content)
         needs replacing. State the role accurately
     [ ] Check the licensing/attribution for the Rock Print model now that the
         repository is public and the site serves the .glb
+    [ ] Confirm Rock Print now opens on Safari (Mac and iPhone) - three
+        likely causes were fixed blind, see DECISIONS.md "Safari"; if it
+        still fails, note the message in the project bar, if any
     [ ] More projects: each needs a slot, a thumbnail, a point-cloud .glb
         and (optionally) a `view` - see CLAUDE.md
 

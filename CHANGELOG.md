@@ -98,6 +98,10 @@ were tried and removed are listed under "Tried and removed" there.
   `view`, fitted by mask-overlap scoring to a phone screenshot the user
   supplied (which added `zoom` and `lift`), and once gathered the camera
   slowly nods up and down (`view.sway`, 13° either side over 16s).
+- **Safari.** Rock Print reportedly didn't load there; fixed blind (no
+  WebKit here): shader code made spec-defined, the fog explicitly under the
+  canvas, and load or shader failures now say so in the project bar. Still
+  to confirm on a real Safari.
 - **Loading.** An inline start-up loader ("flux and flow" particle streams,
   real progress), held for at least 5s with the bar paced to fill over them.
   `?cloudtest` measured ten full clouds at start-up as far too heavy, so
@@ -113,6 +117,7 @@ were tried and removed are listed under "Tried and removed" there.
 
 Open at end of session (see README, "Next up"):
 - Rock Print's five drawer pictures have no captions or photo credits yet.
+- Rock Print on Safari: confirm the blind fix works.
 - Rock Print's copy is still placeholder text, live; the role must be stated
   accurately once written.
 - Model licensing/attribution for the public .glb is unchecked.

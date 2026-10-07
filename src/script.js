@@ -781,6 +781,16 @@ const renderer = new THREE.WebGLRenderer({
 renderer.setSize(screenWidth, screenHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
+// A shader that won't compile draws nothing at all, silently. Say so in the
+// project bar, and keep the compiler's message for the browser's console.
+renderer.debug.onShaderError = (gl, program, vertexShader, fragmentShader) => {
+    const logs = [program, vertexShader, fragmentShader]
+        .map((item) => (item === program ? gl.getProgramInfoLog(item) : gl.getShaderInfoLog(item)))
+        .filter(Boolean);
+    console.error('Shader error', ...logs);
+    setProjectStatus('The model could not be drawn');
+};
+
 renderer.outputColorSpace = THREE.LinearSRGBColorSpace
 renderer.shadowMap.enabled = true
 renderer.shadowMap.type = THREE.PCFSoftShadowMap
@@ -2195,6 +2205,12 @@ function openProject(cube) {
         glbPath: assetUrl(project.detailModel),
         parentObject: cube,
         gather: Boolean(project.gather),
+        // Say so rather than leave "Loading model" up forever, and keep the
+        // real error for the browser's console
+        onError: (error) => {
+            console.error('Could not load', project.detailModel, error);
+            if (selectedCube === cube) setProjectStatus('The model could not be loaded');
+        },
         onLoaded: (model) => {
             cube.userData.detail = model;
             model.rotation.y = modelStartYaw(project);

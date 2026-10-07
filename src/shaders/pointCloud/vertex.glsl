@@ -18,7 +18,6 @@ attribute float aGatherDelay; // 0..1, when it sets off within the spread
 
 varying vec2 vUv;
 // varying vec3 vColor;
-varying vec3 vNormal;
 varying float vArrived;
 varying float vTone;
 
@@ -26,7 +25,8 @@ void main() {
         // Each point sets off at its own moment and eases home, settling
         // gently rather than stopping dead
         float t = clamp((uGather - aGatherDelay * uGatherSpread) / (1.0 - uGatherSpread), 0.0, 1.0);
-        float arrived = 1.0 - pow(1.0 - t, 3.0);
+        float rest = 1.0 - t; // multiplied out: pow() of 0 is undefined in GLSL
+        float arrived = 1.0 - rest * rest * rest;
 
         // The scatter swirls round the vertical axis as it closes in, so the
         // points spiral in like a current rather than flying straight home
