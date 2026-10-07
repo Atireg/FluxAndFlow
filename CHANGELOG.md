@@ -71,41 +71,32 @@ were tried and removed are listed under "Tried and removed" there.
   unmistakable `[PLACEHOLDER ...]` text to prove the drawer works; the real
   copy is still to come.
 - **Catalog motion**, rebuilt as one pure state function per frame (which
-  fixed two old hover bugs): a bigger, rocking wander; a continuous
-  spotlight - any cube glows orange and jumps, one at a time, with its
-  "Project XX" name blinking in step in bare orange text, then eases back
-  into its float (it used to snap up to 2 units in one frame as the jump
-  ended); the pointer stirs nearby cubes like a hand through water; no orbit
-  in the grid.
+  fixed two old hover bugs): a bigger, rocking wander; the pointer stirs
+  nearby cubes like a hand through water; no orbit in the grid. A continuous
+  spotlight: any cube glows orange and jumps, one at a time, its "Project
+  XX" name blinking in step, then eases back into its float.
 - **Every cube holds the little rock** (one download, cloned). Clicking an
-  empty slot says "Still empty...". An "Explore me..." tag, "Project XX"
-  labels near the pointer and falling-leaf names were each built and
-  removed before the blinking name on the orange cube.
-- **The send-off**: after many iterations (explosion, shake, flux, spin,
-  tumble, drift - all disliked), an instant boom knocks the other cubes out
-  and up, they hang, then fall slowly and straight off the screen while the
-  camera is already moving in.
+  empty slot says "Still empty...".
+- **The send-off**: an instant boom knocks the other cubes out and up, they
+  hang, then fall slowly and straight off the screen while the camera is
+  already moving in.
 - **Camera fixes.** The 90° roll on opening/closing is gone at its source
-  (the detail camera now looks along the catalog's screen-up; every
-  animated move goes through `moveCamera`, which slerps). The closing fade
-  no longer pops the grid in at full opacity. The bar title crossfades and
-  stays on one line.
+  (the detail camera now looks along the catalog's screen-up; every animated
+  move goes through `moveCamera`, which slerps). The closing fade no longer
+  pops the grid in at full opacity. The bar title crossfades and stays on
+  one line.
 - **Project view.** The model turns slowly; opening the drawer moves the
-  model left, whole, on a wide screen (with the hint and zoom still there)
-  and pulls into a close-up on a phone; double-click / double-tap zooms to a
-  spot and back; a white touch point with a black outline (orange, blue,
-  then dark grey before it) taps twice every 5s to hint at it, zoomed in or
-  not; a grey fog (a CSS layer, not scene fog) rolls in behind the project;
-  picture frames in the drawer, empty until the pictures exist.
+  model left, whole, on a wide screen and pulls into a close-up on a phone;
+  double-click / double-tap zooms to a spot and back, hinted at every 5s by
+  a white touch point with a black outline; a grey fog (a CSS layer, not
+  scene fog) rolls in behind the project; picture frames in the drawer,
+  empty until the pictures exist.
 - **Rock Print.** Its points gather out of a scattered cloud on every open
   (vertex shader, `gather: true`); they're three random inks (dark red,
   orange, grey) in three random sizes, semi-transparent. It lands on its own
-  `view` - fitted by mask-overlap scoring to a phone screenshot the user
-  supplied, which added `zoom` and `lift` to `view` - then zoomed out a
-  touch on phones (1.9 -> 1.75) since it cropped the pavilion. Once
-  gathered, the camera slowly nods up and down (`view.sway`, 13° either side
-  over 16s, up from a too-subtle 8° over 20s), riding on the drawer, the
-  zoom and the visitor's orbit.
+  `view`, fitted by mask-overlap scoring to a phone screenshot the user
+  supplied (which added `zoom` and `lift`), and once gathered the camera
+  slowly nods up and down (`view.sway`, 13° either side over 16s).
 - **Loading.** An inline start-up loader ("flux and flow" particle streams,
   real progress), held for at least 5s with the bar paced to fill over them.
   `?cloudtest` measured ten full clouds at start-up as far too heavy, so
@@ -115,8 +106,9 @@ were tried and removed are listed under "Tried and removed" there.
   additive blending is gone because it draws nothing on paper; scene
   colours go through `screenColor()`.
 - **Docs**: DECISIONS.md regrouped with a contents list and a "Tried and
-  removed" section, this entry condensed, README's TODO split into next
-  up / open / done, CLAUDE.md given "Where to pick up" and testing tips.
+  removed" section (where every rejected iteration of this session is
+  listed), README's TODO split into next up / open / done, CLAUDE.md given
+  "Where to pick up" and testing tips.
 
 Open at end of session (see README, "Next up"):
 - The user will supply pictures for Rock Print's three empty drawer frames.

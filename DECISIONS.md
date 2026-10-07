@@ -134,11 +134,9 @@ Every ~5.3-5.6s one cube glows orange and jumps, then the next takes over.
   still while the rest drift is part of the signal. Its pose is blended
   with the live float by the spotlight's intensity, which eases in over
   `SPOTLIGHT_FADE_IN` (0.6s) and out over `SPOTLIGHT_FADE_OUT` (1.6s), both
-  smoothstepped. It used to hold at its bare slot with a 0.6s linear ramp,
-  and when the dwell ended the cube snapped from the slot to its floating
-  spot - up to 2 units in one frame, the "too abrupt" return the user saw.
-  Replayed frame by frame, the largest one-frame move is now 0.08 units,
-  the jump itself.
+  smoothstepped, so it leaves and rejoins its float without a jump. (Held
+  at its bare slot, it used to snap up to 2 units in one frame back to its
+  float as the dwell ended.)
 - **One orange for "click me"**, `#ff8c32`: the spotlit cube and the
   drawer's About handle (`--warm` in styles.css, with `--warm-rgb` and
   `--warm-deep`; `spotlightGlowColor` in script.js is kept in step by
@@ -152,10 +150,9 @@ Every ~5.3-5.6s one cube glows orange and jumps, then the next takes over.
   faded out exactly when the cube is back in its float. No CSS transition
   on it, which would smear the blink. A hover ends the spotlight, and the
   name with it; "Still empty..." wins on the same cube. It's bare orange
-  text (`--warm`), no chip - the white chip it started with was asked
-  away - with a soft paper-coloured `text-shadow` halo so it stays legible
-  where it sits on the cube's own orange face. If it ever reads too faint
-  there, a deeper orange is the lever, not bringing the chip back.
+  text (`--warm`) with a soft paper-coloured `text-shadow` halo, so it stays
+  legible over the cube's own orange face; if it reads too faint there, a
+  deeper orange is the lever, not a chip behind it.
 
 Getting the cube to actually show that orange took two things:
 
@@ -385,17 +382,13 @@ overlap the screenshot's (IoU), on a coarse grid of elevation, turn and
 zoom, then finer. Letting the render slide showed the remaining error was
 placement, not angle - hence `lift`. Result: zoom 1.9, overlap 0.8-0.9 with
 a 3px residual shift. The stacked zoom was then eased back to 1.75, as
-asked: on the phone it cropped the pavilion ("zoom out just a bit... really
-just a bit"). The same zoom and lift take the pavilion's top off on desktop,
-so `side` uses 1.4 and no lift.
+asked, since on the phone it cropped the pavilion. The same zoom and lift
+take the pavilion's top off on desktop, so `side` uses 1.4 and no lift.
 
 The model never stops turning, so `turn` is set for the moment the gather
 completes and the pavilion first appears whole: the screenshot's 118° less
 the 32° it turns during `GATHER_DURATION`. If `GATHER_DURATION`,
 `DETAIL_ROTATE_SPEED` or `DETAIL_MODEL_YAW` changes, `turn` shifts with it.
-
-(The first version of this view, `{ elevation: 49, azimuth: 4, turn: 145 }`,
-was fitted to an earlier screenshot from the cube's seven visible corners.)
 
 
 Fitting has to allow for depth, and for what else is on screen
@@ -433,9 +426,7 @@ project with its own `view` keeps it there, `side` zoom included (Rock
 Print 1.4 - the pavilion stays inside the space left of the drawer as it
 turns and nods). The touch-point hint and the double-tap zoom work there
 too; the hint is kept clear of the drawer, and a zoom centres the tapped
-spot in the visible space rather than under the drawer's edge. The user
-asked for this: the close-up used to apply here as well and cut the
-pavilion off under the drawer.
+spot in the visible space rather than under the drawer's edge.
 
 On a narrow screen (`stacked`) the drawer covers the lower half, so it's the
 close-up, `frameDetailCloseup`: a closer, elevated crop (`CLOSEUP_ELEVATION`
@@ -485,8 +476,8 @@ one-point perspective.
 `updateSway` applies it as a change from last frame's angle - a turn about
 the camera's own screen-right axis through `controls.target` - not as an
 absolute pose. So it rides on whatever the camera is doing: the landing
-view, the drawer's close-up, a double-tap zoom, or wherever the visitor
-has orbited to; OrbitControls just sees a camera that moved and re-aims it.
+view, either drawer frame, a double-tap zoom, or wherever the visitor has
+orbited to; OrbitControls just sees a camera that moved and re-aims it.
 It holds while anything else drives the camera (`cameraOrientationLocked`,
 the visitor's hand via OrbitControls' `start`/`end`) and, for a gathering
 cloud, until the gather is done - so the fitted landing shot is untouched.
@@ -496,11 +487,10 @@ a pause mid-nod simply leaves the camera where the nod had it, as the new
 base. It only changes elevation (the axis is horizontal, the camera having
 no roll), so the "transitions only tilt" rule holds.
 
-It started at 8° over 20s; the user found it too subtle and asked for it
-"a bit more obvious", so it's now 13° over 16s - from looking down into
-the plan (71°) to a low, nearly side-on view of the pillars (45°).
-Checked on both layouts across a full swing, frames 2s apart: the pavilion
-stays in frame at both ends, including on a phone at the low point.
+13° over 16s (8° over 20s at first read as too subtle) swings Rock Print
+from looking down into the plan (71°) to a low, nearly side-on view of the
+pillars (45°); checked on both layouts, the pavilion stays in frame at
+both ends.
 
 
 Double-click or double-tap zooms in on the model
@@ -530,14 +520,11 @@ A touch point keeps hinting at the double-tap zoom
 showing is one 2.2s CSS animation: fade in to 90% opacity, press twice
 with a ring spreading on each press (the gesture itself), fade out.
 
-It started as a hand icon; four redrawn designs were compared over the
-pavilion (fine-line hand, solid silhouette, paper-cut hand, handless
-fingertip) and the fingertip ("C") was chosen. It was a soft glow in the
-About handle's orange, then the floating cubes' blue, then dark grey; it's
-now, as asked, a crisp white disc with a black outline (`--hint-fill`,
-`--hint-line`) and black rings - it reads over the orange-and-red cloud,
-the grey fog and the paper alike, and doesn't compete with the orange
-that marks clickable things.
+It's a crisp white disc with a black outline (`--hint-fill`, `--hint-line`)
+and black rings: it reads over the orange-and-red cloud, the grey fog and
+the paper alike, and doesn't compete with the orange that marks clickable
+things. The fingertip design was picked from four drawn options; its
+earlier looks are under "Tried and removed".
 
 `maybeShowTapHint`, each frame in the project view: first once the points
 have gathered (`GATHER_DURATION` + `TAP_HINT_AFTER_GATHER`), then every
@@ -548,9 +535,7 @@ It skips its turn with the drawer open on a phone (where it covers the
 model) or while the camera moves; beside the drawer on a wide screen it
 shows, kept clear of the drawer. Otherwise it keeps coming, zoomed in
 included, where it invites the double-tap back out. A zoom clears any hint
-mid-tap. It used to skip while
-zoomed and stop for good after the first zoom (to avoid nagging); the
-user asked for it to keep showing.
+mid-tap.
 
 
 The project view: point cloud
@@ -758,8 +743,8 @@ reports byte progress where the server gives a length, and calls
 `window.fluxLoader.finish()` once `sealBoot()` has run and all are done -
 two frames later, so the grid is drawn behind it. A failed load counts as
 done, and the loader gives up after 30s regardless. It stays up at least
-`MIN_VISIBLE` (5s, as asked - it was 1.6s) so it reads as an opening,
-not a flash, however fast the load. The bar is paced to match: it shows
+`MIN_VISIBLE` (5s) so it reads as an opening, not a flash, however fast
+the load. The bar is paced to match: it shows
 the lesser of real progress and elapsed time over `MIN_VISIBLE`, so on a
 fast load it fills steadily across the five seconds instead of racing to
 100% and sitting there; on a slow load real progress governs. All
@@ -767,10 +752,9 @@ its animation is scaled by elapsed time, not frame count - per-frame, a
 slow device crawled through the last few percent for seconds.
 
 On a fast load the loader is gone about 6s after the page opens
-(`MIN_VISIBLE`, the bar's last ease and the 0.9s exit). With the old 1.6s
-minimum it left at ~2.7s on Wi-Fi and fast 4G and ~3.9s on slow 4G
-(throttled, phone viewport), so on all but the slowest connections the
-five seconds now decide it, not the download.
+(`MIN_VISIBLE`, the bar's last ease and the 0.9s exit). The catalog itself
+is ready in ~1s on Wi-Fi and fast 4G and ~2.5s on slow 4G (throttled, phone
+viewport), so the five seconds, not the download, decide it.
 
 
 `?cloudtest`: ten copies of Rock Print, as a load test
@@ -833,7 +817,14 @@ previewed, and taken out at the user's request.
 - **A hand icon for the tap hint** (Lucide's "pointer"), three other redrawn
   designs, and the fingertip as a soft glow in orange, then blue, then dark
   grey, before it became white with a black outline. Also: the hint stopping
-  for good once the visitor had zoomed.
+  for good once the visitor had zoomed, and skipping while zoomed in.
+- **A white chip behind the orange cube's "Project XX"** - now bare text.
+- **The close-up beside the drawer on a wide screen**: it cut the pavilion
+  off under the drawer; the whole model now moves left instead. (Phones
+  keep the close-up.)
+- **Rock Print's first landing view**, `{ elevation: 49, turn: 145 }`,
+  fitted to an earlier screenshot - replaced by the closer, steeper one.
+- **A 1.6s minimum for the loader** - asked to be at least 5s.
 - **An orthographic detail view** (`DETAIL_PROJECTION`, still switchable)
   and an oblique three-quarter default: flat, and nothing square.
 - **`controls.autoRotate`** in the detail view: turned the cube's edges.
