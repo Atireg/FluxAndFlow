@@ -18,7 +18,8 @@
      * and the drawer's pull handle use this one orange.
      * spotlightGlowColor in script.js is kept in step by hand.
      */
-    --hint-rgb: 58, 56, 53; /* the double-tap hint's dark grey - darker than the points' warm grey ink */
+    --hint-fill: #fff; /* the double-tap hint: a white touch point... */
+    --hint-line: #111; /* ...with a black outline and rings */
     --warm: #ff8c32;
     --warm-rgb: 255, 140, 50; /* --warm, for rgba() */
     --warm-deep: #5c2c0a;
@@ -118,8 +119,8 @@ body {
 }
 
 /**
- * The double-tap hint over an open model: a soft dark-grey touch point, a
- * little see-through, that fades in, presses twice with
+ * The double-tap hint over an open model: a white touch point with a black
+ * outline, a little see-through, that fades in, presses twice with
  * a ring spreading from it each time, and fades out (2.2s). Its centre sits
  * on the chosen point of the model.
  */
@@ -145,15 +146,12 @@ body {
 }
 
 .tap-hint__dot {
-    width: 1.75rem;
-    height: 1.75rem;
-    margin: -0.875rem 0 0 -0.875rem;
-    background: radial-gradient(
-        circle,
-        rgba(var(--hint-rgb), 0.9) 0%,
-        rgba(var(--hint-rgb), 0.55) 45%,
-        rgba(var(--hint-rgb), 0) 72%
-    );
+    width: 1.1rem;
+    height: 1.1rem;
+    margin: -0.55rem 0 0 -0.55rem;
+    box-sizing: border-box;
+    background: var(--hint-fill);
+    border: 1.5px solid var(--hint-line);
 }
 
 .tap-hint.is-showing .tap-hint__dot {
@@ -164,7 +162,7 @@ body {
     width: 3rem;
     height: 3rem;
     margin: -1.5rem 0 0 -1.5rem;
-    border: 2px solid rgb(var(--hint-rgb));
+    border: 1.5px solid var(--hint-line);
     opacity: 0;
     transform: scale(0.3);
 }
@@ -180,8 +178,8 @@ body {
 /* Never fully solid: the model stays visible through it */
 @keyframes tap-hint-life {
     0%   { opacity: 0; }
-    12%  { opacity: 0.75; }
-    80%  { opacity: 0.75; }
+    12%  { opacity: 0.9; }
+    80%  { opacity: 0.9; }
     100% { opacity: 0; }
 }
 

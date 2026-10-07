@@ -91,9 +91,9 @@ that were tried and removed are listed under "Tried and removed" there.
   stays on one line.
 - **Project view.** The model turns slowly; the drawer pulls the camera
   into a close-up; double-click / double-tap zooms to a spot and back; a
-  soft dark-grey touch point (orange, then blue, at first) taps twice
-  every 5s to hint at it, zoomed in or not; a grey fog (a CSS layer, not scene fog) rolls
-  in behind the project; picture frames in the drawer, empty until the
+  white touch point with a black outline (orange, blue, then dark grey
+  before it) taps twice every 5s to hint at it, zoomed in or not; a grey
+  fog (a CSS layer, not scene fog) rolls in behind the project; picture frames in the drawer, empty until the
   pictures exist.
 - **Rock Print.** Its points gather out of a scattered cloud on every open
   (vertex shader, `gather: true`); they're three random inks (dark red,
@@ -101,8 +101,8 @@ that were tried and removed are listed under "Tried and removed" there.
   own `view` - fitted by mask-overlap scoring to a phone screenshot the user
   supplied, which added `zoom` and `lift` to `view` - then zoomed out a
   touch on phones (1.9 -> 1.75) since it cropped the pavilion. Once
-  gathered, the camera slowly nods up and down (`view.sway`, 8° either side
-  over 20s), riding on the drawer, the zoom and the visitor's orbit.
+  gathered, the camera slowly nods up and down (`view.sway`, 13° either side
+  over 16s, up from a too-subtle 8° over 20s), riding on the drawer, the zoom and the visitor's orbit.
 - **Loading.** An inline start-up loader ("flux and flow" particle streams,
   real progress). `?cloudtest` measured ten full clouds at start-up as far
   too heavy, so clouds load only on click.

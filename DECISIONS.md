@@ -360,7 +360,7 @@ with the drawer parked it centres on the whole screen when the cube's top
 it must otherwise.
 
 Rock Print's view - `{ elevation: 58, azimuth: 4, turn: 86, zoom: { stacked:
-1.75, side: 1.4 }, lift: { stacked: 0.14, side: 0 }, sway: 8 }` - was
+1.75, side: 1.4 }, lift: { stacked: 0.14, side: 0 }, sway: 13 }` - was
 fitted to a phone screenshot the user supplied, not eyeballed (`sway`,
 added later, is the slow nod - see "The camera nods slowly up and down"). A throwaway build (never
 committed) froze the slow turn, finished the gather instantly and exposed a
@@ -445,9 +445,9 @@ The camera nods slowly up and down (`view.sway`)
 -------------------------------------------------
 
 Asked for: the camera slowly rotating upwards and back down while Rock
-Print turns. A project's `view.sway` (degrees; Rock Print 8) makes the
+Print turns. A project's `view.sway` (degrees; Rock Print 13) makes the
 camera swing that far above and below its place, around what it's looking
-at, over `SWAY_PERIOD` (20s) - a second, slower motion under the model's
+at, over `SWAY_PERIOD` (16s) - a second, slower motion under the model's
 40s turn. Opt-in, since on a default square-on project it would break the
 one-point perspective.
 
@@ -460,14 +460,16 @@ It holds while anything else drives the camera (`cameraOrientationLocked`,
 the visitor's hand via OrbitControls' `start`/`end`) and, for a gathering
 cloud, until the gather is done - so the fitted landing shot is untouched.
 Every time it resumes it restarts from zero at the camera's current place
-and grows in over `SWAY_EASE_IN` (3s, smoothstep), so there's never a jump;
+and grows in over `SWAY_EASE_IN` (2s, smoothstep), so there's never a jump;
 a pause mid-nod simply leaves the camera where the nod had it, as the new
 base. It only changes elevation (the axis is horizontal, the camera having
 no roll), so the "transitions only tilt" rule holds.
 
-Checked on both layouts, frames 5s apart after the gather: the camera
-rises, passes back through the view, dips below and returns; on a phone
-the pavilion stays in frame at the low point.
+It started at 8° over 20s; the user found it too subtle and asked for it
+"a bit more obvious", so it's now 13° over 16s - from looking down into
+the plan (71°) to a low, nearly side-on view of the pillars (45°).
+Checked on both layouts across a full swing, frames 2s apart: the pavilion
+stays in frame at both ends, including on a phone at the low point.
 
 
 Double-click or double-tap zooms in on the model
@@ -493,16 +495,17 @@ A touch point keeps hinting at the double-tap zoom
 --------------------------------------------------
 
 `#tap-hint` is a soft touch point with two rings, over the canvas. Each
-showing is one 2.2s CSS animation: fade in to 75% opacity, press twice
+showing is one 2.2s CSS animation: fade in to 90% opacity, press twice
 with a ring spreading on each press (the gesture itself), fade out.
 
 It started as a hand icon; four redrawn designs were compared over the
 pavilion (fine-line hand, solid silhouette, paper-cut hand, handless
-fingertip) and the fingertip ("C") was chosen. Its colour went from the
-About handle's orange to the floating cubes' blue to, now, a dark grey
-(`--hint-rgb`, 58, 56, 53) - darker than the points' warm grey ink, so it
-stays legible over the dense cloud and over the fog, without competing with
-the orange that marks the clickable things.
+fingertip) and the fingertip ("C") was chosen. It was a soft glow in the
+About handle's orange, then the floating cubes' blue, then dark grey; it's
+now, as asked, a crisp white disc with a black outline (`--hint-fill`,
+`--hint-line`) and black rings - it reads over the orange-and-red cloud,
+the grey fog and the paper alike, and doesn't compete with the orange
+that marks clickable things.
 
 `maybeShowTapHint`, each frame in the project view: first once the points
 have gathered (`GATHER_DURATION` + `TAP_HINT_AFTER_GATHER`), then every
@@ -785,8 +788,8 @@ previewed, and taken out at the user's request.
 - **A single dark-teal ink** for the points, before the three inks.
 - **Orbiting the catalog** (OrbitControls in the grid view).
 - **A hand icon for the tap hint** (Lucide's "pointer"), three other
-  redrawn designs, and the fingertip in orange, then blue, before it went
-  dark grey. Also: the hint stopping for good once the visitor had zoomed.
+  redrawn designs, and the fingertip as a soft glow in orange, then blue,
+  then dark grey, before it became white with a black outline. Also: the hint stopping for good once the visitor had zoomed.
 - **An orthographic detail view** (`DETAIL_PROJECTION`, still switchable)
   and an oblique three-quarter default: flat, and nothing square.
 - **`controls.autoRotate`** in the detail view: turned the cube's edges.

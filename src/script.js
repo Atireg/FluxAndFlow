@@ -144,7 +144,7 @@ const projects = [
             lift: { stacked: 0.14, side: 0 },
             // Once the points have gathered, the camera slowly nods this many
             // degrees up and back down past the view while the model turns
-            sway: 8,
+            sway: 13,
         },
 
         // Each time the project opens, its points start out scattered and
@@ -1143,8 +1143,8 @@ const cameraOrientation = { t: 0 };
  * it resumes it starts from zero where the camera now is and grows in over
  * SWAY_EASE_IN - no jump.
  */
-const SWAY_PERIOD = 20; // seconds for one nod up, down and back
-const SWAY_EASE_IN = 3; // seconds to grow into the full nod after resuming
+const SWAY_PERIOD = 16; // seconds for one nod up, down and back
+const SWAY_EASE_IN = 2; // seconds to grow into the full nod after resuming
 let swayStartedAt = null; // elapsed time the current run began; null while held
 let swayApplied = 0; // radians currently applied on top of the camera's own place
 const swayOffset = new THREE.Vector3();
