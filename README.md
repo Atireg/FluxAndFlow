@@ -26,7 +26,12 @@ TO DOs
 
 Next up (waiting on content)
     [ ] Captions / photo credits for Rock Print's five pictures, if
-        wanted (the `caption` fields are empty). Video not started
+        wanted (the `caption` fields are empty)
+    [ ] A video in the drawer, if wanted. Agreed approach: a short clip
+        (under ~1 min) compressed to a small MP4 in static/, playing as a
+        silent loop with a poster frame; a longer film or one with sound
+        embedded from Vimeo (or YouTube unlisted, no-cookie). Not played
+        from Google Drive - Drive is only a way to hand the file over
     [ ] Write the real copy for Rock Print - year, role, context, body,
         credits. The fields hold unmistakable [PLACEHOLDER ...] text, put
         there to check the drawer works on the live site - it is live and

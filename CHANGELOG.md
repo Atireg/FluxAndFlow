@@ -122,3 +122,5 @@ Open at end of session (see README, "Next up"):
   accurately once written.
 - Model licensing/attribution for the public .glb is unchecked.
 - No per-project URLs; `?cloudtest` and `src/loader/` (dead code) can go.
+- A video for the drawer was discussed, not added - see README for the
+  agreed approach.

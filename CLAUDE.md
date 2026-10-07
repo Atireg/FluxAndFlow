@@ -19,9 +19,10 @@ and README's "Next up". As of the end of Session 2: everything built is live
 or on the branch (`git log origin/main..` shows anything not yet merged);
 what's waiting is content from the user (Rock Print's real copy - the live
 text is `[PLACEHOLDER ...]` - and photo credits/captions for its five drawer
-pictures), plus model licensing and per-project URLs. DECISIONS.md opens
-with a contents list; its "Tried and removed" section lists ideas the user
-has already seen and rejected - don't re-propose them without saying so.
+pictures), a check that the blind Safari fix works, plus model licensing and
+per-project URLs. DECISIONS.md opens with a contents list; its "Tried and
+removed" section lists ideas the user has already seen and rejected - don't
+re-propose them without saying so.
 
 ## Stack and commands
 
