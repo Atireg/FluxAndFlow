@@ -360,8 +360,9 @@ with the drawer parked it centres on the whole screen when the cube's top
 it must otherwise.
 
 Rock Print's view - `{ elevation: 58, azimuth: 4, turn: 86, zoom: { stacked:
-1.75, side: 1.4 }, lift: { stacked: 0.14, side: 0 } }` - was fitted to a
-phone screenshot the user supplied, not eyeballed. A throwaway build (never
+1.75, side: 1.4 }, lift: { stacked: 0.14, side: 0 }, sway: 8 }` - was
+fitted to a phone screenshot the user supplied, not eyeballed (`sway`,
+added later, is the slow nod - see "The camera nods slowly up and down"). A throwaway build (never
 committed) froze the slow turn, finished the gather instantly and exposed a
 hook to set the view; renders at the screenshot's viewport (412x762) were
 scored by how well their orange/red point masks overlap the screenshot's
@@ -424,8 +425,9 @@ The model rotates slowly once a project is open
 
 The model turns around its own Y axis, a full turn every 40s
 (`DETAIL_ROTATE_SPEED`). This turns `cube.userData.detail` inside the cube -
-the camera and the cube's edges never move, unlike the rejected
-`autoRotate`.
+the cube's edges stay put, unlike under the rejected `autoRotate`, which
+orbited the camera around a square-on view. (A project with `view.sway`
+also nods its camera, slowly and only in elevation - next entry.)
 
 Computed as `modelStartYaw(project) + (elapsedTime - detailRotateStartTime)
 * DETAIL_ROTATE_SPEED`, not accumulated. `detailRotateStartTime` is reset
@@ -490,16 +492,18 @@ double-tap past a 300ms limit.
 A touch point hints at the double-tap zoom, until it's been used
 -----------------------------------------------------------------
 
-`#tap-hint` is a soft touch point with two rings, over the canvas, in the
-floating cubes' blue at 75% opacity (`--cube-blue-rgb`, 47,151,255: the
-cubes' glass colour as rendered, measured from a screenshot - their faces
-show it at 14% over the paper, which is why they read pale. Re-measure if
-`cubesColor` or the lights change). It was the About handle's orange
-first. Each showing is one 2.2s CSS
-animation: fade in, press twice with a ring spreading on each press (the
-gesture itself), fade out. It was a hand icon at first; four redrawn designs
-were compared over the pavilion (fine-line hand, solid silhouette, paper-cut
-hand, handless fingertip) and the fingertip ("C") was chosen.
+`#tap-hint` is a soft touch point with two rings, over the canvas. Each
+showing is one 2.2s CSS animation: fade in to 75% opacity, press twice
+with a ring spreading on each press (the gesture itself), fade out.
+
+It started as a hand icon; four redrawn designs were compared over the
+pavilion (fine-line hand, solid silhouette, paper-cut hand, handless
+fingertip) and the fingertip ("C") was chosen, first in the About handle's
+orange, then - as asked - in the floating cubes' blue. That blue is
+`--cube-blue-rgb` (47, 151, 255), the cubes' glass colour as rendered,
+measured from a screenshot: their faces show it at only 14% over the
+paper, which is why the cubes read pale and the dot, at 75%, reads deeper.
+Re-measure it if `cubesColor` or the scene's lights change.
 
 `maybeShowTapHint`, each frame in the project view: first once the points
 have gathered (`GATHER_DURATION` + `TAP_HINT_AFTER_GATHER`), then every
@@ -779,8 +783,8 @@ previewed, and taken out at the user's request.
   behind a `?loaderpreview` mode that has since been removed.
 - **A single dark-teal ink** for the points, before the three inks.
 - **Orbiting the catalog** (OrbitControls in the grid view).
-- **A hand icon for the tap hint** (Lucide's "pointer"), and three other
-  redrawn designs.
+- **A hand icon for the tap hint** (Lucide's "pointer"), three other
+  redrawn designs, and the fingertip in orange before it went blue.
 - **An orthographic detail view** (`DETAIL_PROJECTION`, still switchable)
   and an oblique three-quarter default: flat, and nothing square.
 - **`controls.autoRotate`** in the detail view: turned the cube's edges.

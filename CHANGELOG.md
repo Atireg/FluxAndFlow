@@ -61,9 +61,9 @@ list.
 
 ## Session 2 — 2026-10-04 / 2026-10-07
 
-`e0c070e`..`4dca501`, then the docs clean-up `b905cbe` and four tweaks after it (branch
-`ccr-584d8563-rtv32f`, fast-forward merged to `main` on each "merge and
-build"). Every feature below is live and has a DECISIONS.md entry; features
+`e0c070e`..`e93b28a`, plus a final docs tidy (branch `ccr-584d8563-rtv32f`,
+fast-forward merged to `main` on each "merge and build"; `main` is at
+`e93b28a` and live). Every feature below has a DECISIONS.md entry; features
 that were tried and removed are listed under "Tried and removed" there.
 
 - **Drawer on the live site.** The About handle was missing because every
@@ -72,8 +72,10 @@ that were tried and removed are listed under "Tried and removed" there.
   copy is still to come.
 - **Catalog motion**, rebuilt as one pure state function per frame (which
   fixed two old hover bugs): a bigger, rocking wander; a continuous
-  spotlight - any cube glows orange and jumps, one at a time; the pointer
-  stirs nearby cubes like a hand through water; no orbit in the grid.
+  spotlight - any cube glows orange and jumps, one at a time, then eases
+  back into its float (it used to snap up to 2 units in one frame as the
+  jump ended); the pointer stirs nearby cubes like a hand through water; no
+  orbit in the grid.
 - **Every cube holds the little rock** (one download, cloned). Clicking an
   empty slot says "Still empty...". No project names on the grid: an
   "Explore me..." tag, "Project XX" labels and falling-leaf names were each
@@ -89,14 +91,18 @@ that were tried and removed are listed under "Tried and removed" there.
   stays on one line.
 - **Project view.** The model turns slowly; the drawer pulls the camera
   into a close-up; double-click / double-tap zooms to a spot and back; a
-  soft touch point (orange, later blue) taps twice every 5s to hint at it, until used; a
-  grey fog (a CSS layer, not scene fog) rolls in behind the project;
-  picture frames in the drawer, empty until the pictures exist.
+  soft touch point in the cubes' blue (orange at first) taps twice every 5s
+  to hint at it, until used; a grey fog (a CSS layer, not scene fog) rolls
+  in behind the project; picture frames in the drawer, empty until the
+  pictures exist.
 - **Rock Print.** Its points gather out of a scattered cloud on every open
   (vertex shader, `gather: true`); they're three random inks (dark red,
   orange, grey) in three random sizes, semi-transparent. It lands on its
   own `view` - fitted by mask-overlap scoring to a phone screenshot the user
-  supplied, which added `zoom` and `lift` to `view`.
+  supplied, which added `zoom` and `lift` to `view` - then zoomed out a
+  touch on phones (1.9 -> 1.75) since it cropped the pavilion. Once
+  gathered, the camera slowly nods up and down (`view.sway`, 8° either side
+  over 20s), riding on the drawer, the zoom and the visitor's orbit.
 - **Loading.** An inline start-up loader ("flux and flow" particle streams,
   real progress). `?cloudtest` measured ten full clouds at start-up as far
   too heavy, so clouds load only on click.
@@ -104,18 +110,9 @@ that were tried and removed are listed under "Tried and removed" there.
   invitations. The old dark background was a three.js `Sky` dome (removed);
   additive blending is gone because it draws nothing on paper; scene
   colours go through `screenColor()`.
-- **Docs clean-up at the end**: DECISIONS.md regrouped with a contents
-  list and a "Tried and removed" section, this entry condensed, README's
-  TODO split into open and done, CLAUDE.md given a "where to pick up" and
-  testing tips.
-- **After the clean-up, four tweaks**: Rock Print's phone view zoomed
-  out a touch (stacked zoom 1.9 -> 1.75) since it cropped the pavilion; the
-  tap hint is now the floating cubes' blue instead of orange; the spotlit
-  cube now eases out of and back into its float (longer, smoothstepped
-  fade-out, pose blended with the float) - it used to snap up to 2 units
-  in one frame as the jump ended. And the camera now slowly nods up and
-  down over Rock Print once its points have gathered (`view.sway`, 8°
-  either side over 20s), riding on the drawer, zoom and orbiting.
+- **Docs**: DECISIONS.md regrouped with a contents list and a "Tried and
+  removed" section, this entry condensed, README's TODO split into next
+  up / open / done, CLAUDE.md given "Where to pick up" and testing tips.
 
 Open at end of session (see README, "Next up"):
 - The user will supply pictures for Rock Print's three empty drawer frames.
@@ -123,5 +120,3 @@ Open at end of session (see README, "Next up"):
   accurately once written.
 - Model licensing/attribution for the public .glb is unchecked.
 - No per-project URLs; `?cloudtest` and `src/loader/` (dead code) can go.
-- Check whether `main` has the branch's last commits (the tweaks are
-  merged only if the user said "merge and build").

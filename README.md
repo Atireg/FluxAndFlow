@@ -7,7 +7,7 @@ Adding a project: edit the `projects` array near the top of src/script.js
 (the fields are listed in CLAUDE.md). Each entry declares the slot it sits
 in and its own models; any text field left empty is skipped rather than
 rendered blank. An optional `view` sets the camera angle the project opens
-on; `gather: true` makes its points gather out of a scattered cloud each
+on (and, with `sway`, a slow nod of the camera); `gather: true` makes its points gather out of a scattered cloud each
 time it opens; `images` fills the drawer's picture frames. Slots with no
 project show the rock thumbnail and answer a click with "Still empty...".
 See DECISIONS.md for why things are built the way they are, and
