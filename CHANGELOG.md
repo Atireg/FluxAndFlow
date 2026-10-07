@@ -92,11 +92,11 @@ were tried and removed are listed under "Tried and removed" there.
   stays on one line.
 - **Project view.** The model turns slowly; opening the drawer moves the
   model left, whole, on a wide screen (with the hint and zoom still there)
-  and pulls into a close-up on a phone; double-click / double-tap zooms to a spot and back; a white
-  touch point with a black outline (orange, blue, then dark grey before it)
-  taps twice every 5s to hint at it, zoomed in or not; a grey fog (a CSS
-  layer, not scene fog) rolls in behind the project; picture frames in the
-  drawer, empty until the pictures exist.
+  and pulls into a close-up on a phone; double-click / double-tap zooms to a
+  spot and back; a white touch point with a black outline (orange, blue,
+  then dark grey before it) taps twice every 5s to hint at it, zoomed in or
+  not; a grey fog (a CSS layer, not scene fog) rolls in behind the project;
+  picture frames in the drawer, empty until the pictures exist.
 - **Rock Print.** Its points gather out of a scattered cloud on every open
   (vertex shader, `gather: true`); they're three random inks (dark red,
   orange, grey) in three random sizes, semi-transparent. It lands on its own
