@@ -7,11 +7,11 @@ Adding a project: edit the `projects` array near the top of src/script.js
 (the fields are listed in CLAUDE.md). Each entry declares the slot it sits
 in and its own models; any text field left empty is skipped rather than
 rendered blank. An optional `view` sets the camera angle the project opens
-on (and, with `sway`, a slow nod of the camera); `gather: true` makes its points gather out of a scattered cloud each
-time it opens; `images` fills the drawer's picture frames. Slots with no
-project show the rock thumbnail and answer a click with "Still empty...".
-See DECISIONS.md for why things are built the way they are, and
-CHANGELOG.md for what changed when.
+on (and, with `sway`, a slow nod of the camera); `gather: true` makes its
+points gather out of a scattered cloud each time it opens; `images` fills
+the drawer's picture frames. Slots with no project show the rock thumbnail
+and answer a click with "Still empty...". See DECISIONS.md for why things
+are built the way they are, and CHANGELOG.md for what changed when.
 
 Add `?cloudtest` to the address to fill every slot with a copy of the
 first project - a load test, see DECISIONS.md.
@@ -125,8 +125,9 @@ Details view
     [x] A grey fog rolls in behind the project, and clears on the way back
     [x] The About drawer pulls the camera into a close-up
     [x] Double-click / double-tap zooms towards that spot, and back
-    [x] A white touch point with a black outline taps twice every 5s, hinting at the
-        zoom - zoomed in too, where it hints at zooming back out
+    [x] A white touch point with a black outline taps twice every 5s,
+        hinting at the zoom - zoomed in too, where it hints at zooming back
+        out
     [x] Picture frames in the drawer (empty until the pictures exist)
 
 Performance and tech

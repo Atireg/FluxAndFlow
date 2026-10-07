@@ -61,10 +61,10 @@ list.
 
 ## Session 2 — 2026-10-04 / 2026-10-07
 
-`e0c070e`..(branch head) (branch `ccr-584d8563-rtv32f`, fast-forward
-merged to `main` on each "merge and build" - `git log origin/main..`
-shows anything not yet live). Every feature below has a DECISIONS.md entry; features
-that were tried and removed are listed under "Tried and removed" there.
+`e0c070e`..(branch head) (branch `ccr-584d8563-rtv32f`, fast-forward merged
+to `main` on each "merge and build" - `git log origin/main..` shows anything
+not yet live). Every feature below has a DECISIONS.md entry; features that
+were tried and removed are listed under "Tried and removed" there.
 
 - **Drawer on the live site.** The About handle was missing because every
   description field was empty (by design - `hasDescription`). Filled with
@@ -73,9 +73,10 @@ that were tried and removed are listed under "Tried and removed" there.
 - **Catalog motion**, rebuilt as one pure state function per frame (which
   fixed two old hover bugs): a bigger, rocking wander; a continuous
   spotlight - any cube glows orange and jumps, one at a time, with its
-  "Project XX" name blinking in step in bare orange text, then eases back into its float (it
-  used to snap up to 2 units in one frame as the jump ended); the pointer stirs nearby cubes like a hand through water; no
-  orbit in the grid.
+  "Project XX" name blinking in step in bare orange text, then eases back
+  into its float (it used to snap up to 2 units in one frame as the jump
+  ended); the pointer stirs nearby cubes like a hand through water; no orbit
+  in the grid.
 - **Every cube holds the little rock** (one download, cloned). Clicking an
   empty slot says "Still empty...". An "Explore me..." tag, "Project XX"
   labels near the pointer and falling-leaf names were each built and
@@ -89,23 +90,25 @@ that were tried and removed are listed under "Tried and removed" there.
   animated move goes through `moveCamera`, which slerps). The closing fade
   no longer pops the grid in at full opacity. The bar title crossfades and
   stays on one line.
-- **Project view.** The model turns slowly; the drawer pulls the camera
-  into a close-up; double-click / double-tap zooms to a spot and back; a
-  white touch point with a black outline (orange, blue, then dark grey
-  before it) taps twice every 5s to hint at it, zoomed in or not; a grey
-  fog (a CSS layer, not scene fog) rolls in behind the project; picture frames in the drawer, empty until the
-  pictures exist.
+- **Project view.** The model turns slowly; the drawer pulls the camera into
+  a close-up; double-click / double-tap zooms to a spot and back; a white
+  touch point with a black outline (orange, blue, then dark grey before it)
+  taps twice every 5s to hint at it, zoomed in or not; a grey fog (a CSS
+  layer, not scene fog) rolls in behind the project; picture frames in the
+  drawer, empty until the pictures exist.
 - **Rock Print.** Its points gather out of a scattered cloud on every open
   (vertex shader, `gather: true`); they're three random inks (dark red,
-  orange, grey) in three random sizes, semi-transparent. It lands on its
-  own `view` - fitted by mask-overlap scoring to a phone screenshot the user
+  orange, grey) in three random sizes, semi-transparent. It lands on its own
+  `view` - fitted by mask-overlap scoring to a phone screenshot the user
   supplied, which added `zoom` and `lift` to `view` - then zoomed out a
   touch on phones (1.9 -> 1.75) since it cropped the pavilion. Once
   gathered, the camera slowly nods up and down (`view.sway`, 13° either side
-  over 16s, up from a too-subtle 8° over 20s), riding on the drawer, the zoom and the visitor's orbit.
+  over 16s, up from a too-subtle 8° over 20s), riding on the drawer, the
+  zoom and the visitor's orbit.
 - **Loading.** An inline start-up loader ("flux and flow" particle streams,
-  real progress), held for at least 5s with the bar paced to fill over them. `?cloudtest` measured ten full clouds at start-up as far
-  too heavy, so clouds load only on click.
+  real progress), held for at least 5s with the bar paced to fill over them.
+  `?cloudtest` measured ten full clouds at start-up as far too heavy, so
+  clouds load only on click.
 - **The whole site is paper**: dark ink on a warm light ground, orange for
   invitations. The old dark background was a three.js `Sky` dome (removed);
   additive blending is gone because it draws nothing on paper; scene

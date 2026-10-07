@@ -17,7 +17,7 @@ The catalog (the grid of cubes)
 - The catalog has a fixed number of slots
 - A cube's visual state is a pure function of its mode and the clock
 - The spotlight: any cube, held still, in the one orange
-- Moving the pointer stirs the grid; the grid doesn't orbit
+- Moving the pointer through the grid stirs it; the grid doesn't orbit
 - Every cube shows the rock, from one download
 - Clicking an empty slot answers with "Still empty..."
 - Clicks are distinguished from drags
@@ -375,18 +375,18 @@ it must otherwise.
 
 Rock Print's view - `{ elevation: 58, azimuth: 4, turn: 86, zoom: { stacked:
 1.75, side: 1.4 }, lift: { stacked: 0.14, side: 0 }, sway: 13 }` - was
-fitted to a phone screenshot the user supplied, not eyeballed (`sway`,
-added later, is the slow nod - see "The camera nods slowly up and down"). A throwaway build (never
-committed) froze the slow turn, finished the gather instantly and exposed a
-hook to set the view; renders at the screenshot's viewport (412x762) were
-scored by how well their orange/red point masks overlap the screenshot's
-(IoU), on a coarse grid of elevation, turn and zoom, then finer. Letting the
-render slide showed the remaining error was placement, not angle - hence
-`lift`. Result: zoom 1.9, overlap 0.8-0.9 with a 3px residual shift. The
-stacked zoom was then eased back to 1.75, as asked: on the phone it
-cropped the pavilion ("zoom out just a bit... really just a bit"). The same zoom
-and lift take the pavilion's top off on desktop, so `side` uses 1.4 and no
-lift.
+fitted to a phone screenshot the user supplied, not eyeballed (`sway`, added
+later, is the slow nod - see "The camera nods slowly up and down"). A
+throwaway build (never committed) froze the slow turn, finished the gather
+instantly and exposed a hook to set the view; renders at the screenshot's
+viewport (412x762) were scored by how well their orange/red point masks
+overlap the screenshot's (IoU), on a coarse grid of elevation, turn and
+zoom, then finer. Letting the render slide showed the remaining error was
+placement, not angle - hence `lift`. Result: zoom 1.9, overlap 0.8-0.9 with
+a 3px residual shift. The stacked zoom was then eased back to 1.75, as
+asked: on the phone it cropped the pavilion ("zoom out just a bit... really
+just a bit"). The same zoom and lift take the pavilion's top off on desktop,
+so `side` uses 1.4 and no lift.
 
 The model never stops turning, so `turn` is set for the moment the gather
 completes and the pavilion first appears whole: the screenshot's 118° less
@@ -810,9 +810,10 @@ previewed, and taken out at the user's request.
   behind a `?loaderpreview` mode that has since been removed.
 - **A single dark-teal ink** for the points, before the three inks.
 - **Orbiting the catalog** (OrbitControls in the grid view).
-- **A hand icon for the tap hint** (Lucide's "pointer"), three other
-  redrawn designs, and the fingertip as a soft glow in orange, then blue,
-  then dark grey, before it became white with a black outline. Also: the hint stopping for good once the visitor had zoomed.
+- **A hand icon for the tap hint** (Lucide's "pointer"), three other redrawn
+  designs, and the fingertip as a soft glow in orange, then blue, then dark
+  grey, before it became white with a black outline. Also: the hint stopping
+  for good once the visitor had zoomed.
 - **An orthographic detail view** (`DETAIL_PROJECTION`, still switchable)
   and an oblique three-quarter default: flat, and nothing square.
 - **`controls.autoRotate`** in the detail view: turned the cube's edges.
