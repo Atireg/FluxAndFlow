@@ -61,9 +61,9 @@ list.
 
 ## Session 2 — 2026-10-04 / 2026-10-07
 
-`e0c070e`..`e93b28a`, plus a final docs tidy (branch `ccr-584d8563-rtv32f`,
-fast-forward merged to `main` on each "merge and build"; `main` is at
-`e93b28a` and live). Every feature below has a DECISIONS.md entry; features
+`e0c070e`..(branch head) (branch `ccr-584d8563-rtv32f`, fast-forward
+merged to `main` on each "merge and build" - `git log origin/main..`
+shows anything not yet live). Every feature below has a DECISIONS.md entry; features
 that were tried and removed are listed under "Tried and removed" there.
 
 - **Drawer on the live site.** The About handle was missing because every
@@ -91,8 +91,8 @@ that were tried and removed are listed under "Tried and removed" there.
   stays on one line.
 - **Project view.** The model turns slowly; the drawer pulls the camera
   into a close-up; double-click / double-tap zooms to a spot and back; a
-  soft touch point in the cubes' blue (orange at first) taps twice every 5s
-  to hint at it, until used; a grey fog (a CSS layer, not scene fog) rolls
+  soft dark-grey touch point (orange, then blue, at first) taps twice
+  every 5s to hint at it, zoomed in or not; a grey fog (a CSS layer, not scene fog) rolls
   in behind the project; picture frames in the drawer, empty until the
   pictures exist.
 - **Rock Print.** Its points gather out of a scattered cloud on every open

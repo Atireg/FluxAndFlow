@@ -231,7 +231,6 @@ const tapHint = document.querySelector('#tap-hint');
 const TAP_HINT_AFTER_GATHER = 1.2; // seconds after the points have gathered before the first one
 const TAP_HINT_GAP = 5; // seconds from one hint to the next
 let tapHintNext = Infinity; // seconds into the model's showing (see detailRotateStartTime)
-let tapHintLearned = false; // once the visitor has zoomed, it never shows again
 const emptyTag = document.querySelector('#empty-tag');
 const cubeTagAnchor = new THREE.Vector3();
 const EMPTY_TAG_DURATION = 1.6; // seconds "Still empty..." stays up after a click
@@ -2292,8 +2291,8 @@ function toggleDetailZoom(clientX, clientY) {
     moveCamera(aim.clone().add(offset), aim, DETAIL_ZOOM_DURATION);
     detailZoomed = true;
 
-    // They've found it - no more hints
-    tapHintLearned = true;
+    // Clear a hint that's mid-tap; the next one comes round as usual, zoomed
+    // in or not
     tapHint.classList.remove('is-showing');
 }
 
@@ -2308,20 +2307,22 @@ function toggleDetailZoom(clientX, clientY) {
 const tapHintPoint = new THREE.Vector3();
 
 function maybeShowTapHint(model, since) {
-    if (tapHintLearned || since < tapHintNext) return;
+    if (since < tapHintNext) return;
 
     tapHintNext = since + TAP_HINT_GAP;
 
-    // Not now - try again next time round
-    if (detailZoomed || drawerOpen || cameraOrientationLocked) return;
+    // Not now - try again next time round. Zoomed in is fine: there it
+    // invites the double-tap back out.
+    if (drawerOpen || cameraOrientationLocked) return;
 
     const points = model.userData.points;
     if (!points || !model.visible) return;
 
     // A random point of the cloud that's comfortably on screen, clear of
-    // the bar along the top
+    // the bar along the top. Zoomed in, most of the cloud is off screen, so
+    // allow plenty of tries - each is one projected point.
     const positions = points.geometry.attributes.position;
-    for (let tries = 0; tries < 12; tries++) {
+    for (let tries = 0; tries < 60; tries++) {
         tapHintPoint.fromBufferAttribute(positions, Math.floor(Math.random() * positions.count));
         points.localToWorld(tapHintPoint).project(camera);
 

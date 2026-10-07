@@ -32,7 +32,7 @@ The project view: camera
 - The model rotates slowly once a project is open
 - The camera nods slowly up and down (`view.sway`)
 - Double-click or double-tap zooms in on the model
-- A touch point hints at the double-tap zoom, until it's been used
+- A touch point keeps hinting at the double-tap zoom
 
 The project view: point cloud
 - The point cloud is quantized, not Draco-compressed
@@ -489,8 +489,8 @@ own `timeStamp`, not when they're handled: a busy frame pushed a real 285ms
 double-tap past a 300ms limit.
 
 
-A touch point hints at the double-tap zoom, until it's been used
------------------------------------------------------------------
+A touch point keeps hinting at the double-tap zoom
+--------------------------------------------------
 
 `#tap-hint` is a soft touch point with two rings, over the canvas. Each
 showing is one 2.2s CSS animation: fade in to 75% opacity, press twice
@@ -498,21 +498,22 @@ with a ring spreading on each press (the gesture itself), fade out.
 
 It started as a hand icon; four redrawn designs were compared over the
 pavilion (fine-line hand, solid silhouette, paper-cut hand, handless
-fingertip) and the fingertip ("C") was chosen, first in the About handle's
-orange, then - as asked - in the floating cubes' blue. That blue is
-`--cube-blue-rgb` (47, 151, 255), the cubes' glass colour as rendered,
-measured from a screenshot: their faces show it at only 14% over the
-paper, which is why the cubes read pale and the dot, at 75%, reads deeper.
-Re-measure it if `cubesColor` or the scene's lights change.
+fingertip) and the fingertip ("C") was chosen. Its colour went from the
+About handle's orange to the floating cubes' blue to, now, a dark grey
+(`--hint-rgb`, 58, 56, 53) - darker than the points' warm grey ink, so it
+stays legible over the dense cloud and over the fog, without competing with
+the orange that marks the clickable things.
 
 `maybeShowTapHint`, each frame in the project view: first once the points
 have gathered (`GATHER_DURATION` + `TAP_HINT_AFTER_GATHER`), then every
 `TAP_HINT_GAP` (5s, as asked), each time on a random point of the cloud
 projected to the screen, retried until it's comfortably on screen and clear
-of the bar. It skips its turn while zoomed, with the drawer open or while
-the camera moves, and stops for good (`tapHintLearned`) the first time the
-visitor zooms - repeating it after that would only nag. Under reduced motion
-it fades in and out without the presses.
+of the bar (up to 60 tries - zoomed in, most of the cloud is off screen).
+It skips its turn with the drawer open or while the camera moves, and
+otherwise keeps coming, zoomed in included, where it invites the
+double-tap back out. A zoom clears any hint mid-tap. It used to skip while
+zoomed and stop for good after the first zoom (to avoid nagging); the
+user asked for it to keep showing.
 
 
 The project view: point cloud
@@ -784,7 +785,8 @@ previewed, and taken out at the user's request.
 - **A single dark-teal ink** for the points, before the three inks.
 - **Orbiting the catalog** (OrbitControls in the grid view).
 - **A hand icon for the tap hint** (Lucide's "pointer"), three other
-  redrawn designs, and the fingertip in orange before it went blue.
+  redrawn designs, and the fingertip in orange, then blue, before it went
+  dark grey. Also: the hint stopping for good once the visitor had zoomed.
 - **An orthographic detail view** (`DETAIL_PROJECTION`, still switchable)
   and an oblique three-quarter default: flat, and nothing square.
 - **`controls.autoRotate`** in the detail view: turned the cube's edges.
