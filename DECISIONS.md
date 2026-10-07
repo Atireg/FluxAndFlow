@@ -241,7 +241,10 @@ rock inside.
 Clicks are distinguished from drags
 -----------------------------------
 
-A press that travels more than 5px is a drag, not a click (`wasDrag`).
+Selecting a cube answers the press's own `pointerup` on the canvas
+(`onCanvasSelect`; main mouse button, or any touch or pen), not a `click`
+on window - see "Safari" below for why. A press that travels more than 5px
+is a drag, not a selection (`wasDrag`).
 Originally this stopped an orbit from opening whichever cube it ended on;
 the catalog no longer orbits, but a drag now stirs the grid and letting go
 shouldn't open a cube. In a project it keeps orbiting by hand from counting
@@ -617,9 +620,16 @@ and flies every point in from the middle.
 Safari: shaders stay within defined GLSL, and failures say so
 --------------------------------------------------------------
 
-Reported: Rock Print didn't load on Safari. It couldn't be reproduced here -
-there's no WebKit in the cloud sessions and its download is blocked - so the
-fix closes off the likely causes rather than a confirmed one:
+Reported: Rock Print didn't load on Safari; then, more precisely, tapping
+its cube did nothing at all, with no error. That second report is the
+likely real cause: selection listened for `click` on window, and Safari on
+iPhone and iPad doesn't send `click` for a tap on a plain canvas that has no
+click handler of its own - so the tap never reached the code. Selection now
+answers `pointerup` on the canvas itself, which every browser sends.
+
+None of this could be reproduced here - there's no WebKit in the cloud
+sessions and its download is blocked. Before the clearer report, three
+other likely causes were closed off; they stay, as they're correct anyway:
 
 - **No undefined GLSL.** The fragment shader used `smoothstep(1.0, 0.01, x)`
   - reversed edges, which GLSL leaves undefined. Chrome happens to compute

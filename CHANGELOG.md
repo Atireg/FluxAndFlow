@@ -98,10 +98,12 @@ were tried and removed are listed under "Tried and removed" there.
   `view`, fitted by mask-overlap scoring to a phone screenshot the user
   supplied (which added `zoom` and `lift`), and once gathered the camera
   slowly nods up and down (`view.sway`, 13° either side over 16s).
-- **Safari.** Rock Print reportedly didn't load there; fixed blind (no
-  WebKit here): shader code made spec-defined, the fog explicitly under the
-  canvas, and load or shader failures now say so in the project bar. Still
-  to confirm on a real Safari.
+- **Safari.** Rock Print reportedly didn't load there, and tapping its cube
+  did nothing. Selection now answers the canvas's own `pointerup` instead of
+  a window `click`, which iPhone/iPad Safari doesn't send for a tap on a
+  plain canvas. Fixed blind (no WebKit here), along with spec-defined shader
+  code, the fog explicitly under the canvas, and load/shader failures shown
+  in the project bar. Still to confirm on a real Safari.
 - **Loading.** An inline start-up loader ("flux and flow" particle streams,
   real progress), held for at least 5s with the bar paced to fill over them.
   `?cloudtest` measured ten full clouds at start-up as far too heavy, so

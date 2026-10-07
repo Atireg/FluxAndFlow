@@ -2087,8 +2087,10 @@ function placeDroppingCube(cube, elapsedTime) {
     cube.scale.setScalar(1);
 }
 
-// Function to handle mouse clicks
-function onMouseClick(event) {
+// Picking a cube in the catalog, on a press released over the canvas. Only
+// the main mouse button; a touch or pen always counts.
+function onCanvasSelect(event) {
+    if (event.pointerType === 'mouse' && event.button !== 0) return;
     if (viewState !== 'catalog' || wasDrag(event)) return;
 
     // Calculate mouse position in normalized device coordinates (-1 to +1)
@@ -2453,12 +2455,15 @@ window.addEventListener('mousemove', onMouseMove);
 // Pointer, not mouse, so a finger dragged across the grid stirs it too
 window.addEventListener('pointermove', trackFlowPointer);
 
-// Add the click event listener
-window.addEventListener('click', onMouseClick);
+// Selecting answers the press's own pointerup on the canvas, not a `click`
+// on window: Safari on iPhone and iPad doesn't send `click` for a tap on a
+// plain canvas, so a window-level click listener never heard it and a tap
+// on a cube silently did nothing. Pointer events arrive in every browser.
+canvas.addEventListener('pointerup', onCanvasSelect);
 
 // Ways back to the catalog
 projectClose.addEventListener('click', (event) => {
-    // Keep this click from reaching onMouseClick on the way up
+    // Keep this click to the button itself
     event.stopPropagation();
     closeProject();
 });
