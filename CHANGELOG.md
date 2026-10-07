@@ -90,8 +90,8 @@ were tried and removed are listed under "Tried and removed" there.
   model left, whole, on a wide screen and pulls into a close-up on a phone;
   double-click / double-tap zooms to a spot and back, hinted at every 5s by
   a white touch point with a black outline; a grey fog (a CSS layer, not
-  scene fog) rolls in behind the project; picture frames in the drawer,
-  empty until the pictures exist.
+  scene fog) rolls in behind the project; the drawer holds five pictures of
+  Rock Print supplied by the user, sized for the web.
 - **Rock Print.** Its points gather out of a scattered cloud on every open
   (vertex shader, `gather: true`); they're three random inks (dark red,
   orange, grey) in three random sizes, semi-transparent. It lands on its own
@@ -112,7 +112,7 @@ were tried and removed are listed under "Tried and removed" there.
   "Where to pick up" and testing tips.
 
 Open at end of session (see README, "Next up"):
-- The user will supply pictures for Rock Print's three empty drawer frames.
+- Rock Print's five drawer pictures have no captions or photo credits yet.
 - Rock Print's copy is still placeholder text, live; the role must be stated
   accurately once written.
 - Model licensing/attribution for the public .glb is unchecked.

@@ -15,14 +15,13 @@ Session-by-session history: `CHANGELOG.md`.
 ## Where to pick up
 
 Read the last entry of `CHANGELOG.md` (its "Open at end of session" list)
-and README's "Next up". As of the end of Session 2: everything built is
-live or on the branch (`git log origin/main..` shows anything not yet
-merged); what's waiting is content from the user
-(pictures for Rock Print's three empty drawer frames, its real copy - the
-live text is `[PLACEHOLDER ...]`), plus model licensing and per-project
-URLs. DECISIONS.md opens with a contents list; its "Tried and removed"
-section lists ideas the user has already seen and rejected - don't
-re-propose them without saying so.
+and README's "Next up". As of the end of Session 2: everything built is live
+or on the branch (`git log origin/main..` shows anything not yet merged);
+what's waiting is content from the user (Rock Print's real copy - the live
+text is `[PLACEHOLDER ...]` - and photo credits/captions for its five drawer
+pictures), plus model licensing and per-project URLs. DECISIONS.md opens
+with a contents list; its "Tried and removed" section lists ideas the user
+has already seen and rejected - don't re-propose them without saying so.
 
 ## Stack and commands
 
@@ -78,7 +77,10 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
   `SLOT_COUNT` without raising it.
 - `images` go in `static/images/`. The first spans the drawer's width, the
   rest sit two to a row. An entry without a `src` renders as an empty
-  dashed frame, holding its place until the picture exists.
+  dashed frame, holding its place until the picture exists. Prepare new
+  pictures as Rock Print's were: JPEG quality ~80, progressive, metadata
+  stripped (no GPS on a public site), the lead about 1500px wide and the
+  rest about 900px - set `ratio` to the file's own width / height.
 - Leaving `year`/`role`/`context`/`body`/`credits` empty is intentional, not
   a placeholder bug: a project with no description gets no drawer handle at
   all, rather than a handle onto an empty panel. See DECISIONS.md. **State

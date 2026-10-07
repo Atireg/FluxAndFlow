@@ -703,9 +703,18 @@ A project's `images` is a list of `{ src, alt, caption, ratio }`;
 (`imageFigure`). The first spans the width, the rest sit two to a row.
 `ratio` is a CSS aspect ratio (3 / 2 by default), so frames have their size
 before pictures load. An entry with no `src` is an empty dashed frame,
-`aria-hidden`. Rock Print has three empty frames; filling one is setting
-its `src` (and `alt`). Pictures load lazily. The drawer went 94% -> 98%
-opaque so the point cloud doesn't muddy the pictures.
+`aria-hidden`. Pictures load lazily. The drawer went 94% -> 98% opaque so
+the point cloud doesn't muddy the pictures.
+
+Rock Print has five, supplied by the user: the lead (the pavilion beside
+the church) at 1500px wide, ~450 KB, and four at 900px, 95-165 KB, about
+1 MB in all, re-saved as progressive JPEG at quality ~80 with metadata
+stripped. The sizes follow the drawer: the lead shows at ~450px wide on a
+desktop and the two-up pictures at ~220px, so these stay sharp at 2x pixel
+density without shipping the 2000px originals. `ratio` is each file's own
+width / height, so frames don't jump when the pictures arrive. Each has an
+`alt` describing what it shows; `caption` is empty until there's a credit
+or caption to give.
 
 
 Asset paths resolve against the Vite base URL

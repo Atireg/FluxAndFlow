@@ -158,9 +158,36 @@ const projects = [
         // as a CSS aspect ratio, '3 / 2' if left out.
         //   { src: '', alt: 'what it shows', caption: '', ratio: '4 / 5' }
         images: [
-            { src: '', alt: '', caption: '' },
-            { src: '', alt: '', caption: '' },
-            { src: '', alt: '', caption: '' },
+            {
+                src: 'images/rock-print-01-exterior.jpg',
+                alt: 'The pavilion under a chestnut tree beside a stone church: columns of loose stone holding up a thin rusted steel roof',
+                caption: '',
+                ratio: '1500 / 1122',
+            },
+            {
+                src: 'images/rock-print-02-inside.jpg',
+                alt: 'Inside the pavilion, a visitor walks between the stone columns, blurred in motion',
+                caption: '',
+                ratio: '900 / 589',
+            },
+            {
+                src: 'images/rock-print-03-printing.jpg',
+                alt: 'A robotic arm on a tracked vehicle lays stone and thread layer by layer as a column rises, watched by an operator',
+                caption: '',
+                ratio: '900 / 601',
+            },
+            {
+                src: 'images/rock-print-04-touch.jpg',
+                alt: 'A visitor touches a column, its surface of loose stones bound by thread',
+                caption: '',
+                ratio: '900 / 601',
+            },
+            {
+                src: 'images/rock-print-05-detail.jpg',
+                alt: 'Close-up of the columns: crushed stone held together by loops of white thread, with a blue line running through',
+                caption: '',
+                ratio: '900 / 601',
+            },
         ],
     },
 ];

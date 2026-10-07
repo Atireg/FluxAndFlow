@@ -25,9 +25,8 @@ TO DOs
 ======
 
 Next up (waiting on content)
-    [ ] Pictures for Rock Print's drawer: three empty frames are in place
-        (one full width, two side by side) - set each `src` and `alt` in
-        the project's `images`, files in static/images/. Video not started
+    [ ] Captions / photo credits for Rock Print's five pictures, if
+        wanted (the `caption` fields are empty). Video not started
     [ ] Write the real copy for Rock Print - year, role, context, body,
         credits. The fields hold unmistakable [PLACEHOLDER ...] text, put
         there to check the drawer works on the live site - it is live and
@@ -130,7 +129,8 @@ Details view
     [x] A white touch point with a black outline taps twice every 5s,
         hinting at the zoom - zoomed in too, where it hints at zooming back
         out
-    [x] Picture frames in the drawer (empty until the pictures exist)
+    [x] Pictures in the drawer: Rock Print has five (one full width, four
+        two to a row), sized for the web in static/images/
 
 Performance and tech
     [x] Deployed early (GitHub Pages)
