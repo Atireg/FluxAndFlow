@@ -28,7 +28,7 @@ The project view: camera
 - The default detail view is a one-point perspective, square-on
 - A project can set its own camera angle (Rock Print's landing view)
 - Fitting has to allow for depth, and for what else is on screen
-- The drawer pulls the camera into a close-up
+- The open drawer: the whole model beside it, or a close-up below it
 - The model rotates slowly once a project is open
 - The camera nods slowly up and down (`view.sway`)
 - Double-click or double-tap zooms in on the model
@@ -363,7 +363,8 @@ it appears, on top of `DETAIL_MODEL_YAW`), plus:
 - `lift`: how far up the screen the model sits, as a share of its height.
 
 `zoom` and `lift` can be one number or `{ side, stacked }` (`perLayout`).
-Both are ignored with the drawer open, which has its own close-up.
+Both are ignored with the drawer open on a phone, which has its own
+close-up; beside the drawer on a wide screen the view is kept.
 
 Framing with a `view` differs from the default (in `frameDetail`, behind
 `framesCube`): it fits the cube, not the model's bounding box (the box
@@ -418,15 +419,31 @@ take the cube's top off, so the margin goes back past 1. Reserving vertical
 space can't make a width-limited model bigger - it only moves it.
 
 
-The drawer pulls the camera into a close-up
--------------------------------------------
+The open drawer: the whole model beside it, or a close-up below it
+------------------------------------------------------------------
 
-With the drawer open, `setDrawer` calls `frameDetailCloseup`: a closer,
-elevated crop (`CLOSEUP_ELEVATION` 38°, `CLOSEUP_DISTANCE_FACTOR` of the
-model's radius) on the project's own heading - an atmospheric shot behind
-the text, not the reference view, so the whole piece doesn't have to fit.
-Closing the drawer returns to `frameDetail`. The two share a heading, so the
-move is a pure tilt like every other.
+`frameWithDrawerOpen` picks the frame while the drawer is open, used by
+`setDrawer`, resize, a model landing with the drawer already out, and
+zooming back out.
+
+On a wide screen (`side`, 860px and up) the drawer sits beside the model,
+so the model moves left and stays whole: `frameDetail` already fits into
+whatever the drawer leaves free (`freeW`, `ndcX = -fraction`), and a
+project with its own `view` keeps it there, `side` zoom included (Rock
+Print 1.4 - the pavilion stays inside the space left of the drawer as it
+turns and nods). The touch-point hint and the double-tap zoom work there
+too; the hint is kept clear of the drawer, and a zoom centres the tapped
+spot in the visible space rather than under the drawer's edge. The user
+asked for this: the close-up used to apply here as well and cut the
+pavilion off under the drawer.
+
+On a narrow screen (`stacked`) the drawer covers the lower half, so it's the
+close-up, `frameDetailCloseup`: a closer, elevated crop (`CLOSEUP_ELEVATION`
+38°, `CLOSEUP_DISTANCE_FACTOR` of the model's radius) on the project's own
+heading - an atmospheric shot behind the text, not the reference view, so
+the whole piece doesn't have to fit. Closing the drawer returns to
+`frameDetail`. The two share a heading, so the move is a pure tilt like
+every other.
 
 It keeps the project's azimuth but not its elevation: Rock Print's steeper
 landing angle left only fragments of pillars in the strip a phone has above
@@ -493,8 +510,9 @@ Double-click or double-tap zooms in on the model
 towards the cloud's nearest point along the pointer's ray (a points raycast,
 `threshold` 0.06; a miss zooms towards the middle), keeping the direction of
 view - a straight move in, no turn. Doing it again returns to `frameDetail`
-(or the close-up if the drawer is open). Any re-frame clears the zoomed
-state.
+(or `frameWithDrawerOpen` if the drawer is open). With the drawer open
+beside the model, the spot is centred in the space left of it, not at the
+screen's centre under the drawer. Any re-frame clears the zoomed state.
 
 Mouse and touch are handled separately. A mouse sends `dblclick`. Touch
 double-taps are timed by hand on `pointerup` (`DOUBLE_TAP_TIME` 350ms,
@@ -526,9 +544,11 @@ have gathered (`GATHER_DURATION` + `TAP_HINT_AFTER_GATHER`), then every
 `TAP_HINT_GAP` (5s, as asked), each time on a random point of the cloud
 projected to the screen, retried until it's comfortably on screen and clear
 of the bar (up to 60 tries - zoomed in, most of the cloud is off screen).
-It skips its turn with the drawer open or while the camera moves, and
-otherwise keeps coming, zoomed in included, where it invites the
-double-tap back out. A zoom clears any hint mid-tap. It used to skip while
+It skips its turn with the drawer open on a phone (where it covers the
+model) or while the camera moves; beside the drawer on a wide screen it
+shows, kept clear of the drawer. Otherwise it keeps coming, zoomed in
+included, where it invites the double-tap back out. A zoom clears any hint
+mid-tap. It used to skip while
 zoomed and stop for good after the first zoom (to avoid nagging); the
 user asked for it to keep showing.
 

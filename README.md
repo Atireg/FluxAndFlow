@@ -123,7 +123,8 @@ Details view
     [x] Points: three inks (dark red, orange, grey), three sizes,
         semi-transparent
     [x] A grey fog rolls in behind the project, and clears on the way back
-    [x] The About drawer pulls the camera into a close-up
+    [x] Opening the About drawer: on a wide screen the model moves left and
+        stays whole (hint and zoom work there); on a phone, a close-up
     [x] Double-click / double-tap zooms towards that spot, and back
     [x] A white touch point with a black outline taps twice every 5s,
         hinting at the zoom - zoomed in too, where it hints at zooming back

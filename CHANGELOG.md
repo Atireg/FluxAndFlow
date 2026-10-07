@@ -90,8 +90,9 @@ were tried and removed are listed under "Tried and removed" there.
   animated move goes through `moveCamera`, which slerps). The closing fade
   no longer pops the grid in at full opacity. The bar title crossfades and
   stays on one line.
-- **Project view.** The model turns slowly; the drawer pulls the camera into
-  a close-up; double-click / double-tap zooms to a spot and back; a white
+- **Project view.** The model turns slowly; opening the drawer moves the
+  model left, whole, on a wide screen (with the hint and zoom still there)
+  and pulls into a close-up on a phone; double-click / double-tap zooms to a spot and back; a white
   touch point with a black outline (orange, blue, then dark grey before it)
   taps twice every 5s to hint at it, zoomed in or not; a grey fog (a CSS
   layer, not scene fog) rolls in behind the project; picture frames in the

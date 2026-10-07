@@ -356,12 +356,13 @@ function setDrawer(open, { reframe = true } = {}) {
     // the bar can give that height back - see the 859px query in styles.css
     document.body.classList.toggle('drawer-open', open);
 
-    // Opening pulls in for a closer, more atmospheric crop instead of just
-    // making room for the drawer; closing returns to the full-fit view
+    // Opening makes room for the drawer - beside the model on a wide
+    // screen, the close-up on a narrow one (see frameWithDrawerOpen);
+    // closing returns to the full-fit view
     if (!reframe || !selectedCube) return;
 
     if (open) {
-        frameDetailCloseup(selectedCube, { duration: 1.1 });
+        frameWithDrawerOpen(selectedCube, { duration: 1.1 });
     } else {
         frameDetail(selectedCube, { duration: 0.8 });
     }
@@ -1231,8 +1232,11 @@ function frameDetail(object, { duration = 1.6, ease } = {}) {
     // the cube runs off the edges and the model fills the screen, and be
     // nudged up the screen (`lift`, a share of the screen's height). Either
     // can be one number, or { side, stacked } per layout. Not with the
-    // drawer open, which has its own close-up.
-    const ownView = framesCube && !drawerOpen ? object.userData.project.view : {};
+    // drawer open on a narrow screen, which has its own close-up; beside a
+    // drawer on a wide one it keeps its view, framed into the space left.
+    const { mode, fraction } = getPanelLayout();
+    const side = mode === 'side';
+    const ownView = framesCube && (!drawerOpen || side) ? object.userData.project.view : {};
     const box = framesCube
         ? new THREE.Box3().setFromCenterAndSize(object.position, new THREE.Vector3().setScalar(cubeSize))
         : new THREE.Box3().setFromObject(object);
@@ -1253,8 +1257,6 @@ function frameDetail(object, { duration = 1.6, ease } = {}) {
     const halfH = Math.abs(up.x) * half.x + Math.abs(up.y) * half.y + Math.abs(up.z) * half.z;
     const halfD = Math.abs(forward.x) * half.x + Math.abs(forward.y) * half.y + Math.abs(forward.z) * half.z;
 
-    const { mode, fraction } = getPanelLayout();
-    const side = mode === 'side';
     const perLayout = (value, fallback) => (typeof value === 'object' ? value[mode] : value) ?? fallback;
     const zoom = perLayout(ownView.zoom, 1);
     const lift = perLayout(ownView.lift, 0);
@@ -1349,6 +1351,20 @@ function frameDetail(object, { duration = 1.6, ease } = {}) {
  * atmospheric one. Deliberately not one-point and not fit to the whole
  * box - see DECISIONS.md for why that's fine here specifically.
  */
+/**
+ * The frame while the drawer is open. On a wide screen the drawer sits
+ * beside the model, so the whole piece is framed into the space to its left
+ * (frameDetail already fits into whatever the drawer leaves free). On a
+ * narrow one it covers the lower half, and the close-up is what fits.
+ */
+function frameWithDrawerOpen(cube, options) {
+    if (getPanelLayout().mode === 'side') {
+        frameDetail(cube, options);
+    } else {
+        frameDetailCloseup(cube, options);
+    }
+}
+
 const CLOSEUP_ELEVATION = 38; // degrees
 const CLOSEUP_DISTANCE_FACTOR = 1.1;
 
@@ -1459,7 +1475,7 @@ window.addEventListener('resize', () => {
     if (!selectedCube) return;
 
     if (drawerOpen) {
-        frameDetailCloseup(selectedCube, { duration: 0.4 });
+        frameWithDrawerOpen(selectedCube, { duration: 0.4 });
     } else {
         frameDetail(selectedCube, { duration: 0.4 });
     }
@@ -2180,7 +2196,7 @@ function openProject(cube) {
             // both together. The drawer may already be open if it loaded
             // slowly enough for the visitor to pull it out before this ran.
             if (drawerOpen) {
-                frameDetailCloseup(cube);
+                frameWithDrawerOpen(cube);
                 return;
             }
 
@@ -2288,7 +2304,7 @@ function toggleDetailZoom(clientX, clientY) {
 
     if (detailZoomed) {
         if (drawerOpen) {
-            frameDetailCloseup(selectedCube, { duration: DETAIL_ZOOM_DURATION });
+            frameWithDrawerOpen(selectedCube, { duration: DETAIL_ZOOM_DURATION });
         } else {
             frameDetail(selectedCube, { duration: DETAIL_ZOOM_DURATION });
         }
@@ -2305,9 +2321,16 @@ function toggleDetailZoom(clientX, clientY) {
     const hits = model && model.visible ? zoomRaycaster.intersectObject(model, true) : [];
     const aim = hits.length ? hits[0].point.clone() : controls.target.clone();
 
-    // Same direction of view, closer in, centred on the spot
+    // Same direction of view, closer in, centred on the spot - in the space
+    // left of the drawer when it's open beside the model, not behind it
     const offset = camera.position.clone().sub(controls.target).multiplyScalar(DETAIL_ZOOM);
-    moveCamera(aim.clone().add(offset), aim, DETAIL_ZOOM_DURATION);
+    const { mode, fraction } = getPanelLayout();
+    const shift = new THREE.Vector3();
+    if (drawerOpen && mode === 'side' && camera.isPerspectiveCamera) {
+        const halfHeight = offset.length() * Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2);
+        shift.set(1, 0, 0).applyQuaternion(camera.quaternion).multiplyScalar(fraction * halfHeight * aspectRatio);
+    }
+    moveCamera(aim.clone().add(offset).add(shift), aim.clone().add(shift), DETAIL_ZOOM_DURATION);
     detailZoomed = true;
 
     // Clear a hint that's mid-tap; the next one comes round as usual, zoomed
@@ -2331,8 +2354,13 @@ function maybeShowTapHint(model, since) {
     tapHintNext = since + TAP_HINT_GAP;
 
     // Not now - try again next time round. Zoomed in is fine: there it
-    // invites the double-tap back out.
-    if (drawerOpen || cameraOrientationLocked) return;
+    // invites the double-tap back out. So is the drawer on a wide screen,
+    // where it sits beside the model; on a narrow one it covers it.
+    const { mode, fraction } = getPanelLayout();
+    if ((drawerOpen && mode !== 'side') || cameraOrientationLocked) return;
+
+    // Clear of the drawer on the right, when it's open beside the model
+    const maxX = Math.min(0.7, 1 - 2 * fraction - 0.15);
 
     const points = model.userData.points;
     if (!points || !model.visible) return;
@@ -2345,7 +2373,7 @@ function maybeShowTapHint(model, since) {
         tapHintPoint.fromBufferAttribute(positions, Math.floor(Math.random() * positions.count));
         points.localToWorld(tapHintPoint).project(camera);
 
-        if (Math.abs(tapHintPoint.x) < 0.7 && tapHintPoint.y > -0.7 && tapHintPoint.y < 0.5) {
+        if (tapHintPoint.x > -0.7 && tapHintPoint.x < maxX && tapHintPoint.y > -0.7 && tapHintPoint.y < 0.5) {
             tapHint.style.left = `${(tapHintPoint.x + 1) / 2 * screenWidth}px`;
             tapHint.style.top = `${(1 - tapHintPoint.y) / 2 * screenHeight}px`;
 
