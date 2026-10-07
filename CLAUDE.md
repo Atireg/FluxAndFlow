@@ -16,7 +16,8 @@ Session-by-session history: `CHANGELOG.md`.
 
 Read the last entry of `CHANGELOG.md` (its "Open at end of session" list)
 and README's "Next up". As of the end of Session 2: everything built is
-live and the branch matches `main`; what's waiting is content from the user
+live or on the branch (`git log origin/main..` shows anything not yet
+merged); what's waiting is content from the user
 (pictures for Rock Print's three empty drawer frames, its real copy - the
 live text is `[PLACEHOLDER ...]`), plus model licensing and per-project
 URLs. DECISIONS.md opens with a contents list; its "Tried and removed"
@@ -63,7 +64,7 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
     thumbModel: 'models/rock.gltf',               // small model shown in the catalog cube
     detailModel: 'models/RockPrintStructureReduced.glb',  // loaded on click
     view: { elevation: 58, azimuth: 4, turn: 86,       // optional camera angle, degrees,
-            zoom: { stacked: 1.9, side: 1.4 },            // closer than the cube's fit
+            zoom: { stacked: 1.75, side: 1.4 },            // closer than the cube's fit
             lift: { stacked: 0.14, side: 0 } },           // raised on screen (share of height)
     gather: true,                                 // optional: points gather from a scattered cloud on open
     images: [{ src: 'images/x.jpg', alt: '', caption: '', ratio: '3 / 2' }],  // drawer pictures; no src = empty frame

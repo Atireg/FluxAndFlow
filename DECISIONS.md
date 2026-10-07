@@ -128,9 +128,16 @@ Every ~5.3-5.6s one cube glows orange and jumps, then the next takes over.
   restricting it to the one project would leave most of the grid inert.
   The hovered cube is excluded (the two would fight over the same fields),
   and so is the cube that just finished, so it visibly moves on.
-- **It holds still at its slot while it jumps**, no wander. Two motions on
-  one cube read as busy; holding still while the rest drift is part of the
-  signal.
+- **It holds still while it jumps**, no wander - where its float had it
+  when the spotlight began. Two motions on one cube read as busy; holding
+  still while the rest drift is part of the signal. Its pose is blended
+  with the live float by the spotlight's intensity, which eases in over
+  `SPOTLIGHT_FADE_IN` (0.6s) and out over `SPOTLIGHT_FADE_OUT` (1.6s), both
+  smoothstepped. It used to hold at its bare slot with a 0.6s linear ramp,
+  and when the dwell ended the cube snapped from the slot to its floating
+  spot - up to 2 units in one frame, the "too abrupt" return the user saw.
+  Replayed frame by frame, the largest one-frame move is now 0.08 units,
+  the jump itself.
 - **One orange for "click me"**, `#ff8c32`: the spotlit cube and the
   drawer's About handle (`--warm` in styles.css, with `--warm-rgb` and
   `--warm-deep`; `spotlightGlowColor` in script.js is kept in step by
@@ -352,14 +359,16 @@ with the drawer parked it centres on the whole screen when the cube's top
 it must otherwise.
 
 Rock Print's view - `{ elevation: 58, azimuth: 4, turn: 86, zoom: { stacked:
-1.9, side: 1.4 }, lift: { stacked: 0.14, side: 0 } }` - was fitted to a
+1.75, side: 1.4 }, lift: { stacked: 0.14, side: 0 } }` - was fitted to a
 phone screenshot the user supplied, not eyeballed. A throwaway build (never
 committed) froze the slow turn, finished the gather instantly and exposed a
 hook to set the view; renders at the screenshot's viewport (412x762) were
 scored by how well their orange/red point masks overlap the screenshot's
 (IoU), on a coarse grid of elevation, turn and zoom, then finer. Letting the
 render slide showed the remaining error was placement, not angle - hence
-`lift`. Result: overlap 0.8-0.9 with a 3px residual shift. The same zoom
+`lift`. Result: zoom 1.9, overlap 0.8-0.9 with a 3px residual shift. The
+stacked zoom was then eased back to 1.75, as asked: on the phone it
+cropped the pavilion ("zoom out just a bit... really just a bit"). The same zoom
 and lift take the pavilion's top off on desktop, so `side` uses 1.4 and no
 lift.
 
@@ -451,8 +460,12 @@ double-tap past a 300ms limit.
 A touch point hints at the double-tap zoom, until it's been used
 -----------------------------------------------------------------
 
-`#tap-hint` is a soft orange touch point with two rings, over the canvas, in
-the About handle's orange at 75% opacity. Each showing is one 2.2s CSS
+`#tap-hint` is a soft touch point with two rings, over the canvas, in the
+floating cubes' blue at 75% opacity (`--cube-blue-rgb`, 47,151,255: the
+cubes' glass colour as rendered, measured from a screenshot - their faces
+show it at 14% over the paper, which is why they read pale. Re-measure if
+`cubesColor` or the lights change). It was the About handle's orange
+first. Each showing is one 2.2s CSS
 animation: fade in, press twice with a ring spreading on each press (the
 gesture itself), fade out. It was a hand icon at first; four redrawn designs
 were compared over the pavilion (fine-line hand, solid silhouette, paper-cut

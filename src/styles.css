@@ -18,6 +18,7 @@
      * and the drawer's pull handle use this one orange.
      * spotlightGlowColor in script.js is kept in step by hand.
      */
+    --cube-blue-rgb: 47, 151, 255; /* the cubes' glass colour, measured from the render (it shows at 14% over --bg); re-measure if cubesColor or the lights change */
     --warm: #ff8c32;
     --warm-rgb: 255, 140, 50; /* --warm, for rgba() */
     --warm-deep: #5c2c0a;
@@ -117,8 +118,8 @@ body {
 }
 
 /**
- * The double-tap hint over an open model: a soft touch point in the About
- * handle's orange, a little see-through, that fades in, presses twice with
+ * The double-tap hint over an open model: a soft touch point in the floating
+ * cubes' blue, a little see-through, that fades in, presses twice with
  * a ring spreading from it each time, and fades out (2.2s). Its centre sits
  * on the chosen point of the model.
  */
@@ -149,9 +150,9 @@ body {
     margin: -0.875rem 0 0 -0.875rem;
     background: radial-gradient(
         circle,
-        rgba(var(--warm-rgb), 0.9) 0%,
-        rgba(var(--warm-rgb), 0.55) 45%,
-        rgba(var(--warm-rgb), 0) 72%
+        rgba(var(--cube-blue-rgb), 0.9) 0%,
+        rgba(var(--cube-blue-rgb), 0.55) 45%,
+        rgba(var(--cube-blue-rgb), 0) 72%
     );
 }
 
@@ -163,7 +164,7 @@ body {
     width: 3rem;
     height: 3rem;
     margin: -1.5rem 0 0 -1.5rem;
-    border: 2px solid var(--warm);
+    border: 2px solid rgb(var(--cube-blue-rgb));
     opacity: 0;
     transform: scale(0.3);
 }

@@ -102,7 +102,8 @@ Navigation and layout
 Catalog view
     [x] Fixed number of slots (SLOT_COUNT = 10), reachable on every viewport
     [x] Cubes drift and rock independently; the pointer stirs them; no orbit
-    [x] One cube at a time (any cube) glows orange and jumps, continuously
+    [x] One cube at a time (any cube) glows orange and jumps, continuously,
+        easing out of and back into its float
     [x] Every cube holds the little rock (one download, cloned)
     [x] An empty slot's click answers "Still empty..."
     [x] No project names on the grid (three labelling ideas tried and
@@ -121,8 +122,8 @@ Details view
     [x] A grey fog rolls in behind the project, and clears on the way back
     [x] The About drawer pulls the camera into a close-up
     [x] Double-click / double-tap zooms towards that spot, and back
-    [x] An orange touch point taps twice every 5s, hinting at the zoom,
-        until the visitor has used it
+    [x] A touch point in the cubes' blue taps twice every 5s, hinting at
+        the zoom, until the visitor has used it
     [x] Picture frames in the drawer (empty until the pictures exist)
 
 Performance and tech

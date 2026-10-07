@@ -140,7 +140,7 @@ const projects = [
             // points gather (GATHER_DURATION at DETAIL_ROTATE_SPEED), so the
             // shot is what's on screen as the gather completes
             turn: 86,
-            zoom: { stacked: 1.9, side: 1.4 },
+            zoom: { stacked: 1.75, side: 1.4 },
             lift: { stacked: 0.14, side: 0 },
         },
 
@@ -867,7 +867,7 @@ function wanderOffset(wander, elapsedTime) {
 /**
  * Spotlight
  *
- * One cube at a time, continuously: holds at its slot, jumps - a quick
+ * One cube at a time, continuously: holds where it floated, jumps - a quick
  * rock on two axes, a lift and a scale pulse on both the cube and its
  * thumbnail, edges blinking cyan to orange - for a fixed dwell, settles,
  * and hands off to another a beat later. Every cube is fair game, project
@@ -878,7 +878,8 @@ function wanderOffset(wander, elapsedTime) {
  */
 const SPOTLIGHT_GAP = [0.3, 0.6]; // seconds between one settling and the next starting
 const SPOTLIGHT_DWELL = 5; // seconds a cube stays spotlighted
-const SPOTLIGHT_FADE = 0.6; // seconds to ramp the effect in, and back out, at each end of the dwell
+const SPOTLIGHT_FADE_IN = 0.6; // seconds to ramp the effect in at the start of the dwell
+const SPOTLIGHT_FADE_OUT = 1.6; // and to settle back into the float at the end - slower, so it eases home
 const SPOTLIGHT_FACE_GLOW = 1.0; // how strongly the face glows orange at the peak of a beat
 const SPOTLIGHT_FACE_DIM = 0.9; // how far the face's own lit colour drops out at that peak
 const SPOTLIGHT_PULSE_PERIOD = 1.1; // seconds per jump
@@ -1678,13 +1679,15 @@ function updateHoveredCube(cube, elapsedTime) {
 
 // Ramp the whole effect in, and back out, rather than popping into a fast
 // rock on the first frame and snapping to rest the instant the dwell ends -
-// this is what makes it settle rather than just stop.
+// this is what makes it settle rather than just stop. Eased at both ends
+// (smoothstep), so it neither starts nor lands with a jolt.
 function spotlightIntensity(elapsedTime) {
     const since = elapsedTime - spotlightStartedAt;
-    const fadeIn = Math.min(since / SPOTLIGHT_FADE, 1);
-    const fadeOut = Math.min((SPOTLIGHT_DWELL - since) / SPOTLIGHT_FADE, 1);
+    const fadeIn = Math.min(since / SPOTLIGHT_FADE_IN, 1);
+    const fadeOut = Math.min((SPOTLIGHT_DWELL - since) / SPOTLIGHT_FADE_OUT, 1);
+    const ramp = Math.max(0, Math.min(fadeIn, fadeOut));
 
-    return Math.max(0, Math.min(fadeIn, fadeOut));
+    return ramp * ramp * (3 - 2 * ramp);
 }
 
 function updateSpotlightCube(cube, elapsedTime) {
@@ -1695,13 +1698,28 @@ function updateSpotlightCube(cube, elapsedTime) {
     const glow = (pulse + 1) / 2; // 0..1
     const lift = Math.max(0, pulse); // only the upward half of each beat
 
-    // Holds at its slot rather than also wandering, lifted on the upward
-    // half of each beat - a jump, not a drift - amid the others around it.
+    // Holds where its float had it when the spotlight began, rather than
+    // also wandering, lifted on the upward half of each beat - a jump, not a
+    // drift - amid the others around it. Blended with the live float by the
+    // same intensity, so it leaves its drift and rejoins it without a snap:
+    // the float has moved on during the dwell, and the fade-out glides it
+    // there.
     const base = cube.userData.slotPosition;
-    cube.position.set(base.x, lift * SPOTLIGHT_JUMP_HEIGHT * intensity, base.z);
+    const held = wanderOffset(cube.userData.wander, spotlightStartedAt);
+    const live = wanderOffset(cube.userData.wander, elapsedTime);
+    const mix = (from, to) => from + (to - from) * intensity;
+    cube.position.set(
+        base.x + mix(live.x, held.x),
+        mix(live.y, held.y) + lift * SPOTLIGHT_JUMP_HEIGHT * intensity,
+        base.z + mix(live.z, held.z),
+    );
 
-    cube.rotation.x = Math.sin((since / spotlightRotatePeriodX) * Math.PI * 2) * SPOTLIGHT_ROTATE_AMPLITUDE * intensity;
-    cube.rotation.z = Math.sin((since / spotlightRotatePeriodZ) * Math.PI * 2 + 1.7) * SPOTLIGHT_ROTATE_AMPLITUDE * intensity;
+    const rock = (period, phase) => Math.sin((since / period) * Math.PI * 2 + phase) * SPOTLIGHT_ROTATE_AMPLITUDE;
+    cube.rotation.set(
+        mix(live.tiltX, rock(spotlightRotatePeriodX, 0)),
+        0,
+        mix(live.tiltZ, rock(spotlightRotatePeriodZ, 1.7)),
+    );
     cube.scale.setScalar(1 + pulse * SPOTLIGHT_CUBE_SCALE_AMPLITUDE * intensity);
 
     // Clear glass at rest; the glow fills it in

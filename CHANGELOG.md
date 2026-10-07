@@ -61,7 +61,7 @@ list.
 
 ## Session 2 — 2026-10-04 / 2026-10-07
 
-`e0c070e`..`4dca501`, plus the docs clean-up commit after it (branch
+`e0c070e`..`4dca501`, then the docs clean-up `b905cbe` and three tweaks after it (branch
 `ccr-584d8563-rtv32f`, fast-forward merged to `main` on each "merge and
 build"). Every feature below is live and has a DECISIONS.md entry; features
 that were tried and removed are listed under "Tried and removed" there.
@@ -89,7 +89,7 @@ that were tried and removed are listed under "Tried and removed" there.
   stays on one line.
 - **Project view.** The model turns slowly; the drawer pulls the camera
   into a close-up; double-click / double-tap zooms to a spot and back; a
-  soft orange touch point taps twice every 5s to hint at it, until used; a
+  soft touch point (orange, later blue) taps twice every 5s to hint at it, until used; a
   grey fog (a CSS layer, not scene fog) rolls in behind the project;
   picture frames in the drawer, empty until the pictures exist.
 - **Rock Print.** Its points gather out of a scattered cloud on every open
@@ -108,6 +108,12 @@ that were tried and removed are listed under "Tried and removed" there.
   list and a "Tried and removed" section, this entry condensed, README's
   TODO split into open and done, CLAUDE.md given a "where to pick up" and
   testing tips.
+- **After the clean-up, three tweaks**: Rock Print's phone view zoomed
+  out a touch (stacked zoom 1.9 -> 1.75) since it cropped the pavilion; the
+  tap hint is now the floating cubes' blue instead of orange; the spotlit
+  cube now eases out of and back into its float (longer, smoothstepped
+  fade-out, pose blended with the float) - it used to snap up to 2 units
+  in one frame as the jump ended.
 
 Open at end of session (see README, "Next up"):
 - The user will supply pictures for Rock Print's three empty drawer frames.
@@ -115,5 +121,5 @@ Open at end of session (see README, "Next up"):
   accurately once written.
 - Model licensing/attribution for the public .glb is unchecked.
 - No per-project URLs; `?cloudtest` and `src/loader/` (dead code) can go.
-- Nothing is pending on the branch: `main` and the branch match except for
-  the docs clean-up, which doesn't change the site.
+- Check whether `main` has the branch's last commits (the three tweaks are
+  merged only if the user said "merge and build").
