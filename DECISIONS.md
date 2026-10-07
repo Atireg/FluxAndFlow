@@ -151,7 +151,11 @@ Every ~5.3-5.6s one cube glows orange and jumps, then the next takes over.
   `spotlightIntensity` - so it blinks in step with the orange and has
   faded out exactly when the cube is back in its float. No CSS transition
   on it, which would smear the blink. A hover ends the spotlight, and the
-  name with it; "Still empty..." wins on the same cube.
+  name with it; "Still empty..." wins on the same cube. It's bare orange
+  text (`--warm`), no chip - the white chip it started with was asked
+  away - with a soft paper-coloured `text-shadow` halo so it stays legible
+  where it sits on the cube's own orange face. If it ever reads too faint
+  there, a deeper orange is the lever, not bringing the chip back.
 
 Getting the cube to actually show that orange took two things:
 
@@ -734,12 +738,19 @@ reports byte progress where the server gives a length, and calls
 `window.fluxLoader.finish()` once `sealBoot()` has run and all are done -
 two frames later, so the grid is drawn behind it. A failed load counts as
 done, and the loader gives up after 30s regardless. It stays up at least
-`MIN_VISIBLE` (1.6s) so a fast load reads as an opening, not a flash. All
+`MIN_VISIBLE` (5s, as asked - it was 1.6s) so it reads as an opening,
+not a flash, however fast the load. The bar is paced to match: it shows
+the lesser of real progress and elapsed time over `MIN_VISIBLE`, so on a
+fast load it fills steadily across the five seconds instead of racing to
+100% and sitting there; on a slow load real progress governs. All
 its animation is scaled by elapsed time, not frame count - per-frame, a
 slow device crawled through the last few percent for seconds.
 
-Measured on a phone viewport, throttled: the loader leaves at ~2.7s on Wi-Fi
-and fast 4G (mostly `MIN_VISIBLE` plus the exit), ~3.9s on slow 4G.
+On a fast load the loader is gone about 6s after the page opens
+(`MIN_VISIBLE`, the bar's last ease and the 0.9s exit). With the old 1.6s
+minimum it left at ~2.7s on Wi-Fi and fast 4G and ~3.9s on slow 4G
+(throttled, phone viewport), so on all but the slowest connections the
+five seconds now decide it, not the download.
 
 
 `?cloudtest`: ten copies of Rock Print, as a load test

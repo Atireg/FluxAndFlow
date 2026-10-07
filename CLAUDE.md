@@ -167,7 +167,7 @@ Testing tips learnt the hard way:
   Playwright's network throttling (CDP `Network.emulateNetworkConditions`)
   for slow-connection checks.
 - **Wait for `#loader` to be removed** before clicking anything - it sits
-  over the page for at least 1.6s plus its exit.
+  over the page for at least 5s (`MIN_VISIBLE`) plus its exit - about 6s.
 - **Software WebGL is slow** (1-30 fps), and GSAP's lag smoothing then
   stretches tweens to many times their nominal length. Something that looks
   broken or sluggish in a headless screenshot may just be slow rendering;

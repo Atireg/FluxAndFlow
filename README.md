@@ -80,7 +80,8 @@ Done
 Loader
     [x] Start-up loader inline in index.html: flowing particles around the
         wordmark, real progress, pouring into the centre on exit; "paper",
-        chosen from six palettes compared live
+        chosen from six palettes compared live. Stays at least 5s, the bar
+        filling steadily over them
 
 Loading many projects (tested with ?cloudtest)
     [x] Point clouds load only when a project is opened (ten at start-up

@@ -73,7 +73,7 @@ that were tried and removed are listed under "Tried and removed" there.
 - **Catalog motion**, rebuilt as one pure state function per frame (which
   fixed two old hover bugs): a bigger, rocking wander; a continuous
   spotlight - any cube glows orange and jumps, one at a time, with its
-  "Project XX" name blinking in step, then eases back into its float (it
+  "Project XX" name blinking in step in bare orange text, then eases back into its float (it
   used to snap up to 2 units in one frame as the jump ended); the pointer stirs nearby cubes like a hand through water; no
   orbit in the grid.
 - **Every cube holds the little rock** (one download, cloned). Clicking an
@@ -104,7 +104,7 @@ that were tried and removed are listed under "Tried and removed" there.
   gathered, the camera slowly nods up and down (`view.sway`, 13° either side
   over 16s, up from a too-subtle 8° over 20s), riding on the drawer, the zoom and the visitor's orbit.
 - **Loading.** An inline start-up loader ("flux and flow" particle streams,
-  real progress). `?cloudtest` measured ten full clouds at start-up as far
+  real progress), held for at least 5s with the bar paced to fill over them. `?cloudtest` measured ten full clouds at start-up as far
   too heavy, so clouds load only on click.
 - **The whole site is paper**: dark ink on a warm light ground, orange for
   invitations. The old dark background was a three.js `Sky` dome (removed);

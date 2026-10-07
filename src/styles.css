@@ -322,11 +322,17 @@ canvas.webgl {
     will-change: transform, opacity;
 }
 
-/* The orange cube's name, blinking with its glow. Its opacity is set every
-   frame in step with the beat, so no transition to smear the blink. */
+/* The orange cube's name, blinking with its glow: bare orange text, no
+   chip. A soft paper-coloured halo keeps it legible where it crosses the
+   cube's own orange face. Its opacity is set every frame in step with the
+   beat, so no transition to smear the blink. */
 .cube-tag--spotlight {
-    color: var(--warm-deep);
-    border-color: var(--warm);
+    color: var(--warm);
+    background: none;
+    border: none;
+    text-shadow:
+        0 0 0.25rem rgba(var(--bg-rgb), 0.95),
+        0 0 0.6rem rgba(var(--bg-rgb), 0.8);
     transition: none;
 }
 

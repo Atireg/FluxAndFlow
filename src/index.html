@@ -40,7 +40,10 @@
       var ctx = canvas.getContext('2d');
       var still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-      var MIN_VISIBLE = 1600; // ms - long enough to read as an opening, not a flash
+      // ms - the loader is an opening, not just a wait: it stays this long
+      // however fast the catalog loads, and the bar paces itself to fill over
+      // it rather than racing to 100% and sitting there
+      var MIN_VISIBLE = 5000;
       // The exit: the streams pour into the centre while the loader fades -
       // onto the same paper the site sits on, so only the grid appears
       var EXIT = 900; // ms - keep in step with .loader.is-leaving in styles.css
@@ -127,7 +130,8 @@
         var dt = lastFrame === null ? 16 : Math.min(now - lastFrame, 100);
         lastFrame = now;
 
-        shown += (target - shown) * (1 - Math.exp(-dt / 180));
+        var paced = Math.min(target, (now - startedAt) / MIN_VISIBLE);
+        shown += (paced - shown) * (1 - Math.exp(-dt / 180));
 
         if (!still) drawField(now, dt / 16.7);
 
