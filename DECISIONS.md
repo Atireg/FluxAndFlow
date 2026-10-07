@@ -87,7 +87,10 @@ nothing needs resetting when a mode ends. `updateCube()` picks the mode;
 write a complete state, not a diff. Two grid-wide modes follow the same
 rule: `'dropping'` (the send-off, `updateDroppingCube`) and `'returning'`
 (the way back, `placeAtRest`). Pulses are multiples of a stored base value
-(`contentBaseScale`), never absolute numbers.
+(`contentBaseScale`), never absolute numbers. A hovered cube doesn't
+pulse: it keeps its float (`placeAtRest`) and only takes the deeper teal
+tint (`HOVER_FACE_OPACITY`), so it neither jumps out of its drift nor
+competes with the spotlight's jump.
 
 This replaced two racing loops (a bounce in the render loop plus a separate
 hover-only `requestAnimationFrame` loop) that had two live bugs: un-hovering
@@ -828,3 +831,6 @@ previewed, and taken out at the user's request.
 - **An orthographic detail view** (`DETAIL_PROJECTION`, still switchable)
   and an oblique three-quarter default: flat, and nothing square.
 - **`controls.autoRotate`** in the detail view: turned the cube's edges.
+- **A hover pulse in the catalog**: the hovered cube held at its slot with
+  a fast jitter and a ±20% size pulse (its rock pulsing too). Now it just
+  keeps floating, tinted.

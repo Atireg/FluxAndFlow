@@ -1724,20 +1724,10 @@ function updateIdleCube(cube, elapsedTime) {
     }
 }
 
-// Quicker and more alert than the idle wander, since this cube is reacting
-// to the cursor right now rather than drifting on its own.
-const HOVER_JITTER_FREQUENCY = 18; // radians/second
-const HOVER_JITTER_AMPLITUDE = 0.025;
-const HOVER_SCALE_AMPLITUDE = 0.2;
-const HOVER_CONTENT_PULSE_AMPLITUDE = 0.1;
-
+// No pulse or jitter: the cube under the pointer keeps floating as it was,
+// and only its tint - a deeper teal glass - says it's the one
 function updateHoveredCube(cube, elapsedTime) {
-    const base = cube.userData.slotPosition;
-    const jitter = Math.sin(elapsedTime * HOVER_JITTER_FREQUENCY) * HOVER_JITTER_AMPLITUDE;
-    cube.position.set(base.x + jitter, jitter, base.z);
-
-    cube.rotation.set(0, 0, 0);
-    cube.scale.setScalar(1 + Math.sin(elapsedTime * HOVER_JITTER_FREQUENCY) * HOVER_SCALE_AMPLITUDE);
+    placeAtRest(cube, elapsedTime);
     cube.material.opacity = HOVER_FACE_OPACITY;
     cube.material.color.set(selectedCubeColor);
     cube.material.emissive.setRGB(0, 0, 0);
@@ -1746,8 +1736,7 @@ function updateHoveredCube(cube, elapsedTime) {
     cube.userData.edges.material.color.set(selectedCubeColor);
 
     if (cube.userData.content) {
-        const pulse = 1 + Math.sin(elapsedTime * HOVER_JITTER_FREQUENCY * 0.15) * HOVER_CONTENT_PULSE_AMPLITUDE;
-        cube.userData.content.scale.setScalar(cube.userData.contentBaseScale * pulse);
+        cube.userData.content.scale.setScalar(cube.userData.contentBaseScale);
     }
 }
 

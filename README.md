@@ -102,7 +102,8 @@ Navigation and layout
 
 Catalog view
     [x] Fixed number of slots (SLOT_COUNT = 10), reachable on every viewport
-    [x] Cubes drift and rock independently; the pointer stirs them; no orbit
+    [x] Cubes drift and rock independently; the pointer stirs them; no orbit;
+        a hovered cube just tints teal, no pulse
     [x] One cube at a time (any cube) glows orange and jumps, continuously,
         easing out of and back into its float
     [x] Every cube holds the little rock (one download, cloned)
