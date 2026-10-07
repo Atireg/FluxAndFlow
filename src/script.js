@@ -497,10 +497,6 @@ function loadPointCloudWithShaderMaterial({
     onError,
     gather = false,
 }) {
-
-    // console.log(parentObject);
-    
-
     gltfLoader.load(glbPath, (gltf) => {
         const materials = [];
 
@@ -1738,21 +1734,14 @@ function updateSpotlightCube(cube, elapsedTime) {
  * tight frame.
  */
 function placeTagOnCube(tag, cube) {
-    const { x, y } = cubeTagPoint(cube);
-    tag.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
-}
-
-// Where a tag sits on a cube, in screen pixels
-function cubeTagPoint(cube) {
     // Down the screen is world +Z from the overhead catalog camera
     cube.updateMatrixWorld();
     cubeTagAnchor.set(0, cubeSize / 2, cubeSize * 0.36);
     cube.localToWorld(cubeTagAnchor).project(camera);
 
-    return {
-        x: (cubeTagAnchor.x + 1) / 2 * screenWidth,
-        y: (1 - cubeTagAnchor.y) / 2 * screenHeight,
-    };
+    const x = (cubeTagAnchor.x + 1) / 2 * screenWidth;
+    const y = (1 - cubeTagAnchor.y) / 2 * screenHeight;
+    tag.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
 }
 
 /**

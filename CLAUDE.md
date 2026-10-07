@@ -1,9 +1,9 @@
 # Flux and Flow
 
 A portfolio: a catalog of projects explored in three dimensions. Each
-project is a cube in a grid; clicking one opens a split view with the
-project's 3D model on one side and its description in a pull-out drawer on
-the other.
+project is a cube in a grid; clicking one knocks the others off the
+screen and opens the project's 3D point cloud on the whole canvas, with its
+description in a pull-out drawer.
 
 Full project description and TODO list: `README.md`.
 Why things are built the way they are: `DECISIONS.md` — read it before
@@ -11,6 +11,17 @@ touching the camera/projection math, the fog, the point-cloud asset
 pipeline, or the drawer's visibility logic. It exists specifically so those
 things don't get re-debugged or re-tried from scratch in a fresh session.
 Session-by-session history: `CHANGELOG.md`.
+
+## Where to pick up
+
+Read the last entry of `CHANGELOG.md` (its "Open at end of session" list)
+and README's "Next up". As of the end of Session 2: everything built is
+live and the branch matches `main`; what's waiting is content from the user
+(pictures for Rock Print's three empty drawer frames, its real copy - the
+live text is `[PLACEHOLDER ...]`), plus model licensing and per-project
+URLs. DECISIONS.md opens with a contents list; its "Tried and removed"
+section lists ideas the user has already seen and rejected - don't
+re-propose them without saying so.
 
 ## Stack and commands
 
@@ -26,6 +37,8 @@ Vanilla three.js + GSAP + Vite. No framework, no test suite.
 - Default branch: `main`. Work happens on feature branches and gets
   fast-forward merged into `main` when ready to publish — `main` is the
   live branch, treat merging into it as a publish action, not a routine step.
+  The user asks for it explicitly, usually as "merge and build": merge only
+  then, and confirm the deploy afterwards.
 - `.github/workflows/deploy.yml` builds and deploys to GitHub Pages on every
   push to `main`. A push to `main` goes live in roughly a minute.
 - Live at **https://atireg.github.io/FluxAndFlow/**.
@@ -37,7 +50,7 @@ Vanilla three.js + GSAP + Vite. No framework, no test suite.
 ## Adding or editing a project
 
 Edit the `projects` array near the top of `src/script.js` (currently ~line
-75). Each entry:
+98). Each entry:
 
 ```js
 {
@@ -58,7 +71,8 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
 ```
 
 - The grid always has `SLOT_COUNT` (10) cubes regardless of viewport; an
-  empty slot renders as a plain cube. Project count should not exceed
+  empty slot shows the rock thumbnail (`EMPTY_SLOT_THUMB`) and answers a
+  click with "Still empty...". Project count should not exceed
   `SLOT_COUNT` without raising it.
 - `images` go in `static/images/`. The first spans the drawer's width, the
   rest sit two to a row. An entry without a `src` renders as an empty
@@ -102,6 +116,14 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
 - **Faded cube faces have `depthWrite = false`** while a project is open,
   restored on close. Without this the invisible front face occludes the
   cube's own back edges and the one-point perspective reads as flat.
+- **`animate()` runs its first frame the moment it's defined**, before the
+  rest of `script.js` has executed. Any `const`/`let` it (or anything it
+  calls) touches must be declared above it, or the page dies on load with a
+  temporal-dead-zone error. This has happened three times.
+- **Cube state is recomputed from mode + clock every frame** (DECISIONS.md,
+  "A cube's visual state is a pure function"). A GSAP tween on a property
+  the per-frame update also writes gets silently overwritten - add a mode or
+  keep the per-frame update out of that window instead.
 - **No per-project URLs yet.** The catalog/detail state is not reflected in
   the address bar. Don't assume a project is linkable.
 
@@ -135,3 +157,28 @@ change from reading the diff. Check both the `side` (≥860px) and `stacked`
 (<860px) layouts, and both drawer states (open/parked) on mobile — several
 real bugs in this project only showed up in one specific combination of
 layout × drawer state × view (catalog vs. detail).
+
+Testing tips learnt the hard way:
+
+- **Serve `dist/` gzipped**, as GitHub Pages does, when measuring load
+  times; a plain `python -m http.server` overstates transfer sizes. Use
+  Playwright's network throttling (CDP `Network.emulateNetworkConditions`)
+  for slow-connection checks.
+- **Wait for `#loader` to be removed** before clicking anything - it sits
+  over the page for at least 1.6s plus its exit.
+- **Software WebGL is slow** (1-30 fps), and GSAP's lag smoothing then
+  stretches tweens to many times their nominal length. Something that looks
+  broken or sluggish in a headless screenshot may just be slow rendering;
+  log the state/decision rather than trusting timing. For frame-exact
+  checks, install Playwright's fake clock (`page.clock.install` /
+  `pauseAt` / `runFor`) and grab frames from the canvas
+  (`preserveDrawingBuffer` off, so read it inside a `requestAnimationFrame`
+  wrapper via `toDataURL`) - `page.screenshot` can hang under a paused
+  clock. Sample a grid of pixels, not one: the canvas is transparent.
+- **Fitting a view to a reference screenshot**: make a throwaway build
+  (never committed) that freezes the slow rotation, finishes the gather
+  instantly and exposes a hook to set `view`; render candidates at the
+  screenshot's own CSS viewport and score by mask overlap (IoU) of the
+  points' colours. DECISIONS.md, "A project can set its own camera angle".
+- Don't leave debug hooks or `console.log`s in a merge - one shipped to the
+  live site once.

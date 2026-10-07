@@ -3,14 +3,15 @@ Flux and Flow — a catalog of projects, explored in three dimensions.
 Live at https://atireg.github.io/FluxAndFlow/ (deployed from `main` by
 .github/workflows/deploy.yml on every push).
 
-Adding a project: edit the `projects` array near the top of src/script.js.
-Each entry declares the slot it sits in and its own models, and any text
-field left empty is skipped rather than rendered blank. An optional `view`
-sets the camera angle the project opens on; without it the project gets the
-square-on default. An optional `gather: true` makes its points gather out
-of a scattered cloud each time it opens. Slots with no project show the
-rock thumbnail and answer a click with "Still empty...". See DECISIONS.md
-for why things are built the way they are.
+Adding a project: edit the `projects` array near the top of src/script.js
+(the fields are listed in CLAUDE.md). Each entry declares the slot it sits
+in and its own models; any text field left empty is skipped rather than
+rendered blank. An optional `view` sets the camera angle the project opens
+on; `gather: true` makes its points gather out of a scattered cloud each
+time it opens; `images` fills the drawer's picture frames. Slots with no
+project show the rock thumbnail and answer a click with "Still empty...".
+See DECISIONS.md for why things are built the way they are, and
+CHANGELOG.md for what changed when.
 
 Add `?cloudtest` to the address to fill every slot with a copy of the
 first project - a load test, see DECISIONS.md.
@@ -20,157 +21,111 @@ first project - a load test, see DECISIONS.md.
     npm run build    # production build into dist/
 
 
-TO DOs:
+TO DOs
+======
+
+Next up (waiting on content)
+    [ ] Pictures for Rock Print's drawer: three empty frames are in place
+        (one full width, two side by side) - set each `src` and `alt` in
+        the project's `images`, files in static/images/. Video not started
+    [ ] Write the real copy for Rock Print - year, role, context, body,
+        credits. The fields hold unmistakable [PLACEHOLDER ...] text, put
+        there to check the drawer works on the live site - it is live and
+        needs replacing. State the role accurately
+    [ ] Check the licensing/attribution for the Rock Print model now that the
+        repository is public and the site serves the .glb
+    [ ] More projects: each needs a slot, a thumbnail, a point-cloud .glb
+        and (optionally) a `view` - see CLAUDE.md
 
 Landing/welcome view
     [ ] Graphics (me as a figure?) + welcome text explaning the webside's concept
     [ ] How does that transform into the cubes/catalog view - maybe just a semi-transparent surface with the text and the figure on top of the moving cubes?
 
-Loader
-    [x] Start-up loader: a field of flowing particles around the
-        "Flux and Flow" wordmark, gathering strength as the catalog loads
-        and pouring into the centre as it hands over to the grid - see
-        DECISIONS.md
-    [x] Loader colours: "paper" - dark ink streams with touches of orange
-        on a light ground - chosen from six palettes compared live, and
-        then carried through the whole site (see below)
-    [ ] The project view's own loading state is still a plain pulsing dot +
-        "Loading model" in the project bar while the point cloud downloads -
-        could borrow the start-up loader's flow field
-
-Loading many projects (tested with ?cloudtest - see DECISIONS.md)
-    [x] Point clouds load only when a project is opened, never with the
-        page: ten full clouds at start-up measured ~9.7 MB and ~9s on a 4G
-        phone. Ten rock thumbnails instead: ~2 MB, ~2s on 4G
-    [ ] Real thumbnails as binary .glb rather than .gltf with embedded
-        base64 - about a quarter smaller each
-
 Navigation and general layout
     [ ] Logo
     [ ] Add buttons to switch between views
     [ ] Add footer (Copyrights, )
-    [x] Project bar with the title and a way back to the catalog
-    [x] The title stays on one line at every viewport width - it used to
-        wrap onto two on phones and on wide desktops
-    [x] On a small phone the bar + the open drawer left very little room for
-        the model. Fixed by moving the title into the drawer's own header
-        once the drawer is open on a narrow viewport, rather than shrinking
-        the drawer itself - see DECISIONS.md
-
-Color palette and typography
-    [x] Select one color palette and stick to it in all views
-        (CSS custom properties on :root in styles.css; the scene colours in
-        script.js are kept in step with them by hand)
-    [x] The whole site is "paper": dark ink on a warm light ground, the
-        loader's palette, so the two meet without a jump. Cubes are tinted
-        glass with teal edges, point clouds are ink - a random mix of dark
-        red, orange and grey - see DECISIONS.md
-    [x] Select the fonts and stick to them in all views
-        (Fira Sans - the old <link> pointed at a Google Fonts share page
-        rather than a stylesheet, so it had never actually loaded)
+    [ ] Per-project URLs, so a single project can be linked to directly
 
 Catalog view
     [ ] The element of surprise or discovery - when hovered on a cube add little 3D objects representing each project (e.g. a rock, an aggregate, a spider...)
-    [x] Every cube has the little rock inside it, empty slots included
-        (one download, cloned into each cube)
-    [x] If a cube is empty - add a message saying (to be discovered later)
-        (clicking one shows "Still empty..." on it for a moment - see
-        DECISIONS.md)
+        (every cube holds the rock for now, empty slots included)
     [ ] Add a "magic/mystery" appearance (e.g. fog shader or lights)
-        (the old fog was configured near-beyond-far and is now off - see
-        DECISIONS.md before re-adding it)
-    [x] The cubes float more (bigger drift, a gentle rock) and the pointer
-        stirs them: moving through the grid carries nearby cubes along and
-        they lean with it, then settle back. Works with a finger too. The
-        grid view no longer orbits when dragged - see DECISIONS.md
+        (scene fog is off for a reason - see DECISIONS.md before re-adding)
     [ ] Change the shape of the cubes when hovering on them
     [ ] Make the content swing and make the colors go crazy
-    [x] Fixed number of slots (SLOT_COUNT = 10), stable per project, reachable
-        at every viewport including portrait phones
-    [x] Cubes drift slowly and independently instead of bouncing on a fixed
-        beat. One cube at a time - any cube, empty slots included - jumps:
-        a quick rock, a lift, a scale pulse on it and its thumbnail
-        together, lit up orange inside and out. Settles after 5
-        seconds, a beat later another one starts, continuously - never
-        the cube under the cursor or while a project is open.
-        See DECISIONS.md.
-    [x] No project names on the grid: an "Explore me..." tag, a "Project
-        XX" label and falling-leaf names were each tried and removed. An
-        empty slot's click answers "Still empty..." - see the empty-cube
-        item above
-    [x] Clicking a project sets off a send-off: an instant boom knocks the
-        other cubes out from the chosen one and up towards the viewer, they
-        hang for a moment, then fall slowly and straight down the screen.
-        The camera starts moving in while they're still falling. The chosen
-        one holds still. Going back brings them home as the grid fades in.
-        See DECISIONS.md.
 
 Details view (per project)
-    [x] Integrate 2D content per project - text only so far
-    [x] Slow ambient rotation of the model while a project is open - the
-        model only, not the camera; see DECISIONS.md for why that
-        distinction mattered here
-    [x] Opening the About drawer pulls the camera into a close, elevated
-        crop of the model rather than just reframing around it - see
-        DECISIONS.md
-    [x] Moving between all projects and a project (and in and out of the
-        drawer's close-up) only tilts the camera, plus whatever small turn a
-        project's own view asks for (4° for Rock Print) - the grid no longer
-        rolls 90° on the way in or out. The detail camera has to keep
-        looking along the catalog's screen-up for this to hold - see
-        DECISIONS.md
-    [x] A grey fog rolls in behind the project as the camera zooms in, and
-        clears on the way back - see DECISIONS.md
-    [x] Double-click (or double-tap) on the model zooms in towards that
-        spot; again zooms back out - see DECISIONS.md
-    [x] A soft orange touch point turns up every 5 seconds over the model
-        and taps twice, hinting at the zoom, until the visitor has used it
-        (chosen from four drawn options, replacing an icon hand)
-    [x] Rock Print's points gather out of a scattered cloud, spiralling in
-        to the pavilion, each time it opens (`gather: true` in the projects
-        array) - see DECISIONS.md
-    [x] Per-project camera angle (`view` in the projects array), with
-        optional `zoom` and `lift`, per layout. Rock Print lands on a
-        close, steep view fitted to a phone screenshot of the shot wanted
-        (a gentler zoom on desktop) - see DECISIONS.md
-    [~] Images and video in the drawer: three empty frames are in place in
-        Rock Print's drawer (one full width, two side by side), waiting
-        for the pictures - set each `src` in the project's `images`. Video
-        not started
-    [x] Split the screen in two: half for 3D content/half for the 2D content
-        (then superseded: the text now lives in a drawer pulled from the edge,
-        so by default the model gets the whole canvas)
-    [ ] Per-project URLs, so a single project can be linked to directly
-    [ ] Write the real copy for Rock Print - year, role, context, body,
-        credits. The fields currently hold unmistakable [PLACEHOLDER ...]
-        text, put there deliberately to verify the About drawer renders and
-        works on the live site - it is live now and needs replacing, not
-        just filling in for the first time
-    [ ] Check the licensing/attribution for the Rock Print model now that the
-        repository is public and the site serves the .glb
+    [ ] The project view's own loading state is still a plain pulsing dot +
+        "Loading model" in the project bar while the point cloud downloads -
+        could borrow the start-up loader's flow field
 
-[x] Handle resizing...
-    (the catalog re-arranges without rebuilding; an open project re-frames and
-    re-lenses, including across the mobile/desktop breakpoint)
-
-Performance Check
+Performance and tech
+    [ ] Real thumbnails as binary .glb rather than .gltf with embedded
+        base64 - about a quarter smaller each
     [ ] Destroy all objects after they move out of the screen
-    [ ] Add shaders for the colors of the point clouds
-        (COLOR_0 is deliberately kept in the .glb for this, although nothing
-        reads it yet - the points are currently a random mix of three inks,
-        dark red, orange and grey, in three random sizes, semi-transparent;
-        see DECISIONS.md)
-    [x] Deploy at least part of the project early on
-    [x] Point cloud down from 2.2 MB to 922 KB, and the Draco decoder it used
-        to pull for nothing is gone
+    [ ] Point-cloud colours from the scan: COLOR_0 is still in the .glb but
+        unread - the points are drawn in three inks. Use it, or drop it
+        (~315 KB less per cloud)
+    [ ] Remove `?cloudtest` once there are real projects to fill the grid
+    [ ] src/loader/ is dead code - nothing imports it (an old, unused
+        preloader; the start-up loader lives inline in src/index.html)
 
 Sound?
 
-TECH STUFF
 
-    [x] chek the pixel ratio setting for the size of the points
-        (uPointScale now carries pixels-per-world-unit from the JS side, so a
-        point keeps the same size across pixel ratios and under either
-        projection)
-    [ ] src/loader/ is dead code - nothing imports it (an old, unused
-        preloader; the start-up loader lives inline in src/index.html)
+Done
+====
+
+Loader
+    [x] Start-up loader inline in index.html: flowing particles around the
+        wordmark, real progress, pouring into the centre on exit; "paper",
+        chosen from six palettes compared live
+
+Loading many projects (tested with ?cloudtest)
+    [x] Point clouds load only when a project is opened (ten at start-up
+        measured ~9.7 MB, ~9s on 4G); ten rock thumbnails ~2 MB, ~2s on 4G
+
+Look
+    [x] One palette everywhere (CSS custom properties in styles.css; scene
+        colours in script.js kept in step by hand through screenColor())
+    [x] The whole site is "paper": dark ink on a warm light ground; cubes
+        are tinted glass with teal edges; orange marks the invitations
+    [x] Fira Sans everywhere
+
+Navigation and layout
+    [x] Project bar with the title and a way back; title on one line at
+        every width; moves into the drawer on a small phone
+    [x] Text in a drawer pulled from the edge (superseded the split screen)
+    [x] Handles resizing, including across the mobile/desktop breakpoint
+
+Catalog view
+    [x] Fixed number of slots (SLOT_COUNT = 10), reachable on every viewport
+    [x] Cubes drift and rock independently; the pointer stirs them; no orbit
+    [x] One cube at a time (any cube) glows orange and jumps, continuously
+    [x] Every cube holds the little rock (one download, cloned)
+    [x] An empty slot's click answers "Still empty..."
+    [x] No project names on the grid (three labelling ideas tried and
+        removed - see DECISIONS.md, "Tried and removed")
+    [x] Clicking a project: instant boom, the others hang, then fall slowly;
+        the camera moves in while they fall; they return on the way back
+
+Details view
+    [x] One-point perspective by default; transitions only tilt, never roll
+    [x] Per-project camera angle (`view`, with `zoom` and `lift` per
+        layout); Rock Print lands on a view fitted to a phone screenshot
+    [x] Slow ambient rotation of the model (the model, not the camera)
+    [x] Rock Print's points gather out of a scattered cloud on open
+    [x] Points: three inks (dark red, orange, grey), three sizes,
+        semi-transparent
+    [x] A grey fog rolls in behind the project, and clears on the way back
+    [x] The About drawer pulls the camera into a close-up
+    [x] Double-click / double-tap zooms towards that spot, and back
+    [x] An orange touch point taps twice every 5s, hinting at the zoom,
+        until the visitor has used it
+    [x] Picture frames in the drawer (empty until the pictures exist)
+
+Performance and tech
+    [x] Deployed early (GitHub Pages)
+    [x] Point cloud 2.2 MB -> 922 KB (quantized), no pointless Draco decoder
+    [x] Point size consistent across pixel ratios and projections
