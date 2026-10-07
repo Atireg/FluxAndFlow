@@ -143,6 +143,15 @@ Every ~5.3-5.6s one cube glows orange and jumps, then the next takes over.
   drawer's About handle (`--warm` in styles.css, with `--warm-rgb` and
   `--warm-deep`; `spotlightGlowColor` in script.js is kept in step by
   hand). It went dark red, then a lighter red, then orange, as asked.
+- **It carries its name, blinking.** `#spotlight-tag` reads "Project 01"
+  to "Project 10" by grid slot, empty slots included (every cube reads as
+  a project to come). Its opacity is computed in `updateCubeTags` from the
+  same beat and ramp the cube glows by - brightest when the cube is most
+  orange, down to `SPOTLIGHT_TAG_MIN` (20%) between beats, all scaled by
+  `spotlightIntensity` - so it blinks in step with the orange and has
+  faded out exactly when the cube is back in its float. No CSS transition
+  on it, which would smear the blink. A hover ends the spotlight, and the
+  name with it; "Still empty..." wins on the same cube.
 
 Getting the cube to actually show that orange took two things:
 
@@ -210,8 +219,9 @@ Clicking an empty slot answers with "Still empty..."
 computed from the click time like everything else per-frame. Clicking again
 restarts it; it's dropped as soon as the catalog isn't on screen. It's the
 quiet ink-on-panel chip, not the orange: orange is the invitation, and an
-empty slot isn't one. It's the grid's only word - see "Tried and removed"
-for the labels that came and went.
+empty slot isn't one. The only other word on the grid is the orange
+cube's blinking name (see the spotlight entry); "Tried and removed" lists
+the labels that came and went before it.
 
 It's HTML laid over the canvas, not a sprite or text mesh in the scene:
 HTML gets the real Fira Sans, stays sharp at any pixel ratio and restyles in
@@ -764,13 +774,15 @@ Kept so they aren't re-proposed blind. All were built, shipped or
 previewed, and taken out at the user's request.
 
 - **"Explore me..." tag on the spotlit cube**, in orange. Replaced by
-  project labels near the pointer, which were then removed too.
+  project labels near the pointer, which were then removed too. (The
+  spotlit cube now carries its "Project XX" name again, blinking - asked
+  for after all three below had gone.)
 - **"Project 01".."Project 10" label** on the cube nearest the pointer,
   faded by distance (`PROJECT_TAG_NEAR`/`FAR`). Replaced by falling names.
 - **Project names falling like leaves**: a cube's name dropped as plain ink
   text when the pointer reached it, swaying down off the screen (CSS
-  `leaf-fall`, per-leaf custom properties, a per-cube cooldown). Removed:
-  the grid shows no project names now.
+  `leaf-fall`, per-leaf custom properties, a per-cube cooldown). Removed;
+  names near the pointer haven't come back.
 - **Send-off variants**: blowing the cubes outward and up over 2s; a hard
   0.55s shake and fast fall; a "flux" that swirled and rocked each cube;
   a push-and-hop wave; a tumbling fall with sideways drift; waiting for the

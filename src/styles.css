@@ -294,8 +294,9 @@ canvas.webgl {
 }
 
 /**
- * The tag on a catalog cube: "Still empty..." after clicking an empty slot.
- * Positioned and faded from script.js every frame.
+ * The tags on a catalog cube: "Still empty..." after clicking an empty slot,
+ * and "Project 01"... on the cube glowing orange. Positioned and faded from
+ * script.js every frame.
  */
 .cube-tag {
     position: fixed;
@@ -319,6 +320,14 @@ canvas.webgl {
     opacity: 0;
     transition: opacity 0.2s ease;
     will-change: transform, opacity;
+}
+
+/* The orange cube's name, blinking with its glow. Its opacity is set every
+   frame in step with the beat, so no transition to smear the blink. */
+.cube-tag--spotlight {
+    color: var(--warm-deep);
+    border-color: var(--warm);
+    transition: none;
 }
 
 /* Quieter: an empty slot is an answer, not a label */

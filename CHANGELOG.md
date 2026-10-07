@@ -72,14 +72,14 @@ that were tried and removed are listed under "Tried and removed" there.
   copy is still to come.
 - **Catalog motion**, rebuilt as one pure state function per frame (which
   fixed two old hover bugs): a bigger, rocking wander; a continuous
-  spotlight - any cube glows orange and jumps, one at a time, then eases
-  back into its float (it used to snap up to 2 units in one frame as the
-  jump ended); the pointer stirs nearby cubes like a hand through water; no
+  spotlight - any cube glows orange and jumps, one at a time, with its
+  "Project XX" name blinking in step, then eases back into its float (it
+  used to snap up to 2 units in one frame as the jump ended); the pointer stirs nearby cubes like a hand through water; no
   orbit in the grid.
 - **Every cube holds the little rock** (one download, cloned). Clicking an
-  empty slot says "Still empty...". No project names on the grid: an
-  "Explore me..." tag, "Project XX" labels and falling-leaf names were each
-  built and removed.
+  empty slot says "Still empty...". An "Explore me..." tag, "Project XX"
+  labels near the pointer and falling-leaf names were each built and
+  removed before the blinking name on the orange cube.
 - **The send-off**: after many iterations (explosion, shake, flux, spin,
   tumble, drift - all disliked), an instant boom knocks the other cubes out
   and up, they hang, then fall slowly and straight off the screen while the

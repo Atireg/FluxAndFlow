@@ -106,8 +106,9 @@ Catalog view
         easing out of and back into its float
     [x] Every cube holds the little rock (one download, cloned)
     [x] An empty slot's click answers "Still empty..."
-    [x] No project names on the grid (three labelling ideas tried and
-        removed - see DECISIONS.md, "Tried and removed")
+    [x] The orange cube shows a blinking "Project XX", gone once it settles;
+        no other names on the grid (three labelling ideas tried and removed
+        - see DECISIONS.md, "Tried and removed")
     [x] Clicking a project: instant boom, the others hang, then fall slowly;
         the camera moves in while they fall; they return on the way back
 

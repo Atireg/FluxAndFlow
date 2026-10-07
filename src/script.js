@@ -237,6 +237,8 @@ const EMPTY_TAG_DURATION = 1.6; // seconds "Still empty..." stays up after a cli
 const EMPTY_TAG_FADE = 0.3; // seconds of that spent fading out
 let emptyTagCube = null;
 let emptyTagShownAt = 0;
+const spotlightTag = document.querySelector('#spotlight-tag');
+const SPOTLIGHT_TAG_MIN = 0.2; // the name's opacity at the low of each blink, relative to the spotlight's strength
 const barTitle = document.querySelector('#project-title');
 const barStatus = document.querySelector('#project-status');
 const projectClose = document.querySelector('#project-close');
@@ -1819,11 +1821,28 @@ function placeTagOnCube(tag, cube) {
 }
 
 /**
- * The catalog's one word on its cubes: "Still empty..." for a moment on an
- * empty slot that was just clicked.
+ * The catalog's words on its cubes: "Still empty..." for a moment on an
+ * empty slot that was just clicked, and "Project 01"... on the cube glowing
+ * orange, blinking with its glow and gone once it's back in its float.
  */
 function updateCubeTags(elapsedTime) {
     const inCatalog = viewState === 'catalog';
+
+    // The same beat and ramp the cube itself glows by (updateSpotlightCube),
+    // so the name is brightest when the cube is most orange and has faded
+    // out entirely by the time the cube has settled
+    const spotlightShows = inCatalog && spotlightCube && spotlightCube !== emptyTagCube;
+    if (spotlightShows) {
+        const since = elapsedTime - spotlightStartedAt;
+        const glow = (Math.sin((since / SPOTLIGHT_PULSE_PERIOD) * Math.PI * 2) + 1) / 2;
+        const label = `Project ${String(spotlightCube.userData.slot + 1).padStart(2, '0')}`;
+        if (spotlightTag.textContent !== label) spotlightTag.textContent = label;
+
+        placeTagOnCube(spotlightTag, spotlightCube);
+        spotlightTag.style.opacity = spotlightIntensity(elapsedTime) * (SPOTLIGHT_TAG_MIN + (1 - SPOTLIGHT_TAG_MIN) * glow);
+    } else {
+        spotlightTag.style.opacity = 0;
+    }
 
     const emptySince = elapsedTime - emptyTagShownAt;
     const emptyOpacity = inCatalog && emptyTagCube
