@@ -42,7 +42,6 @@ const SLOT_COUNT = 10;
 // The cubes' faces are tinted glass over the paper: mostly see-through at
 // rest, filling in when hovered or glowing
 const CUBE_FACE_OPACITY = 0.14;
-const HOVER_FACE_OPACITY = 0.3;
 const SPOTLIGHT_FACE_OPACITY = 0.6; // at the peak of a beat
 
 /**
@@ -325,6 +324,8 @@ const SPOTLIGHT_TAG_MIN = 0.2; // the name's opacity at the low of each blink, r
 const spotlightString = document.querySelector('#spotlight-string');
 const spotlightStringPaths = spotlightString.querySelectorAll('path');
 const spotlightStringFade = spotlightString.querySelector('linearGradient');
+const spotlightKnots = spotlightString.querySelectorAll('circle');
+const TAG_KNOT_SIZE = 0.055; // the knot's radius, as a share of the pebble's radius on screen
 const TAG_STRING_LENGTH = 0.8; // as a share of the pebble's radius on screen
 const TAG_STRING_MIN = 22; // px
 const ROPE_SEGMENTS = 10;
@@ -1011,10 +1012,17 @@ const SPOTLIGHT_ROTATE_AMPLITUDE = 0.14; // radians, ~8 degrees
 const SPOTLIGHT_SCALE_AMPLITUDE = 0.18; // the thumbnail scales +/- 18% at the peak of each jump
 const SPOTLIGHT_CUBE_SCALE_AMPLITUDE = 0.14; // the cube itself, kept well clear of its neighbours
 const SPOTLIGHT_JUMP_HEIGHT = 0.4; // units lifted at the peak of each jump
+const SPOTLIGHT_HANDOFF = 0.8; // seconds for a hovered spotlight to settle out of its jump
+
+// The pebble under the pointer turns the same orange, steady rather than
+// blinking, and its name hangs below it for as long as the pointer stays
+const HOVER_FADE_IN = 0.25; // seconds to turn orange
+const HOVER_FADE_OUT = 0.9; // seconds to fade back once the pointer leaves
 
 let spotlightCube = null;
 let lastSpotlightCube = null; // excluded from the next pick, so it moves on
 let spotlightStartedAt = 0;
+let spotlightCutAt = Infinity; // when a hover took the spotlight's pebble over
 let spotlightRotatePeriodX = 0;
 let spotlightRotatePeriodZ = 0;
 let nextSpotlightAt = randomBetween(...SPOTLIGHT_GAP);
@@ -1040,8 +1048,8 @@ const PEBBLE_STRETCH = 0.08; // how far each is drawn out along its own axes
 const PEBBLE_DETAIL = 16; // icosphere subdivisions - smooth, still cheap to raycast
 const PEBBLE_RIM_POWER = 2.4; // how tightly the rim hugs the silhouette
 
-function makePebbleGeometry(seed) {
-    let geometry = new THREE.IcosahedronGeometry(PEBBLE_RADIUS, PEBBLE_DETAIL);
+function makePebbleGeometry(seed, radius = PEBBLE_RADIUS, detail = PEBBLE_DETAIL) {
+    let geometry = new THREE.IcosahedronGeometry(radius, detail);
 
     // Shared vertices, so the normals come out smooth rather than faceted
     geometry.deleteAttribute('normal');
@@ -1092,6 +1100,82 @@ function makeRimMaterial(color) {
     material.customProgramCacheKey = () => 'pebble-rim';
 
     return material;
+}
+
+/**
+ * Small pebbles, scattered in the gaps between the big ones and around the
+ * grid's edge - a beach rather than a tray. Decoration only: not in
+ * `cubes`, so nothing hovers, glows or opens them. They float, the pointer
+ * stirs them and the boom knocks them off the screen like the rest, a
+ * little below the big ones. They share one glass and one rim material, so
+ * opening and closing a project fades them with one tween each. Where they
+ * sit is seeded, not random, so a resize lays them out the same way again.
+ */
+const SMALL_PEBBLE_RADIUS = [0.1, 0.2]; // as a share of cubeSize - a project's pebble is 0.44
+const SMALL_PEBBLE_SKIP = 0.25; // share of the gaps left empty
+const SMALL_PEBBLE_JITTER = 0.08; // how far each strays from its gap's centre, as a share of the grid step
+const SMALL_PEBBLE_SINK = 1.5; // units below the big pebbles
+const SMALL_PEBBLE_DETAIL = 6; // icosphere subdivisions - small on screen, so fewer
+const SMALL_PEBBLE_RIM_OPACITY = 0.7;
+
+let smallPebbles = [];
+const smallPebbleFace = new THREE.MeshStandardMaterial({
+    color: cubesColor,
+    metalness: 0.2,
+    roughness: 0.6,
+    transparent: true,
+    opacity: CUBE_FACE_OPACITY,
+});
+const smallPebbleRim = makeRimMaterial(selectedCubeColor);
+smallPebbleRim.opacity = SMALL_PEBBLE_RIM_OPACITY;
+
+// A repeatable 0..1 for a number - the same layout every time
+function seeded(n) {
+    const x = Math.sin(n) * 43758.5453;
+    return x - Math.floor(x);
+}
+
+// One per gap at the big pebbles' diagonals - between four of them inside
+// the grid, between two or beside one at its edge - minus a seeded few
+function layoutSmallPebbles() {
+    smallPebbles.forEach((pebble) => {
+        scene.remove(pebble);
+        pebble.geometry.dispose();
+    });
+    smallPebbles = [];
+
+    const step = cubeSize * spacing;
+    const gaps = [];
+    cubes.forEach((cube) => {
+        const home = cube.userData.slotPosition;
+        for (const [dx, dz] of [[-0.5, -0.5], [0.5, -0.5], [-0.5, 0.5], [0.5, 0.5]]) {
+            const x = home.x + dx * step;
+            const z = home.z + dz * step;
+            if (!gaps.some((gap) => Math.hypot(gap.x - x, gap.z - z) < step * 0.3)) gaps.push({ x, z });
+        }
+    });
+
+    gaps.forEach((gap, index) => {
+        const random = (k) => seeded(index * 12.9898 + k * 78.233 + 0.5);
+        if (random(1) < SMALL_PEBBLE_SKIP) return;
+
+        const radius = cubeSize * THREE.MathUtils.lerp(...SMALL_PEBBLE_RADIUS, random(2));
+        const geometry = makePebbleGeometry(index * 1.93 + 0.4, radius, SMALL_PEBBLE_DETAIL);
+        const pebble = new THREE.Mesh(geometry, smallPebbleFace);
+        const rim = new THREE.Mesh(geometry, smallPebbleRim);
+        rim.renderOrder = 1;
+        pebble.add(rim);
+
+        pebble.userData.slotPosition = {
+            x: gap.x + (random(3) - 0.5) * 2 * SMALL_PEBBLE_JITTER * step,
+            z: gap.z + (random(4) - 0.5) * 2 * SMALL_PEBBLE_JITTER * step,
+        };
+        pebble.userData.restY = -SMALL_PEBBLE_SINK;
+        pebble.userData.wander = createWander();
+
+        scene.add(pebble);
+        smallPebbles.push(pebble);
+    });
 }
 
 /**
@@ -1356,6 +1440,8 @@ function layoutCubes() {
         // The hover animation nudges cubes around, so keep a home to return to
         cube.userData.slotPosition = { x: cube.position.x, z: cube.position.z };
     });
+
+    layoutSmallPebbles();
 }
 
 // Move the camera back far enough to frame the whole grid
@@ -1374,6 +1460,12 @@ function fitCameraToGrid({ animate = false } = {}) {
     // Clear the highest point a cube reaches while it bobs
     const cubeTop = cubeSize / 2 + 3;
     const height = Math.max(distanceForDepth, distanceForWidth) + cubeTop;
+
+    // How big a pebble looks, for the words on and under it to scale with
+    // (see .cube-tag in styles.css) - so a wide screen's bigger pebbles get
+    // bigger names, and a phone's stay as they are
+    const pixelsPerUnit = screenHeight / (2 * height * Math.tan(halfFov));
+    document.documentElement.style.setProperty('--pebble-px', `${(PEBBLE_RADIUS * pixelsPerUnit).toFixed(1)}px`);
 
     // Position the camera above the grid, looking straight down at its centre
     perspectiveCamera.up.set(0, 1, 0);
@@ -1832,17 +1924,24 @@ function animate() {
             updateCube(cube, elapsedTime);
             applyFlow(cube);
         });
+        smallPebbles.forEach((pebble) => {
+            placeAtRest(pebble, elapsedTime);
+            applyFlow(pebble);
+        });
     } else if (viewState === 'dropping') {
         cubes.forEach((cube) => updateDroppingCube(cube, elapsedTime));
+        smallPebbles.forEach((pebble) => placeDroppingCube(pebble, elapsedTime));
         updateDissolve(elapsedTime);
     } else if (viewState === 'returning') {
         // Back home before they fade in, wherever the drop left them
         cubes.forEach((cube) => placeAtRest(cube, elapsedTime));
+        smallPebbles.forEach((pebble) => placeAtRest(pebble, elapsedTime));
     } else {
         // The camera starts moving in before the drop has finished - the
         // rest of the fall plays out under openProject's fade
         if (dropInProgress(elapsedTime)) {
             cubes.forEach((cube) => { if (cube !== selectedCube) placeDroppingCube(cube, elapsedTime); });
+            smallPebbles.forEach((pebble) => placeDroppingCube(pebble, elapsedTime));
         }
         updateDissolve(elapsedTime);
 
@@ -1896,13 +1995,59 @@ function findCube(object) {
  * simply computes a different mode's state instead.
  */
 function updateCube(cube, elapsedTime) {
-    if (cube === hoveredCube) {
-        updateHoveredCube(cube, elapsedTime);
-    } else if (cube === spotlightCube) {
-        updateSpotlightCube(cube, elapsedTime);
+    const hover = hoverGlow(cube, elapsedTime);
+    cube.userData.hoverGlow = hover;
+
+    if (cube === spotlightCube) {
+        updateSpotlightCube(cube, elapsedTime, hover);
     } else {
-        updateIdleCube(cube, elapsedTime);
+        updateIdleCube(cube, elapsedTime, hover);
     }
+}
+
+/**
+ * How orange the hover has made a pebble, 0..1. The one exception to the
+ * pure function: a pointer can leave halfway through the fade in, so the
+ * fade starts from wherever it had got to - remembered at each change.
+ */
+function hoverGlow(cube, elapsedTime) {
+    const hover = cube.userData.hover ?? (cube.userData.hover = { on: false, at: -Infinity, from: 0 });
+    const hovered = cube === hoveredCube;
+
+    if (hovered !== hover.on) {
+        hover.from = hoverRamp(hover, elapsedTime);
+        hover.on = hovered;
+        hover.at = elapsedTime;
+    }
+
+    const ramp = hoverRamp(hover, elapsedTime);
+    return ramp * ramp * (3 - 2 * ramp);
+}
+
+function hoverRamp(hover, elapsedTime) {
+    const since = elapsedTime - hover.at;
+    return hover.on
+        ? Math.min(hover.from + since / HOVER_FADE_IN, 1)
+        : Math.max(hover.from - since / HOVER_FADE_OUT, 0);
+}
+
+/**
+ * A pebble's colours for how orange it is, 0..1 - the spotlight's glow and
+ * a hover's alike. At 0 it's its resting self. The face glows through its
+ * emissive colour rather than its base colour: the base colour is lit by
+ * the scene's cyan lights, which turn an orange green - and it's dimmed as
+ * the glow rises, or that cyan-lit grey washes the orange out to tan.
+ */
+function paintGlow(cube, amount, rimOpacity = 1) {
+    const restOpacity = restingFaceOpacity(cube);
+    cube.material.opacity = restOpacity + (SPOTLIGHT_FACE_OPACITY - restOpacity) * amount;
+    cube.material.color.copy(restingFaceColor(cube)).multiplyScalar(1 - amount * SPOTLIGHT_FACE_DIM);
+    spotlightFaceColor.copy(spotlightGlowColor).multiplyScalar(amount * SPOTLIGHT_FACE_GLOW);
+    cube.material.emissive.copy(spotlightFaceColor);
+
+    spotlightEdgeColor.copy(restingRimColor(cube)).lerp(spotlightGlowColor, amount);
+    cube.userData.edges.material.color.copy(spotlightEdgeColor);
+    cube.userData.edges.material.opacity = rimOpacity;
 }
 
 // Where a cube sits while idle - shared with the grid's return after a project
@@ -1910,7 +2055,7 @@ function updateCube(cube, elapsedTime) {
 function placeAtRest(cube, elapsedTime) {
     const base = cube.userData.slotPosition;
     const offset = wanderOffset(cube.userData.wander, elapsedTime);
-    cube.position.set(base.x + offset.x, offset.y, base.z + offset.z);
+    cube.position.set(base.x + offset.x, (cube.userData.restY ?? 0) + offset.y, base.z + offset.z);
 
     cube.rotation.set(offset.tiltX, 0, offset.tiltZ);
     cube.scale.setScalar(1);
@@ -1960,46 +2105,51 @@ function trackFlowPointer(event) {
 function resetFlow() {
     flowPointerVelocity.set(0, 0);
     flowPointerKnown = false;
-    cubes.forEach((cube) => {
+    [cubes, smallPebbles].forEach((group) => group.forEach((cube) => {
         cube.userData.flow = { x: 0, z: 0, vx: 0, vz: 0 };
-    });
+    }));
 }
 
 function updateFlow(dt) {
     // The pointer's push dies away once it stops moving
     flowPointerVelocity.multiplyScalar(Math.exp(-dt / FLOW_POINTER_FADE));
 
-    cubes.forEach((cube) => {
-        const flow = cube.userData.flow ?? (cube.userData.flow = { x: 0, z: 0, vx: 0, vz: 0 });
-        const home = cube.userData.slotPosition;
+    cubes.forEach((cube) => stepFlow(cube, dt));
+    smallPebbles.forEach((pebble) => stepFlow(pebble, dt));
+}
 
-        // Where the pointer's motion would carry this cube right now
-        let targetX = 0;
-        let targetZ = 0;
+// One body's push from the pointer: a damped spring towards where the
+// pointer's motion would carry it
+function stepFlow(cube, dt) {
+    const flow = cube.userData.flow ?? (cube.userData.flow = { x: 0, z: 0, vx: 0, vz: 0 });
+    const home = cube.userData.slotPosition;
 
-        if (flowPointerKnown && home) {
-            const distance = Math.hypot(home.x - flowPointer.x, home.z - flowPointer.z);
-            const reach = Math.exp(-((distance / FLOW_RADIUS) ** 2));
-            targetX = flowPointerVelocity.x * FLOW_CARRY * reach;
-            targetZ = flowPointerVelocity.y * FLOW_CARRY * reach;
+    // Where the pointer's motion would carry this cube right now
+    let targetX = 0;
+    let targetZ = 0;
 
-            const length = Math.hypot(targetX, targetZ);
-            if (length > FLOW_MAX) {
-                targetX *= FLOW_MAX / length;
-                targetZ *= FLOW_MAX / length;
-            }
+    if (flowPointerKnown && home) {
+        const distance = Math.hypot(home.x - flowPointer.x, home.z - flowPointer.z);
+        const reach = Math.exp(-((distance / FLOW_RADIUS) ** 2));
+        targetX = flowPointerVelocity.x * FLOW_CARRY * reach;
+        targetZ = flowPointerVelocity.y * FLOW_CARRY * reach;
+
+        const length = Math.hypot(targetX, targetZ);
+        if (length > FLOW_MAX) {
+            targetX *= FLOW_MAX / length;
+            targetZ *= FLOW_MAX / length;
         }
+    }
 
-        // A damped spring towards that, integrated in small steps
-        const steps = Math.ceil(dt / (1 / 120));
-        const h = dt / steps;
-        for (let i = 0; i < steps; i++) {
-            flow.vx += (FLOW_STIFFNESS * (targetX - flow.x) - FLOW_DAMPING * flow.vx) * h;
-            flow.vz += (FLOW_STIFFNESS * (targetZ - flow.z) - FLOW_DAMPING * flow.vz) * h;
-            flow.x += flow.vx * h;
-            flow.z += flow.vz * h;
-        }
-    });
+    // A damped spring towards that, integrated in small steps
+    const steps = Math.ceil(dt / (1 / 120));
+    const h = dt / steps;
+    for (let i = 0; i < steps; i++) {
+        flow.vx += (FLOW_STIFFNESS * (targetX - flow.x) - FLOW_DAMPING * flow.vx) * h;
+        flow.vz += (FLOW_STIFFNESS * (targetZ - flow.z) - FLOW_DAMPING * flow.vz) * h;
+        flow.x += flow.vx * h;
+        flow.z += flow.vz * h;
+    }
 }
 
 // On top of whatever the cube's mode has just set
@@ -2017,30 +2167,11 @@ function applyFlow(cube) {
     cube.rotation.z -= lean(flow.vx);
 }
 
-function updateIdleCube(cube, elapsedTime) {
+// Floating, and orange as far as a hover has made it - no jump: the
+// pebble under the pointer stays where it is, to be clicked
+function updateIdleCube(cube, elapsedTime, hover = 0) {
     placeAtRest(cube, elapsedTime);
-    cube.material.opacity = restingFaceOpacity(cube);
-    cube.material.color.copy(restingFaceColor(cube));
-    cube.material.emissive.setRGB(0, 0, 0);
-
-    cube.userData.edges.material.opacity = 1;
-    cube.userData.edges.material.color.copy(restingRimColor(cube));
-
-    if (cube.userData.content) {
-        cube.userData.content.scale.setScalar(cube.userData.contentBaseScale);
-    }
-}
-
-// No pulse or jitter: the cube under the pointer keeps floating as it was,
-// and only its tint - a deeper teal glass - says it's the one
-function updateHoveredCube(cube, elapsedTime) {
-    placeAtRest(cube, elapsedTime);
-    cube.material.opacity = HOVER_FACE_OPACITY;
-    cube.material.color.set(selectedCubeColor);
-    cube.material.emissive.setRGB(0, 0, 0);
-
-    cube.userData.edges.material.opacity = 1;
-    cube.userData.edges.material.color.set(selectedCubeColor);
+    paintGlow(cube, hover);
 
     if (cube.userData.content) {
         cube.userData.content.scale.setScalar(cube.userData.contentBaseScale);
@@ -2057,10 +2188,14 @@ function spotlightIntensity(elapsedTime) {
     const fadeOut = Math.min((SPOTLIGHT_DWELL - since) / SPOTLIGHT_FADE_OUT, 1);
     const ramp = Math.max(0, Math.min(fadeIn, fadeOut));
 
-    return ramp * ramp * (3 - 2 * ramp);
+    // A hover cuts it short: the jump settles over SPOTLIGHT_HANDOFF while
+    // the hover's steady orange takes over
+    const cut = THREE.MathUtils.clamp((elapsedTime - spotlightCutAt) / SPOTLIGHT_HANDOFF, 0, 1);
+
+    return ramp * ramp * (3 - 2 * ramp) * (1 - cut * cut * (3 - 2 * cut));
 }
 
-function updateSpotlightCube(cube, elapsedTime) {
+function updateSpotlightCube(cube, elapsedTime, hover = 0) {
     const since = elapsedTime - spotlightStartedAt;
     const intensity = spotlightIntensity(elapsedTime);
 
@@ -2092,24 +2227,10 @@ function updateSpotlightCube(cube, elapsedTime) {
     );
     cube.scale.setScalar(1 + pulse * SPOTLIGHT_CUBE_SCALE_AMPLITUDE * intensity);
 
-    // Clear glass at rest; the glow fills it in
-    const restOpacity = restingFaceOpacity(cube);
-    cube.material.opacity = restOpacity + (SPOTLIGHT_FACE_OPACITY - restOpacity) * glow * intensity;
-
-    // Blink the whole cube - face and edges alike - between its resting
-    // colours and the spotlight's orange, never fully off so it
-    // reads as glowing rather than flickering. The face glows through its
-    // emissive colour rather than its base colour: the base colour is lit
-    // by the scene's cyan lights, which turn an orange green - and it's
-    // dimmed as the glow rises, or that cyan-lit grey washes the orange out
-    // to tan.
-    cube.material.color.copy(restingFaceColor(cube)).multiplyScalar(1 - glow * intensity * SPOTLIGHT_FACE_DIM);
-    spotlightFaceColor.copy(spotlightGlowColor).multiplyScalar(glow * intensity * SPOTLIGHT_FACE_GLOW);
-    cube.material.emissive.copy(spotlightFaceColor);
-
-    spotlightEdgeColor.copy(restingRimColor(cube)).lerp(spotlightGlowColor, glow * intensity);
-    cube.userData.edges.material.color.copy(spotlightEdgeColor);
-    cube.userData.edges.material.opacity = 1 - intensity * 0.35 * (1 - glow);
+    // Blink the whole pebble - glass and rim alike - between its resting
+    // colours and the orange, the rim never fully off so it reads as
+    // glowing rather than flickering; a hover holds it at full orange
+    paintGlow(cube, Math.max(glow * intensity, hover), 1 - intensity * 0.35 * (1 - glow) * (1 - hover));
 
     if (cube.userData.content) {
         const contentScale = cube.userData.contentBaseScale * (1 + pulse * SPOTLIGHT_SCALE_AMPLITUDE * intensity);
@@ -2155,7 +2276,8 @@ function hangSpotlightTag(cube, elapsedTime) {
     cube.updateMatrixWorld();
     const [ax, ay] = screenPoint(cube.localToWorld(tagPivot.set(0, 0, PEBBLE_RADIUS * 0.9)));
     const [cx, cy] = screenPoint(cube.localToWorld(tagCentre.set(0, 0, 0)));
-    const length = Math.max(TAG_STRING_MIN, (Math.hypot(ax - cx, ay - cy) / 0.9) * TAG_STRING_LENGTH);
+    const pebbleRadius = Math.hypot(ax - cx, ay - cy) / 0.9;
+    const length = Math.max(TAG_STRING_MIN, pebbleRadius * TAG_STRING_LENGTH);
     const link = length / ROPE_SEGMENTS;
 
     // A new pebble: the string hangs straight down, at rest
@@ -2271,6 +2393,15 @@ function hangSpotlightTag(cube, elapsedTime) {
     }
     for (const path of spotlightStringPaths) path.setAttribute('d', d);
 
+    // A dot where it's tied on, as if hanging from the pebble, with a glow
+    // like the string's
+    const knot = THREE.MathUtils.clamp(pebbleRadius * TAG_KNOT_SIZE, 2, 6);
+    spotlightKnots.forEach((circle, index) => {
+        circle.setAttribute('cx', ax.toFixed(1));
+        circle.setAttribute('cy', ay.toFixed(1));
+        circle.setAttribute('r', (index === 0 ? knot * 2.2 : knot).toFixed(1));
+    });
+
     // The fade runs from the knot to the tag, wherever the wind has it
     spotlightStringFade.setAttribute('x1', ax.toFixed(1));
     spotlightStringFade.setAttribute('y1', ay.toFixed(1));
@@ -2289,17 +2420,40 @@ function updateCubeTags(elapsedTime) {
     // The same beat and ramp the cube itself glows by (updateSpotlightCube),
     // so the name is brightest when the cube is most orange and has faded
     // out entirely by the time the cube has settled
-    const spotlightShows = inCatalog && spotlightCube && spotlightCube !== emptyTagCube;
-    if (spotlightShows) {
-        const since = elapsedTime - spotlightStartedAt;
-        const glow = (Math.sin((since / SPOTLIGHT_PULSE_PERIOD) * Math.PI * 2) + 1) / 2;
-        const label = `Project ${String(spotlightCube.userData.slot + 1).padStart(2, '0')}`;
+    // One name at a time, on whichever pebble shows it most: a hovered
+    // one's steady, the spotlight's blinking. "Still empty..." wins on its
+    // own pebble.
+    let tagCube = null;
+    let tagOpacity = 0;
+
+    if (inCatalog) {
+        cubes.forEach((cube) => {
+            if (cube === emptyTagCube) return;
+
+            let opacity = cube.userData.hoverGlow ?? 0;
+            if (cube === spotlightCube) {
+                const since = elapsedTime - spotlightStartedAt;
+                const glow = (Math.sin((since / SPOTLIGHT_PULSE_PERIOD) * Math.PI * 2) + 1) / 2;
+                opacity = Math.max(opacity, spotlightIntensity(elapsedTime) * (SPOTLIGHT_TAG_MIN + (1 - SPOTLIGHT_TAG_MIN) * glow));
+            }
+
+            if (opacity > tagOpacity) {
+                tagCube = cube;
+                tagOpacity = opacity;
+            }
+        });
+    }
+
+    if (tagCube) {
+        const label = `Project ${String(tagCube.userData.slot + 1).padStart(2, '0')}`;
         if (spotlightTag.textContent !== label) spotlightTag.textContent = label;
 
-        const intensity = spotlightIntensity(elapsedTime);
-        hangSpotlightTag(spotlightCube, elapsedTime);
-        spotlightTag.style.opacity = intensity * (SPOTLIGHT_TAG_MIN + (1 - SPOTLIGHT_TAG_MIN) * glow);
-        spotlightString.style.opacity = intensity;
+        hangSpotlightTag(tagCube, elapsedTime);
+        spotlightTag.style.opacity = tagOpacity;
+
+        // The string doesn't blink with the name, it just comes and goes
+        const spotlit = tagCube === spotlightCube ? spotlightIntensity(elapsedTime) : 0;
+        spotlightString.style.opacity = Math.max(tagCube.userData.hoverGlow ?? 0, spotlit);
     } else {
         spotlightTag.style.opacity = 0;
         spotlightString.style.opacity = 0;
@@ -2334,14 +2488,18 @@ function pickSpotlightCube() {
 
 function updateSpotlightCycle(elapsedTime) {
     if (spotlightCube) {
-        // The visitor started hovering the very cube that is glowing - let
-        // the hover take it over immediately rather than contesting it.
-        const hovered = spotlightCube === hoveredCube;
+        // The visitor started hovering the very pebble that is glowing - the
+        // hover takes it over, its jump settling over SPOTLIGHT_HANDOFF
+        // rather than snapping (see spotlightIntensity)
+        if (spotlightCube === hoveredCube && spotlightCutAt === Infinity) spotlightCutAt = elapsedTime;
+
+        const handedOver = elapsedTime - spotlightCutAt > SPOTLIGHT_HANDOFF;
         const dwelled = elapsedTime - spotlightStartedAt > SPOTLIGHT_DWELL;
 
-        if (hovered || dwelled) {
+        if (handedOver || dwelled) {
             lastSpotlightCube = spotlightCube;
             spotlightCube = null;
+            spotlightCutAt = Infinity;
             nextSpotlightAt = elapsedTime + randomBetween(...SPOTLIGHT_GAP);
         }
 
@@ -2433,7 +2591,11 @@ function startDrop(cube) {
     getDissolve(cube);
     hoveredCube = null;
 
-    cubes.forEach((other) => {
+    // The clicked pebble's glow is the dissolve's now; none carries a hover
+    // back into the catalog
+    cubes.forEach((other) => { other.userData.hover = null; });
+
+    [cubes, smallPebbles].forEach((group) => group.forEach((other) => {
         // Out along the screen, away from the chosen cube
         const away = other.position.clone().sub(cube.position).setY(0);
 
@@ -2443,7 +2605,7 @@ function startDrop(cube) {
             lag: away.length() * BOOM_WAVE,
             away: away.lengthSq() > 0 ? away.normalize() : away,
         };
-    });
+    }));
 
     // Partway through the fall rather than after it, so the camera's move
     // follows straight on from it. The fall keeps playing out in detail
@@ -2588,6 +2750,11 @@ function openProject(cube) {
 
         if (other.userData.content) other.userData.content.visible = false;
     });
+
+    // The small pebbles go with them
+    smallPebbleFace.depthWrite = false;
+    gsap.to(smallPebbleFace, { opacity: 0, duration: 0.8, ease: 'power2.out' });
+    gsap.to(smallPebbleRim, { opacity: 0, duration: 0.8, ease: 'power2.out' });
 
     // The face fades out over the next 0.8s rather than vanishing
     // instantly, so a residual glow colour would otherwise show through as
@@ -2744,6 +2911,10 @@ function closeProject() {
         if (other.userData.content) other.userData.content.visible = true;
     });
 
+    gsap.delayedCall(revealDelay, () => { smallPebbleFace.depthWrite = true; });
+    gsap.to(smallPebbleFace, { opacity: CUBE_FACE_OPACITY, duration: revealDuration, ease: 'power2.inOut', delay: revealDelay });
+    gsap.to(smallPebbleRim, { opacity: SMALL_PEBBLE_RIM_OPACITY, duration: revealDuration, ease: 'power2.inOut', delay: revealDelay });
+
     gsap.delayedCall(revealDelay + revealDuration, () => { viewState = 'catalog'; });
 
     exitDetailProjection(1.1);
@@ -2884,6 +3055,8 @@ canvas.addEventListener('pointerup', (event) => {
 
 // Add event listener for mouse move
 window.addEventListener('mousemove', onMouseMove);
+// Leaving the window lets go of the pebble it was over
+document.documentElement.addEventListener('mouseleave', () => { hoveredCube = null; });
 
 // Pointer, not mouse, so a finger dragged across the grid stirs it too
 window.addEventListener('pointermove', trackFlowPointer);

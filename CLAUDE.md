@@ -140,15 +140,24 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
   "A pebble's state is a pure function"). A GSAP tween on a property
   the per-frame update also writes gets silently overwritten - add a mode or
   keep the per-frame update out of that window instead. The exceptions are
-  the effects with memory - the pointer's flow and the tag's rope - which
-  are integrated in small steps (1/120 s, `TAG_STEP` for the rope) so they
-  behave the same at 5 fps as at 120.
+  the effects with memory - the pointer's flow and the tag's rope,
+  integrated in small steps (1/120 s, `TAG_STEP` for the rope) so they
+  behave the same at 5 fps as at 120, and the hover's fade (`hoverGlow`).
+  Colours go through `paintGlow` (0 resting, 1 orange) for the spotlight
+  and the hover alike.
+- **The small pebbles (`smallPebbles`) are not in `cubes`**, so raycasts
+  and the spotlight never see them - but they float, are stirred, fall in
+  the boom and fade with a project like the rest. Anything new that moves
+  or fades the grid has to handle both arrays. See DECISIONS.md, "Small
+  pebbles between the big ones".
 - **The spotlight's tag hangs on a simulated rope.** `hangSpotlightTag`
   runs a small screen-space Verlet rope (`ROPE_*`) under gravity and a
   gusty `wind(t)`, then draws it as a curve in `#spotlight-string`. Its
   feel lives in the `TAG_*` constants (weight, damping, breeze, gusts,
   how far it may swing); they sit above `animate()` for the TDZ reason
-  below. See DECISIONS.md, "The glowing pebble's name hangs on a string".
+  below. The tags' font size follows `--pebble-px` (the pebbles' radius on
+  screen, set by `fitCameraToGrid`), not a fixed rem. See DECISIONS.md,
+  "The glowing pebble's name hangs on a string".
 - **Safari can't be tested here.** Cloud sessions only have Chromium, and
   downloading Playwright's WebKit is blocked. Safari draws WebGL through
   Metal, which is strict where Chrome is lenient: keep GLSL inside defined

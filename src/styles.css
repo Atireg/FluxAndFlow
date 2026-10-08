@@ -310,8 +310,10 @@ canvas.webgl {
     z-index: 1;
     pointer-events: none;
 
-    padding: 0.4rem 0.7rem;
-    font-size: 0.875rem;
+    padding: 0.46em 0.8em;
+    /* Scales with the pebbles on screen (--pebble-px, their radius, set by
+       fitCameraToGrid), never below the size that reads well on a phone */
+    font-size: max(0.875rem, calc(var(--pebble-px, 50px) * 0.27));
     font-weight: 600; /* the project title's weight and tracking */
     letter-spacing: -0.01em;
     line-height: 1;
@@ -359,18 +361,28 @@ canvas.webgl {
     opacity: 0.14;
 }
 
+.tag-string__knot {
+    fill: var(--warm-text); /* deeper than the glowing pebble it sits on */
+    opacity: 0.95;
+}
+
+.tag-string__knot-glow {
+    fill: var(--warm);
+    opacity: 0.16;
+}
+
 .tag-string__stop {
     stop-color: var(--warm);
     stop-opacity: 1;
 }
 
 .tag-string__stop--clear {
-    stop-opacity: 0.2;
+    stop-opacity: 0.4;
 }
 
 .cube-tag--spotlight {
-    padding-top: 0.2rem;
-    font-size: 0.95rem;
+    padding-top: 0.2em;
+    font-size: max(0.95rem, calc(var(--pebble-px, 50px) * 0.3));
     color: var(--warm-text);
     background: none;
     border: none;

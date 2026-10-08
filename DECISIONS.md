@@ -14,6 +14,7 @@ Contents
 The catalog (the grid of pebbles - "cubes" in the code)
 - Pebbles, and a clicked one dissolves into points
 - A fixed number of slots
+- Small pebbles between the big ones
 - A pebble's state is a pure function of its mode and the clock
 - The spotlight: any pebble, held still, in the one orange
 - The glowing pebble's name hangs on a string
@@ -102,16 +103,41 @@ the viewport instead gave 0 pebbles on a portrait phone. A project's `slot`
 is stable; its on-screen place isn't, but the order is row-major.
 
 
+Small pebbles between the big ones
+----------------------------------
+
+The user asked for smaller pebbles around the project ones. `smallPebbles`
+sit in the gaps at the big ones' diagonals (`layoutSmallPebbles`, rerun by
+`layoutCubes`): one per gap, a seeded quarter left empty
+(`SMALL_PEBBLE_SKIP`), each a little off-centre, `SMALL_PEBBLE_RADIUS` of
+0.1-0.2 x cubeSize, `SMALL_PEBBLE_SINK` below so they read as behind.
+Seeded rather than random, so a resize lays them out the same way.
+
+- **Decoration, not slots**: they're not in `cubes`, so raycasts, hover,
+  the spotlight and clicks never see them.
+- **They move with the grid**: the same wander and flow, knocked off by
+  the boom (`startDrop` gives them drop data too). Anything new that moves
+  or fades the grid has to handle both arrays.
+- **One material each** for glass and rim, shared by all of them, so
+  `openProject` / `closeProject` fade them with one tween each. Nothing
+  writes their opacity per frame, so the tweens aren't stomped.
+
+
 A pebble's state is a pure function of its mode and the clock
 -------------------------------------------------------------
 
 Every frame each pebble's whole state - pose, colour, opacity, its rock's
 scale - is computed fresh from its mode and the clock (`updateIdleCube`,
-`updateHoveredCube`, `updateSpotlightCube`, and the grid-wide `'dropping'`
-and `'returning'` modes). Nothing accumulates, so nothing drifts or needs
-resetting. Hover doesn't pulse: the pebble keeps its float and takes the
-deeper teal tint. The exceptions with memory - the pointer's flow and the
-hanging tag - are integrated on top.
+`updateSpotlightCube`, and the grid-wide `'dropping'` and `'returning'`
+modes). Nothing accumulates, so nothing drifts or needs resetting. Colour
+goes through `paintGlow(cube, amount)`: 0 is the pebble's resting self, 1
+the spotlight's orange.
+
+**Hover** turns the pebble that orange, steady - no jump or pulse, it keeps
+its float so it stays put to be clicked - over `HOVER_FADE_IN`, back over
+`HOVER_FADE_OUT`. The exceptions with memory: the hover's fade (a pointer
+can leave halfway in, so `hoverGlow` remembers where it had got to at each
+change; cleared in `startDrop`), the pointer's flow and the hanging tag.
 
 Two traps it sets, both hit for real:
 
@@ -151,8 +177,18 @@ The glowing pebble's name hangs on a string
 
 `#spotlight-tag` reads "Project 01".."Project 10" by slot and blinks with
 the glow (down to `SPOTLIGHT_TAG_MIN` between beats, scaled by the
-spotlight's ramp), gone once the pebble settles. A hover ends it;
-"Still empty..." wins on the same pebble.
+spotlight's ramp), gone once the pebble settles. **A hovered pebble's name
+hangs the same way**, steady, for as long as the pointer stays (the user
+asked for both to stay). One tag at a time, on whichever pebble shows it
+most. Hovering the spotlit pebble hands it over: its jump settles over
+`SPOTLIGHT_HANDOFF` (`spotlightCutAt` in `spotlightIntensity`) while the
+hover holds the orange - it used to end the spotlight on the spot, which
+snapped the pebble out of mid-jump. "Still empty..." wins on its pebble.
+
+**Size**: the tags scale with the pebbles on screen - `--pebble-px`, their
+radius in pixels, set by `fitCameraToGrid` - at 0.3 of it, never under
+0.95rem. A phone (radius ~49px) stays as it was; 1280px wide gets ~22px,
+1920 ~30px. A fixed rem looked small on wide screens.
 
 It hangs below the pebble on the paper, because on the face it was orange
 on orange (`hangSpotlightTag`). The string is a simulated rope in screen
@@ -170,11 +206,14 @@ curve (`#spotlight-string`). The tag turns with the string's overall lean,
 not just its last link (which spun it whenever the end kinked); the knot is
 spread across steps and the swing capped at `TAG_MAX_SWING` (~55 degrees),
 or a slow frame flips it. Text is `--warm-text`, a shade deeper than
-`--warm` for legibility on paper, with a soft paper halo. The string itself
-is drawn soft rather than as a line: the lighter `--warm`, part-transparent,
-over a faint wider glow, and fading in from the knot (a gradient whose ends
-follow the knot and the tag each frame) - a solid 1px line in the text's
-orange read as drawn on. It starts faint, not clear, or it looked untied.
+`--warm` for legibility on paper, with a soft paper halo. A dot marks the
+knot (`TAG_KNOT_SIZE` of the pebble's radius, 2-6px), in `--warm-text` so
+it shows on the glowing pebble - in `--warm` it vanished there. The string
+itself is drawn soft rather than as a line: the lighter `--warm`,
+part-transparent, over a faint wider glow, and fading in from the knot (a
+gradient whose ends follow the knot and the tag each frame) - a solid 1px
+line in the text's orange read as drawn on. It starts faint, not clear, or
+it looked untied.
 
 
 The pointer stirs the grid; the grid doesn't orbit
@@ -539,7 +578,8 @@ Catalog
 - **Cubes** (box glass with teal edge lines; the cube's outline kept at 0.3
   around the model) - replaced by pebbles. Also shown: bubbles, morphing
   blobs, rounded cubes, plain clouds of points.
-- **Orbiting the catalog**, and **a hover pulse** (jitter and ±20% size).
+- **Orbiting the catalog**, **a hover pulse** (jitter and ±20% size), and
+  **a teal hover tint** (hover is orange now).
 - **Labels**: "Explore me..." on the glowing cube; "Project XX" on the cube
   nearest the pointer; names falling like leaves from cubes the pointer
   reached; then the glowing pebble's name as a white chip, as bare orange
