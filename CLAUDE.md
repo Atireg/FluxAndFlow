@@ -23,7 +23,10 @@ text is `[PLACEHOLDER ...]` - and photo credits/captions for its five drawer
 pictures), a check that the blind Safari fix works, plus model licensing and
 per-project URLs. DECISIONS.md opens with a contents list; its "Tried and
 removed" section lists ideas the user has already seen and rejected - don't
-re-propose them without saying so.
+re-propose them without saying so. The catalog's look (pebbles, the orange
+spotlight, the tag hanging on a string in the wind) went through many
+rounds of the user's feedback: tune the existing constants before
+rebuilding any of it.
 
 ## Stack and commands
 
@@ -52,7 +55,7 @@ Vanilla three.js + GSAP + Vite. No framework, no test suite.
 ## Adding or editing a project
 
 Edit the `projects` array near the top of `src/script.js` (currently ~line
-98). Each entry:
+145). Each entry:
 
 ```js
 {
@@ -62,7 +65,7 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
     year: '', role: '', context: '',             // shown in the drawer if non-empty
     body: [],                                     // array of paragraph strings
     credits: '',
-    thumbModel: 'models/rock.gltf',               // small model shown in the catalog cube
+    thumbModel: 'models/rock.gltf',               // small model shown in the catalog pebble
     detailModel: 'models/RockPrintStructureReduced.glb',  // loaded on click
     view: { elevation: 58, azimuth: 4, turn: 86,       // optional camera angle, degrees,
             zoom: { stacked: 1.75, side: 1.4 },            // closer than the cube's fit
@@ -73,7 +76,7 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
 }
 ```
 
-- The grid always has `SLOT_COUNT` (10) cubes regardless of viewport; an
+- The grid always has `SLOT_COUNT` (10) pebbles regardless of viewport; an
   empty slot shows the rock thumbnail (`EMPTY_SLOT_THUMB`) and answers a
   click with "Still empty...". Project count should not exceed
   `SLOT_COUNT` without raising it.
@@ -109,7 +112,7 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
   `view` is framed on its cube with `VIEW_FRAME_MARGIN` instead (see
   "The default view, and a project's own `view`" in DECISIONS.md).
 - **The background is the page's CSS `--bg`, not the scene.** The renderer
-  is transparent and there is nothing behind the cubes (an old `Sky` dome
+  is transparent and there is nothing behind the pebbles (an old `Sky` dome
   that painted a dark night was removed). The ground is light "paper", so
   **don't use additive blending** - it renders as nothing on a light
   background. Give scene colours with `screenColor()`. See DECISIONS.md,
@@ -133,10 +136,19 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
   rest of `script.js` has executed. Any `const`/`let` it (or anything it
   calls) touches must be declared above it, or the page dies on load with a
   temporal-dead-zone error. This has happened three times.
-- **Cube state is recomputed from mode + clock every frame** (DECISIONS.md,
+- **Pebble state is recomputed from mode + clock every frame** (DECISIONS.md,
   "A pebble's state is a pure function"). A GSAP tween on a property
   the per-frame update also writes gets silently overwritten - add a mode or
-  keep the per-frame update out of that window instead.
+  keep the per-frame update out of that window instead. The exceptions are
+  the effects with memory - the pointer's flow and the tag's rope - which
+  are integrated in small steps (1/120 s, `TAG_STEP` for the rope) so they
+  behave the same at 5 fps as at 120.
+- **The spotlight's tag hangs on a simulated rope.** `hangSpotlightTag`
+  runs a small screen-space Verlet rope (`ROPE_*`) under gravity and a
+  gusty `wind(t)`, then draws it as a curve in `#spotlight-string`. Its
+  feel lives in the `TAG_*` constants (weight, damping, breeze, gusts,
+  how far it may swing); they sit above `animate()` for the TDZ reason
+  below. See DECISIONS.md, "The glowing pebble's name hangs on a string".
 - **Safari can't be tested here.** Cloud sessions only have Chromium, and
   downloading Playwright's WebKit is blocked. Safari draws WebGL through
   Metal, which is strict where Chrome is lenient: keep GLSL inside defined
@@ -196,10 +208,21 @@ Testing tips learnt the hard way:
   (`preserveDrawingBuffer` off, so read it inside a `requestAnimationFrame`
   wrapper via `toDataURL`) - `page.screenshot` can hang under a paused
   clock. Sample a grid of pixels, not one: the canvas is transparent.
+  Canvas grabs leave out everything drawn in HTML over it (the tags and
+  their string, the CSS fog, the touch-point hint, the drawer) - check
+  those with a real-time `page.screenshot`.
+- **Visited pebbles persist** in `localStorage` within a Playwright
+  context: open a project and every later page in that context shows its
+  pebble darker. Use a fresh context for a clean grid.
 - **Fitting a view to a reference screenshot**: make a throwaway build
   (never committed) that freezes the slow rotation, finishes the gather
   instantly and exposes a hook to set `view`; render candidates at the
   screenshot's own CSS viewport and score by mask overlap (IoU) of the
-  points' colours. DECISIONS.md, "The default view, and a project's own `view`".
+  points' colours. DECISIONS.md, "The default view, and a project's own
+  `view`".
+- **Editing DECISIONS.md by script**: its contents list repeats every
+  entry title, so find an entry by its heading (the title followed by a
+  `---` underline), not by the bare title - matching the first occurrence
+  once duplicated a long stretch of the file.
 - Don't leave debug hooks or `console.log`s in a merge - one shipped to the
   live site once.
