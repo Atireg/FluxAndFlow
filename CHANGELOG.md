@@ -87,7 +87,7 @@ its "Tried and removed".
   drawer moves the model left on a wide screen, a close-up on a phone, and
   holds five photos; its text is still a placeholder.
 - **Emergent Space** (slot 1), the second project: the user's aggregate,
-  a plain mesh sampled into a 20k point cloud as it loads - any mesh .glb now
+  a plain mesh sampled into an 8,000-point cloud as it loads - any mesh .glb now
   works. Its pebble holds the aggregate itself, in the rock's ink
   (`thumbSize`).
 - **Site.** "Paper" palette throughout (the dark `Sky` dome removed); an

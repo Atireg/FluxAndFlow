@@ -424,15 +424,16 @@ Emergent Space's `aggregate.glb` came as a plain triangle mesh from Blender
 (36 KB, ~1,250 vertices, ~115 units across), not a point cloud. Rather than
 convert it offline, `loadPointCloudWithShaderMaterial` turns any `.glb` with
 no POINTS in it into a cloud (`pointsFromMeshes`): `MESH_SAMPLE_POINTS`
-(20,000; a project's `points` overrides it - 60,000 read too dense on the
-aggregate's thin arms) points scattered over the surface with three.js's
-`MeshSurfaceSampler`, shared between meshes by area, in world space (so the
-file's own rotation holds), then centred and scaled so the longest side is
-`MESH_FIT_SIZE` (cubeSize), since a mesh arrives in whatever units it was
-drawn in. From there it is an ordinary cloud: inks, sizes, gather. It
-downloads a fraction of what a sampled cloud would weigh (Rock Print's 78k
-quantized points are 922 KB) and a mesh exported from Rhino or Blender works
-as it is. A real point cloud is left exactly as it is.
+(20,000; a project's `points` overrides it - Emergent Space uses 8,000, as
+60,000 and then 20,000 read as solid rods on the aggregate's thin arms)
+points scattered over the surface with three.js's `MeshSurfaceSampler`,
+shared between meshes by area, in world space (so the file's own rotation
+holds), then centred and scaled so the longest side is `MESH_FIT_SIZE`
+(cubeSize), since a mesh arrives in whatever units it was drawn in. From
+there it is an ordinary cloud: inks, sizes, gather. It downloads a fraction
+of what a sampled cloud would weigh (Rock Print's 78k quantized points are
+922 KB) and a mesh exported from Rhino or Blender works as it is. A real
+point cloud is left exactly as it is.
 
 
 Point size, three sizes, three inks

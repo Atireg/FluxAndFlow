@@ -23,7 +23,7 @@ text is `[PLACEHOLDER ...]` - and photo credits/captions for its five drawer
 pictures; Emergent Space's text), a check that the blind Safari fixes
 work, plus model licensing and per-project URLs. Two projects exist: Rock
 Print Pavilion (slot 0, a scanned point cloud) and Emergent Space (slot 1,
-an aggregate - a plain mesh, `aggregate.glb`, sampled into points).
+an aggregate - a plain mesh, `aggregate.glb`, sampled into 8,000 points).
 DECISIONS.md opens with a contents list; its "Tried and removed" section
 lists ideas the user has already seen and rejected - don't re-propose them
 without saying so. The catalog's look (pebbles, the orange spotlight, the

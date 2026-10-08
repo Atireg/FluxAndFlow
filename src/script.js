@@ -258,6 +258,9 @@ const projects = [
         // Framed on its cube, so the long arms stay in frame as it turns,
         // and seen a little from above so they read in depth
         view: { elevation: 25 },
+        // Fewer than a mesh gets by default - its arms are thin, and more
+        // read as solid rods rather than a cloud
+        points: 8000,
         gather: true,
     },
 ];

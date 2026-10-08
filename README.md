@@ -113,7 +113,7 @@ Project view
         gather from a scattered cloud, in three inks and three sizes; it
         turns slowly (a turn every 80s) while the camera nods (`view.sway`)
     [x] Emergent Space (slot 1): an aggregate, from a plain mesh sampled
-        into 20k points as it loads; the mesh itself, in the rock's ink,
+        into 8,000 points as it loads; the mesh itself, in the rock's ink,
         in its pebble
     [x] A grey fog rolls in behind the project
     [x] The About drawer: model moves left and stays whole on a wide screen,
