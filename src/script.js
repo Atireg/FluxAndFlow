@@ -322,7 +322,9 @@ const SPOTLIGHT_TAG_MIN = 0.2; // the name's opacity at the low of each blink, r
 // keeps it alive in between. Simulated in screen pixels with memory (like
 // the flow), in fixed small steps; it starts hanging straight down for each
 // new pebble.
-const spotlightString = document.querySelector('#spotlight-string path');
+const spotlightString = document.querySelector('#spotlight-string');
+const spotlightStringPaths = spotlightString.querySelectorAll('path');
+const spotlightStringFade = spotlightString.querySelector('linearGradient');
 const TAG_STRING_LENGTH = 0.8; // as a share of the pebble's radius on screen
 const TAG_STRING_MIN = 22; // px
 const ROPE_SEGMENTS = 10;
@@ -2267,7 +2269,13 @@ function hangSpotlightTag(cube, elapsedTime) {
             + ` ${(p2.x - (p3.x - p1.x) / 6).toFixed(1)},${(p2.y - (p3.y - p1.y) / 6).toFixed(1)}`
             + ` ${p2.x.toFixed(1)},${p2.y.toFixed(1)}`;
     }
-    spotlightString.setAttribute('d', d);
+    for (const path of spotlightStringPaths) path.setAttribute('d', d);
+
+    // The fade runs from the knot to the tag, wherever the wind has it
+    spotlightStringFade.setAttribute('x1', ax.toFixed(1));
+    spotlightStringFade.setAttribute('y1', ay.toFixed(1));
+    spotlightStringFade.setAttribute('x2', tag.x.toFixed(1));
+    spotlightStringFade.setAttribute('y2', tag.y.toFixed(1));
 }
 
 /**
@@ -2291,7 +2299,7 @@ function updateCubeTags(elapsedTime) {
         const intensity = spotlightIntensity(elapsedTime);
         hangSpotlightTag(spotlightCube, elapsedTime);
         spotlightTag.style.opacity = intensity * (SPOTLIGHT_TAG_MIN + (1 - SPOTLIGHT_TAG_MIN) * glow);
-        spotlightString.style.opacity = intensity * 0.8;
+        spotlightString.style.opacity = intensity;
     } else {
         spotlightTag.style.opacity = 0;
         spotlightString.style.opacity = 0;

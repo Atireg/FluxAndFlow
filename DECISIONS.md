@@ -170,7 +170,11 @@ curve (`#spotlight-string`). The tag turns with the string's overall lean,
 not just its last link (which spun it whenever the end kinked); the knot is
 spread across steps and the swing capped at `TAG_MAX_SWING` (~55 degrees),
 or a slow frame flips it. Text is `--warm-text`, a shade deeper than
-`--warm` for legibility on paper, with a soft paper halo.
+`--warm` for legibility on paper, with a soft paper halo. The string itself
+is drawn soft rather than as a line: the lighter `--warm`, part-transparent,
+over a faint wider glow, and fading in from the knot (a gradient whose ends
+follow the knot and the tag each frame) - a solid 1px line in the text's
+orange read as drawn on. It starts faint, not clear, or it looked untied.
 
 
 The pointer stirs the grid; the grid doesn't orbit

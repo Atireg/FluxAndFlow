@@ -263,7 +263,19 @@
   <!-- The answer to clicking a slot with no project in it yet; placed by
        updateCubeTags in script.js for a moment after the click -->
   <div class="cube-tag cube-tag--empty" id="empty-tag" aria-hidden="true">Still empty...</div>
-  <svg class="tag-string" id="spotlight-string" aria-hidden="true"><path /></svg>
+  <!-- The tag's string: a faint glow under a fine line, both fading in
+       from the pebble (the gradient's ends follow the knot and the tag) -->
+  <svg class="tag-string" id="spotlight-string" aria-hidden="true">
+    <defs>
+      <linearGradient id="tag-string-fade" gradientUnits="userSpaceOnUse">
+        <stop offset="0" class="tag-string__stop tag-string__stop--clear" />
+        <stop offset="0.4" class="tag-string__stop" />
+        <stop offset="1" class="tag-string__stop" />
+      </linearGradient>
+    </defs>
+    <path class="tag-string__glow" stroke="url(#tag-string-fade)" />
+    <path class="tag-string__line" stroke="url(#tag-string-fade)" />
+  </svg>
   <div class="cube-tag cube-tag--spotlight" id="spotlight-tag" aria-hidden="true"></div>
 
   <!-- Always on screen while a project is open: just enough to say what you

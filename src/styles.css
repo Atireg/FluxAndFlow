@@ -341,11 +341,31 @@ canvas.webgl {
     pointer-events: none;
 }
 
+/* Soft rather than drawn: the lighter orange, part-transparent, with a
+   faint glow, fading in from the pebble */
 .tag-string path {
     fill: none;
-    stroke: var(--warm-text);
-    stroke-width: 1;
     stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.tag-string__line {
+    stroke-width: 1.1;
+    opacity: 0.7;
+}
+
+.tag-string__glow {
+    stroke-width: 4;
+    opacity: 0.14;
+}
+
+.tag-string__stop {
+    stop-color: var(--warm);
+    stop-opacity: 1;
+}
+
+.tag-string__stop--clear {
+    stop-opacity: 0.2;
 }
 
 .cube-tag--spotlight {
