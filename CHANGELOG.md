@@ -74,8 +74,8 @@ were tried and removed are listed under "Tried and removed" there.
   fixed two old hover bugs): a bigger, rocking wander; the pointer stirs
   nearby cubes like a hand through water; no orbit in the grid; a hovered
   cube just tints, no pulse. A continuous spotlight: any cube glows orange
-  and jumps, one at a time, its "Project XX" name hanging below it on a thin
-  string, swinging and blinking in step, then eases back into its float.
+  and jumps, one at a time, its "Project XX" name hanging below it on a thin,
+  rippling string, swinging and blinking in step, then eases back into its float.
 - **Pebbles instead of cubes**, after five organic options were rendered to
   choose from: glass stones with a teal rim in the grid; a clicked one
   dissolves into a cloud of points that becomes the project's own. A

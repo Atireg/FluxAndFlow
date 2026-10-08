@@ -219,20 +219,20 @@ Every ~5.3-5.6s one cube glows orange and jumps, then the next takes over.
   `TAG_STEP` with `TAG_GRAVITY` and `TAG_DAMPING`, held to their link length
   over `ROPE_ITERATIONS` passes with the knot pinned and the tag a heavier
   end (`TAG_WEIGHT`), plus a little bending stiffness (`ROPE_STIFFNESS`,
-  once a step - applied every pass it went rigid again). A breeze that's
-  out of step from point to point (`TAG_BREEZE`, off under reduced motion)
-  sends ripples down it, and the pebble's jump and rock jerk the knot, so it
-  bows, S-curves, goes briefly slack and settles. It's drawn as one smooth
+  once a step - applied every pass it went rigid again). A breeze that's out
+  of step from point to point (`TAG_BREEZE`, off under reduced motion) sends
+  ripples down it, and the pebble's jump and rock jerk the knot, so it bows,
+  S-curves, goes briefly slack and settles. It's drawn as one smooth
   Catmull-Rom curve (`#spotlight-string`). The tag turns about its top
-  centre with the string's overall lean plus a little of its lower stretch
-  - following only the last link, it spun sideways whenever the end
-  kinked. The knot is spread across the steps and the swing and turn
-  capped at `TAG_MAX_SWING` (~40 degrees): without that a slow frame yanked
-  the string and flipped the tag past horizontal. Like the flow it has memory, so it's integrated, not a pure
-  function of the clock; it starts hanging straight down for each new
-  pebble. The text is `--warm-text`, the invitation's orange a shade deeper
-  for text on paper, with a soft paper halo; the string's opacity follows
-  the glow's ramp, the text also blinks.
+  centre with the string's overall lean plus a little of its lower stretch -
+  following only the last link, it spun sideways whenever the end kinked.
+  The knot is spread across the steps and the swing and turn capped at
+  `TAG_MAX_SWING` (~40 degrees): without that a slow frame yanked the string
+  and flipped the tag past horizontal. Like the flow it has memory, so it's
+  integrated, not a pure function of the clock; it starts hanging straight
+  down for each new pebble. The text is `--warm-text`, the invitation's
+  orange a shade deeper for text on paper, with a soft paper halo; the
+  string's opacity follows the glow's ramp, the text also blinks.
 
 Getting the cube to actually show that orange took two things:
 
