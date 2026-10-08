@@ -122,13 +122,15 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
   If adding Draco or quantization to a cloud, read "Quantized, not
   Draco-compressed" first — Draco does not apply to POINTS at all.
 - `drop` drops `count` copies of a mesh onto a surface with real physics
-  (`src/pile.js`): its collision shape is the straight rods `findRods`
-  finds in the mesh, so it only suits rod-built aggregates. `size` is each
-  copy's longest side and `ground` the surface's height, in the cube's
-  units (5 across, centred on 0). They're held hidden for `PILE_WAIT`,
-  then fall into view in slow motion (`PILE_TIME_SCALE`); the model turns
-  only once the pile has settled. See "Emergent Space: aggregates dropped
-  with live physics" in DECISIONS.md before retuning it.
+  (`src/pile.js`): its collision shape is the straight rods `findRods` finds
+  in the mesh, so it only suits rod-built aggregates. `size` is each copy's
+  longest side and `ground` the surface's height, in the cube's units (5
+  across, centred on 0). The surface they land on is the clicked pebble's
+  dissolve, its points falling into a disc (`uGround` in the dissolve
+  shader). They're held hidden for `PILE_WAIT`, then fall into view in slow
+  motion (`PILE_TIME_SCALE`); the model turns only once the pile has
+  settled. See "Emergent Space: aggregates dropped with live physics" in
+  DECISIONS.md before retuning it.
 
 ## Things that will bite a fresh session
 

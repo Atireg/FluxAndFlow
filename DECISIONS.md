@@ -74,11 +74,13 @@ grid; renaming would have touched most of the file for nothing.
   slot. Vertices are merged first so normals are smooth.
 - **Flux**: each pebble slowly changes shape, as asked - three broad waves
   rolling over its surface on its own seed (`addPebbleFlux`, in the vertex
-  shader; `PEBBLE_FLUX` 15% of the radius - 9% read as too subtle -
-  `PEBBLE_FLUX_SPEED`), off one shared clock (`pebbleFluxTime`). The glass
-  and the rim run the same function on the same seed, or the rim would slip
-  off the glass. Pure function of time; clicks and hover still use the
-  resting shape, near enough, and the dissolve starts from it.
+  shader; `PEBBLE_FLUX` 30% of the radius - 9% and then 15% read as too
+  subtle - `PEBBLE_FLUX_SPEED`), off one shared clock (`pebbleFluxTime`).
+  The glass and the rim run the same function on the same seed, or the rim
+  would slip off the glass. Pure function of time; clicks and hover still
+  use the resting shape, near enough. The dissolve starts from the shape at
+  the click (the same function, its clock held at `dropStartedAt`) - at
+  30% the resting shape was visibly a different pebble.
 - **Rim, not edges.** `userData.edges` is a second skin on the same
   geometry (`makeRimMaterial`, a MeshBasicMaterial with a fresnel term
   patched in), opaque only at the silhouette. It keeps the edge lines'
@@ -475,8 +477,16 @@ Blender/Rhino simulation. A project's `drop: { count, size, ground }` does it
   three rods are ~27 times longer than thick. A mesh that isn't made of
   rods would need another shape.
 - **Drawn as points**: one sampled cloud, shared by every copy, each copy a
-  THREE.Points that `pile.sync()` moves to its body every frame. The
-  surface is a faint disc of points in the grey ink (`userData.tone`).
+  THREE.Points that `pile.sync()` moves to its body every frame.
+- **The ground is the clicked pebble.** At the user's request the points
+  the pebble dissolves into swell out, then fall - each in turn, gathering
+  speed - to a place on a disc on the ground (`aGround`, `uGround` in the
+  dissolve shader; `PILE_SURFACE_RADIUS`), turn the grey ink, shrink and
+  lighten, and stay as the surface the aggregates land on: no crossfade
+  and no end for a project with a `drop` (`points.userData.ground` in
+  `updateDissolve`). It's laid by about 2.5s after the click, before the
+  first aggregate lands. A separate faint disc of grey points came first;
+  at full size the falling points read heavy and dark, hence the shrink.
 - **Tuned to interlock.** Dropped a few hundred times off screen (the same
   cannon-es setup in Node, counting drops where all three end up
   touching): a lively drop - more spin, bounce and spread - left them

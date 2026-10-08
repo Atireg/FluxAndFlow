@@ -6,7 +6,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import { mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { MeshSurfaceSampler } from 'three/examples/jsm/math/MeshSurfaceSampler.js';
-import { createPile, findRods, loadPhysics } from './pile.js';
+import { createPile, findRods, loadPhysics, PILE_SURFACE_RADIUS } from './pile.js';
 
 import pointCloudVertexShader from './shaders/pointCloud/vertex.glsl';
 import pointCloudFragmentShader from './shaders/pointCloud/fragment.glsl';
@@ -819,8 +819,7 @@ function loadPointCloudWithShaderMaterial({
                         pick -= POINT_INKS[tone].share;
                         tone++;
                     }
-                    // A cloud can ask for one ink throughout (a pile's surface)
-                    tones[i] = child.userData.tone ?? tone;
+                    tones[i] = tone;
                 }
                 geometry.setAttribute('aTone', new THREE.BufferAttribute(tones, 1));
                 // geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
@@ -1223,7 +1222,7 @@ const PEBBLE_RIM_POWER = 2.4; // how tightly the rim hugs the silhouette
  * glass), off one shared clock - a pure function of time, nothing stored.
  * Clicking and hovering still use the resting shape, near enough.
  */
-const PEBBLE_FLUX = 0.15; // how far the surface moves, as a share of the radius - 0.09 read as too subtle
+const PEBBLE_FLUX = 0.3; // how far the surface moves, as a share of the radius - 0.09 and 0.15 read as too subtle
 const PEBBLE_FLUX_SPEED = 0.5; // radians a second, roughly - a wave every ~12s
 const pebbleFluxTime = { value: 0 }; // shared by every pebble's materials, set each frame
 
@@ -1337,24 +1336,42 @@ uniform float uT;
 uniform float uSwell;
 uniform float uPixelsPerUnit;
 uniform float uSize;
+uniform float uGround; // 1: the points fall and stay as a pile's surface (aGround)
 attribute vec3 aDrift;
 attribute float aDelay;
 attribute float aTone;
+attribute vec3 aNormal;
+attribute vec3 aGround;
 varying float vAlpha;
 varying float vInk;
 varying float vTone;
+${PEBBLE_FLUX_GLSL}
 
 void main() {
+    // From the pebble's shape at the moment it was clicked, flux and all
+    vec3 start = position + aNormal * pebbleFlux(normalize(position)) * uFluxAmount;
+
     float t = clamp((uT - aDelay) / (1.0 - aDelay), 0.0, 1.0);
     float rest = 1.0 - t;
     float swell = 1.0 - rest * rest;
-    vec3 p = position * (1.0 + uSwell * swell) + aDrift * swell;
+    vec3 p = start * (1.0 + uSwell * swell) + aDrift * swell;
+
+    // Or swell out, then fall - each in turn, gathering speed - to its own
+    // place on the ground, and stay there
+    float puff = smoothstep(0.0, 0.3, uT);
+    vec3 swollen = start * (1.0 + uSwell * puff) + aDrift * puff;
+    float falling = clamp((uT - 0.25 - aDelay * 0.35) / 0.35, 0.0, 1.0);
+    vec3 landed = mix(swollen, aGround, falling * falling);
+    p = mix(p, landed, uGround);
 
     vec4 mv = modelViewMatrix * vec4(p, 1.0);
     gl_Position = projectionMatrix * mv;
-    gl_PointSize = uSize * uPixelsPerUnit / max(-mv.z, 0.001);
+    // Landed, they're finer and fainter - a ground, not a cloud
+    float settled = falling * uGround;
+    gl_PointSize = uSize * (1.0 - 0.5 * settled) * uPixelsPerUnit / max(-mv.z, 0.001);
 
-    vAlpha = smoothstep(0.0, 0.12, uT) * (1.0 - smoothstep(0.55, 1.0, uT));
+    float fading = 1.0 - smoothstep(0.55, 1.0, uT);
+    vAlpha = smoothstep(0.0, 0.12, uT) * mix(fading, 1.0 - 0.45 * falling, uGround);
     vInk = smoothstep(0.1, 0.6, uT);
     vTone = aTone;
 }`;
@@ -1378,27 +1395,48 @@ function getDissolve(cube) {
     if (cube.userData.dissolve) return cube.userData.dissolve;
 
     const surface = cube.geometry.attributes.position;
+    const surfaceNormals = cube.geometry.attributes.normal;
     const positions = new Float32Array(DISSOLVE_POINTS * 3);
+    const normals = new Float32Array(DISSOLVE_POINTS * 3);
     const drifts = new Float32Array(DISSOLVE_POINTS * 3);
     const delays = new Float32Array(DISSOLVE_POINTS);
     const tones = new Float32Array(DISSOLVE_POINTS);
+    const grounds = new Float32Array(DISSOLVE_POINTS * 3);
     const v = new THREE.Vector3();
+
+    // A project dropped onto a surface (`drop`) gets its surface from these:
+    // each point's place on a disc on the ground, in the grey ink
+    const drop = cube.userData.project?.drop;
+    const groundRadius = drop ? (drop.size ?? 3) * PILE_SURFACE_RADIUS : 0;
 
     for (let i = 0; i < DISSOLVE_POINTS; i++) {
         // A point on the pebble's surface, nudged a little off it
-        v.fromBufferAttribute(surface, Math.floor(Math.random() * surface.count));
+        const vertex = Math.floor(Math.random() * surface.count);
+        v.fromBufferAttribute(surface, vertex);
         v.addScalar((Math.random() - 0.5) * 0.15);
         v.toArray(positions, i * 3);
+        v.fromBufferAttribute(surfaceNormals, vertex);
+        v.toArray(normals, i * 3);
 
         v.randomDirection().multiplyScalar(DISSOLVE_DRIFT * (0.3 + 0.7 * Math.random()));
         v.toArray(drifts, i * 3);
 
         delays[i] = Math.random() * 0.3;
-        tones[i] = Math.floor(Math.random() * 3);
+        tones[i] = drop ? 2 : Math.floor(Math.random() * 3);
+
+        if (drop) {
+            const r = Math.sqrt(Math.random()) * groundRadius;
+            const a = Math.random() * Math.PI * 2;
+            grounds[i * 3] = Math.cos(a) * r;
+            grounds[i * 3 + 1] = drop.ground ?? 0;
+            grounds[i * 3 + 2] = Math.sin(a) * r;
+        }
     }
 
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute('aNormal', new THREE.BufferAttribute(normals, 3));
+    geometry.setAttribute('aGround', new THREE.BufferAttribute(grounds, 3));
     geometry.setAttribute('aDrift', new THREE.BufferAttribute(drifts, 3));
     geometry.setAttribute('aDelay', new THREE.BufferAttribute(delays, 1));
     geometry.setAttribute('aTone', new THREE.BufferAttribute(tones, 1));
@@ -1416,8 +1454,14 @@ function getDissolve(cube) {
             uRim: { value: selectedCubeColor },
             uInks: { value: POINT_INKS.map((ink) => ink.color) },
             uOpacity: { value: POINT_OPACITY },
+            uGround: { value: drop ? 1 : 0 },
+            // The pebble's flux, held where it was at the click (see updateDissolve)
+            uFluxTime: { value: 0 },
+            uFluxSeed: { value: cube.userData.fluxSeed ?? 0 },
+            uFluxAmount: { value: PEBBLE_RADIUS * PEBBLE_FLUX },
         },
     }));
+    points.userData.ground = Boolean(drop);
     points.visible = false;
     points.renderOrder = 2;
     points.raycast = () => {}; // never something to click on
@@ -1433,18 +1477,22 @@ function updateDissolve(elapsedTime) {
     const points = droppingFrom?.userData.dissolve;
     if (!points) return;
 
+    // A pile's surface stays; otherwise the cloud is gone by the end
     const t = (elapsedTime - dropStartedAt) / DISSOLVE_DURATION;
-    points.visible = t < 1;
+    const ground = points.userData.ground;
+    points.visible = ground || t < 1;
     if (!points.visible) return;
 
     // Giving way to the project's own points as they appear (REVEAL_DURATION)
+    // - unless it's becoming the ground they land on
     const detail = droppingFrom.userData.detail;
     const shown = viewState === 'detail' && selectedCube === droppingFrom && detail?.visible;
-    const reveal = shown ? revealAt(elapsedTime - droppingFrom.userData.detailRotateStartTime) : 0;
+    const reveal = shown && !ground ? revealAt(elapsedTime - droppingFrom.userData.detailRotateStartTime) : 0;
 
     const uniforms = points.material.uniforms;
-    uniforms.uT.value = t;
+    uniforms.uT.value = Math.min(t, 1);
     uniforms.uOpacity.value = POINT_OPACITY * (1 - reveal);
+    uniforms.uFluxTime.value = dropStartedAt * PEBBLE_FLUX_SPEED;
     uniforms.uPixelsPerUnit.value = renderer.domElement.height / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov ?? 45) / 2));
 }
 
@@ -1477,6 +1525,7 @@ function createPlayground() {
         edges.renderOrder = 1;
         cube.add(edges);
         cube.userData.edges = edges;
+        cube.userData.fluxSeed = seed;
 
         // Which slot this is, and the project sitting in it (null when empty)
         cube.userData.slot = slot;

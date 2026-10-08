@@ -38,8 +38,9 @@ const PILE_FIRST_HEIGHT = 2; // the first starts this far above the ground, in a
 const PILE_HEIGHT_STEP = 0.7; // and each next one this much higher, so they land in turn
 const PILE_SPIN = 1; // radians/s, at most, of tumble as they're let go
 const PILE_SLEEP_SPEED = 0.08; // aggregate sizes per second - slower than this for a moment counts as at rest
-const SURFACE_POINTS = 1200;
-const SURFACE_RADIUS = 0.9; // in aggregate sizes
+// The surface they land on is drawn by the clicked pebble's dissolve, its
+// points falling to a disc this wide (see getDissolve in script.js)
+export const PILE_SURFACE_RADIUS = 0.9; // in aggregate sizes
 
 /**
  * The straight rods a crossed-rod aggregate is made of, found from its
@@ -126,21 +127,6 @@ export async function createPile({ template, rods, count, size, groundY }) {
         group.add(points);
         aggregates.push(points);
     }
-
-    // The surface, as a faint disc of points in the grey ink
-    const surfacePositions = new Float32Array(SURFACE_POINTS * 3);
-    for (let i = 0; i < SURFACE_POINTS; i++) {
-        const r = Math.sqrt(Math.random()) * size * SURFACE_RADIUS;
-        const a = Math.random() * Math.PI * 2;
-        surfacePositions[i * 3] = Math.cos(a) * r;
-        surfacePositions[i * 3 + 1] = groundY;
-        surfacePositions[i * 3 + 2] = Math.sin(a) * r;
-    }
-    const surfaceGeometry = new THREE.BufferGeometry();
-    surfaceGeometry.setAttribute('position', new THREE.BufferAttribute(surfacePositions, 3));
-    const surface = new THREE.Points(surfaceGeometry);
-    surface.userData.tone = 2; // see loadPointCloudWithShaderMaterial
-    group.add(surface);
 
     // The world, in the group's own units: gravity scaled so an aggregate
     // `size` across falls like one PILE_REAL_SIZE metres across
