@@ -5,7 +5,9 @@ Live at https://atireg.github.io/FluxAndFlow/ (deployed from `main` by
 
 Adding a project: edit the `projects` array near the top of src/script.js
 (the fields are listed in CLAUDE.md). Each entry declares the slot it sits
-in and its own models; any text field left empty is skipped rather than
+in and its own models - the project's model can be a point cloud or a
+plain mesh, sampled into points as it loads; any text field left empty is
+skipped rather than
 rendered blank. An optional `view` sets the camera angle the project opens
 on (and, with `sway`, a slow nod of the camera); `gather: true` makes its
 points gather out of a scattered cloud each time it opens; `images` fills
@@ -36,14 +38,18 @@ Next up (waiting on content)
         credits. The fields hold unmistakable [PLACEHOLDER ...] text, put
         there to check the drawer works on the live site - it is live and
         needs replacing. State the role accurately
-    [ ] Check the licensing/attribution for the Rock Print model now that the
-        repository is public and the site serves the .glb
-    [ ] Confirm Rock Print now opens on Safari (Mac and iPhone): tapping its
-        pebble did nothing there; selection no longer relies on Safari's
-        `click` (see DECISIONS.md, "Safari"). If it still fails, note the
-        device and any message in the project bar
-    [ ] More projects: each needs a slot, a thumbnail, a point-cloud .glb
-        and (optionally) a `view` - see CLAUDE.md
+    [ ] The aggregate (slot 1): a real title ("Aggregate" is a working one,
+        from the file name) and any text - with none it has no drawer
+    [ ] Check the licensing/attribution for the Rock Print and aggregate
+        models now that the repository is public and the site serves them
+    [ ] Confirm on Safari (Mac and iPhone), all fixed blind: tapping a
+        pebble opens its project (it did nothing - selection no longer
+        relies on Safari's `click`), and the names, their string and the
+        zoom hint draw over the pebbles and the cloud, not behind (see
+        DECISIONS.md, "Safari"). If anything fails, note the device and any
+        message in the project bar
+    [ ] More projects: each needs a slot, a .glb (point cloud or mesh) and
+        a `view` - see CLAUDE.md
 
 Landing/welcome view
     [ ] Graphics (me as a figure?) + welcome text explaning the webside's concept
@@ -57,7 +63,8 @@ Navigation and general layout
 
 Catalog view
     [ ] The element of surprise or discovery - when hovered on a cube add little 3D objects representing each project (e.g. a rock, an aggregate, a spider...)
-        (every pebble holds the rock for now, empty slots included)
+        (every pebble holds the rock for now, empty slots included; the
+        aggregate's own mesh could be its pebble's thumbnail, scaled down)
     [ ] Add a "magic/mystery" appearance (e.g. fog shader or lights)
         (scene fog is off for a reason - see DECISIONS.md before re-adding)
     [ ] Change the shape of the cubes when hovering on them
@@ -88,12 +95,13 @@ Done
 Catalog
     [x] Ten fixed slots (SLOT_COUNT), reachable on every viewport
     [x] Glass pebbles (cubes before), each its own shape, each holding the
-        little rock, with smaller pebbles scattered between them; they
-        float and rock, the pointer stirs them, no orbit
+        little rock, with smaller pebbles scattered among them (instanced);
+        they float and rock, the pointer stirs them, no orbit
     [x] One pebble at a time glows orange and jumps; its "Project XX" hangs
         below it on a soft, thin string tied on with a dot, swinging in
         gusts. A hovered pebble turns orange and keeps its name while the
-        pointer stays. Names scale with the pebbles on screen
+        pointer stays. Names scale with the pebbles on screen and draw over
+        them
     [x] Clicking a project: an instant boom, the others fall slowly, the
         clicked pebble dissolves into a cloud of points that becomes the
         project; opened projects' pebbles stay darker (remembered)
@@ -102,11 +110,14 @@ Catalog
 Project view
     [x] Rock Print lands on a view fitted to a phone screenshot; its points
         gather from a scattered cloud, in three inks and three sizes; it
-        turns slowly while the camera nods (`view.sway`)
+        turns slowly (a turn every 80s) while the camera nods (`view.sway`)
+    [x] The aggregate (slot 1), from a plain mesh sampled into 60k points
+        as it loads
     [x] A grey fog rolls in behind the project
     [x] The About drawer: model moves left and stays whole on a wide screen,
         a close-up on a phone; five pictures in it
-    [x] Double-click / double-tap zoom, hinted by a white touch point every 5s
+    [x] Double-click / double-tap zoom, hinted every 5s by a white touch
+        point that scales with the screen
     [x] Camera moves only tilt, never roll
 
 Site

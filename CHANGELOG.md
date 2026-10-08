@@ -67,39 +67,44 @@ not yet live). The why is in DECISIONS.md; rejected iterations are under
 its "Tried and removed".
 
 - **Catalog.** Cubes became glass pebbles, each its own shape, with smaller
-  ones scattered between, rebuilt on one pure state function per frame:
-  they float and rock, the pointer stirs them, nothing orbits. One pebble
-  at a time glows orange and jumps, its "Project XX" hanging below on a
-  soft, simulated string that swings in gusts, tied on with a dot; a
-  hovered pebble turns orange and keeps its name. Names scale with the
-  pebbles on screen. Every pebble holds the rock; empty slots say "Still
-  empty...". Opened projects' pebbles stay darker, remembered in the
-  browser.
+  ones scattered among them (instanced), rebuilt on one pure state function
+  per frame: they float and rock, the pointer stirs them, nothing orbits.
+  One pebble at a time glows orange and jumps, its "Project XX" hanging
+  below on a soft, simulated string that swings in gusts, tied on with a
+  dot; a hovered pebble turns orange and keeps its name. Names scale with
+  the pebbles on screen and draw over them. Every pebble holds the rock;
+  empty slots say "Still empty...". Opened projects' pebbles stay darker,
+  remembered in the browser.
 - **Opening a project.** An instant boom, the others fall slowly while the
   camera moves in, and the clicked pebble dissolves into a cloud of points
   that turns into the project's own. Camera moves only tilt (the old 90°
   roll fixed at its source); a grey CSS fog rolls in behind.
 - **Rock Print.** Points gather out of a scattered cloud, in three inks and
   sizes; it lands on a view fitted to the user's phone screenshot, turns
-  slowly while the camera nods (`view.sway`). Double-click / double-tap
-  zoom, hinted by a white touch point. The drawer moves the model left on a
-  wide screen, a close-up on a phone, and holds five photos; its text is
-  still a placeholder.
+  slowly (80s a turn) while the camera nods (`view.sway`). Double-click /
+  double-tap zoom, hinted by a white touch point sized to the screen. The
+  drawer moves the model left on a wide screen, a close-up on a phone, and
+  holds five photos; its text is still a placeholder.
+- **The aggregate** (slot 1), the second project: the user's plain mesh,
+  sampled into a point cloud as it loads - any mesh .glb now works.
 - **Site.** "Paper" palette throughout (the dark `Sky` dome removed); an
   inline start-up loader with real progress, at least 5s; clouds load only
   on click after `?cloudtest` measured the alternative.
 - **Safari.** Tapping a pebble did nothing there: selection now uses the
-  canvas's `pointerup`, not a window `click`. Shaders made spec-defined and
-  failures made visible too. Fixed blind; still to confirm.
+  canvas's `pointerup`, not a window `click`. The names and the zoom hint
+  showed behind the pebbles and the cloud: overlays now stack by z-index.
+  Shaders made spec-defined and failures made visible too. Fixed blind;
+  still to confirm.
 - **Docs.** DECISIONS regrouped (contents, "Tried and removed") and purged
   to what's current; README's TODO split into next up / open / done;
   CLAUDE.md gained "Where to pick up", notes on the pebbles and the
   hanging tag, and testing tips.
 
 Open at end of session (see README, "Next up"):
-- Rock Print on Safari: confirm the fix.
+- Safari: confirm the tap and the stacking fixes.
 - Rock Print's real copy (live text is placeholder; state the role
-  accurately), and captions/credits for its five photos.
-- Model licensing/attribution for the public .glb is unchecked.
+  accurately), and captions/credits for its five photos; the aggregate's
+  real title and any text.
+- Model licensing/attribution for the public .glb files is unchecked.
 - A drawer video was discussed, not added - README has the agreed approach.
 - No per-project URLs; `?cloudtest` and `src/loader/` (dead code) can go.

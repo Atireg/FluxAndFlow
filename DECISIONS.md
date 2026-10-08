@@ -34,6 +34,7 @@ The project view: camera
 
 The project view: point cloud
 - Quantized, not Draco-compressed
+- A mesh becomes points as it loads
 - Point size, three sizes, three inks
 - Points gather out of a scattered cloud
 - Safari: defined GLSL, visible failures
@@ -106,15 +107,25 @@ is stable; its on-screen place isn't, but the order is row-major.
 Small pebbles between the big ones
 ----------------------------------
 
-The user asked for smaller pebbles around the project ones. `smallPebbles`
-sit in the gaps at the big ones' diagonals (`layoutSmallPebbles`, rerun by
-`layoutCubes`): one per gap, a seeded quarter left empty
-(`SMALL_PEBBLE_SKIP`), each a little off-centre, `SMALL_PEBBLE_RADIUS` of
-0.1-0.2 x cubeSize, `SMALL_PEBBLE_SINK` below so they read as behind.
-Seeded rather than random, so a resize lays them out the same way.
+The user asked for smaller pebbles around the project ones.
+`layoutSmallPebbles` (rerun by `layoutCubes`) drops `SMALL_PEBBLE_PER_SLOT`
+per big pebble at random over the grid and a margin around it, each kept
+clear of the big pebbles' homes and of the others, small ones more common
+(`SMALL_PEBBLE_RADIUS` 0.05-0.2 x cubeSize), at varied depths below
+(`SMALL_PEBBLE_SINK`). A first version, one per gap at the big ones'
+diagonals, read as too organised. Seeded (`seededRandom`), so a resize
+lays them out the same way.
 
-- **Decoration, not slots**: they're not in `cubes`, so raycasts, hover,
-  the spotlight and clicks never see them.
+- **Instanced**: `SMALL_PEBBLE_SHAPES` pebble shapes, each an
+  InstancedMesh for its glass and one for its rim - six draw calls however
+  many there are (one mesh pair each was ~50). Each pebble is a bare
+  Object3D the shared pose code moves like a big one (`placeAtRest`,
+  `applyFlow`, `placeDroppingCube`); `syncSmallPebbles` copies the poses
+  into the instances every frame, under each one's own size, stretch and
+  heading (`userData.form`). The rim shader turns its normal by the
+  instance matrix (`USE_INSTANCING`).
+- **Decoration, not slots**: not in `cubes`, so raycasts, hover, the
+  spotlight and clicks never see them.
 - **They move with the grid**: the same wander and flow, knocked off by
   the boom (`startDrop` gives them drop data too). Anything new that moves
   or fades the grid has to handle both arrays.
@@ -175,9 +186,9 @@ Every ~5.3-5.6s one pebble glows orange and jumps, then the next.
 The glowing pebble's name hangs on a string
 -------------------------------------------
 
-`#spotlight-tag` reads "Project 01".."Project 10" by slot and blinks with
-the glow (down to `SPOTLIGHT_TAG_MIN` between beats, scaled by the
-spotlight's ramp), gone once the pebble settles. **A hovered pebble's name
+`#spotlight-tag` reads "Project 01".."Project 10" by slot and pulses with
+the glow (down to `SPOTLIGHT_TAG_MIN`, 0.65, between beats - at 0.2 it
+read as see-through), gone once the pebble settles. **A hovered pebble's name
 hangs the same way**, steady, for as long as the pointer stays (the user
 asked for both to stay). One tag at a time, on whichever pebble shows it
 most. Hovering the spotlit pebble hands it over: its jump settles over
@@ -189,6 +200,9 @@ snapped the pebble out of mid-jump. "Still empty..." wins on its pebble.
 radius in pixels, set by `fitCameraToGrid` - at 0.3 of it, never under
 0.95rem. A phone (radius ~49px) stays as it was; 1280px wide gets ~22px,
 1920 ~30px. A fixed rem looked small on wide screens.
+
+**Above the pebbles**: the tags and the string are `z-index` 2, over the
+canvas (1) - see "Safari".
 
 It hangs below the pebble on the paper, because on the face it was orange
 on orange (`hangSpotlightTag`). The string is a simulated rope in screen
@@ -209,11 +223,9 @@ or a slow frame flips it. Text is `--warm-text`, a shade deeper than
 `--warm` for legibility on paper, with a soft paper halo. A dot marks the
 knot (`TAG_KNOT_SIZE` of the pebble's radius, 2-6px), in `--warm-text` so
 it shows on the glowing pebble - in `--warm` it vanished there. The string
-itself is drawn soft rather than as a line: the lighter `--warm`,
-part-transparent, over a faint wider glow, and fading in from the knot (a
-gradient whose ends follow the knot and the tag each frame) - a solid 1px
-line in the text's orange read as drawn on. It starts faint, not clear, or
-it looked untied.
+is the lighter `--warm`, solid, over a faint wider glow: softer than a 1px
+line in the text's orange, which read as drawn on. A see-through string
+fading in from the knot was tried and looked lost behind the pebbles.
 
 
 The pointer stirs the grid; the grid doesn't orbit
@@ -321,7 +333,7 @@ model's bounding box (which balloons with scattered points), with
 `VIEW_FRAME_MARGIN`; on a phone with the drawer parked, it centres on the
 whole screen if the cube's top clears the bar.
 
-Rock Print's `{ elevation: 58, azimuth: 4, turn: 86, zoom: { stacked: 1.75,
+Rock Print's `{ elevation: 58, azimuth: 4, turn: 102, zoom: { stacked: 1.75,
 side: 1.4 }, lift: { stacked: 0.14, side: 0 }, sway: 13 }` was fitted to the
 user's phone screenshot: a throwaway build (never committed) froze the turn
 and gather and exposed a hook to set the view; renders at the screenshot's
@@ -329,9 +341,14 @@ viewport were scored by overlap (IoU) of their point masks, coarse then
 fine, which also showed the leftover error was placement - hence `lift`.
 The fitted phone zoom 1.9 was eased to 1.75 on request (it cropped the
 pavilion); desktop uses 1.4 and no lift. `turn` is the screenshot's 118°
-less the 32° the model turns during the gather, so the shot is on screen as
+less the 16° the model turns during the gather, so the shot is on screen as
 the gather completes - it shifts if `GATHER_DURATION`, `DETAIL_ROTATE_SPEED`
 or `DETAIL_MODEL_YAW` change.
+
+The aggregate's `{ elevation: 25 }` is there for the framing as much as the
+angle: without a `view` the fit is the model's box at the moment it opens,
+and on a phone (`DETAIL_MARGIN.stackedParked` crops in) its long arms ran
+off the screen as it turned. Framed on its cube, they stay in.
 
 
 Fitting allows for depth and for what else is on screen
@@ -363,10 +380,11 @@ there, hence the fixed elevation.
 The model turns; the camera nods (`view.sway`)
 ----------------------------------------------
 
-The model turns inside the pebble's place, a full turn every 40s
-(`DETAIL_ROTATE_SPEED`), computed from `detailRotateStartTime` (reset when
-the model appears, which the gather shares). The fit is computed once at
-the start angle; Rock Print stays in frame across a full turn.
+The model turns inside the pebble's place, a full turn every 80s
+(`DETAIL_ROTATE_SPEED`; 40s read as too fast), computed from
+`detailRotateStartTime` (reset when the model appears, which the gather
+shares). The fit is computed once at the start angle; Rock Print stays in
+frame across a full turn.
 
 `view.sway` (Rock Print 13°) nods the camera that far above and below, over
 `SWAY_PERIOD` (16s; 8° over 20s read as too subtle). `updateSway` applies
@@ -391,11 +409,13 @@ would zoom in and straight back out.
 
 `#tap-hint` is a white disc with a black outline and rings that presses
 twice (2.2s CSS animation), readable over the cloud, the fog and the paper,
-and not competing with the orange. `maybeShowTapHint` shows it once the
-gather is done, then every `TAP_HINT_GAP` (5s), on a random on-screen point
-of the cloud clear of the bar and any side drawer - zoomed in too, where it
-invites zooming back out. It skips while the camera moves or a phone's
-drawer is open.
+and not competing with the orange. Its size (`--hint-size`) follows the
+screen's shorter side, 3vmin between 1.1rem (a phone, as before) and 2.6rem;
+it sits at `z-index` 2, over the canvas. `maybeShowTapHint` shows it once
+the gather is done, then every `TAP_HINT_GAP` (5s), on a random on-screen
+point of the cloud clear of the bar and any side drawer - zoomed in too,
+where it invites zooming back out. It skips while the camera moves or a
+phone's drawer is open.
 
 
 The project view: point cloud
@@ -412,6 +432,23 @@ and uint8 colours, 28 -> 10 bytes a point, 2.2 MB -> 922 KB, about a
 millimetre of precision. COLOR_0 (the scan's colours) is still in the file
 but unread - dropping it would save ~315 KB. `static/draco/` keeps the
 decoder for any model that genuinely uses Draco.
+
+
+A mesh becomes points as it loads
+---------------------------------
+
+The aggregate came as a plain triangle mesh straight from Blender (36 KB,
+~1,250 vertices, ~115 units across), not a point cloud. Rather than convert
+it offline, `loadPointCloudWithShaderMaterial` turns any `.glb` with no
+POINTS in it into a cloud (`pointsFromMeshes`): `MESH_SAMPLE_POINTS`
+(60,000) points scattered over the surface with three.js's
+`MeshSurfaceSampler`, shared between meshes by area, in world space (so the
+file's own rotation holds), then centred and scaled so the longest side is
+`MESH_FIT_SIZE` (cubeSize), since a mesh arrives in whatever units it was
+drawn in. From there it is an ordinary cloud: inks, sizes, gather. It
+downloads a fraction of what a sampled cloud would weigh (Rock Print's 78k
+quantized points are 922 KB) and a mesh exported from Rhino or Blender
+works as it is. A real point cloud is left exactly as it is.
 
 
 Point size, three sizes, three inks
@@ -451,7 +488,10 @@ correct anyway:
   `pow()` at 0 are undefined and Safari's Metal backend needn't do what
   Chrome does (a NaN hides every point); both rewritten to identical,
   defined forms. Keep shader code inside what GLSL ES defines.
-- **The fog is explicitly under the canvas** (`z-index` 0 and 1).
+- **Stacking by z-index, never page order.** The fog is under the canvas
+  (0 and 1); the catalog's tags and string and the tap hint are over it (2).
+  At equal z-index Safari drew the canvas over later layers - the hint
+  showed behind the point cloud, the names behind the glass.
 - **Failures say so.** A failed model load or shader compile
   (`renderer.debug.onShaderError`) puts a message in the project bar, with
   the real error in the console.
@@ -584,7 +624,8 @@ Catalog
   nearest the pointer; names falling like leaves from cubes the pointer
   reached; then the glowing pebble's name as a white chip, as bare orange
   text on its face (unreadable), on a straight rod-like line, and on a taut,
-  barely-moving string.
+  barely-moving string; the string see-through and fading in from the knot.
+- **Small pebbles one per diagonal gap** - too organised.
 - **Send-off variants**: a 2s blow-out; a hard shake and fast fall; a swirl
   and rock; a push-and-hop wave; a tumbling fall with sideways drift;
   waiting for the last cube before the camera moved.

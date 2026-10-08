@@ -129,10 +129,16 @@ body {
  * on the chosen point of the model.
  */
 .tap-hint {
+    /* The dot's size follows the screen's shorter side, never smaller than
+       it was on a phone */
+    --hint-size: clamp(1.1rem, 3vmin, 2.6rem);
+
     position: fixed;
     top: 0;
     left: 0;
-    z-index: 1;
+    /* Above the canvas (1) by z-index, not page order - Safari drew the
+       point cloud over it */
+    z-index: 2;
     width: 0;
     height: 0;
     pointer-events: none;
@@ -150,12 +156,12 @@ body {
 }
 
 .tap-hint__dot {
-    width: 1.1rem;
-    height: 1.1rem;
-    margin: -0.55rem 0 0 -0.55rem;
+    width: var(--hint-size);
+    height: var(--hint-size);
+    margin: calc(var(--hint-size) / -2) 0 0 calc(var(--hint-size) / -2);
     box-sizing: border-box;
     background: var(--hint-fill);
-    border: 1.5px solid var(--hint-line);
+    border: max(1.5px, calc(var(--hint-size) * 0.08)) solid var(--hint-line);
 }
 
 .tap-hint.is-showing .tap-hint__dot {
@@ -163,10 +169,10 @@ body {
 }
 
 .tap-hint__ripple {
-    width: 3rem;
-    height: 3rem;
-    margin: -1.5rem 0 0 -1.5rem;
-    border: 1.5px solid var(--hint-line);
+    width: calc(var(--hint-size) * 2.7);
+    height: calc(var(--hint-size) * 2.7);
+    margin: calc(var(--hint-size) * -1.35) 0 0 calc(var(--hint-size) * -1.35);
+    border: max(1.5px, calc(var(--hint-size) * 0.08)) solid var(--hint-line);
     opacity: 0;
     transform: scale(0.3);
 }
@@ -307,7 +313,10 @@ canvas.webgl {
     position: fixed;
     top: 0;
     left: 0;
-    z-index: 1;
+    /* Above the canvas (1) by z-index, not page order: Safari has drawn the
+       WebGL canvas over later layers, which put the pebbles' glass over the
+       names. The bar (also 2) and these never show at once. */
+    z-index: 2;
     pointer-events: none;
 
     padding: 0.46em 0.8em;
@@ -336,24 +345,24 @@ canvas.webgl {
 .tag-string {
     position: fixed;
     inset: 0;
-    z-index: 1;
+    z-index: 2; /* above the canvas, like the tags */
     width: 100%;
     height: 100%;
     overflow: visible;
     pointer-events: none;
 }
 
-/* Soft rather than drawn: the lighter orange, part-transparent, with a
-   faint glow, fading in from the pebble */
+/* Soft rather than drawn: the lighter orange with a faint glow, but solid -
+   see-through, it looked lost behind the pebbles */
 .tag-string path {
     fill: none;
+    stroke: var(--warm);
     stroke-linecap: round;
     stroke-linejoin: round;
 }
 
 .tag-string__line {
-    stroke-width: 1.1;
-    opacity: 0.7;
+    stroke-width: 1.2;
 }
 
 .tag-string__glow {
@@ -363,21 +372,11 @@ canvas.webgl {
 
 .tag-string__knot {
     fill: var(--warm-text); /* deeper than the glowing pebble it sits on */
-    opacity: 0.95;
 }
 
 .tag-string__knot-glow {
     fill: var(--warm);
     opacity: 0.16;
-}
-
-.tag-string__stop {
-    stop-color: var(--warm);
-    stop-opacity: 1;
-}
-
-.tag-string__stop--clear {
-    stop-opacity: 0.4;
 }
 
 .cube-tag--spotlight {

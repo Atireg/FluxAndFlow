@@ -20,13 +20,14 @@ and README's "Next up". As of the end of Session 2: everything built is live
 or on the branch (`git log origin/main..` shows anything not yet merged);
 what's waiting is content from the user (Rock Print's real copy - the live
 text is `[PLACEHOLDER ...]` - and photo credits/captions for its five drawer
-pictures), a check that the blind Safari fix works, plus model licensing and
-per-project URLs. DECISIONS.md opens with a contents list; its "Tried and
-removed" section lists ideas the user has already seen and rejected - don't
-re-propose them without saying so. The catalog's look (pebbles, the orange
-spotlight, the tag hanging on a string in the wind) went through many
-rounds of the user's feedback: tune the existing constants before
-rebuilding any of it.
+pictures; the aggregate's real title and text), a check that the blind
+Safari fixes work, plus model licensing and per-project URLs. Two projects
+exist: Rock Print (slot 0, "Project 01") and the aggregate (slot 1).
+DECISIONS.md opens with a contents list; its "Tried and removed" section
+lists ideas the user has already seen and rejected - don't re-propose them
+without saying so. The catalog's look (pebbles, the orange spotlight, the
+tag hanging on a string in the wind) went through many rounds of the user's
+feedback: tune the existing constants before rebuilding any of it.
 
 ## Stack and commands
 
@@ -67,7 +68,7 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
     credits: '',
     thumbModel: 'models/rock.gltf',               // small model shown in the catalog pebble
     detailModel: 'models/RockPrintStructureReduced.glb',  // loaded on click
-    view: { elevation: 58, azimuth: 4, turn: 86,       // optional camera angle, degrees,
+    view: { elevation: 58, azimuth: 4, turn: 102,      // optional camera angle, degrees,
             zoom: { stacked: 1.75, side: 1.4 },            // closer than the cube's fit
             lift: { stacked: 0.14, side: 0 },             // raised on screen (share of height)
             sway: 13 },                                    // camera nods ± degrees, slowly
@@ -91,10 +92,14 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
   all, rather than a handle onto an empty panel. See DECISIONS.md. **State
   the role accurately once written** — the page implies authorship of
   whatever it shows.
-- `detailModel` should be a point-cloud `.glb`. If adding Draco compression
-  or quantization to a new model, read the "Quantized, not Draco-compressed"
-  entry in DECISIONS.md first — Draco does not apply to
-  non-indexed POINTS primitives at all.
+- `detailModel` is a `.glb` in `static/models/`: a point cloud (Rock
+  Print) or a plain mesh (the aggregate), whose surface is sampled into
+  points as it loads, centred and scaled to fit - see "A mesh becomes points
+  as it loads" in DECISIONS.md. Give a new model a `view` (even just
+  `{ elevation: 25 }`): without one the fit is the model's box at the
+  moment it opens, and a long shape runs off a phone screen as it turns.
+  If adding Draco or quantization to a cloud, read "Quantized, not
+  Draco-compressed" first — Draco does not apply to POINTS at all.
 
 ## Things that will bite a fresh session
 
@@ -147,9 +152,11 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
   and the hover alike.
 - **The small pebbles (`smallPebbles`) are not in `cubes`**, so raycasts
   and the spotlight never see them - but they float, are stirred, fall in
-  the boom and fade with a project like the rest. Anything new that moves
-  or fades the grid has to handle both arrays. See DECISIONS.md, "Small
-  pebbles between the big ones".
+  the boom and fade with a project like the rest. They're drawn instanced:
+  each is a bare Object3D whose pose `syncSmallPebbles` copies into the
+  InstancedMeshes every frame. Anything new that moves or fades the grid
+  has to handle both arrays. See DECISIONS.md, "Small pebbles between the
+  big ones".
 - **The spotlight's tag hangs on a simulated rope.** `hangSpotlightTag`
   runs a small screen-space Verlet rope (`ROPE_*`) under gravity and a
   gusty `wind(t)`, then draws it as a curve in `#spotlight-string`. Its
@@ -161,11 +168,12 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
 - **Safari can't be tested here.** Cloud sessions only have Chromium, and
   downloading Playwright's WebKit is blocked. Safari draws WebGL through
   Metal, which is strict where Chrome is lenient: keep GLSL inside defined
-  behaviour (no reversed `smoothstep` edges, no `pow(0, y)`), don't rely on
-  page order to stack the canvas over animating layers, and don't rely on
-  `click` for taps on the canvas - iPhone/iPad Safari doesn't send it there;
-  use `pointerup` on the canvas. See DECISIONS.md, "Safari: defined GLSL,
-  visible failures".
+  behaviour (no reversed `smoothstep` edges, no `pow(0, y)`), stack HTML
+  over or under the canvas by z-index, never page order (fog 0, canvas 1,
+  tags, string and tap hint 2 - at equal z-index Safari drew the canvas on
+  top), and don't rely on `click` for taps on the canvas - iPhone/iPad
+  Safari doesn't send it there; use `pointerup` on the canvas. See
+  DECISIONS.md, "Safari: defined GLSL, visible failures".
 - **No per-project URLs yet.** The catalog/detail state is not reflected in
   the address bar. Don't assume a project is linkable.
 

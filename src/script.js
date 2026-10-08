@@ -5,6 +5,7 @@ import { gsap } from 'gsap';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import { mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+import { MeshSurfaceSampler } from 'three/examples/jsm/math/MeshSurfaceSampler.js';
 
 import pointCloudVertexShader from './shaders/pointCloud/vertex.glsl';
 import pointCloudFragmentShader from './shaders/pointCloud/fragment.glsl';
@@ -182,10 +183,10 @@ const projects = [
         view: {
             elevation: 58,
             azimuth: 4,
-            // 118 in the screenshot, minus the 32 the model turns while its
+            // 118 in the screenshot, minus the 16 the model turns while its
             // points gather (GATHER_DURATION at DETAIL_ROTATE_SPEED), so the
             // shot is what's on screen as the gather completes
-            turn: 86,
+            turn: 102,
             zoom: { stacked: 1.75, side: 1.4 },
             lift: { stacked: 0.14, side: 0 },
             // Once the points have gathered, the camera slowly nods this many
@@ -235,6 +236,26 @@ const projects = [
                 ratio: '900 / 601',
             },
         ],
+    },
+    {
+        id: 'aggregate',
+        slot: 1,
+        // A working title, from the file's name - no text yet, so no drawer
+        title: 'Aggregate',
+        year: '',
+        role: '',
+        context: '',
+        body: [],
+        credits: '',
+
+        thumbModel: 'models/rock.gltf',
+        // A plain mesh, not a point cloud: its surface is sampled into
+        // points as it loads (see pointsFromMeshes)
+        detailModel: 'models/aggregate.glb',
+        // Framed on its cube, so the long arms stay in frame as it turns,
+        // and seen a little from above so they read in depth
+        view: { elevation: 25 },
+        gather: true,
     },
 ];
 
@@ -311,7 +332,7 @@ const EMPTY_TAG_FADE = 0.3; // seconds of that spent fading out
 let emptyTagCube = null;
 let emptyTagShownAt = 0;
 const spotlightTag = document.querySelector('#spotlight-tag');
-const SPOTLIGHT_TAG_MIN = 0.2; // the name's opacity at the low of each blink, relative to the spotlight's strength
+const SPOTLIGHT_TAG_MIN = 0.65; // the name's opacity at the low of each blink, relative to the spotlight's strength - a pulse, never faint
 
 // The glowing pebble's name hangs below it on a thin string, and the string
 // behaves like one: a short rope of ROPE_SEGMENTS links, each point pulled
@@ -323,7 +344,6 @@ const SPOTLIGHT_TAG_MIN = 0.2; // the name's opacity at the low of each blink, r
 // new pebble.
 const spotlightString = document.querySelector('#spotlight-string');
 const spotlightStringPaths = spotlightString.querySelectorAll('path');
-const spotlightStringFade = spotlightString.querySelector('linearGradient');
 const spotlightKnots = spotlightString.querySelectorAll('circle');
 const TAG_KNOT_SIZE = 0.055; // the knot's radius, as a share of the pebble's radius on screen
 const TAG_STRING_LENGTH = 0.8; // as a share of the pebble's radius on screen
@@ -598,6 +618,73 @@ function setGather(model, progress) {
     });
 }
 
+/**
+ * A model that arrives as a mesh rather than a point cloud - straight out of
+ * Rhino or Blender - is turned into one as it loads: points scattered over
+ * its surface, more where there's more surface, so it's drawn in the same
+ * inks as a scanned cloud. It's also centred and scaled to fit the cube the
+ * detail view frames, since a mesh comes in whatever units it was drawn in.
+ * A point cloud is left exactly as it is.
+ */
+const MESH_SAMPLE_POINTS = 60000;
+const MESH_FIT_SIZE = cubeSize; // the model's longest side
+
+function pointsFromMeshes(root) {
+    root.updateMatrixWorld(true);
+
+    const meshes = [];
+    root.traverse((child) => { if (child.isMesh) meshes.push(child); });
+    if (!meshes.length) return null;
+
+    // Each mesh gets points in proportion to its surface area
+    const area = (mesh) => {
+        const geometry = mesh.geometry.index ? mesh.geometry.toNonIndexed() : mesh.geometry;
+        const position = geometry.attributes.position;
+        const triangle = new THREE.Triangle();
+        let total = 0;
+        for (let i = 0; i < position.count; i += 3) {
+            triangle.a.fromBufferAttribute(position, i).applyMatrix4(mesh.matrixWorld);
+            triangle.b.fromBufferAttribute(position, i + 1).applyMatrix4(mesh.matrixWorld);
+            triangle.c.fromBufferAttribute(position, i + 2).applyMatrix4(mesh.matrixWorld);
+            total += triangle.getArea();
+        }
+        return total;
+    };
+    const areas = meshes.map(area);
+    const totalArea = areas.reduce((sum, value) => sum + value, 0) || 1;
+
+    const positions = new Float32Array(MESH_SAMPLE_POINTS * 3);
+    const point = new THREE.Vector3();
+    let written = 0;
+
+    meshes.forEach((mesh, index) => {
+        const count = index === meshes.length - 1
+            ? MESH_SAMPLE_POINTS - written
+            : Math.round(MESH_SAMPLE_POINTS * areas[index] / totalArea);
+        const sampler = new MeshSurfaceSampler(mesh).build();
+
+        for (let i = 0; i < count; i++, written++) {
+            sampler.sample(point);
+            point.applyMatrix4(mesh.matrixWorld);
+            point.toArray(positions, written * 3);
+        }
+    });
+
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+    // Centred on the origin, its longest side MESH_FIT_SIZE
+    geometry.computeBoundingBox();
+    const size = geometry.boundingBox.getSize(new THREE.Vector3());
+    const centre = geometry.boundingBox.getCenter(new THREE.Vector3());
+    geometry.translate(-centre.x, -centre.y, -centre.z);
+    geometry.scale(...Array(3).fill(MESH_FIT_SIZE / (Math.max(size.x, size.y, size.z) || 1)));
+
+    const group = new THREE.Group();
+    group.add(new THREE.Points(geometry));
+    return group;
+}
+
 function loadPointCloudWithShaderMaterial({
     glbPath,
     parentObject,
@@ -608,6 +695,17 @@ function loadPointCloudWithShaderMaterial({
 }) {
     gltfLoader.load(glbPath, (gltf) => {
         const materials = [];
+
+        let hasPoints = false;
+        gltf.scene.traverse((child) => { if (child.isPoints) hasPoints = true; });
+        if (!hasPoints) {
+            const sampled = pointsFromMeshes(gltf.scene);
+            if (!sampled) {
+                onError?.(new Error('No points or meshes in the model'));
+                return;
+            }
+            gltf.scene = sampled;
+        }
 
         gltf.scene.traverse((child) => {
             if (child.isPoints) {
@@ -756,11 +854,11 @@ const DETAIL_PROJECTION = 'perspective';
 const DETAIL_FOV = { side: 45, stacked: 30 };
 const CATALOG_FOV = 45;
 
-// A full turn every 40s - slow enough to read as ambient rather than as
-// something to watch, same spirit as the catalog's own wander. Turns the
-// model itself, not the camera - see DECISIONS.md for why that distinction
-// matters here.
-const DETAIL_ROTATE_SPEED = (2 * Math.PI) / 40;
+// A full turn every 80s - slow enough to read as ambient rather than as
+// something to watch (40s looked too fast), same spirit as the catalog's
+// own wander. Turns the model itself, not the camera - see DECISIONS.md for
+// why that distinction matters here.
+const DETAIL_ROTATE_SPEED = (2 * Math.PI) / 80;
 
 /**
  * How much room to leave around a project. Above 1 the whole box fits with
@@ -1088,7 +1186,17 @@ function makeRimMaterial(color) {
     material.onBeforeCompile = (shader) => {
         shader.vertexShader = shader.vertexShader
             .replace('#include <common>', '#include <common>\nvarying vec3 vRimNormal;\nvarying vec3 vRimView;')
-            .replace('#include <project_vertex>', '#include <project_vertex>\nvRimNormal = normalize(normalMatrix * normal);\nvRimView = normalize(-mvPosition.xyz);');
+            .replace('#include <project_vertex>', [
+                '#include <project_vertex>',
+                // An instance's own turn too (the small pebbles), near enough
+                // for a rim even where its scale isn't uniform
+                'vec3 rimNormal = normal;',
+                '#ifdef USE_INSTANCING',
+                'rimNormal = mat3(instanceMatrix) * rimNormal;',
+                '#endif',
+                'vRimNormal = normalize(normalMatrix * rimNormal);',
+                'vRimView = normalize(-mvPosition.xyz);',
+            ].join('\n'));
         shader.fragmentShader = shader.fragmentShader
             .replace('#include <common>', '#include <common>\nvarying vec3 vRimNormal;\nvarying vec3 vRimView;')
             .replace('#include <opaque_fragment>', [
@@ -1103,22 +1211,34 @@ function makeRimMaterial(color) {
 }
 
 /**
- * Small pebbles, scattered in the gaps between the big ones and around the
- * grid's edge - a beach rather than a tray. Decoration only: not in
- * `cubes`, so nothing hovers, glows or opens them. They float, the pointer
- * stirs them and the boom knocks them off the screen like the rest, a
- * little below the big ones. They share one glass and one rim material, so
- * opening and closing a project fades them with one tween each. Where they
- * sit is seeded, not random, so a resize lays them out the same way again.
+ * Small pebbles, scattered among the big ones and around the grid's edge -
+ * a beach rather than a tray. Decoration only: not in `cubes`, so nothing
+ * hovers, glows or opens them. They float, the pointer stirs them and the
+ * boom knocks them off the screen like the rest, a little below the big
+ * ones. Seeded, so a resize lays them out the same way again.
+ *
+ * Drawn instanced: a few pebble shapes, each one InstancedMesh for its
+ * glass and one for its rim, so however many there are they cost a
+ * handful of draw calls. Each pebble is a bare Object3D that the shared
+ * pose code (placeAtRest, applyFlow, placeDroppingCube) moves like a big
+ * one; syncSmallPebbles copies the poses into the instances every frame.
+ * One glass and one rim material across all of them, so opening and
+ * closing a project fades them with one tween each.
  */
-const SMALL_PEBBLE_RADIUS = [0.1, 0.2]; // as a share of cubeSize - a project's pebble is 0.44
-const SMALL_PEBBLE_SKIP = 0.25; // share of the gaps left empty
-const SMALL_PEBBLE_JITTER = 0.08; // how far each strays from its gap's centre, as a share of the grid step
-const SMALL_PEBBLE_SINK = 1.5; // units below the big pebbles
+const SMALL_PEBBLE_PER_SLOT = 2.6; // how many, per big pebble
+const SMALL_PEBBLE_RADIUS = [0.05, 0.2]; // as a share of cubeSize - a project's pebble is 0.44; small ones more common
+const SMALL_PEBBLE_MARGIN = 0.55; // how far past the outer pebbles they spread, as a share of the grid step
+const SMALL_PEBBLE_SINK = [1, 3]; // units below the big pebbles
+const SMALL_PEBBLE_SHAPES = 3;
 const SMALL_PEBBLE_DETAIL = 6; // icosphere subdivisions - small on screen, so fewer
 const SMALL_PEBBLE_RIM_OPACITY = 0.7;
 
-let smallPebbles = [];
+let smallPebbles = []; // poses only, never in the scene
+let smallPebbleMeshes = []; // per shape: { face, rim }
+const smallPebbleShapes = Array.from({ length: SMALL_PEBBLE_SHAPES }, (_, index) => (
+    makePebbleGeometry(index * 2.71 + 0.9, 1, SMALL_PEBBLE_DETAIL)
+));
+const smallPebbleMatrix = new THREE.Matrix4();
 const smallPebbleFace = new THREE.MeshStandardMaterial({
     color: cubesColor,
     metalness: 0.2,
@@ -1129,52 +1249,101 @@ const smallPebbleFace = new THREE.MeshStandardMaterial({
 const smallPebbleRim = makeRimMaterial(selectedCubeColor);
 smallPebbleRim.opacity = SMALL_PEBBLE_RIM_OPACITY;
 
-// A repeatable 0..1 for a number - the same layout every time
-function seeded(n) {
-    const x = Math.sin(n) * 43758.5453;
-    return x - Math.floor(x);
+// A repeatable sequence of 0..1 (mulberry32) - the same layout every time
+function seededRandom(seed) {
+    let state = seed >>> 0;
+    return () => {
+        state = (state + 0x6D2B79F5) >>> 0;
+        let t = state;
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
 }
 
-// One per gap at the big pebbles' diagonals - between four of them inside
-// the grid, between two or beside one at its edge - minus a seeded few
+// Dropped at random over the grid and a margin around it, each kept clear
+// of the big pebbles' homes and of the small ones already placed
 function layoutSmallPebbles() {
-    smallPebbles.forEach((pebble) => {
-        scene.remove(pebble);
-        pebble.geometry.dispose();
+    smallPebbleMeshes.forEach(({ face, rim }) => {
+        scene.remove(face, rim);
+        face.dispose();
+        rim.dispose();
     });
-    smallPebbles = [];
 
+    const random = seededRandom(gridShape.cols * 97 + gridShape.rows);
     const step = cubeSize * spacing;
-    const gaps = [];
-    cubes.forEach((cube) => {
-        const home = cube.userData.slotPosition;
-        for (const [dx, dz] of [[-0.5, -0.5], [0.5, -0.5], [-0.5, 0.5], [0.5, 0.5]]) {
-            const x = home.x + dx * step;
-            const z = home.z + dz * step;
-            if (!gaps.some((gap) => Math.hypot(gap.x - x, gap.z - z) < step * 0.3)) gaps.push({ x, z });
-        }
+    const homes = cubes.map((cube) => cube.userData.slotPosition);
+    const minX = Math.min(...homes.map((home) => home.x)) - step * SMALL_PEBBLE_MARGIN;
+    const maxX = Math.max(...homes.map((home) => home.x)) + step * SMALL_PEBBLE_MARGIN;
+    const minZ = Math.min(...homes.map((home) => home.z)) - step * SMALL_PEBBLE_MARGIN;
+    const maxZ = Math.max(...homes.map((home) => home.z)) + step * SMALL_PEBBLE_MARGIN;
+    const wanted = Math.round(cubes.length * SMALL_PEBBLE_PER_SLOT);
+
+    const spots = [];
+    for (let attempt = 0; attempt < 4000 && spots.length < wanted; attempt++) {
+        const radius = cubeSize * THREE.MathUtils.lerp(...SMALL_PEBBLE_RADIUS, random() ** 1.6);
+        const x = THREE.MathUtils.lerp(minX, maxX, random());
+        const z = THREE.MathUtils.lerp(minZ, maxZ, random());
+
+        if (homes.some((home) => Math.hypot(home.x - x, home.z - z) < PEBBLE_RADIUS + radius * 0.3)) continue;
+        if (spots.some((spot) => Math.hypot(spot.x - x, spot.z - z) < spot.radius + radius + 0.25)) continue;
+
+        spots.push({ x, z, radius });
+    }
+
+    const counts = new Array(SMALL_PEBBLE_SHAPES).fill(0);
+    smallPebbles = spots.map((spot) => {
+        const pebble = new THREE.Object3D();
+        const shape = Math.floor(random() * SMALL_PEBBLE_SHAPES);
+        const stretch = 0.8 + 0.4 * random();
+
+        pebble.userData.slotPosition = { x: spot.x, z: spot.z };
+        pebble.userData.restY = -THREE.MathUtils.lerp(...SMALL_PEBBLE_SINK, random());
+        pebble.userData.wander = createWander();
+        pebble.userData.shape = shape;
+        pebble.userData.instance = counts[shape]++;
+
+        // Its own size, proportions and heading, under whatever pose it's given
+        pebble.userData.form = new THREE.Matrix4().compose(
+            new THREE.Vector3(),
+            new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), random() * Math.PI * 2),
+            new THREE.Vector3(spot.radius * stretch, spot.radius, spot.radius / stretch),
+        );
+
+        return pebble;
     });
 
-    gaps.forEach((gap, index) => {
-        const random = (k) => seeded(index * 12.9898 + k * 78.233 + 0.5);
-        if (random(1) < SMALL_PEBBLE_SKIP) return;
-
-        const radius = cubeSize * THREE.MathUtils.lerp(...SMALL_PEBBLE_RADIUS, random(2));
-        const geometry = makePebbleGeometry(index * 1.93 + 0.4, radius, SMALL_PEBBLE_DETAIL);
-        const pebble = new THREE.Mesh(geometry, smallPebbleFace);
-        const rim = new THREE.Mesh(geometry, smallPebbleRim);
+    smallPebbleMeshes = smallPebbleShapes.map((geometry, shape) => {
+        const face = new THREE.InstancedMesh(geometry, smallPebbleFace, Math.max(counts[shape], 1));
+        const rim = new THREE.InstancedMesh(geometry, smallPebbleRim, Math.max(counts[shape], 1));
+        face.count = counts[shape];
+        rim.count = counts[shape];
         rim.renderOrder = 1;
-        pebble.add(rim);
 
-        pebble.userData.slotPosition = {
-            x: gap.x + (random(3) - 0.5) * 2 * SMALL_PEBBLE_JITTER * step,
-            z: gap.z + (random(4) - 0.5) * 2 * SMALL_PEBBLE_JITTER * step,
-        };
-        pebble.userData.restY = -SMALL_PEBBLE_SINK;
-        pebble.userData.wander = createWander();
+        // They fall far off screen, and the bounds would go stale
+        face.frustumCulled = false;
+        rim.frustumCulled = false;
 
-        scene.add(pebble);
-        smallPebbles.push(pebble);
+        scene.add(face, rim);
+        return { face, rim };
+    });
+
+    syncSmallPebbles();
+}
+
+function syncSmallPebbles() {
+    smallPebbles.forEach((pebble) => {
+        pebble.updateMatrix();
+        smallPebbleMatrix.multiplyMatrices(pebble.matrix, pebble.userData.form);
+
+        const { face, rim } = smallPebbleMeshes[pebble.userData.shape];
+        face.setMatrixAt(pebble.userData.instance, smallPebbleMatrix);
+        rim.setMatrixAt(pebble.userData.instance, smallPebbleMatrix);
+    });
+
+    smallPebbleMeshes.forEach(({ face, rim }) => {
+        face.instanceMatrix.needsUpdate = true;
+        rim.instanceMatrix.needsUpdate = true;
     });
 }
 
@@ -1960,6 +2129,7 @@ function animate() {
         }
     }
 
+    syncSmallPebbles();
     updateCubeTags(elapsedTime);
 
     // Update controls - except while a camera move is driving orientation
@@ -2401,12 +2571,6 @@ function hangSpotlightTag(cube, elapsedTime) {
         circle.setAttribute('cy', ay.toFixed(1));
         circle.setAttribute('r', (index === 0 ? knot * 2.2 : knot).toFixed(1));
     });
-
-    // The fade runs from the knot to the tag, wherever the wind has it
-    spotlightStringFade.setAttribute('x1', ax.toFixed(1));
-    spotlightStringFade.setAttribute('y1', ay.toFixed(1));
-    spotlightStringFade.setAttribute('x2', tag.x.toFixed(1));
-    spotlightStringFade.setAttribute('y2', tag.y.toFixed(1));
 }
 
 /**
