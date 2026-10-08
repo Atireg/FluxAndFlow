@@ -121,7 +121,8 @@ Project view
         with live physics (cannon-es, loaded only for it), tumbling into an
         interlocked pile - a new drop every time - then turning. Each from
         a plain mesh sampled into 8,000 points as it loads; the mesh
-        itself, in the rock's ink, in its pebble
+        itself, in the rock's ink, in its pebble; opening the About
+        drawer zooms in on the three
     [x] A grey fog rolls in behind the project
     [x] The About drawer: model moves left and stays whole on a wide screen,
         a close-up on a phone; five pictures in it

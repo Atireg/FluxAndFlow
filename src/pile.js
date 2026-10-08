@@ -232,6 +232,42 @@ export async function createPile({ template, rods, count, size, groundY }) {
             aggregates.forEach((points) => { points.visible = false; });
         },
 
+        // The aggregates' extent in world space, for framing them: from
+        // their points (every 16th), as a box round the axis the pile turns
+        // about, so it still holds as it turns. Still falling, it's where a
+        // settled pile lies - centred, about a size across and half a size
+        // high (as measured over the tuning drops)
+        bounds() {
+            group.updateMatrixWorld(true);
+            const axis = new THREE.Vector3().setFromMatrixPosition(group.matrixWorld);
+            let reach = 0.6 * size;
+            let low = groundY;
+            let high = groundY + 0.55 * size;
+
+            if (this.settledAt !== Infinity) {
+                reach = 0;
+                low = Infinity;
+                high = -Infinity;
+                const position = template.geometry.attributes.position;
+                const point = new THREE.Vector3();
+                aggregates.forEach((points) => {
+                    for (let i = 0; i < position.count; i += 16) {
+                        // In the group's own space, where the turn is about Y
+                        point.fromBufferAttribute(position, i).applyMatrix4(points.matrix);
+                        reach = Math.max(reach, Math.hypot(point.x, point.z));
+                        low = Math.min(low, point.y);
+                        high = Math.max(high, point.y);
+                    }
+                });
+            }
+
+            const scaleY = new THREE.Vector3().setFromMatrixScale(group.matrixWorld).y;
+            return new THREE.Box3(
+                new THREE.Vector3(axis.x - reach * scaleY, axis.y + low * scaleY, axis.z - reach * scaleY),
+                new THREE.Vector3(axis.x + reach * scaleY, axis.y + high * scaleY, axis.z + reach * scaleY),
+            );
+        },
+
         sync() {
             bodies.forEach((body, i) => {
                 aggregates[i].position.set(body.position.x, body.position.y, body.position.z);

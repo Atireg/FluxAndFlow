@@ -93,7 +93,7 @@ its "Tried and removed".
   time. Each is a plain mesh sampled into 8,000 points as it loads - any
   mesh .glb now works. Its pebble holds the aggregate itself, in the rock's
   ink (`thumbSize`). An About drawer with placeholder text, to be replaced;
-  on a phone it shows the whole pile above it rather than a close-up.
+  opening it zooms in on the three aggregates.
 - **Site.** "Paper" palette throughout (the dark `Sky` dome removed); an
   inline start-up loader with real progress, at least 5s; clouds load only
   on click after `?cloudtest` measured the alternative.

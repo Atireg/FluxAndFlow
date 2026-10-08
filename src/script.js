@@ -265,7 +265,7 @@ const projects = [
         detailModel: 'models/aggregate.glb',
         // Framed on its cube, so the pile stays in frame as it turns, and
         // seen from above enough to read the surface and how they interlock
-        view: { elevation: 30, zoom: { side: 1.5, stacked: 1.05 }, closeup: false },
+        view: { elevation: 30, zoom: { side: 1.5, stacked: 1.05 } },
         // Fewer than a mesh gets by default - its arms are thin, and more
         // read as solid rods rather than a cloud. Per aggregate.
         points: 8000,
@@ -1733,7 +1733,7 @@ function updateSway(project, since, elapsedTime) {
     swayApplied = angle;
 }
 
-function frameDetail(object, { duration = 1.6, ease } = {}) {
+function frameDetail(object, { duration = 1.6, ease, fit, fitZoom } = {}) {
     detailZoomed = false;
 
     // A project with its own view is framed on the cube alone. Seen from
@@ -1751,10 +1751,12 @@ function frameDetail(object, { duration = 1.6, ease } = {}) {
     // drawer on a wide one it keeps its view, framed into the space left.
     const { mode, fraction } = getPanelLayout();
     const side = mode === 'side';
-    const ownView = framesCube && (!drawerOpen || side) ? object.userData.project.view : {};
-    const box = framesCube
+    // Or framed on a box of its own (`fit`, world space) - a pile's
+    // aggregates with the drawer open - at the plain fit, no zoom or lift
+    const ownView = framesCube && !fit && (!drawerOpen || side) ? object.userData.project.view : {};
+    const box = fit?.clone() ?? (framesCube
         ? new THREE.Box3().setFromCenterAndSize(object.position, new THREE.Vector3().setScalar(cubeSize))
-        : new THREE.Box3().setFromObject(object);
+        : new THREE.Box3().setFromObject(object));
     if (box.isEmpty()) return;
 
     const center = box.getCenter(new THREE.Vector3());
@@ -1773,7 +1775,7 @@ function frameDetail(object, { duration = 1.6, ease } = {}) {
     const halfD = Math.abs(forward.x) * half.x + Math.abs(forward.y) * half.y + Math.abs(forward.z) * half.z;
 
     const perLayout = (value, fallback) => (typeof value === 'object' ? value[mode] : value) ?? fallback;
-    const zoom = perLayout(ownView.zoom, 1);
+    const zoom = perLayout(fit ? fitZoom : ownView.zoom, 1);
     const lift = perLayout(ownView.lift, 0);
     let margin = side
         ? DETAIL_MARGIN.side
@@ -1872,10 +1874,20 @@ function frameDetail(object, { duration = 1.6, ease } = {}) {
  * (frameDetail already fits into whatever the drawer leaves free). On a
  * narrow one it covers the lower half, and the close-up is what fits.
  */
+// The fit of a pile's box allows for any turn and for its depth, which on a
+// phone's short strip above the drawer leaves it small - so closer there
+const PILE_DRAWER_ZOOM = { side: 1, stacked: 1.6 };
+
 function frameWithDrawerOpen(cube, options) {
-    // A project can ask for the whole model above the drawer on a phone too
-    // (`view.closeup: false`) - a close-up of a pile shows a couple of rods
-    if (getPanelLayout().mode === 'side' || cube.userData.project?.view?.closeup === false) {
+    // A pile: in on the aggregates themselves, beside the drawer or above
+    // it, rather than the whole surface they landed on
+    const pile = cube.userData.detail?.userData.pile;
+    if (pile) {
+        frameDetail(cube, { ...options, fit: pile.bounds(), fitZoom: PILE_DRAWER_ZOOM });
+        return;
+    }
+
+    if (getPanelLayout().mode === 'side') {
         frameDetail(cube, options);
     } else {
         frameDetailCloseup(cube, options);

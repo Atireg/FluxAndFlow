@@ -78,7 +78,6 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
             zoom: { stacked: 1.75, side: 1.4 },            // closer than the cube's fit
             lift: { stacked: 0.14, side: 0 },             // raised on screen (share of height)
             sway: 13 },                                    // camera nods ± degrees, slowly
-                                                  // view.closeup: false - phone drawer shows the whole model, not a close-up
     gather: true,                                 // optional: points gather from a scattered cloud on open
     // points: 20000,                             // optional, a mesh detailModel only: how many points to sample
     // drop: { count: 3, size: 3, ground: -1.2 }, // optional, a crossed-rod mesh only: copies dropped with physics (Emergent Space)

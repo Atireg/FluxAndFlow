@@ -358,10 +358,16 @@ phone the drawer covers the lower half, so it's the close-up
 (`frameDetailCloseup`: `CLOSEUP_ELEVATION` 38° on the project's heading,
 `CLOSEUP_DISTANCE_FACTOR` of its radius) - an atmospheric crop, not the
 whole piece. Rock Print's steeper angle left only fragments of pillars
-there, hence the fixed elevation. A close-up of Emergent Space's pile showed
-just a couple of rods, so a project can opt out with `view.closeup: false`:
-its phone layout then fits the whole model into the strip above the drawer
-(`frameDetail`, which allows for the drawer's height).
+there, hence the fixed elevation.
+
+A pile (Emergent Space) is framed on its aggregates instead, in both
+layouts - a zoom in on the three, asked for by the user: `pile.bounds()`
+gives their extent from their points (or, still falling, where a settled
+pile lies) as a box round the axis the pile turns about, and `frameDetail`
+fits that box (`fit`) into the space beside or above the drawer, closer on
+a phone (`PILE_DRAWER_ZOOM`), where the box's allowance for any turn and
+for depth left it small in the short strip. The plain close-up showed only
+a couple of rods; fitting the whole cube showed a small pile.
 
 
 The model turns; the camera nods (`view.sway`)
