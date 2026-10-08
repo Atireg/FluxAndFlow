@@ -224,7 +224,7 @@ The pointer stirs the grid; the grid doesn't orbit
 
 
 Every pebble holds its thumbnail - the rock, or the project's own model
-------------------------------------------------------------------------
+-----------------------------------------------------------------------
 
 Empty slots use `EMPTY_SLOT_THUMB` (the same rock). `loadThumb` keeps one
 promise per path and each pebble adds a `clone()`, so ten rocks are one

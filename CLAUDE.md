@@ -16,21 +16,25 @@ Session-by-session history: `CHANGELOG.md`.
 ## Where to pick up
 
 Read the last entry of `CHANGELOG.md` (its "Open at end of session" list)
-and README's "Next up". As of the end of Session 2: everything built is live
-or on the branch (`git log origin/main..` shows anything not yet merged);
-what's waiting is content from the user (the real copy for both projects -
-the live drawer text is `[PLACEHOLDER ...]` - and photo credits/captions
-for Rock Print's five drawer pictures), a check that the blind Safari fixes
-work, plus model licensing and per-project URLs. Two projects exist: Rock
-Print Pavilion (slot 0, a scanned point cloud) and Emergent Space (slot 1:
-three copies of an aggregate - a plain mesh, `aggregate.glb`, sampled into
-8,000 points each - dropped onto a surface with live physics until they
-interlock, a new drop every time it opens).
-DECISIONS.md opens with a contents list; its "Tried and removed" section
-lists ideas the user has already seen and rejected - don't re-propose them
-without saying so. The catalog's look (pebbles, the orange spotlight, the
-tag hanging on a string in the wind) went through many rounds of the user's
-feedback: tune the existing constants before rebuilding any of it.
+and README's "Next up". As of the end of Session 2:
+
+- **State**: everything built is live, or on the branch -
+  `git log origin/main..` shows anything not yet merged.
+- **Two projects**: Rock Print Pavilion (slot 0, a scanned point cloud)
+  and Emergent Space (slot 1: three copies of an aggregate - a plain mesh,
+  `aggregate.glb`, sampled into 8,000 points each - dropped onto a surface
+  with live physics until they interlock, a new drop every time it opens).
+- **Waiting on the user**: the real copy for both projects (the live drawer
+  text is `[PLACEHOLDER ...]`), captions/credits for Rock Print's five
+  pictures, model licensing, and a check on real devices that the blind
+  Safari fixes work and the physics drop runs smoothly.
+- **Not started**: per-project URLs, a landing view; README lists the rest.
+- **Before proposing anything**: DECISIONS.md opens with a contents list;
+  its "Tried and removed" section lists ideas the user has already seen and
+  rejected - don't re-propose them without saying so. The catalog's look
+  (pebbles, the orange spotlight, the name hanging on a string in the wind)
+  went through many rounds of the user's feedback: tune the existing
+  constants before rebuilding any of it.
 
 ## Stack and commands
 
@@ -61,7 +65,7 @@ suite.
 ## Adding or editing a project
 
 Edit the `projects` array near the top of `src/script.js` (currently ~line
-145). Each entry:
+146). Each entry:
 
 ```js
 {

@@ -5,15 +5,15 @@ Live at https://atireg.github.io/FluxAndFlow/ (deployed from `main` by
 
 Adding a project: edit the `projects` array near the top of src/script.js
 (the fields are listed in CLAUDE.md). Each entry declares the slot it sits
-in and its own models - the project's model can be a point cloud or a
-plain mesh, sampled into points as it loads; any text field left empty is
-skipped rather than
+in and its own models - a point cloud, or a plain mesh sampled into points
+as it loads - and any text field left empty is skipped rather than
 rendered blank. An optional `view` sets the camera angle the project opens
 on (and, with `sway`, a slow nod of the camera); `gather: true` makes its
-points gather out of a scattered cloud each time it opens; `images` fills
-the drawer's picture frames. Slots with no project show the rock thumbnail
-and answer a click with "Still empty...". See DECISIONS.md for why things
-are built the way they are, and CHANGELOG.md for what changed when.
+points gather out of a scattered cloud each time it opens; `drop` drops
+copies of a rod-built mesh onto a surface with physics; `images` fills the
+drawer's picture frames. Slots with no project show the rock thumbnail and
+answer a click with "Still empty...". See DECISIONS.md for why things are
+built the way they are, and CHANGELOG.md for what changed when.
 
 Add `?cloudtest` to the address to fill every slot with a copy of the
 first project - a load test, see DECISIONS.md.
@@ -26,22 +26,19 @@ first project - a load test, see DECISIONS.md.
 TO DOs
 ======
 
-Next up (waiting on content)
-    [ ] Captions / photo credits for Rock Print's five pictures, if
-        wanted (the `caption` fields are empty)
+Next up (waiting on content or a check from the user)
+    [ ] The real copy for both projects - year, role, context, body,
+        credits. Rock Print's and Emergent Space's fields hold unmistakable
+        [PLACEHOLDER ...] text so their About drawers exist; it is live and
+        needs replacing. State the role accurately
+    [ ] Captions / photo credits for Rock Print's five pictures, if wanted
+        (the `caption` fields are empty); pictures for Emergent Space's
+        drawer, if wanted
     [ ] A video in the drawer, if wanted. Agreed approach: a short clip
         (under ~1 min) compressed to a small MP4 in static/, playing as a
         silent loop with a poster frame; a longer film or one with sound
         embedded from Vimeo (or YouTube unlisted, no-cookie). Not played
         from Google Drive - Drive is only a way to hand the file over
-    [ ] Write the real copy for Rock Print - year, role, context, body,
-        credits. The fields hold unmistakable [PLACEHOLDER ...] text, put
-        there to check the drawer works on the live site - it is live and
-        needs replacing. State the role accurately
-    [ ] Write the real copy for Emergent Space (slot 1) - year, role,
-        context, body, credits. Like Rock Print's, the fields hold
-        [PLACEHOLDER ...] text so the About drawer exists; it needs
-        replacing. Pictures for its drawer too, if wanted
     [ ] Check the licensing/attribution for the Rock Print and Emergent
         Space models now that the repository is public and the site serves
         them
@@ -68,11 +65,11 @@ Navigation and general layout
 
 Catalog view
     [ ] The element of surprise or discovery - when hovered on a cube add little 3D objects representing each project (e.g. a rock, an aggregate, a spider...)
-        (Emergent Space's pebble holds its aggregate (`thumbSize`); every
-        other pebble, empty slots included, holds the rock)
+        (each pebble shows its object all the time instead - Emergent
+        Space's holds its aggregate (`thumbSize`), the rest the rock - and
+        hover deliberately changes nothing; see DECISIONS.md)
     [ ] Add a "magic/mystery" appearance (e.g. fog shader or lights)
         (scene fog is off for a reason - see DECISIONS.md before re-adding)
-    [ ] Change the shape of the cubes when hovering on them
     [ ] Make the content swing and make the colors go crazy
 
 Details view (per project)
@@ -125,7 +122,8 @@ Project view
         drawer zooms in on the three
     [x] A grey fog rolls in behind the project
     [x] The About drawer: model moves left and stays whole on a wide screen,
-        a close-up on a phone; five pictures in it
+        a close-up on a phone (Emergent Space: in on the pile in both);
+        five pictures in Rock Print's
     [x] Double-click / double-tap zoom, hinted every 5s by a white touch
         point that scales with the screen
     [x] Camera moves only tilt, never roll
