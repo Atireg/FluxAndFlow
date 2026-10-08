@@ -313,6 +313,25 @@ let emptyTagCube = null;
 let emptyTagShownAt = 0;
 const spotlightTag = document.querySelector('#spotlight-tag');
 const SPOTLIGHT_TAG_MIN = 0.2; // the name's opacity at the low of each blink, relative to the spotlight's strength
+
+// The glowing pebble's name hangs below it on a thin string and swings: a
+// pendulum simulated in screen pixels, its pivot the pebble's lower edge.
+// The pebble's jump and rock jerk the pivot about, and a faint, uneven
+// breeze keeps it moving in between - so it dances with the pebble. This
+// has memory (like the flow), so it's integrated in fixed small steps; it
+// starts hanging straight down each time a new pebble glows.
+const spotlightString = document.querySelector('#spotlight-string path');
+const TAG_STRING_LENGTH = 0.55; // as a share of the pebble's radius on screen
+const TAG_STRING_MIN = 16; // px
+const TAG_GRAVITY = 2400; // px/s^2
+const TAG_DAMPING = 2.2; // per second - it swings a few times, then settles
+const TAG_BREEZE = 160; // px/s^2 - the uneven sideways push that keeps it dancing
+const TAG_STEP = 1 / 120; // seconds per integration step
+const TAG_MAX_SWING = 0.7; // radians (~40 degrees) either side of hanging straight down
+const TAG_STILL = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const tagSwing = { cube: null, x: 0, y: 0, prevX: 0, prevY: 0, pivotX: 0, pivotY: 0, lastTime: 0 };
+const tagPivot = new THREE.Vector3();
+const tagCentre = new THREE.Vector3();
 const barTitle = document.querySelector('#project-title');
 const barStatus = document.querySelector('#project-status');
 const projectClose = document.querySelector('#project-close');
@@ -2104,6 +2123,71 @@ function placeTagOnCube(tag, cube) {
     tag.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
 }
 
+// Where a point on a cube lands on screen, in pixels
+function screenPoint(vector) {
+    vector.project(camera);
+    return [(vector.x + 1) / 2 * screenWidth, (1 - vector.y) / 2 * screenHeight];
+}
+
+function hangSpotlightTag(cube, elapsedTime) {
+    // Tied to the pebble's lower edge as seen from above - down the screen
+    // is world +Z - just inside its rim
+    cube.updateMatrixWorld();
+    const [ax, ay] = screenPoint(cube.localToWorld(tagPivot.set(0, 0, PEBBLE_RADIUS * 0.9)));
+    const [cx, cy] = screenPoint(cube.localToWorld(tagCentre.set(0, 0, 0)));
+    const length = Math.max(TAG_STRING_MIN, (Math.hypot(ax - cx, ay - cy) / 0.9) * TAG_STRING_LENGTH);
+
+    // A new pebble: hanging straight down, at rest
+    if (tagSwing.cube !== cube) {
+        Object.assign(tagSwing, {
+            cube, x: ax, y: ay + length, prevX: ax, prevY: ay + length, pivotX: ax, pivotY: ay, lastTime: elapsedTime,
+        });
+    }
+
+    // The pivot moves smoothly across the steps rather than all at once, so
+    // a slow frame doesn't yank the string
+    const span = Math.min(elapsedTime - tagSwing.lastTime, 0.1);
+    const fromX = tagSwing.pivotX;
+    const fromY = tagSwing.pivotY;
+    tagSwing.pivotX = ax;
+    tagSwing.pivotY = ay;
+    tagSwing.lastTime = elapsedTime;
+
+    let remaining = span;
+    while (remaining > 0) {
+        const dt = Math.min(TAG_STEP, remaining);
+        remaining -= dt;
+
+        const along = span > 0 ? 1 - remaining / span : 1;
+        const px = fromX + (ax - fromX) * along;
+        const py = fromY + (ay - fromY) * along;
+
+        const t = elapsedTime - remaining;
+        const breeze = TAG_STILL ? 0 : TAG_BREEZE * (Math.sin(t * 2.3) + 0.6 * Math.sin(t * 3.7 + 1.3));
+        const keep = 1 - TAG_DAMPING * dt;
+
+        // Verlet: where it's heading, plus gravity and the breeze...
+        const nextX = tagSwing.x + (tagSwing.x - tagSwing.prevX) * keep + breeze * dt * dt;
+        const nextY = tagSwing.y + (tagSwing.y - tagSwing.prevY) * keep + TAG_GRAVITY * dt * dt;
+        tagSwing.prevX = tagSwing.x;
+        tagSwing.prevY = tagSwing.y;
+
+        // ...held at the string's length from where it's tied, and never
+        // swung further than TAG_MAX_SWING from hanging
+        const swing = THREE.MathUtils.clamp(Math.atan2(nextX - px, nextY - py), -TAG_MAX_SWING, TAG_MAX_SWING);
+        tagSwing.x = px + Math.sin(swing) * length;
+        tagSwing.y = py + Math.cos(swing) * length;
+    }
+
+    // The tag turns with its string, about the point where it's tied
+    const angle = Math.atan2(tagSwing.x - ax, tagSwing.y - ay);
+    spotlightTag.style.transform = `translate(${tagSwing.x}px, ${tagSwing.y}px) translate(-50%, 0) rotate(${-angle}rad)`;
+
+    // A little give in the string, bowing against the way it's swinging
+    const bow = THREE.MathUtils.clamp((tagSwing.prevX - tagSwing.x) * 4, -5, 5);
+    spotlightString.setAttribute('d', `M${ax},${ay} Q${(ax + tagSwing.x) / 2 + bow},${(ay + tagSwing.y) / 2} ${tagSwing.x},${tagSwing.y}`);
+}
+
 /**
  * The catalog's words on its cubes: "Still empty..." for a moment on an
  * empty slot that was just clicked, and "Project 01"... on the cube glowing
@@ -2122,10 +2206,14 @@ function updateCubeTags(elapsedTime) {
         const label = `Project ${String(spotlightCube.userData.slot + 1).padStart(2, '0')}`;
         if (spotlightTag.textContent !== label) spotlightTag.textContent = label;
 
-        placeTagOnCube(spotlightTag, spotlightCube);
-        spotlightTag.style.opacity = spotlightIntensity(elapsedTime) * (SPOTLIGHT_TAG_MIN + (1 - SPOTLIGHT_TAG_MIN) * glow);
+        const intensity = spotlightIntensity(elapsedTime);
+        hangSpotlightTag(spotlightCube, elapsedTime);
+        spotlightTag.style.opacity = intensity * (SPOTLIGHT_TAG_MIN + (1 - SPOTLIGHT_TAG_MIN) * glow);
+        spotlightString.style.opacity = intensity * 0.8;
     } else {
         spotlightTag.style.opacity = 0;
+        spotlightString.style.opacity = 0;
+        tagSwing.cube = null;
     }
 
     const emptySince = elapsedTime - emptyTagShownAt;

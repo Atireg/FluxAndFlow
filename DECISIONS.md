@@ -209,10 +209,24 @@ Every ~5.3-5.6s one cube glows orange and jumps, then the next takes over.
   `spotlightIntensity` - so it blinks in step with the orange and has
   faded out exactly when the cube is back in its float. No CSS transition
   on it, which would smear the blink. A hover ends the spotlight, and the
-  name with it; "Still empty..." wins on the same cube. It's bare orange
-  text (`--warm`) with a soft paper-coloured `text-shadow` halo, so it stays
-  legible over the cube's own orange face; if it reads too faint there, a
-  deeper orange is the lever, not a chip behind it.
+  name with it; "Still empty..." wins on the same cube.
+- **The name hangs on a thin string and dances.** Sitting on the face, it
+  was orange text on a glowing orange pebble and hard to read, so it hangs
+  below the pebble on the paper instead (`hangSpotlightTag`): an SVG line
+  (`#spotlight-string`) from just inside the pebble's lower rim to the tag,
+  which turns with the string about its top centre. It's a pendulum in
+  screen pixels - Verlet steps of `TAG_STEP` with `TAG_GRAVITY` and
+  `TAG_DAMPING`, the string's length a share of the pebble's size on
+  screen - so the pebble's jump and rock jerk the pivot and the tag swings,
+  overshoots and settles, and a faint uneven breeze (`TAG_BREEZE`, off
+  under reduced motion) keeps it moving in between. The pivot is spread
+  across the steps and the swing capped at `TAG_MAX_SWING` (~40 degrees):
+  without them a slow frame yanked the string and flipped the tag past
+  horizontal. Like the flow it has memory, so it's integrated, not a pure
+  function of the clock; it starts hanging straight down for each new
+  pebble. The text is `--warm-text`, the invitation's orange a shade deeper
+  for text on paper, with a soft paper halo; the string's opacity follows
+  the glow's ramp, the text also blinks.
 
 Getting the cube to actually show that orange took two things:
 
@@ -924,7 +938,9 @@ previewed, and taken out at the user's request.
   designs, and the fingertip as a soft glow in orange, then blue, then dark
   grey, before it became white with a black outline. Also: the hint stopping
   for good once the visitor had zoomed, and skipping while zoomed in.
-- **A white chip behind the orange cube's "Project XX"** - now bare text.
+- **A white chip behind the orange cube's "Project XX"**, then the name as
+  bare orange text sitting on the glowing face (unreadable on orange) - now
+  it hangs below on a string.
 - **The close-up beside the drawer on a wide screen**: it cut the pavilion
   off under the drawer; the whole model now moves left instead. (Phones
   keep the close-up.)

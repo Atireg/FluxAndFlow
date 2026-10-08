@@ -120,7 +120,8 @@ Catalog view
         whose project has been opened stays darker, remembered across visits
     [x] Every cube holds the little rock (one download, cloned)
     [x] An empty slot's click answers "Still empty..."
-    [x] The orange cube shows a blinking "Project XX", gone once it settles;
+    [x] The orange pebble's "Project XX" hangs below it on a thin string,
+        swinging as the pebble jumps, blinking, gone once it settles;
         no other names on the grid (three labelling ideas tried and removed
         - see DECISIONS.md, "Tried and removed")
     [x] Clicking a project: instant boom, the others hang, then fall slowly;

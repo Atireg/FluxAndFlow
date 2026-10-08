@@ -21,6 +21,7 @@
     --hint-fill: #fff; /* the double-tap hint: a white touch point... */
     --hint-line: #111; /* ...with a black outline and rings */
     --warm: #ff8c32;
+    --warm-text: #e8721c; /* the same orange a shade deeper, for text on the paper */
     --warm-rgb: 255, 140, 50; /* --warm, for rgba() */
     --warm-deep: #5c2c0a;
     --warm-deep-rgb: 92, 44, 10; /* --warm-deep, for rgba() */
@@ -326,14 +327,34 @@ canvas.webgl {
     will-change: transform, opacity;
 }
 
-/* The orange cube's name, blinking with its glow: bare orange text, no
-   chip. A soft paper-coloured halo keeps it legible where it crosses the
-   cube's own orange face. Its opacity is set every frame in step with the
-   beat, so no transition to smear the blink. */
+/* The glowing pebble's name, hanging below it on a thin string (see
+   hangSpotlightTag): bare orange text on the paper, blinking with the glow.
+   Placed and turned every frame about its top centre, where the string is
+   tied - so no transition, which would smear the blink and the swing. */
+.tag-string {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+}
+
+.tag-string path {
+    fill: none;
+    stroke: var(--warm-text);
+    stroke-width: 1;
+    stroke-linecap: round;
+}
+
 .cube-tag--spotlight {
-    color: var(--warm);
+    padding-top: 0.2rem;
+    font-size: 0.95rem;
+    color: var(--warm-text);
     background: none;
     border: none;
+    transform-origin: 50% 0;
     text-shadow:
         0 0 0.25rem rgba(var(--bg-rgb), 0.95),
         0 0 0.6rem rgba(var(--bg-rgb), 0.8);
