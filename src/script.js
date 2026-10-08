@@ -1118,17 +1118,10 @@ const SPOTLIGHT_ROTATE_AMPLITUDE = 0.14; // radians, ~8 degrees
 const SPOTLIGHT_SCALE_AMPLITUDE = 0.18; // the thumbnail scales +/- 18% at the peak of each jump
 const SPOTLIGHT_CUBE_SCALE_AMPLITUDE = 0.14; // the cube itself, kept well clear of its neighbours
 const SPOTLIGHT_JUMP_HEIGHT = 0.4; // units lifted at the peak of each jump
-const SPOTLIGHT_HANDOFF = 0.8; // seconds for a hovered spotlight to settle out of its jump
-
-// The pebble under the pointer turns the same orange, steady rather than
-// blinking, and its name hangs below it for as long as the pointer stays
-const HOVER_FADE_IN = 0.25; // seconds to turn orange
-const HOVER_FADE_OUT = 0.9; // seconds to fade back once the pointer leaves
 
 let spotlightCube = null;
 let lastSpotlightCube = null; // excluded from the next pick, so it moves on
 let spotlightStartedAt = 0;
-let spotlightCutAt = Infinity; // when a hover took the spotlight's pebble over
 let spotlightRotatePeriodX = 0;
 let spotlightRotatePeriodZ = 0;
 let nextSpotlightAt = randomBetween(...SPOTLIGHT_GAP);
@@ -2196,45 +2189,16 @@ function findCube(object) {
  * simply computes a different mode's state instead.
  */
 function updateCube(cube, elapsedTime) {
-    const hover = hoverGlow(cube, elapsedTime);
-    cube.userData.hoverGlow = hover;
-
     if (cube === spotlightCube) {
-        updateSpotlightCube(cube, elapsedTime, hover);
+        updateSpotlightCube(cube, elapsedTime);
     } else {
-        updateIdleCube(cube, elapsedTime, hover);
+        updateIdleCube(cube, elapsedTime);
     }
 }
 
 /**
- * How orange the hover has made a pebble, 0..1. The one exception to the
- * pure function: a pointer can leave halfway through the fade in, so the
- * fade starts from wherever it had got to - remembered at each change.
- */
-function hoverGlow(cube, elapsedTime) {
-    const hover = cube.userData.hover ?? (cube.userData.hover = { on: false, at: -Infinity, from: 0 });
-    const hovered = cube === hoveredCube;
-
-    if (hovered !== hover.on) {
-        hover.from = hoverRamp(hover, elapsedTime);
-        hover.on = hovered;
-        hover.at = elapsedTime;
-    }
-
-    const ramp = hoverRamp(hover, elapsedTime);
-    return ramp * ramp * (3 - 2 * ramp);
-}
-
-function hoverRamp(hover, elapsedTime) {
-    const since = elapsedTime - hover.at;
-    return hover.on
-        ? Math.min(hover.from + since / HOVER_FADE_IN, 1)
-        : Math.max(hover.from - since / HOVER_FADE_OUT, 0);
-}
-
-/**
- * A pebble's colours for how orange it is, 0..1 - the spotlight's glow and
- * a hover's alike. At 0 it's its resting self. The face glows through its
+ * A pebble's colours for how orange the spotlight has made it, 0..1. At 0
+ * it's its resting self. The face glows through its
  * emissive colour rather than its base colour: the base colour is lit by
  * the scene's cyan lights, which turn an orange green - and it's dimmed as
  * the glow rises, or that cyan-lit grey washes the orange out to tan.
@@ -2368,11 +2332,11 @@ function applyFlow(cube) {
     cube.rotation.z -= lean(flow.vx);
 }
 
-// Floating, and orange as far as a hover has made it - no jump: the
-// pebble under the pointer stays where it is, to be clicked
-function updateIdleCube(cube, elapsedTime, hover = 0) {
+// Floating, as it rests. Hover changes nothing: the pebble under the
+// pointer stays as it is, to be clicked
+function updateIdleCube(cube, elapsedTime) {
     placeAtRest(cube, elapsedTime);
-    paintGlow(cube, hover);
+    paintGlow(cube, 0);
 
     if (cube.userData.content) {
         cube.userData.content.scale.setScalar(cube.userData.contentBaseScale);
@@ -2389,14 +2353,10 @@ function spotlightIntensity(elapsedTime) {
     const fadeOut = Math.min((SPOTLIGHT_DWELL - since) / SPOTLIGHT_FADE_OUT, 1);
     const ramp = Math.max(0, Math.min(fadeIn, fadeOut));
 
-    // A hover cuts it short: the jump settles over SPOTLIGHT_HANDOFF while
-    // the hover's steady orange takes over
-    const cut = THREE.MathUtils.clamp((elapsedTime - spotlightCutAt) / SPOTLIGHT_HANDOFF, 0, 1);
-
-    return ramp * ramp * (3 - 2 * ramp) * (1 - cut * cut * (3 - 2 * cut));
+    return ramp * ramp * (3 - 2 * ramp);
 }
 
-function updateSpotlightCube(cube, elapsedTime, hover = 0) {
+function updateSpotlightCube(cube, elapsedTime) {
     const since = elapsedTime - spotlightStartedAt;
     const intensity = spotlightIntensity(elapsedTime);
 
@@ -2430,8 +2390,8 @@ function updateSpotlightCube(cube, elapsedTime, hover = 0) {
 
     // Blink the whole pebble - glass and rim alike - between its resting
     // colours and the orange, the rim never fully off so it reads as
-    // glowing rather than flickering; a hover holds it at full orange
-    paintGlow(cube, Math.max(glow * intensity, hover), 1 - intensity * 0.35 * (1 - glow) * (1 - hover));
+    // glowing rather than flickering
+    paintGlow(cube, glow * intensity, 1 - intensity * 0.35 * (1 - glow));
 
     if (cube.userData.content) {
         const contentScale = cube.userData.contentBaseScale * (1 + pulse * SPOTLIGHT_SCALE_AMPLITUDE * intensity);
@@ -2614,41 +2574,21 @@ function updateCubeTags(elapsedTime) {
 
     // The same beat and ramp the cube itself glows by (updateSpotlightCube),
     // so the name is brightest when the cube is most orange and has faded
-    // out entirely by the time the cube has settled
-    // One name at a time, on whichever pebble shows it most: a hovered
-    // one's steady, the spotlight's blinking. "Still empty..." wins on its
-    // own pebble.
-    let tagCube = null;
-    let tagOpacity = 0;
-
-    if (inCatalog) {
-        cubes.forEach((cube) => {
-            if (cube === emptyTagCube) return;
-
-            let opacity = cube.userData.hoverGlow ?? 0;
-            if (cube === spotlightCube) {
-                const since = elapsedTime - spotlightStartedAt;
-                const glow = (Math.sin((since / SPOTLIGHT_PULSE_PERIOD) * Math.PI * 2) + 1) / 2;
-                opacity = Math.max(opacity, spotlightIntensity(elapsedTime) * (SPOTLIGHT_TAG_MIN + (1 - SPOTLIGHT_TAG_MIN) * glow));
-            }
-
-            if (opacity > tagOpacity) {
-                tagCube = cube;
-                tagOpacity = opacity;
-            }
-        });
-    }
-
-    if (tagCube) {
-        const label = `Project ${String(tagCube.userData.slot + 1).padStart(2, '0')}`;
+    // out entirely by the time the cube has settled. "Still empty..." wins
+    // on its own pebble.
+    const spotlightShows = inCatalog && spotlightCube && spotlightCube !== emptyTagCube;
+    if (spotlightShows) {
+        const since = elapsedTime - spotlightStartedAt;
+        const glow = (Math.sin((since / SPOTLIGHT_PULSE_PERIOD) * Math.PI * 2) + 1) / 2;
+        const label = `Project ${String(spotlightCube.userData.slot + 1).padStart(2, '0')}`;
         if (spotlightTag.textContent !== label) spotlightTag.textContent = label;
 
-        hangSpotlightTag(tagCube, elapsedTime);
-        spotlightTag.style.opacity = tagOpacity;
+        const intensity = spotlightIntensity(elapsedTime);
+        hangSpotlightTag(spotlightCube, elapsedTime);
+        spotlightTag.style.opacity = intensity * (SPOTLIGHT_TAG_MIN + (1 - SPOTLIGHT_TAG_MIN) * glow);
 
         // The string doesn't blink with the name, it just comes and goes
-        const spotlit = tagCube === spotlightCube ? spotlightIntensity(elapsedTime) : 0;
-        spotlightString.style.opacity = Math.max(tagCube.userData.hoverGlow ?? 0, spotlit);
+        spotlightString.style.opacity = intensity;
     } else {
         spotlightTag.style.opacity = 0;
         spotlightString.style.opacity = 0;
@@ -2683,18 +2623,10 @@ function pickSpotlightCube() {
 
 function updateSpotlightCycle(elapsedTime) {
     if (spotlightCube) {
-        // The visitor started hovering the very pebble that is glowing - the
-        // hover takes it over, its jump settling over SPOTLIGHT_HANDOFF
-        // rather than snapping (see spotlightIntensity)
-        if (spotlightCube === hoveredCube && spotlightCutAt === Infinity) spotlightCutAt = elapsedTime;
-
-        const handedOver = elapsedTime - spotlightCutAt > SPOTLIGHT_HANDOFF;
-        const dwelled = elapsedTime - spotlightStartedAt > SPOTLIGHT_DWELL;
-
-        if (handedOver || dwelled) {
+        // Runs its whole dwell, hovered or not - hover changes nothing
+        if (elapsedTime - spotlightStartedAt > SPOTLIGHT_DWELL) {
             lastSpotlightCube = spotlightCube;
             spotlightCube = null;
-            spotlightCutAt = Infinity;
             nextSpotlightAt = elapsedTime + randomBetween(...SPOTLIGHT_GAP);
         }
 
@@ -2785,10 +2717,6 @@ function startDrop(cube) {
     dropStartedAt = clock.getElapsedTime();
     getDissolve(cube);
     hoveredCube = null;
-
-    // The clicked pebble's glow is the dissolve's now; none carries a hover
-    // back into the catalog
-    cubes.forEach((other) => { other.userData.hover = null; });
 
     [cubes, smallPebbles].forEach((group) => group.forEach((other) => {
         // Out along the screen, away from the chosen cube

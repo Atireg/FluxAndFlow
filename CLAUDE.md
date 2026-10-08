@@ -146,11 +146,11 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
   "A pebble's state is a pure function"). A GSAP tween on a property
   the per-frame update also writes gets silently overwritten - add a mode or
   keep the per-frame update out of that window instead. The exceptions are
-  the effects with memory - the pointer's flow and the tag's rope,
+  the effects with memory - the pointer's flow and the tag's rope -
   integrated in small steps (1/120 s, `TAG_STEP` for the rope) so they
-  behave the same at 5 fps as at 120, and the hover's fade (`hoverGlow`).
-  Colours go through `paintGlow` (0 resting, 1 orange) for the spotlight
-  and the hover alike.
+  behave the same at 5 fps as at 120. Colours go through `paintGlow` (0
+  resting, 1 the spotlight's orange). Hover deliberately changes nothing
+  visible (DECISIONS.md, "Tried and removed").
 - **The small pebbles (`smallPebbles`) are not in `cubes`**, so raycasts
   and the spotlight never see them - but they float, are stirred, fall in
   the boom and fade with a project like the rest. They're drawn instanced:

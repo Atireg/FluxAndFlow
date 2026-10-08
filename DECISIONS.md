@@ -144,11 +144,9 @@ modes). Nothing accumulates, so nothing drifts or needs resetting. Colour
 goes through `paintGlow(cube, amount)`: 0 is the pebble's resting self, 1
 the spotlight's orange.
 
-**Hover** turns the pebble that orange, steady - no jump or pulse, it keeps
-its float so it stays put to be clicked - over `HOVER_FADE_IN`, back over
-`HOVER_FADE_OUT`. The exceptions with memory: the hover's fade (a pointer
-can leave halfway in, so `hoverGlow` remembers where it had got to at each
-change; cleared in `startDrop`), the pointer's flow and the hanging tag.
+**Hover changes nothing**: the pebble under the pointer keeps its look and
+its float, to be clicked; the spotlight just never starts on it. The
+exceptions with memory are the pointer's flow and the hanging tag.
 
 Two traps it sets, both hit for real:
 
@@ -188,13 +186,9 @@ The glowing pebble's name hangs on a string
 
 `#spotlight-tag` reads "Project 01".."Project 10" by slot and pulses with
 the glow (down to `SPOTLIGHT_TAG_MIN`, 0.65, between beats - at 0.2 it
-read as see-through), gone once the pebble settles. **A hovered pebble's name
-hangs the same way**, steady, for as long as the pointer stays (the user
-asked for both to stay). One tag at a time, on whichever pebble shows it
-most. Hovering the spotlit pebble hands it over: its jump settles over
-`SPOTLIGHT_HANDOFF` (`spotlightCutAt` in `spotlightIntensity`) while the
-hover holds the orange - it used to end the spotlight on the spot, which
-snapped the pebble out of mid-jump. "Still empty..." wins on its pebble.
+read as see-through), gone once the pebble settles. Hovering it changes
+nothing - the spotlight runs its whole dwell. "Still empty..." wins on its
+pebble.
 
 **Size**: the tags scale with the pebbles on screen - `--pebble-px`, their
 radius in pixels, set by `fitCameraToGrid` - at 0.3 of it, never under
@@ -628,8 +622,9 @@ Catalog
 - **Cubes** (box glass with teal edge lines; the cube's outline kept at 0.3
   around the model) - replaced by pebbles. Also shown: bubbles, morphing
   blobs, rounded cubes, plain clouds of points.
-- **Orbiting the catalog**, **a hover pulse** (jitter and ±20% size), and
-  **a teal hover tint** (hover is orange now).
+- **Orbiting the catalog**; on hover, **a pulse** (jitter and ±20% size),
+  **a teal tint**, then **orange with the name hanging below** (and the
+  spotlit pebble handing over to it) - hover now changes nothing.
 - **Labels**: "Explore me..." on the glowing cube; "Project XX" on the cube
   nearest the pointer; names falling like leaves from cubes the pointer
   reached; then the glowing pebble's name as a white chip, as bare orange

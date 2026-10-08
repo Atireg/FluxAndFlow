@@ -99,9 +99,8 @@ Catalog
         they float and rock, the pointer stirs them, no orbit
     [x] One pebble at a time glows orange and jumps; its "Project XX" hangs
         below it on a soft, thin string tied on with a dot, swinging in
-        gusts. A hovered pebble turns orange and keeps its name while the
-        pointer stays. Names scale with the pebbles on screen and draw over
-        them
+        gusts. Names scale with the pebbles on screen and draw over them.
+        Hover changes nothing
     [x] Clicking a project: an instant boom, the others fall slowly, the
         clicked pebble dissolves into a cloud of points that becomes the
         project; opened projects' pebbles stay darker (remembered)
