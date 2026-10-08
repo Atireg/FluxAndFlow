@@ -1215,6 +1215,54 @@ const PEBBLE_STRETCH = 0.08; // how far each is drawn out along its own axes
 const PEBBLE_DETAIL = 16; // icosphere subdivisions - smooth, still cheap to raycast
 const PEBBLE_RIM_POWER = 2.4; // how tightly the rim hugs the silhouette
 
+/**
+ * The flux: each pebble slowly changes shape - a few broad waves rolling
+ * over its surface, swelling one side as another eases, never quite
+ * repeating, each pebble on its own seed. Done in the vertex shader of the
+ * glass and of the rim alike (the same function, so the rim stays on the
+ * glass), off one shared clock - a pure function of time, nothing stored.
+ * Clicking and hovering still use the resting shape, near enough.
+ */
+const PEBBLE_FLUX = 0.09; // how far the surface moves, as a share of the radius
+const PEBBLE_FLUX_SPEED = 0.5; // radians a second, roughly - a wave every ~12s
+const pebbleFluxTime = { value: 0 }; // shared by every pebble's materials, set each frame
+
+const PEBBLE_FLUX_GLSL = `
+uniform float uFluxTime;
+uniform float uFluxSeed;
+uniform float uFluxAmount;
+
+// Three slow waves over the pebble's surface, about -1..1
+float pebbleFlux(vec3 n) {
+    float t = uFluxTime;
+    float s = uFluxSeed;
+    return (sin(n.x * 2.3 + t + s) * cos(n.z * 2.1 - t * 0.73 + s * 1.3)
+        + 0.6 * sin(n.y * 3.1 + n.x * 1.7 + t * 1.27 + s * 2.1)
+        + 0.4 * cos(n.z * 2.7 - n.y * 1.9 - t * 0.91 + s * 0.7)) / 2.0;
+}`;
+
+// Patches a pebble material (glass or rim) to flux, on its own seed
+function addPebbleFlux(material, seed) {
+    const before = material.onBeforeCompile;
+
+    material.onBeforeCompile = (shader, renderer) => {
+        before?.(shader, renderer);
+        shader.uniforms.uFluxTime = pebbleFluxTime;
+        shader.uniforms.uFluxSeed = { value: seed };
+        shader.uniforms.uFluxAmount = { value: PEBBLE_RADIUS * PEBBLE_FLUX };
+        shader.vertexShader = shader.vertexShader
+            .replace('#include <common>', `#include <common>\n${PEBBLE_FLUX_GLSL}`)
+            .replace('#include <begin_vertex>', [
+                '#include <begin_vertex>',
+                'transformed += normal * pebbleFlux(normalize(position)) * uFluxAmount;',
+            ].join('\n'));
+    };
+
+    const key = material.customProgramCacheKey?.() ?? '';
+    material.customProgramCacheKey = () => `${key}|pebble-flux`;
+    return material;
+}
+
 function makePebbleGeometry(seed) {
     let geometry = new THREE.IcosahedronGeometry(PEBBLE_RADIUS, PEBBLE_DETAIL);
 
@@ -1411,19 +1459,21 @@ function createPlayground() {
 
     // One cube per slot. The count is fixed, so a project always has a home.
     for (let slot = 0; slot < SLOT_COUNT; slot++) {
-        const cubeGeometry = makePebbleGeometry(slot * 2.37 + 1.1);
-        const cubeMaterial = new THREE.MeshStandardMaterial({
+        const seed = slot * 2.37 + 1.1;
+        const cubeGeometry = makePebbleGeometry(seed);
+        const cubeMaterial = addPebbleFlux(new THREE.MeshStandardMaterial({
             color: cubesColor,
             metalness: 0.2,
             roughness: 0.6,
             transparent: true,
             opacity: CUBE_FACE_OPACITY,
-        });
+        }), seed);
 
         const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
 
-        // The pebble's rim, in place of a box's edge lines - see makeRimMaterial
-        const edges = new THREE.Mesh(cubeGeometry, makeRimMaterial(selectedCubeColor));
+        // The pebble's rim, in place of a box's edge lines - see makeRimMaterial.
+        // It fluxes with the glass, on the same seed, so it stays on it.
+        const edges = new THREE.Mesh(cubeGeometry, addPebbleFlux(makeRimMaterial(selectedCubeColor), seed));
         edges.renderOrder = 1;
         cube.add(edges);
         cube.userData.edges = edges;
@@ -2038,6 +2088,7 @@ function animate() {
 
     // Update smoke
     smokeMaterial.uniforms.uTime.value = elapsedTime;
+    pebbleFluxTime.value = elapsedTime * PEBBLE_FLUX_SPEED;
 
     // The catalog's own motion - wander, hover, spotlight - only runs while
     // it is actually what's on screen. A click hands every cube to the

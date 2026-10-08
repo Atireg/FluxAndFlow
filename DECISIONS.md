@@ -72,6 +72,13 @@ grid; renaming would have touched most of the file for nothing.
   (0.44 x cubeSize), wobbled by a few slow waves (`PEBBLE_LUMPS`), drawn out
   a little (`PEBBLE_STRETCH`), squashed flat (`PEBBLE_SQUASH`); a seed per
   slot. Vertices are merged first so normals are smooth.
+- **Flux**: each pebble slowly changes shape, as asked - three broad
+  waves rolling over its surface on its own seed (`addPebbleFlux`, in the
+  vertex shader; `PEBBLE_FLUX` 9% of the radius, `PEBBLE_FLUX_SPEED`), off
+  one shared clock (`pebbleFluxTime`). The glass and the rim run the same
+  function on the same seed, or the rim would slip off the glass. Pure
+  function of time; clicks and hover still use the resting shape, near
+  enough, and the dissolve starts from it.
 - **Rim, not edges.** `userData.edges` is a second skin on the same
   geometry (`makeRimMaterial`, a MeshBasicMaterial with a fresnel term
   patched in), opaque only at the silhouette. It keeps the edge lines'

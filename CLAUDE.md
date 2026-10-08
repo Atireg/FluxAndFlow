@@ -157,8 +157,11 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
   a rim mesh (a fresnel-patched MeshBasicMaterial), not edge lines - keep
   driving it through `.material.color` / `.opacity`. A pebble's resting look
   comes from `restingFaceColor` / `restingFaceOpacity` / `restingRimColor`
-  (darker once visited) - don't write `cubesColor` back directly. See
-  DECISIONS.md, "Pebbles, and a clicked one dissolves into points".
+  (darker once visited) - don't write `cubesColor` back directly. Pebbles
+  slowly change shape in the vertex shader (`addPebbleFlux`, on both the
+  glass and the rim with the same seed - any new pebble material needs it
+  too, or it won't move with them). See DECISIONS.md, "Pebbles, and a
+  clicked one dissolves into points".
 - **Faded pebble faces have `depthWrite = false`** while a project is open,
   restored on close. Without this an invisible face still occludes what's
   behind it.
