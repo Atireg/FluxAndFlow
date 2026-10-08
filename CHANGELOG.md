@@ -91,7 +91,8 @@ its "Tried and removed".
   failures made visible too. Fixed blind; still to confirm.
 - **Docs.** DECISIONS regrouped (contents, "Tried and removed") and purged
   to what's current; README's TODO split into next up / open / done;
-  CLAUDE.md gained "Where to pick up" and testing tips.
+  CLAUDE.md gained "Where to pick up", notes on the pebbles and the
+  hanging tag, and testing tips.
 
 Open at end of session (see README, "Next up"):
 - Rock Print on Safari: confirm the fix.
