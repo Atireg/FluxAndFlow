@@ -76,6 +76,9 @@ were tried and removed are listed under "Tried and removed" there.
   cube just tints, no pulse. A continuous spotlight: any cube glows orange
   and jumps, one at a time, its "Project XX" name blinking in step, then
   eases back into its float.
+- **Pebbles instead of cubes**, after five organic options were rendered to
+  choose from: glass stones with a teal rim in the grid; a clicked one
+  dissolves into a cloud of points that becomes the project's own.
 - **Every cube holds the little rock** (one download, cloned). Clicking an
   empty slot says "Still empty...".
 - **The send-off**: an instant boom knocks the other cubes out and up, they

@@ -14,6 +14,7 @@ Contents
 --------
 
 The catalog (the grid of cubes)
+- The catalog's objects are pebbles, and a clicked one dissolves into points
 - The catalog has a fixed number of slots
 - A cube's visual state is a pure function of its mode and the clock
 - The spotlight: any cube, held still, in the one orange
@@ -59,6 +60,50 @@ Tried and removed
 
 The catalog
 ===========
+
+
+The catalog's objects are pebbles, and a clicked one dissolves into points
+----------------------------------------------------------------------------
+
+Asked for something more organic than cubes; five options were rendered
+(pebbles, bubbles, morphing blobs, rounded cubes, clouds of points) and the
+user picked a mix of two: pebbles in the grid, turning into a cloud of
+points when clicked. **The code still calls them cubes** (`cubes`, `cube`,
+`cubeSize`, `CUBE_FACE_OPACITY`...), and they still sit in the cubeSize
+grid; renaming everything would have touched most of the file for nothing.
+
+- **Shape.** `makePebbleGeometry(seed)`: a sphere of radius
+  `PEBBLE_RADIUS` (0.44 x cubeSize), its surface wobbled by a few slow,
+  overlapping waves (`PEBBLE_LUMPS`), drawn out a little along its own axes
+  (`PEBBLE_STRETCH`) and squashed to lie flat (`PEBBLE_SQUASH` 0.62). Each
+  slot has its own seed, so each pebble is its own shape. Vertices are
+  merged before the wobble so normals come out smooth. The widest pebble
+  stays well inside the 1-unit gap plus wander.
+- **The outline.** A box drew its outline with edge lines; a pebble has no
+  edges. `userData.edges` is now a second skin on the same geometry whose
+  material (`makeRimMaterial`, a MeshBasicMaterial with a fresnel term
+  patched in) is opaque only where the surface turns away from the eye - a
+  teal rim at the silhouette. It keeps the `.color` / `.opacity` the edge
+  lines had, so the spotlight, hover, the drop and every fade work on it
+  unchanged. The face is the same tinted glass material as before.
+- **The dissolve.** On click (`getDissolve`, built once per pebble, kept
+  for later opens) the pebble's glass, rim and rock fade over
+  `DISSOLVE_FADE` (0.5s) while `DISSOLVE_POINTS` points scattered over its
+  surface swell outward, drift, and turn from the rim's teal to the
+  project's own inks, thinning away by `DISSOLVE_DURATION` (3.6s). By then
+  the project's own points are gathering out of their scattered cloud in
+  the same place, so one cloud reads as becoming the other. It's a pure
+  function of time since the click (`updateDissolve`, one uniform a frame),
+  in `'dropping'` and `'detail'`; closing hides it.
+- **The detail view has no frame any more.** The clicked cube's edges used
+  to stay at 0.3 opacity around the model; the pebble has dissolved, so the
+  project stands alone in the fog. Framing still fits the same invisible
+  cubeSize box, so no camera numbers changed.
+- The tag anchor (`placeTagOnCube`) sits on the pebble's top
+  (`PEBBLE_RADIUS * PEBBLE_SQUASH`) rather than a box's.
+
+Checked on both layouts (catalog, spotlight with its name, hover, the
+dissolve frame by frame on a simulated clock, back to the catalog).
 
 
 The catalog has a fixed number of slots
@@ -697,10 +742,12 @@ costs nothing in the renderer.
 Faded cube faces must not write depth
 -------------------------------------
 
-In the detail view the cube's faces fade to opacity 0 but would keep writing
-depth, so the invisible front face hides the cube's own back edges and the
-one-point perspective reads flat. `depthWrite` is false while a project is
-open and restored on close (after a short delay, with the reveal).
+In the detail view the catalog objects' faces fade to opacity 0 but would
+keep writing depth, so an invisible front face would hide what's behind it -
+with cubes, the cube's own back edges, flattening the one-point perspective.
+`depthWrite` is false while a project is open and restored on close (after
+a short delay, with the reveal). It still matters with pebbles: a faded
+pebble would otherwise cut a hole in the point cloud inside it.
 
 
 A project with no description has no drawer
@@ -876,6 +923,10 @@ previewed, and taken out at the user's request.
 - **An orthographic detail view** (`DETAIL_PROJECTION`, still switchable)
   and an oblique three-quarter default: flat, and nothing square.
 - **`controls.autoRotate`** in the detail view: turned the cube's edges.
+- **Cubes in the catalog** (box glass with teal edge lines), and the cube's
+  outline kept at 0.3 around the model in the project view. Replaced by
+  pebbles that dissolve into points; bubbles, morphing blobs, rounded cubes
+  and plain clouds of points were the other options shown.
 - **A hover pulse in the catalog**: the hovered cube held at its slot with
   a fast jitter and a ±20% size pulse (its rock pulsing too). Now it just
   keeps floating, tinted.

@@ -1,9 +1,10 @@
 # Flux and Flow
 
 A portfolio: a catalog of projects explored in three dimensions. Each
-project is a cube in a grid; clicking one knocks the others off the
-screen and opens the project's 3D point cloud on the whole canvas, with its
-description in a pull-out drawer.
+project is a glass pebble in a grid (still called a "cube" throughout the
+code); clicking one knocks the others off the screen, dissolves it into a
+cloud of points and opens the project's 3D point cloud on the whole canvas,
+with its description in a pull-out drawer.
 
 Full project description and TODO list: `README.md`.
 Why things are built the way they are: `DECISIONS.md` — read it before
@@ -118,9 +119,14 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
   background colour. Don't re-enable without reading DECISIONS.md. The
   grey fog in the project view is something else: a CSS layer (`#fog`)
   behind the transparent canvas.
-- **Faded cube faces have `depthWrite = false`** while a project is open,
-  restored on close. Without this the invisible front face occludes the
-  cube's own back edges and the one-point perspective reads as flat.
+- **The catalog's "cubes" are pebbles.** Names in the code (`cubes`,
+  `cubeSize`, `userData.edges`) are the cube-era ones. `userData.edges` is
+  a rim mesh (a fresnel-patched MeshBasicMaterial), not edge lines - keep
+  driving it through `.material.color` / `.opacity`. See DECISIONS.md, "The
+  catalog's objects are pebbles".
+- **Faded pebble faces have `depthWrite = false`** while a project is open,
+  restored on close. Without this an invisible face still occludes what's
+  behind it.
 - **`animate()` runs its first frame the moment it's defined**, before the
   rest of `script.js` has executed. Any `const`/`let` it (or anything it
   calls) touches must be declared above it, or the page dies on load with a

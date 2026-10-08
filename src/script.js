@@ -4,6 +4,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { gsap } from 'gsap';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
+import { mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 
 import pointCloudVertexShader from './shaders/pointCloud/vertex.glsl';
 import pointCloudFragmentShader from './shaders/pointCloud/fragment.glsl';
@@ -946,6 +947,203 @@ let nextSpotlightAt = randomBetween(...SPOTLIGHT_GAP);
 const spotlightEdgeColor = new THREE.Color(); // reused each frame, never reallocated
 const spotlightFaceColor = new THREE.Color(); // same, for the cube's own face
 
+/**
+ * Pebbles. The catalog's objects are smooth, flattened stones rather than
+ * boxes - the code still calls them cubes, and they still sit in a
+ * cubeSize grid. Each is its own shape (a seeded wobble on a squashed
+ * sphere), in the same pale glass. A box drew its outline with edge lines;
+ * a pebble has no edges, so a second skin on the same geometry draws its
+ * silhouette instead - a teal rim that is strongest where the surface turns
+ * away from the eye. It answers to the same `edges.material.color` and
+ * `.opacity` the edge lines did, so hover, the spotlight and every fade
+ * work on it unchanged.
+ */
+const PEBBLE_RADIUS = cubeSize * 0.44;
+const PEBBLE_SQUASH = 0.62; // height as a share of width - a stone lying flat
+const PEBBLE_LUMPS = 0.06; // how far the surface wanders from round
+const PEBBLE_STRETCH = 0.08; // how far each is drawn out along its own axes
+const PEBBLE_DETAIL = 16; // icosphere subdivisions - smooth, still cheap to raycast
+const PEBBLE_RIM_POWER = 2.4; // how tightly the rim hugs the silhouette
+
+function makePebbleGeometry(seed) {
+    let geometry = new THREE.IcosahedronGeometry(PEBBLE_RADIUS, PEBBLE_DETAIL);
+
+    // Shared vertices, so the normals come out smooth rather than faceted
+    geometry.deleteAttribute('normal');
+    geometry.deleteAttribute('uv');
+    geometry = mergeVertices(geometry);
+
+    const position = geometry.attributes.position;
+    const v = new THREE.Vector3();
+    const n = new THREE.Vector3();
+    const stretchX = 1 + PEBBLE_STRETCH * Math.sin(seed * 3.1);
+    const stretchZ = 1 + PEBBLE_STRETCH * Math.cos(seed * 1.7);
+
+    for (let i = 0; i < position.count; i++) {
+        v.fromBufferAttribute(position, i);
+        n.copy(v).normalize();
+
+        // A few slow, overlapping waves over the sphere - a soft wobble, not noise
+        const lump = Math.sin(n.x * 2.2 + seed) * Math.cos(n.y * 2.9 + seed * 1.7)
+            + 0.6 * Math.sin(n.z * 3.7 + seed * 2.3) * Math.sin(n.x * 1.5 - seed)
+            + 0.35 * Math.cos((n.x + n.z) * 4.6 + seed * 0.5);
+
+        v.multiplyScalar(1 + PEBBLE_LUMPS * lump);
+        position.setXYZ(i, v.x * stretchX, v.y * PEBBLE_SQUASH, v.z * stretchZ);
+    }
+
+    geometry.computeVertexNormals();
+    return geometry;
+}
+
+// The rim: plain colour and opacity like any basic material, its alpha
+// weighted towards the silhouette. Kept off pow(0, y), undefined in GLSL
+// (see "Safari" in DECISIONS.md).
+function makeRimMaterial(color) {
+    const material = new THREE.MeshBasicMaterial({ color, transparent: true, depthWrite: false });
+
+    material.onBeforeCompile = (shader) => {
+        shader.vertexShader = shader.vertexShader
+            .replace('#include <common>', '#include <common>\nvarying vec3 vRimNormal;\nvarying vec3 vRimView;')
+            .replace('#include <project_vertex>', '#include <project_vertex>\nvRimNormal = normalize(normalMatrix * normal);\nvRimView = normalize(-mvPosition.xyz);');
+        shader.fragmentShader = shader.fragmentShader
+            .replace('#include <common>', '#include <common>\nvarying vec3 vRimNormal;\nvarying vec3 vRimView;')
+            .replace('#include <opaque_fragment>', [
+                'float rimFacing = abs(dot(normalize(vRimNormal), normalize(vRimView)));',
+                `diffuseColor.a *= pow(max(1.0 - rimFacing, 0.0001), ${PEBBLE_RIM_POWER.toFixed(2)});`,
+                '#include <opaque_fragment>',
+            ].join('\n'));
+    };
+    material.customProgramCacheKey = () => 'pebble-rim';
+
+    return material;
+}
+
+/**
+ * The dissolve: a clicked pebble gives way to a cloud of points. Its glass
+ * and rim fade (DISSOLVE_FADE) while points scattered over its surface
+ * swell outward and turn from the rim's teal to the project's own inks,
+ * then thin away - by when the project's points are gathering out of their
+ * own scattered cloud, so one cloud seems to become the other. Like the
+ * drop, a pure function of time since the click: one uniform a frame.
+ */
+const DISSOLVE_DURATION = 3.6; // seconds from the click to the last point gone - overlapping the move in and the gather
+const DISSOLVE_FADE = 0.5; // seconds for the glass and rim to give way
+const DISSOLVE_POINTS = 2400;
+const DISSOLVE_SWELL = 0.55; // how far the cloud swells past the pebble's surface, as a share
+const DISSOLVE_DRIFT = 0.9; // units each point also wanders off on its own
+const DISSOLVE_POINT_SIZE = 0.07; // world units across
+
+const dissolveVertexShader = `
+uniform float uT;
+uniform float uSwell;
+uniform float uPixelsPerUnit;
+uniform float uSize;
+attribute vec3 aDrift;
+attribute float aDelay;
+attribute float aTone;
+varying float vAlpha;
+varying float vInk;
+varying float vTone;
+
+void main() {
+    float t = clamp((uT - aDelay) / (1.0 - aDelay), 0.0, 1.0);
+    float rest = 1.0 - t;
+    float swell = 1.0 - rest * rest;
+    vec3 p = position * (1.0 + uSwell * swell) + aDrift * swell;
+
+    vec4 mv = modelViewMatrix * vec4(p, 1.0);
+    gl_Position = projectionMatrix * mv;
+    gl_PointSize = uSize * uPixelsPerUnit / max(-mv.z, 0.001);
+
+    vAlpha = smoothstep(0.0, 0.12, uT) * (1.0 - smoothstep(0.55, 1.0, uT));
+    vInk = smoothstep(0.1, 0.6, uT);
+    vTone = aTone;
+}`;
+
+const dissolveFragmentShader = `
+uniform vec3 uRim;
+uniform vec3 uInks[3];
+uniform float uOpacity;
+varying float vAlpha;
+varying float vInk;
+varying float vTone;
+
+void main() {
+    float disc = 1.0 - step(0.5, distance(gl_PointCoord, vec2(0.5)));
+    vec3 ink = vTone < 0.5 ? uInks[0] : (vTone < 1.5 ? uInks[1] : uInks[2]);
+    gl_FragColor = vec4(mix(uRim, ink, vInk), disc * vAlpha * uOpacity);
+}`;
+
+// Built the first time a pebble is clicked, then kept for later opens
+function getDissolve(cube) {
+    if (cube.userData.dissolve) return cube.userData.dissolve;
+
+    const surface = cube.geometry.attributes.position;
+    const positions = new Float32Array(DISSOLVE_POINTS * 3);
+    const drifts = new Float32Array(DISSOLVE_POINTS * 3);
+    const delays = new Float32Array(DISSOLVE_POINTS);
+    const tones = new Float32Array(DISSOLVE_POINTS);
+    const v = new THREE.Vector3();
+
+    for (let i = 0; i < DISSOLVE_POINTS; i++) {
+        // A point on the pebble's surface, nudged a little off it
+        v.fromBufferAttribute(surface, Math.floor(Math.random() * surface.count));
+        v.addScalar((Math.random() - 0.5) * 0.15);
+        v.toArray(positions, i * 3);
+
+        v.randomDirection().multiplyScalar(DISSOLVE_DRIFT * (0.3 + 0.7 * Math.random()));
+        v.toArray(drifts, i * 3);
+
+        delays[i] = Math.random() * 0.3;
+        tones[i] = Math.floor(Math.random() * 3);
+    }
+
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute('aDrift', new THREE.BufferAttribute(drifts, 3));
+    geometry.setAttribute('aDelay', new THREE.BufferAttribute(delays, 1));
+    geometry.setAttribute('aTone', new THREE.BufferAttribute(tones, 1));
+
+    const points = new THREE.Points(geometry, new THREE.ShaderMaterial({
+        transparent: true,
+        depthWrite: false,
+        vertexShader: dissolveVertexShader,
+        fragmentShader: dissolveFragmentShader,
+        uniforms: {
+            uT: { value: 0 },
+            uSwell: { value: DISSOLVE_SWELL },
+            uPixelsPerUnit: { value: 1 },
+            uSize: { value: DISSOLVE_POINT_SIZE },
+            uRim: { value: selectedCubeColor },
+            uInks: { value: POINT_INKS.map((ink) => ink.color) },
+            uOpacity: { value: POINT_OPACITY },
+        },
+    }));
+    points.visible = false;
+    points.renderOrder = 2;
+    points.raycast = () => {}; // never something to click on
+
+    cube.add(points);
+    cube.userData.dissolve = points;
+    return points;
+}
+
+// Runs while a project is being opened or is open; droppingFrom is the
+// pebble that was clicked
+function updateDissolve(elapsedTime) {
+    const points = droppingFrom?.userData.dissolve;
+    if (!points) return;
+
+    const t = (elapsedTime - dropStartedAt) / DISSOLVE_DURATION;
+    points.visible = t < 1;
+    if (!points.visible) return;
+
+    const uniforms = points.material.uniforms;
+    uniforms.uT.value = t;
+    uniforms.uPixelsPerUnit.value = renderer.domElement.height / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov ?? 45) / 2));
+}
+
 createPlayground();
 
 // Everything the catalog loads at start-up has registered by now
@@ -957,7 +1155,7 @@ function createPlayground() {
 
     // One cube per slot. The count is fixed, so a project always has a home.
     for (let slot = 0; slot < SLOT_COUNT; slot++) {
-        const cubeGeometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
+        const cubeGeometry = makePebbleGeometry(slot * 2.37 + 1.1);
         const cubeMaterial = new THREE.MeshStandardMaterial({
             color: cubesColor,
             metalness: 0.2,
@@ -968,16 +1166,10 @@ function createPlayground() {
 
         const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
 
-        // Add edges for a visible border
-        const edgesGeometry = new THREE.EdgesGeometry(cube.geometry);
-        const edgesMaterial = new THREE.LineBasicMaterial({
-            color: selectedCubeColor,
-            transparent: true,
-        });
-        const edges = new THREE.LineSegments(edgesGeometry, edgesMaterial);
-        cube.add(edges); // Attach edges to the cube
-
-        // Store edges in userData for future reference
+        // The pebble's rim, in place of a box's edge lines - see makeRimMaterial
+        const edges = new THREE.Mesh(cubeGeometry, makeRimMaterial(selectedCubeColor));
+        edges.renderOrder = 1;
+        cube.add(edges);
         cube.userData.edges = edges;
 
         // Which slot this is, and the project sitting in it (null when empty)
@@ -1566,6 +1758,7 @@ function animate() {
         });
     } else if (viewState === 'dropping') {
         cubes.forEach((cube) => updateDroppingCube(cube, elapsedTime));
+        updateDissolve(elapsedTime);
     } else if (viewState === 'returning') {
         // Back home before they fade in, wherever the drop left them
         cubes.forEach((cube) => placeAtRest(cube, elapsedTime));
@@ -1575,6 +1768,7 @@ function animate() {
         if (dropInProgress(elapsedTime)) {
             cubes.forEach((cube) => { if (cube !== selectedCube) placeDroppingCube(cube, elapsedTime); });
         }
+        updateDissolve(elapsedTime);
 
         if (selectedCube && selectedCube.userData.detail) {
             // Turns the model itself, not the camera, so the cube's edges stay
@@ -1854,7 +2048,7 @@ function updateSpotlightCube(cube, elapsedTime) {
 function placeTagOnCube(tag, cube) {
     // Down the screen is world +Z from the overhead catalog camera
     cube.updateMatrixWorld();
-    cubeTagAnchor.set(0, cubeSize / 2, cubeSize * 0.36);
+    cubeTagAnchor.set(0, PEBBLE_RADIUS * PEBBLE_SQUASH, cubeSize * 0.36);
     cube.localToWorld(cubeTagAnchor).project(camera);
 
     const x = (cubeTagAnchor.x + 1) / 2 * screenWidth;
@@ -2010,6 +2204,7 @@ function startDrop(cube) {
     resetFlow();
     droppingFrom = cube;
     dropStartedAt = clock.getElapsedTime();
+    getDissolve(cube);
     hoveredCube = null;
 
     cubes.forEach((other) => {
@@ -2041,6 +2236,14 @@ function updateDroppingCube(cube, elapsedTime) {
     cube.userData.edges.material.opacity = 1;
     cube.userData.edges.material.color.set(selectedCubeColor);
     if (cube.userData.content) cube.userData.content.scale.setScalar(cube.userData.contentBaseScale);
+
+    // The clicked pebble's glass, rim and rock give way to its dissolve
+    if (cube === droppingFrom) {
+        const fade = 1 - Math.min((elapsedTime - dropStartedAt) / DISSOLVE_FADE, 1);
+        cube.material.opacity = CUBE_FACE_OPACITY * fade;
+        cube.userData.edges.material.opacity = fade;
+        if (cube.userData.content) cube.userData.content.scale.setScalar(cube.userData.contentBaseScale * fade);
+    }
 
     placeDroppingCube(cube, elapsedTime);
 }
@@ -2149,8 +2352,10 @@ function openProject(cube) {
         // rest of the grid lines up into a lattice of rectangles behind the
         // model rather than scattering into the distance, so it goes entirely.
         gsap.to(other.material, { opacity: 0, duration: 0.8, ease: 'power2.out' });
+        // The clicked pebble included: it has dissolved, and the project
+        // stands on its own in the fog
         gsap.to(other.userData.edges.material, {
-            opacity: other === cube ? 0.3 : 0,
+            opacity: 0,
             duration: 0.8,
             ease: 'power2.out',
         });
@@ -2268,6 +2473,7 @@ function closeProject() {
     tapHintNext = Infinity;
 
     if (cube && cube.userData.detail) cube.userData.detail.visible = false;
+    if (cube && cube.userData.dissolve) cube.userData.dissolve.visible = false;
 
     /**
      * The camera is still parked close against the clicked cube's own

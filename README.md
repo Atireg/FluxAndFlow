@@ -114,6 +114,9 @@ Catalog view
         a hovered cube just tints teal, no pulse
     [x] One cube at a time (any cube) glows orange and jumps, continuously,
         easing out of and back into its float
+    [x] Pebbles instead of cubes: smooth glass stones, each its own shape,
+        with a teal rim; a clicked one dissolves into a cloud of points that
+        turns into the project's inks as its own points gather
     [x] Every cube holds the little rock (one download, cloned)
     [x] An empty slot's click answers "Still empty..."
     [x] The orange cube shows a blinking "Project XX", gone once it settles;
