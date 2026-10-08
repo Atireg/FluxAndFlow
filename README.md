@@ -91,7 +91,7 @@ Catalog
         little rock; they float and rock, the pointer stirs them, no orbit;
         hover just tints
     [x] One pebble at a time glows orange and jumps; its "Project XX" hangs
-        below it on a thin string that ripples and swings
+        below it on a thin string that swings in gusts
     [x] Clicking a project: an instant boom, the others fall slowly, the
         clicked pebble dissolves into a cloud of points that becomes the
         project; opened projects' pebbles stay darker (remembered)

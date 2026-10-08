@@ -327,13 +327,15 @@ const TAG_STRING_LENGTH = 0.8; // as a share of the pebble's radius on screen
 const TAG_STRING_MIN = 22; // px
 const ROPE_SEGMENTS = 10;
 const ROPE_ITERATIONS = 12; // constraint passes per step - higher is less stretchy
-const ROPE_STIFFNESS = 0.1; // a thread's slight resistance to bending, once a step - curves, doesn't crinkle
-const TAG_WEIGHT = 5; // the tag against one point of string
-const TAG_GRAVITY = 2400; // px/s^2
-const TAG_DAMPING = 2.2; // per second
-const TAG_BREEZE = 240; // px/s^2 - uneven, and out of step along the string, so it ripples
+const ROPE_STIFFNESS = 0.05; // a thread's slight resistance to bending, once a step - curves, doesn't crinkle
+const TAG_WEIGHT = 2; // the tag against one point of string - light, so the string bellies in the wind
+const TAG_GRAVITY = 1500; // px/s^2
+const TAG_DAMPING = 0.9; // per second - swings carry on a while before settling
+const TAG_BREEZE = 900; // px/s^2 at the height of a gust
+const TAG_GUST = 0.35; // gusts per second, roughly - the wind rises and falls rather than blowing steadily
+const TAG_WAVE_LAG = 0.35; // seconds a gust takes to travel from the knot to the tag, so it ripples down
 const TAG_STEP = 1 / 120; // seconds per integration step
-const TAG_MAX_SWING = 0.7; // radians (~40 degrees) the tag may swing from under the knot
+const TAG_MAX_SWING = 0.95; // radians (~55 degrees) the tag may swing from under the knot
 const TAG_STILL = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const rope = { cube: null, points: [], pivotX: 0, pivotY: 0, lastTime: 0 };
 const tagPivot = new THREE.Vector3();
@@ -2135,6 +2137,16 @@ function screenPoint(vector) {
     return [(vector.x + 1) / 2 * screenWidth, (1 - vector.y) / 2 * screenHeight];
 }
 
+// The wind on the string at a moment: gusts that swell and die away (a slow
+// envelope, never quite still), each carrying a quicker flutter, mostly
+// blowing one way with the odd turn back. Roughly -1..1.
+function wind(t) {
+    const gust = 0.35 + 0.65 * Math.max(0, Math.sin(t * TAG_GUST * Math.PI * 2) * 0.6 + Math.sin(t * TAG_GUST * 4.1 + 1.7) * 0.4);
+    const sway = 0.65 * Math.sin(t * 1.1 + 0.4) + 0.35;
+    const flutter = 0.45 * Math.sin(t * 5.3) + 0.25 * Math.sin(t * 8.7 + 2.1);
+    return gust * (sway + flutter);
+}
+
 function hangSpotlightTag(cube, elapsedTime) {
     // Tied to the pebble's lower edge as seen from above - down the screen
     // is world +Z - just inside its rim
@@ -2183,8 +2195,7 @@ function hangSpotlightTag(cube, elapsedTime) {
         // pushed by a breeze that's a little out of step from one to the next
         for (let i = 1; i <= last; i++) {
             const p = points[i];
-            const breeze = TAG_STILL ? 0
-                : TAG_BREEZE * (Math.sin(t * 2.3 - i * 0.55) + 0.6 * Math.sin(t * 3.7 + 1.3 - i * 0.9)) * (i === last ? 0.4 : 1);
+            const breeze = TAG_STILL ? 0 : TAG_BREEZE * wind(t - (i / last) * TAG_WAVE_LAG);
             const nextX = p.x + (p.x - p.prevX) * keep + breeze * dt * dt;
             const nextY = p.y + (p.y - p.prevY) * keep + TAG_GRAVITY * dt * dt;
             p.prevX = p.x;

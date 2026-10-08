@@ -69,9 +69,10 @@ its "Tried and removed".
 - **Catalog.** Cubes became glass pebbles, each its own shape, rebuilt on
   one pure state function per frame: they float and rock, the pointer stirs
   them, nothing orbits, hover just tints. One pebble at a time glows orange
-  and jumps, its "Project XX" hanging below on a simulated string. Every
-  pebble holds the rock; empty slots say "Still empty...". Opened projects'
-  pebbles stay darker, remembered in the browser.
+  and jumps, its "Project XX" hanging below on a simulated string that
+  swings in gusts. Every pebble holds the rock; empty slots say "Still
+  empty...". Opened projects' pebbles stay darker, remembered in the
+  browser.
 - **Opening a project.** An instant boom, the others fall slowly while the
   camera moves in, and the clicked pebble dissolves into a cloud of points
   that turns into the project's own. Camera moves only tilt (the old 90°
