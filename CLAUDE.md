@@ -89,8 +89,8 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
   the role accurately once written** — the page implies authorship of
   whatever it shows.
 - `detailModel` should be a point-cloud `.glb`. If adding Draco compression
-  or quantization to a new model, read the "point cloud is quantized, not
-  Draco-compressed" entry in DECISIONS.md first — Draco does not apply to
+  or quantization to a new model, read the "Quantized, not Draco-compressed"
+  entry in DECISIONS.md first — Draco does not apply to
   non-indexed POINTS primitives at all.
 
 ## Things that will bite a fresh session
@@ -107,7 +107,7 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
   These two states are not interchangeable — check both before changing
   either. This only governs the square-on default: a project with its own
   `view` is framed on its cube with `VIEW_FRAME_MARGIN` instead (see
-  "A project can set its own camera angle" in DECISIONS.md).
+  "The default view, and a project's own `view`" in DECISIONS.md).
 - **The background is the page's CSS `--bg`, not the scene.** The renderer
   is transparent and there is nothing behind the cubes (an old `Sky` dome
   that painted a dark night was removed). The ground is light "paper", so
@@ -125,7 +125,7 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
   driving it through `.material.color` / `.opacity`. A pebble's resting look
   comes from `restingFaceColor` / `restingFaceOpacity` / `restingRimColor`
   (darker once visited) - don't write `cubesColor` back directly. See
-  DECISIONS.md, "The catalog's objects are pebbles".
+  DECISIONS.md, "Pebbles, and a clicked one dissolves into points".
 - **Faded pebble faces have `depthWrite = false`** while a project is open,
   restored on close. Without this an invisible face still occludes what's
   behind it.
@@ -134,16 +134,17 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
   calls) touches must be declared above it, or the page dies on load with a
   temporal-dead-zone error. This has happened three times.
 - **Cube state is recomputed from mode + clock every frame** (DECISIONS.md,
-  "A cube's visual state is a pure function"). A GSAP tween on a property
+  "A pebble's state is a pure function"). A GSAP tween on a property
   the per-frame update also writes gets silently overwritten - add a mode or
   keep the per-frame update out of that window instead.
 - **Safari can't be tested here.** Cloud sessions only have Chromium, and
   downloading Playwright's WebKit is blocked. Safari draws WebGL through
   Metal, which is strict where Chrome is lenient: keep GLSL inside defined
-  behaviour (no reversed `smoothstep` edges, no `pow(0, y)`), don't rely
-  on page order to stack the canvas over animating layers, and don't rely on
+  behaviour (no reversed `smoothstep` edges, no `pow(0, y)`), don't rely on
+  page order to stack the canvas over animating layers, and don't rely on
   `click` for taps on the canvas - iPhone/iPad Safari doesn't send it there;
-  use `pointerup` on the canvas. See DECISIONS.md, "Safari".
+  use `pointerup` on the canvas. See DECISIONS.md, "Safari: defined GLSL,
+  visible failures".
 - **No per-project URLs yet.** The catalog/detail state is not reflected in
   the address bar. Don't assume a project is linkable.
 
@@ -199,6 +200,6 @@ Testing tips learnt the hard way:
   (never committed) that freezes the slow rotation, finishes the gather
   instantly and exposes a hook to set `view`; render candidates at the
   screenshot's own CSS viewport and score by mask overlap (IoU) of the
-  points' colours. DECISIONS.md, "A project can set its own camera angle".
+  points' colours. DECISIONS.md, "The default view, and a project's own `view`".
 - Don't leave debug hooks or `console.log`s in a merge - one shipped to the
   live site once.

@@ -59,76 +59,43 @@ list.
 
 ---
 
-## Session 2 — 2026-10-04 / 2026-10-07
+## Session 2 — 2026-10-04 / 2026-10-08
 
-`e0c070e`..(branch head) (branch `ccr-584d8563-rtv32f`, fast-forward merged
-to `main` on each "merge and build" - `git log origin/main..` shows anything
-not yet live). Every feature below has a DECISIONS.md entry; features that
-were tried and removed are listed under "Tried and removed" there.
+`e0c070e`..(branch head) on `ccr-584d8563-rtv32f`, fast-forward merged to
+`main` on each "merge and build" (`git log origin/main..` shows anything
+not yet live). The why is in DECISIONS.md; rejected iterations are under
+its "Tried and removed".
 
-- **Drawer on the live site.** The About handle was missing because every
-  description field was empty (by design - `hasDescription`). Filled with
-  unmistakable `[PLACEHOLDER ...]` text to prove the drawer works; the real
-  copy is still to come.
-- **Catalog motion**, rebuilt as one pure state function per frame (which
-  fixed two old hover bugs): a bigger, rocking wander; the pointer stirs
-  nearby cubes like a hand through water; no orbit in the grid; a hovered
-  cube just tints, no pulse. A continuous spotlight: any cube glows orange
-  and jumps, one at a time, its "Project XX" name hanging below it on a
-  thin, rippling string, swinging and blinking in step, then eases back into
-  its float.
-- **Pebbles instead of cubes**, after five organic options were rendered to
-  choose from: glass stones with a teal rim in the grid; a clicked one
-  dissolves into a cloud of points that becomes the project's own. A
-  pebble whose project has been opened stays darker, remembered in the
-  browser.
-- **Every cube holds the little rock** (one download, cloned). Clicking an
-  empty slot says "Still empty...".
-- **The send-off**: an instant boom knocks the other cubes out and up, they
-  hang, then fall slowly and straight off the screen while the camera is
-  already moving in.
-- **Camera fixes.** The 90° roll on opening/closing is gone at its source
-  (the detail camera now looks along the catalog's screen-up; every animated
-  move goes through `moveCamera`, which slerps). The closing fade no longer
-  pops the grid in at full opacity. The bar title crossfades and stays on
-  one line.
-- **Project view.** The model turns slowly; opening the drawer moves the
-  model left, whole, on a wide screen and pulls into a close-up on a phone;
-  double-click / double-tap zooms to a spot and back, hinted at every 5s by
-  a white touch point with a black outline; a grey fog (a CSS layer, not
-  scene fog) rolls in behind the project; the drawer holds five pictures of
-  Rock Print supplied by the user, sized for the web.
-- **Rock Print.** Its points gather out of a scattered cloud on every open
-  (vertex shader, `gather: true`); they're three random inks (dark red,
-  orange, grey) in three random sizes, semi-transparent. It lands on its own
-  `view`, fitted by mask-overlap scoring to a phone screenshot the user
-  supplied (which added `zoom` and `lift`), and once gathered the camera
-  slowly nods up and down (`view.sway`, 13° either side over 16s).
-- **Safari.** Rock Print reportedly didn't load there, and tapping its cube
-  did nothing. Selection now answers the canvas's own `pointerup` instead of
-  a window `click`, which iPhone/iPad Safari doesn't send for a tap on a
-  plain canvas. Fixed blind (no WebKit here), along with spec-defined shader
-  code, the fog explicitly under the canvas, and load/shader failures shown
-  in the project bar. Still to confirm on a real Safari.
-- **Loading.** An inline start-up loader ("flux and flow" particle streams,
-  real progress), held for at least 5s with the bar paced to fill over them.
-  `?cloudtest` measured ten full clouds at start-up as far too heavy, so
-  clouds load only on click.
-- **The whole site is paper**: dark ink on a warm light ground, orange for
-  invitations. The old dark background was a three.js `Sky` dome (removed);
-  additive blending is gone because it draws nothing on paper; scene
-  colours go through `screenColor()`.
-- **Docs**: DECISIONS.md regrouped with a contents list and a "Tried and
-  removed" section (where every rejected iteration of this session is
-  listed), README's TODO split into next up / open / done, CLAUDE.md given
-  "Where to pick up" and testing tips.
+- **Catalog.** Cubes became glass pebbles, each its own shape, rebuilt on
+  one pure state function per frame: they float and rock, the pointer stirs
+  them, nothing orbits, hover just tints. One pebble at a time glows orange
+  and jumps, its "Project XX" hanging below on a simulated string. Every
+  pebble holds the rock; empty slots say "Still empty...". Opened projects'
+  pebbles stay darker, remembered in the browser.
+- **Opening a project.** An instant boom, the others fall slowly while the
+  camera moves in, and the clicked pebble dissolves into a cloud of points
+  that turns into the project's own. Camera moves only tilt (the old 90°
+  roll fixed at its source); a grey CSS fog rolls in behind.
+- **Rock Print.** Points gather out of a scattered cloud, in three inks and
+  sizes; it lands on a view fitted to the user's phone screenshot, turns
+  slowly while the camera nods (`view.sway`). Double-click / double-tap
+  zoom, hinted by a white touch point. The drawer moves the model left on a
+  wide screen, a close-up on a phone, and holds five photos; its text is
+  still a placeholder.
+- **Site.** "Paper" palette throughout (the dark `Sky` dome removed); an
+  inline start-up loader with real progress, at least 5s; clouds load only
+  on click after `?cloudtest` measured the alternative.
+- **Safari.** Tapping a pebble did nothing there: selection now uses the
+  canvas's `pointerup`, not a window `click`. Shaders made spec-defined and
+  failures made visible too. Fixed blind; still to confirm.
+- **Docs.** DECISIONS regrouped (contents, "Tried and removed") and purged
+  to what's current; README's TODO split into next up / open / done;
+  CLAUDE.md gained "Where to pick up" and testing tips.
 
 Open at end of session (see README, "Next up"):
-- Rock Print's five drawer pictures have no captions or photo credits yet.
-- Rock Print on Safari: confirm the blind fix works.
-- Rock Print's copy is still placeholder text, live; the role must be stated
-  accurately once written.
+- Rock Print on Safari: confirm the fix.
+- Rock Print's real copy (live text is placeholder; state the role
+  accurately), and captions/credits for its five photos.
 - Model licensing/attribution for the public .glb is unchecked.
+- A drawer video was discussed, not added - README has the agreed approach.
 - No per-project URLs; `?cloudtest` and `src/loader/` (dead code) can go.
-- A video for the drawer was discussed, not added - see README for the
-  agreed approach.
