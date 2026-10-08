@@ -30,7 +30,7 @@ let screenWidth = window.innerWidth;
 let screenHeight = window.innerHeight;
 let aspectRatio = screenWidth / screenHeight;
 const cubeSize = 5;
-const spacing = 1.2;
+const spacing = 1.4; // centre to centre, in cubeSizes - 1.2 felt crowded
 
 /**
  * Catalog slots
@@ -617,6 +617,23 @@ function addGatherAttributes(geometry) {
     geometry.setAttribute('aGatherDelay', new THREE.BufferAttribute(delay, 1));
 }
 
+// The handover from the clicked pebble's dissolve to the project's own
+// cloud: over this long from the moment the project's points appear, they
+// fade in while the dissolve's fade out, so the two clouds never sit on top
+// of each other at full strength
+const REVEAL_DURATION = 1; // seconds
+
+function revealAt(since) {
+    const t = Math.min(Math.max(since / REVEAL_DURATION, 0), 1);
+    return t * t * (3 - 2 * t);
+}
+
+function setReveal(model, reveal) {
+    model.userData.pointMaterials?.forEach((material) => {
+        material.uniforms.uReveal.value = reveal;
+    });
+}
+
 function setGather(model, progress) {
     // A cloud loaded without gather attributes would fly in from its origin
     if (!model.userData.gathers) return;
@@ -634,10 +651,10 @@ function setGather(model, progress) {
  * detail view frames, since a mesh comes in whatever units it was drawn in.
  * A point cloud is left exactly as it is.
  */
-const MESH_SAMPLE_POINTS = 60000;
+const MESH_SAMPLE_POINTS = 20000; // a project can ask for more or fewer (`points`)
 const MESH_FIT_SIZE = cubeSize; // the model's longest side
 
-function pointsFromMeshes(root) {
+function pointsFromMeshes(root, total = MESH_SAMPLE_POINTS) {
     root.updateMatrixWorld(true);
 
     const meshes = [];
@@ -661,14 +678,14 @@ function pointsFromMeshes(root) {
     const areas = meshes.map(area);
     const totalArea = areas.reduce((sum, value) => sum + value, 0) || 1;
 
-    const positions = new Float32Array(MESH_SAMPLE_POINTS * 3);
+    const positions = new Float32Array(total * 3);
     const point = new THREE.Vector3();
     let written = 0;
 
     meshes.forEach((mesh, index) => {
         const count = index === meshes.length - 1
-            ? MESH_SAMPLE_POINTS - written
-            : Math.round(MESH_SAMPLE_POINTS * areas[index] / totalArea);
+            ? total - written
+            : Math.round(total * areas[index] / totalArea);
         const sampler = new MeshSurfaceSampler(mesh).build();
 
         for (let i = 0; i < count; i++, written++) {
@@ -700,6 +717,7 @@ function loadPointCloudWithShaderMaterial({
     onProgress,
     onError,
     gather = false,
+    points,
 }) {
     gltfLoader.load(glbPath, (gltf) => {
         const materials = [];
@@ -707,7 +725,7 @@ function loadPointCloudWithShaderMaterial({
         let hasPoints = false;
         gltf.scene.traverse((child) => { if (child.isPoints) hasPoints = true; });
         if (!hasPoints) {
-            const sampled = pointsFromMeshes(gltf.scene);
+            const sampled = pointsFromMeshes(gltf.scene, points);
             if (!sampled) {
                 onError?.(new Error('No points or meshes in the model'));
                 return;
@@ -778,6 +796,7 @@ function loadPointCloudWithShaderMaterial({
                         uSizeAttenuation: { value: 1 },
                         // Starts scattered if it's going to gather, home otherwise
                         uGather: { value: gather ? 0 : 1 },
+                        uReveal: { value: 0 }, // see REVEAL_DURATION
                         uGatherSpread: { value: GATHER_SPREAD },
                         uGatherSwirl: { value: GATHER_SWIRL },
                     },
@@ -1067,7 +1086,7 @@ const WANDER_Y_PERIOD_B = [14, 24];
 const WANDER_Y_AMPLITUDE_A = 1.4; // units
 const WANDER_Y_AMPLITUDE_B = 0.6;
 const WANDER_XZ_PERIOD = [9, 16];
-const WANDER_XZ_AMPLITUDE = 0.38; // horizontal sway - kept under half the 1-unit gap between cubes
+const WANDER_XZ_AMPLITUDE = 0.38; // horizontal sway - well under half the gap between pebbles
 const WANDER_TILT_PERIOD = [7, 12];
 const WANDER_TILT = 0.05; // radians - a floating thing rocks a little as it drifts
 
@@ -1321,8 +1340,14 @@ function updateDissolve(elapsedTime) {
     points.visible = t < 1;
     if (!points.visible) return;
 
+    // Giving way to the project's own points as they appear (REVEAL_DURATION)
+    const detail = droppingFrom.userData.detail;
+    const shown = viewState === 'detail' && selectedCube === droppingFrom && detail?.visible;
+    const reveal = shown ? revealAt(elapsedTime - droppingFrom.userData.detailRotateStartTime) : 0;
+
     const uniforms = points.material.uniforms;
     uniforms.uT.value = t;
+    uniforms.uOpacity.value = POINT_OPACITY * (1 - reveal);
     uniforms.uPixelsPerUnit.value = renderer.domElement.height / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov ?? 45) / 2));
 }
 
@@ -1991,6 +2016,7 @@ function animate() {
             // Replays from scattered each time the project opens, since
             // detailRotateStartTime is reset whenever the model is shown
             setGather(selectedCube.userData.detail, Math.min(since / GATHER_DURATION, 1));
+            setReveal(selectedCube.userData.detail, revealAt(since));
 
             maybeShowTapHint(selectedCube.userData.detail, since);
             updateSway(selectedCube.userData.project, since, elapsedTime);
@@ -2768,6 +2794,7 @@ function openProject(cube) {
         glbPath: assetUrl(project.detailModel),
         parentObject: cube,
         gather: Boolean(project.gather),
+        points: project.points,
         // Say so rather than leave "Loading model" up forever, and keep the
         // real error for the browser's console
         onError: (error) => {

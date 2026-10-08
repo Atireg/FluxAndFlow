@@ -75,6 +75,7 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
             lift: { stacked: 0.14, side: 0 },             // raised on screen (share of height)
             sway: 13 },                                    // camera nods ± degrees, slowly
     gather: true,                                 // optional: points gather from a scattered cloud on open
+    // points: 20000,                             // optional, a mesh detailModel only: how many points to sample
     images: [{ src: 'images/x.jpg', alt: '', caption: '', ratio: '3 / 2' }],  // drawer pictures; no src = empty frame
 }
 ```
@@ -104,8 +105,9 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
   whatever it shows.
 - `detailModel` is a `.glb` in `static/models/`: a point cloud (Rock
   Print) or a plain mesh (Emergent Space), whose surface is sampled into
-  points as it loads, centred and scaled to fit - see "A mesh becomes points
-  as it loads" in DECISIONS.md. Give a new model a `view` (even just
+  points as it loads (`MESH_SAMPLE_POINTS`, 20,000, or the project's
+  `points`), centred and scaled to fit - see "A mesh becomes points as it
+  loads" in DECISIONS.md. Give a new model a `view` (even just
   `{ elevation: 25 }`): without one the fit is the model's box at the
   moment it opens, and a long shape runs off a phone screen as it turns.
   If adding Draco or quantization to a cloud, read "Quantized, not
@@ -238,8 +240,9 @@ Testing tips learnt the hard way:
   opacity above 0.9 once a project is open - not on fixed timeouts.
 - **Finding a pebble to click**: hover shows nothing, so no label gives a
   pebble away. The grid is row-major and centred; slot 0 sits around
-  (330, 190) at 1280x800 and (120, 155) at 390x844, slot 1 one step right
-  (~(550, 200) and ~(270, 150)) - near enough despite the float.
+  (310, 185) at 1280x800 and (80, 139) at 390x844, slot 1 one step right
+  (~(512, 183) and ~(260, 138)) - near enough despite the float. They move
+  if `spacing` or the grid's fit changes: screenshot the catalog first.
 - **Visited pebbles persist** in `localStorage` within a Playwright
   context: open a project and every later page in that context shows its
   pebble darker. Use a fresh context for a clean grid.

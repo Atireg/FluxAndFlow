@@ -79,9 +79,14 @@ grid; renaming would have touched most of the file for nothing.
 - **Dissolve** (`getDissolve`, built once per pebble): on click the glass,
   rim and rock fade over `DISSOLVE_FADE` while `DISSOLVE_POINTS` points on
   the surface swell, drift and turn from teal to the project's inks, gone by
-  `DISSOLVE_DURATION` (3.6s) - overlapping the project's own gather in the
-  same place, so one cloud reads as becoming the other. Pure function of
-  time since the click (`updateDissolve`); closing hides it.
+  `DISSOLVE_DURATION` (3.6s) - in the same place as the project's own
+  gather, so one cloud reads as becoming the other. Pure function of time
+  since the click (`updateDissolve`); closing hides it.
+- **A handover, not an overlap.** At full strength both clouds on top of
+  each other looked muddy, so once the project's points appear they fade
+  in over `REVEAL_DURATION` (1s, `uReveal` in the cloud's shader, from
+  `revealAt`) while the dissolve's fade out over the same second. If the
+  model is still downloading, the dissolve simply runs on.
 - **No frame in the project view.** The pebble has dissolved; the project
   stands alone in the fog. Framing still fits the invisible cubeSize box.
 - **Visited pebbles stay darker**, like visited links: once its project has
@@ -100,7 +105,10 @@ A fixed number of slots
 the arrangement (`computeGridShape` picks the column count closest to the
 viewport's proportions, `fitCameraToGrid` frames it). Sizing the grid from
 the viewport instead gave 0 pebbles on a portrait phone. A project's `slot`
-is stable; its on-screen place isn't, but the order is row-major.
+is stable; its on-screen place isn't, but the order is row-major. Pebbles
+sit `spacing` (1.4) cubeSizes apart, centre to centre - 1.2 felt crowded;
+`fitCameraToGrid` pulls back to fit whatever the spacing, so they get
+smaller on screen as it grows.
 
 
 A pebble's state is a pure function of its mode and the clock
@@ -416,7 +424,8 @@ Emergent Space's `aggregate.glb` came as a plain triangle mesh from Blender
 (36 KB, ~1,250 vertices, ~115 units across), not a point cloud. Rather than
 convert it offline, `loadPointCloudWithShaderMaterial` turns any `.glb` with
 no POINTS in it into a cloud (`pointsFromMeshes`): `MESH_SAMPLE_POINTS`
-(60,000) points scattered over the surface with three.js's
+(20,000; a project's `points` overrides it - 60,000 read too dense on the
+aggregate's thin arms) points scattered over the surface with three.js's
 `MeshSurfaceSampler`, shared between meshes by area, in world space (so the
 file's own rotation holds), then centred and scaled so the longest side is
 `MESH_FIT_SIZE` (cubeSize), since a mesh arrives in whatever units it was

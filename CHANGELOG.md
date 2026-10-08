@@ -67,18 +67,19 @@ not yet live). The why is in DECISIONS.md; rejected iterations are under
 its "Tried and removed".
 
 - **Catalog.** Cubes became glass pebbles, each its own shape, rebuilt on
-  one pure state function per frame: they float and rock, the pointer
-  stirs them, nothing orbits. One pebble at a time glows orange and jumps,
-  its name (the project's title, or "Project XX") hanging below on a soft,
-  simulated string that swings in gusts, tied on with a dot; hover changes
-  nothing. Names scale with the pebbles on screen and draw over them.
-  Pebbles hold the rock or the project's own model; empty slots say "Still
-  empty...". Opened projects' pebbles stay darker, remembered in the
-  browser. Smaller pebbles among them came and went.
+  one pure state function per frame: they float and rock, the pointer stirs
+  them, nothing orbits; spaced wider (1.4). One pebble at a time glows
+  orange and jumps, its name (the project's title, or "Project XX") hanging
+  below on a soft, simulated string that swings in gusts, tied on with a
+  dot; hover changes nothing. Names scale with the pebbles on screen and
+  draw over them. Pebbles hold the rock or the project's own model; empty
+  slots say "Still empty...". Opened projects' pebbles stay darker,
+  remembered in the browser. Smaller pebbles among them came and went.
 - **Opening a project.** An instant boom, the others fall slowly while the
   camera moves in, and the clicked pebble dissolves into a cloud of points
-  that turns into the project's own. Camera moves only tilt (the old 90°
-  roll fixed at its source); a grey CSS fog rolls in behind.
+  that hands over to the project's own (a crossfade, not an overlap). Camera
+  moves only tilt (the old 90° roll fixed at its source); a grey CSS fog
+  rolls in behind.
 - **Rock Print.** Points gather out of a scattered cloud, in three inks and
   sizes; it lands on a view fitted to the user's phone screenshot, turns
   slowly (80s a turn) while the camera nods (`view.sway`). Double-click /
@@ -86,7 +87,7 @@ its "Tried and removed".
   drawer moves the model left on a wide screen, a close-up on a phone, and
   holds five photos; its text is still a placeholder.
 - **Emergent Space** (slot 1), the second project: the user's aggregate,
-  a plain mesh sampled into a point cloud as it loads - any mesh .glb now
+  a plain mesh sampled into a 20k point cloud as it loads - any mesh .glb now
   works. Its pebble holds the aggregate itself, in the rock's ink
   (`thumbSize`).
 - **Site.** "Paper" palette throughout (the dark `Sky` dome removed); an
