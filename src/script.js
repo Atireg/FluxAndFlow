@@ -1223,7 +1223,7 @@ const PEBBLE_RIM_POWER = 2.4; // how tightly the rim hugs the silhouette
  * glass), off one shared clock - a pure function of time, nothing stored.
  * Clicking and hovering still use the resting shape, near enough.
  */
-const PEBBLE_FLUX = 0.09; // how far the surface moves, as a share of the radius
+const PEBBLE_FLUX = 0.15; // how far the surface moves, as a share of the radius - 0.09 read as too subtle
 const PEBBLE_FLUX_SPEED = 0.5; // radians a second, roughly - a wave every ~12s
 const pebbleFluxTime = { value: 0 }; // shared by every pebble's materials, set each frame
 
