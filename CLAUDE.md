@@ -67,6 +67,7 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
     body: [],                                     // array of paragraph strings
     credits: '',
     thumbModel: 'models/rock.gltf',               // small model shown in the catalog pebble
+    thumbSize: 2.4,                               // optional: fit thumbModel to this longest side, in the rock's ink
     detailModel: 'models/RockPrintStructureReduced.glb',  // loaded on click
     view: { elevation: 58, azimuth: 4, turn: 102,      // optional camera angle, degrees,
             zoom: { stacked: 1.75, side: 1.4 },            // closer than the cube's fit

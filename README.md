@@ -63,8 +63,8 @@ Navigation and general layout
 
 Catalog view
     [ ] The element of surprise or discovery - when hovered on a cube add little 3D objects representing each project (e.g. a rock, an aggregate, a spider...)
-        (every pebble holds the rock for now, empty slots included; the
-        aggregate's own mesh could be its pebble's thumbnail, scaled down)
+        (the aggregate's pebble holds the aggregate (`thumbSize`); every
+        other pebble, empty slots included, holds the rock)
     [ ] Add a "magic/mystery" appearance (e.g. fog shader or lights)
         (scene fog is off for a reason - see DECISIONS.md before re-adding)
     [ ] Change the shape of the cubes when hovering on them
@@ -112,7 +112,7 @@ Project view
         gather from a scattered cloud, in three inks and three sizes; it
         turns slowly (a turn every 80s) while the camera nods (`view.sway`)
     [x] The aggregate (slot 1), from a plain mesh sampled into 60k points
-        as it loads
+        as it loads; its own mesh, in the rock's ink, in its pebble
     [x] A grey fog rolls in behind the project
     [x] The About drawer: model moves left and stays whole on a wide screen,
         a close-up on a phone; five pictures in it

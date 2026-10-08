@@ -86,7 +86,8 @@ its "Tried and removed".
   drawer moves the model left on a wide screen, a close-up on a phone, and
   holds five photos; its text is still a placeholder.
 - **The aggregate** (slot 1), the second project: the user's plain mesh,
-  sampled into a point cloud as it loads - any mesh .glb now works.
+  sampled into a point cloud as it loads - any mesh .glb now works. Its
+  pebble holds the aggregate itself, in the rock's ink (`thumbSize`).
 - **Site.** "Paper" palette throughout (the dark `Sky` dome removed); an
   inline start-up loader with real progress, at least 5s; clouds load only
   on click after `?cloudtest` measured the alternative.

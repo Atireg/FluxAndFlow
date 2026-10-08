@@ -19,7 +19,7 @@ The catalog (the grid of pebbles - "cubes" in the code)
 - The spotlight: any pebble, held still, in the one orange
 - The glowing pebble's name hangs on a string
 - The pointer stirs the grid; the grid doesn't orbit
-- Every pebble holds the rock, from one download
+- Every pebble holds its thumbnail - the rock, or the project's own model
 - "Still empty...", and tags as HTML over the canvas
 - Selecting: pointerup on the canvas, and drags don't count
 - Clicking a project knocks the rest of the grid off the screen
@@ -243,14 +243,24 @@ The pointer stirs the grid; the grid doesn't orbit
   `animate()` (see the TDZ note in CLAUDE.md).
 
 
-Every pebble holds the rock, from one download
-----------------------------------------------
+Every pebble holds its thumbnail - the rock, or the project's own model
+------------------------------------------------------------------------
 
 Empty slots use `EMPTY_SLOT_THUMB` (the same rock). `loadThumb` keeps one
 promise per path and each pebble adds a `clone()`, so ten rocks are one
-187 KB download. `EMPTY_SLOT_THUMB` and `thumbScenes` sit up with the
-projects because `createPlayground()` runs before the rest of the file
-(TDZ). A binary `.glb` would be about a quarter smaller than the `.gltf`.
+187 KB download. `EMPTY_SLOT_THUMB`, `THUMB_INK` and `thumbScenes` sit up
+with the projects because `createPlayground()` runs before the rest of the
+file (TDZ). A binary `.glb` would be about a quarter smaller than the
+`.gltf`.
+
+A project with `thumbSize` shows its own model instead (the aggregate:
+`thumbModel` is the same `.glb` its project view samples into points). It's
+centred and scaled to that longest side, whatever units it was drawn in,
+and drawn in the rock's ink as it appears on screen (`THUMB_INK`, an unlit
+colour) rather than the file's own material - the aggregate's was a bright,
+glossy red. Without `thumbSize` the thumbnail is placed as the rock always
+was (0.2 scale, 1 unit down). Either way the spotlight pulses it from
+`contentBaseScale`.
 
 
 "Still empty...", and tags as HTML over the canvas

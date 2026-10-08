@@ -248,7 +248,10 @@ const projects = [
         body: [],
         credits: '',
 
-        thumbModel: 'models/rock.gltf',
+        // Its own mesh in its pebble, centred and scaled to this longest
+        // side (units; the pebble is 4.4 across) - see addContentToCube
+        thumbModel: 'models/aggregate.glb',
+        thumbSize: 2.4,
         // A plain mesh, not a point cloud: its surface is sampled into
         // points as it loads (see pointsFromMeshes)
         detailModel: 'models/aggregate.glb',
@@ -299,6 +302,11 @@ const projectBySlot = new Map(catalogProjects.map((project) => [project.slot, pr
 // The thumbnail for a slot with no project yet - every cube gets something
 // inside it, so the grid reads as full rather than as one find among blanks
 const EMPTY_SLOT_THUMB = 'models/rock.gltf';
+
+// A project's own thumbnail (`thumbSize`) is drawn in the rock's ink - its
+// colour on screen - whatever the file's own material, so the grid reads
+// as one set
+const THUMB_INK = new THREE.MeshBasicMaterial({ color: screenColor(23, 62, 101) });
 
 // Up here, not next to loadThumb: createPlayground() runs before that
 // part of the file has executed.
@@ -1555,12 +1563,35 @@ function addContentToCube(cube) {
     loadThumb(path).then((scene) => {
         if (!scene) return;
 
-        const content = scene.clone();
-        content.position.set(0, -1, 0);
-        content.scale.set(0.2, 0.2, 0.2);
+        const size = cube.userData.project?.thumbSize;
+        let content;
+
+        if (size) {
+            // Any model, in whatever units it was drawn: centred, its longest
+            // side `thumbSize`, in the rock's ink
+            const model = scene.clone();
+            const box = new THREE.Box3().setFromObject(model);
+            const extent = box.getSize(new THREE.Vector3());
+            model.position.copy(box.getCenter(new THREE.Vector3())).negate();
+            model.traverse((child) => { if (child.isMesh) child.material = THUMB_INK; });
+
+            const fitted = new THREE.Group();
+            fitted.scale.setScalar(size / (Math.max(extent.x, extent.y, extent.z) || 1));
+            fitted.add(model);
+
+            content = new THREE.Group();
+            content.add(fitted);
+            cube.userData.contentBaseScale = 1;
+        } else {
+            // The rock, as drawn
+            content = scene.clone();
+            content.position.set(0, -1, 0);
+            cube.userData.contentBaseScale = 0.2;
+        }
+
+        content.scale.setScalar(cube.userData.contentBaseScale);
         cube.add(content);
         cube.userData.content = content;
-        cube.userData.contentBaseScale = 0.2;
 
         // A project already open hides every cube's thumbnail; one that
         // arrives late must not pop back in
