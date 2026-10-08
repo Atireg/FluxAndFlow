@@ -241,13 +241,20 @@ const projects = [
     {
         id: 'emergent-space',
         slot: 1,
-        // No text yet, so no drawer
         title: 'Emergent Space',
-        year: '',
-        role: '',
-        context: '',
-        body: [],
-        credits: '',
+
+        // TEMP: placeholder text so the About drawer exists - unmistakably
+        // fake on purpose, to be replaced with the real copy. State the
+        // role accurately. See README.md.
+        year: '[PLACEHOLDER YEAR]',
+        role: '[PLACEHOLDER ROLE - replace before publishing]',
+        context: '[PLACEHOLDER CONTEXT]',
+        body: [
+            '[PLACEHOLDER BODY TEXT] A description of Emergent Space goes '
+            + 'here: the designed aggregate, how the pieces interlock, and '
+            + 'what the project explores.',
+        ],
+        credits: '[PLACEHOLDER CREDITS]',
 
         // Its own mesh in its pebble, centred and scaled to this longest
         // side (units; the pebble is 4.4 across) - see addContentToCube
@@ -258,7 +265,7 @@ const projects = [
         detailModel: 'models/aggregate.glb',
         // Framed on its cube, so the pile stays in frame as it turns, and
         // seen from above enough to read the surface and how they interlock
-        view: { elevation: 30, zoom: { side: 1.5, stacked: 1.05 } },
+        view: { elevation: 30, zoom: { side: 1.5, stacked: 1.05 }, closeup: false },
         // Fewer than a mesh gets by default - its arms are thin, and more
         // read as solid rods rather than a cloud. Per aggregate.
         points: 8000,
@@ -1866,7 +1873,9 @@ function frameDetail(object, { duration = 1.6, ease } = {}) {
  * narrow one it covers the lower half, and the close-up is what fits.
  */
 function frameWithDrawerOpen(cube, options) {
-    if (getPanelLayout().mode === 'side') {
+    // A project can ask for the whole model above the drawer on a phone too
+    // (`view.closeup: false`) - a close-up of a pile shows a couple of rods
+    if (getPanelLayout().mode === 'side' || cube.userData.project?.view?.closeup === false) {
         frameDetail(cube, options);
     } else {
         frameDetailCloseup(cube, options);

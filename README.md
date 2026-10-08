@@ -38,7 +38,10 @@ Next up (waiting on content)
         credits. The fields hold unmistakable [PLACEHOLDER ...] text, put
         there to check the drawer works on the live site - it is live and
         needs replacing. State the role accurately
-    [ ] Emergent Space (slot 1): its text - with none it has no drawer
+    [ ] Write the real copy for Emergent Space (slot 1) - year, role,
+        context, body, credits. Like Rock Print's, the fields hold
+        [PLACEHOLDER ...] text so the About drawer exists; it needs
+        replacing. Pictures for its drawer too, if wanted
     [ ] Check the licensing/attribution for the Rock Print and Emergent
         Space models now that the repository is public and the site serves
         them

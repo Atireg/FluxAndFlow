@@ -89,10 +89,11 @@ its "Tried and removed".
 - **Emergent Space** (slot 1), the second project: three of the user's
   aggregates dropped onto a surface with live physics (cannon-es, loaded
   only for it), falling into view in slow motion once the camera has
-  arrived, tumbling into an interlocked pile, then turning - a new drop
-  each time. Each is a plain mesh sampled into 8,000 points as it
-  loads - any mesh .glb now works. Its pebble holds the aggregate itself,
-  in the rock's ink (`thumbSize`).
+  arrived, tumbling into an interlocked pile, then turning - a new drop each
+  time. Each is a plain mesh sampled into 8,000 points as it loads - any
+  mesh .glb now works. Its pebble holds the aggregate itself, in the rock's
+  ink (`thumbSize`). An About drawer with placeholder text, to be replaced;
+  on a phone it shows the whole pile above it rather than a close-up.
 - **Site.** "Paper" palette throughout (the dark `Sky` dome removed); an
   inline start-up loader with real progress, at least 5s; clouds load only
   on click after `?cloudtest` measured the alternative.
@@ -110,7 +111,7 @@ Open at end of session (see README, "Next up"):
 - Safari: confirm the tap and the stacking fixes.
 - Rock Print's real copy (live text is placeholder; state the role
   accurately), and captions/credits for its five photos; Emergent Space's
-  text.
+  real copy (its drawer is placeholder too).
 - Emergent Space's physics drop: confirm it runs smoothly on a real phone.
 - Model licensing/attribution for the public .glb files is unchecked.
 - A drawer video was discussed, not added - README has the agreed approach.

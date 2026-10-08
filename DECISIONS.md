@@ -358,7 +358,10 @@ phone the drawer covers the lower half, so it's the close-up
 (`frameDetailCloseup`: `CLOSEUP_ELEVATION` 38° on the project's heading,
 `CLOSEUP_DISTANCE_FACTOR` of its radius) - an atmospheric crop, not the
 whole piece. Rock Print's steeper angle left only fragments of pillars
-there, hence the fixed elevation.
+there, hence the fixed elevation. A close-up of Emergent Space's pile showed
+just a couple of rods, so a project can opt out with `view.closeup: false`:
+its phone layout then fits the whole model into the strip above the drawer
+(`frameDetail`, which allows for the drawer's height).
 
 
 The model turns; the camera nods (`view.sway`)
