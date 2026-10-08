@@ -212,17 +212,23 @@ Every ~5.3-5.6s one cube glows orange and jumps, then the next takes over.
   name with it; "Still empty..." wins on the same cube.
 - **The name hangs on a thin string and dances.** Sitting on the face, it
   was orange text on a glowing orange pebble and hard to read, so it hangs
-  below the pebble on the paper instead (`hangSpotlightTag`): an SVG line
-  (`#spotlight-string`) from just inside the pebble's lower rim to the tag,
-  which turns with the string about its top centre. It's a pendulum in
-  screen pixels - Verlet steps of `TAG_STEP` with `TAG_GRAVITY` and
-  `TAG_DAMPING`, the string's length a share of the pebble's size on
-  screen - so the pebble's jump and rock jerk the pivot and the tag swings,
-  overshoots and settles, and a faint uneven breeze (`TAG_BREEZE`, off
-  under reduced motion) keeps it moving in between. The pivot is spread
-  across the steps and the swing capped at `TAG_MAX_SWING` (~40 degrees):
-  without them a slow frame yanked the string and flipped the tag past
-  horizontal. Like the flow it has memory, so it's integrated, not a pure
+  below the pebble on the paper instead (`hangSpotlightTag`), from a knot
+  just inside the pebble's lower rim. The string is a real rope, not a line
+  (a straight pendulum read as a rod, and was asked to be "really like a
+  string"): `ROPE_SEGMENTS` points in screen pixels, Verlet steps of
+  `TAG_STEP` with `TAG_GRAVITY` and `TAG_DAMPING`, held to their link length
+  over `ROPE_ITERATIONS` passes with the knot pinned and the tag a heavier
+  end (`TAG_WEIGHT`), plus a little bending stiffness (`ROPE_STIFFNESS`,
+  once a step - applied every pass it went rigid again). A breeze that's
+  out of step from point to point (`TAG_BREEZE`, off under reduced motion)
+  sends ripples down it, and the pebble's jump and rock jerk the knot, so it
+  bows, S-curves, goes briefly slack and settles. It's drawn as one smooth
+  Catmull-Rom curve (`#spotlight-string`). The tag turns about its top
+  centre with the string's overall lean plus a little of its lower stretch
+  - following only the last link, it spun sideways whenever the end
+  kinked. The knot is spread across the steps and the swing and turn
+  capped at `TAG_MAX_SWING` (~40 degrees): without that a slow frame yanked
+  the string and flipped the tag past horizontal. Like the flow it has memory, so it's integrated, not a pure
   function of the clock; it starts hanging straight down for each new
   pebble. The text is `--warm-text`, the invitation's orange a shade deeper
   for text on paper, with a soft paper halo; the string's opacity follows
@@ -939,8 +945,8 @@ previewed, and taken out at the user's request.
   grey, before it became white with a black outline. Also: the hint stopping
   for good once the visitor had zoomed, and skipping while zoomed in.
 - **A white chip behind the orange cube's "Project XX"**, then the name as
-  bare orange text sitting on the glowing face (unreadable on orange) - now
-  it hangs below on a string.
+  bare orange text sitting on the glowing face (unreadable on orange), then
+  hung on a straight, rod-like line - now it hangs on a simulated string.
 - **The close-up beside the drawer on a wide screen**: it cut the pavilion
   off under the drawer; the whole model now moves left instead. (Phones
   keep the close-up.)

@@ -314,22 +314,28 @@ let emptyTagShownAt = 0;
 const spotlightTag = document.querySelector('#spotlight-tag');
 const SPOTLIGHT_TAG_MIN = 0.2; // the name's opacity at the low of each blink, relative to the spotlight's strength
 
-// The glowing pebble's name hangs below it on a thin string and swings: a
-// pendulum simulated in screen pixels, its pivot the pebble's lower edge.
-// The pebble's jump and rock jerk the pivot about, and a faint, uneven
-// breeze keeps it moving in between - so it dances with the pebble. This
-// has memory (like the flow), so it's integrated in fixed small steps; it
-// starts hanging straight down each time a new pebble glows.
+// The glowing pebble's name hangs below it on a thin string, and the string
+// behaves like one: a short rope of ROPE_SEGMENTS links, each point pulled
+// by gravity and an uneven breeze and held to its neighbours, the tag a
+// heavier weight at the end. Its top is tied to the pebble's lower edge, so
+// the pebble's jump and rock send curves rippling down it, and the breeze
+// keeps it alive in between. Simulated in screen pixels with memory (like
+// the flow), in fixed small steps; it starts hanging straight down for each
+// new pebble.
 const spotlightString = document.querySelector('#spotlight-string path');
-const TAG_STRING_LENGTH = 0.55; // as a share of the pebble's radius on screen
-const TAG_STRING_MIN = 16; // px
+const TAG_STRING_LENGTH = 0.8; // as a share of the pebble's radius on screen
+const TAG_STRING_MIN = 22; // px
+const ROPE_SEGMENTS = 10;
+const ROPE_ITERATIONS = 12; // constraint passes per step - higher is less stretchy
+const ROPE_STIFFNESS = 0.1; // a thread's slight resistance to bending, once a step - curves, doesn't crinkle
+const TAG_WEIGHT = 5; // the tag against one point of string
 const TAG_GRAVITY = 2400; // px/s^2
-const TAG_DAMPING = 2.2; // per second - it swings a few times, then settles
-const TAG_BREEZE = 160; // px/s^2 - the uneven sideways push that keeps it dancing
+const TAG_DAMPING = 2.2; // per second
+const TAG_BREEZE = 240; // px/s^2 - uneven, and out of step along the string, so it ripples
 const TAG_STEP = 1 / 120; // seconds per integration step
-const TAG_MAX_SWING = 0.7; // radians (~40 degrees) either side of hanging straight down
+const TAG_MAX_SWING = 0.7; // radians (~40 degrees) the tag may swing from under the knot
 const TAG_STILL = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-const tagSwing = { cube: null, x: 0, y: 0, prevX: 0, prevY: 0, pivotX: 0, pivotY: 0, lastTime: 0 };
+const rope = { cube: null, points: [], pivotX: 0, pivotY: 0, lastTime: 0 };
 const tagPivot = new THREE.Vector3();
 const tagCentre = new THREE.Vector3();
 const barTitle = document.querySelector('#project-title');
@@ -2136,56 +2142,121 @@ function hangSpotlightTag(cube, elapsedTime) {
     const [ax, ay] = screenPoint(cube.localToWorld(tagPivot.set(0, 0, PEBBLE_RADIUS * 0.9)));
     const [cx, cy] = screenPoint(cube.localToWorld(tagCentre.set(0, 0, 0)));
     const length = Math.max(TAG_STRING_MIN, (Math.hypot(ax - cx, ay - cy) / 0.9) * TAG_STRING_LENGTH);
+    const link = length / ROPE_SEGMENTS;
 
-    // A new pebble: hanging straight down, at rest
-    if (tagSwing.cube !== cube) {
-        Object.assign(tagSwing, {
-            cube, x: ax, y: ay + length, prevX: ax, prevY: ay + length, pivotX: ax, pivotY: ay, lastTime: elapsedTime,
+    // A new pebble: the string hangs straight down, at rest
+    if (rope.cube !== cube) {
+        rope.cube = cube;
+        rope.points = Array.from({ length: ROPE_SEGMENTS + 1 }, (_, i) => {
+            const y = ay + link * i;
+            return { x: ax, y, prevX: ax, prevY: y };
         });
+        rope.pivotX = ax;
+        rope.pivotY = ay;
+        rope.lastTime = elapsedTime;
     }
 
-    // The pivot moves smoothly across the steps rather than all at once, so
-    // a slow frame doesn't yank the string
-    const span = Math.min(elapsedTime - tagSwing.lastTime, 0.1);
-    const fromX = tagSwing.pivotX;
-    const fromY = tagSwing.pivotY;
-    tagSwing.pivotX = ax;
-    tagSwing.pivotY = ay;
-    tagSwing.lastTime = elapsedTime;
+    // The knot moves smoothly across the steps rather than all at once, so a
+    // slow frame doesn't yank the string
+    const span = Math.min(elapsedTime - rope.lastTime, 0.1);
+    const fromX = rope.pivotX;
+    const fromY = rope.pivotY;
+    rope.pivotX = ax;
+    rope.pivotY = ay;
+    rope.lastTime = elapsedTime;
 
+    const points = rope.points;
+    const last = points.length - 1;
     let remaining = span;
+
     while (remaining > 0) {
         const dt = Math.min(TAG_STEP, remaining);
         remaining -= dt;
 
-        const along = span > 0 ? 1 - remaining / span : 1;
-        const px = fromX + (ax - fromX) * along;
-        const py = fromY + (ay - fromY) * along;
-
         const t = elapsedTime - remaining;
-        const breeze = TAG_STILL ? 0 : TAG_BREEZE * (Math.sin(t * 2.3) + 0.6 * Math.sin(t * 3.7 + 1.3));
+        const along = span > 0 ? 1 - remaining / span : 1;
+        const knotX = fromX + (ax - fromX) * along;
+        const knotY = fromY + (ay - fromY) * along;
         const keep = 1 - TAG_DAMPING * dt;
 
-        // Verlet: where it's heading, plus gravity and the breeze...
-        const nextX = tagSwing.x + (tagSwing.x - tagSwing.prevX) * keep + breeze * dt * dt;
-        const nextY = tagSwing.y + (tagSwing.y - tagSwing.prevY) * keep + TAG_GRAVITY * dt * dt;
-        tagSwing.prevX = tagSwing.x;
-        tagSwing.prevY = tagSwing.y;
+        // Every point but the knot moves on its own momentum, falls, and is
+        // pushed by a breeze that's a little out of step from one to the next
+        for (let i = 1; i <= last; i++) {
+            const p = points[i];
+            const breeze = TAG_STILL ? 0
+                : TAG_BREEZE * (Math.sin(t * 2.3 - i * 0.55) + 0.6 * Math.sin(t * 3.7 + 1.3 - i * 0.9)) * (i === last ? 0.4 : 1);
+            const nextX = p.x + (p.x - p.prevX) * keep + breeze * dt * dt;
+            const nextY = p.y + (p.y - p.prevY) * keep + TAG_GRAVITY * dt * dt;
+            p.prevX = p.x;
+            p.prevY = p.y;
+            p.x = nextX;
+            p.y = nextY;
+        }
 
-        // ...held at the string's length from where it's tied, and never
-        // swung further than TAG_MAX_SWING from hanging
-        const swing = THREE.MathUtils.clamp(Math.atan2(nextX - px, nextY - py), -TAG_MAX_SWING, TAG_MAX_SWING);
-        tagSwing.x = px + Math.sin(swing) * length;
-        tagSwing.y = py + Math.cos(swing) * length;
+        // Hold each link at its length, the knot pinned and the tag heavier,
+        // so the string gives way to the tag rather than the other way round
+        points[0].x = knotX;
+        points[0].y = knotY;
+        for (let pass = 0; pass < ROPE_ITERATIONS; pass++) {
+            for (let i = 0; i < last; i++) {
+                const a = points[i];
+                const b = points[i + 1];
+                const dx = b.x - a.x;
+                const dy = b.y - a.y;
+                const d = Math.hypot(dx, dy) || 1;
+                const pull = (d - link) / d;
+                const wa = i === 0 ? 0 : 1;
+                const wb = i + 1 === last ? 1 / TAG_WEIGHT : 1;
+                const share = wa + wb;
+                a.x += dx * pull * (wa / share);
+                a.y += dy * pull * (wa / share);
+                b.x -= dx * pull * (wb / share);
+                b.y -= dy * pull * (wb / share);
+            }
+        }
+
+        // A little stiffness: each point is nudged towards the line through
+        // its neighbours, so a sharp kink eases out but a curve survives
+        for (let i = 1; i < last; i++) {
+            const a = points[i - 1];
+            const b = points[i];
+            const c = points[i + 1];
+            b.x += ((a.x + c.x) / 2 - b.x) * ROPE_STIFFNESS;
+            b.y += ((a.y + c.y) / 2 - b.y) * ROPE_STIFFNESS;
+        }
+
+        // The tag never swings further than TAG_MAX_SWING from under the knot
+        const tag = points[last];
+        const reach = Math.hypot(tag.x - knotX, tag.y - knotY);
+        const swing = Math.atan2(tag.x - knotX, tag.y - knotY);
+        if (Math.abs(swing) > TAG_MAX_SWING) {
+            const capped = Math.sign(swing) * TAG_MAX_SWING;
+            tag.x = knotX + Math.sin(capped) * reach;
+            tag.y = knotY + Math.cos(capped) * reach;
+        }
     }
 
-    // The tag turns with its string, about the point where it's tied
-    const angle = Math.atan2(tagSwing.x - ax, tagSwing.y - ay);
-    spotlightTag.style.transform = `translate(${tagSwing.x}px, ${tagSwing.y}px) translate(-50%, 0) rotate(${-angle}rad)`;
+    // The tag hangs from the string's end, turned with the string's overall
+    // lean and a little of its last stretch - never past TAG_MAX_SWING
+    const tag = points[last];
+    const before = points[Math.floor(last / 2)];
+    const lean = Math.atan2(tag.x - ax, tag.y - ay);
+    const end = Math.atan2(tag.x - before.x, tag.y - before.y);
+    const angle = THREE.MathUtils.clamp(lean * 0.6 + end * 0.4, -TAG_MAX_SWING, TAG_MAX_SWING);
+    spotlightTag.style.transform = `translate(${tag.x}px, ${tag.y}px) translate(-50%, 0) rotate(${-angle}rad)`;
 
-    // A little give in the string, bowing against the way it's swinging
-    const bow = THREE.MathUtils.clamp((tagSwing.prevX - tagSwing.x) * 4, -5, 5);
-    spotlightString.setAttribute('d', `M${ax},${ay} Q${(ax + tagSwing.x) / 2 + bow},${(ay + tagSwing.y) / 2} ${tagSwing.x},${tagSwing.y}`);
+    // One smooth curve through every point (Catmull-Rom, as cubic Beziers)
+    let d = `M${points[0].x.toFixed(1)},${points[0].y.toFixed(1)}`;
+    for (let i = 0; i < last; i++) {
+        const p0 = points[Math.max(i - 1, 0)];
+        const p1 = points[i];
+        const p2 = points[i + 1];
+        const p3 = points[Math.min(i + 2, last)];
+        d += ` C${(p1.x + (p2.x - p0.x) / 6).toFixed(1)},${(p1.y + (p2.y - p0.y) / 6).toFixed(1)}`
+            + ` ${(p2.x - (p3.x - p1.x) / 6).toFixed(1)},${(p2.y - (p3.y - p1.y) / 6).toFixed(1)}`
+            + ` ${p2.x.toFixed(1)},${p2.y.toFixed(1)}`;
+    }
+    spotlightString.setAttribute('d', d);
 }
 
 /**
@@ -2213,7 +2284,7 @@ function updateCubeTags(elapsedTime) {
     } else {
         spotlightTag.style.opacity = 0;
         spotlightString.style.opacity = 0;
-        tagSwing.cube = null;
+        rope.cube = null;
     }
 
     const emptySince = elapsedTime - emptyTagShownAt;
