@@ -101,6 +101,17 @@ grid; renaming everything would have touched most of the file for nothing.
   cubeSize box, so no camera numbers changed.
 - The tag anchor (`placeTagOnCube`) sits on the pebble's top
   (`PEBBLE_RADIUS * PEBBLE_SQUASH`) rather than a box's.
+- **A visited pebble stays darker**, like a visited link, as asked: once
+  its project has been opened (`markVisited`, in `openProject` - an empty
+  slot's "Still empty..." doesn't count), it rests in deeper glass
+  (`visitedCubeColor`, `VISITED_FACE_OPACITY` 0.24) with a darker rim
+  (`visitedRimColor`). Every state that returns a pebble to rest or glows
+  from rest - idle, spotlight, the drop, opening, the way back - takes its
+  base from `restingFaceColor` / `restingFaceOpacity` / `restingRimColor`,
+  so none of them snaps it back to the unvisited look. Project ids are kept
+  in `localStorage` (`fluxandflow.visited`), so it's still darker on the
+  next visit; where storage is blocked it lasts for the visit only. Hover
+  keeps its own tint either way.
 
 Checked on both layouts (catalog, spotlight with its name, hover, the
 dissolve frame by frame on a simulated clock, back to the catalog).

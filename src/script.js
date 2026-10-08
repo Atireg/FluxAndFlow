@@ -59,6 +59,52 @@ const screenColor = (r, g, b) => new THREE.Color().setRGB(r / 255, g / 255, b / 
 const cubesColor = screenColor(120, 150, 158);
 const selectedCubeColor = screenColor(31, 95, 107);
 
+// A pebble whose project has been opened stays darker, like a visited link:
+// deeper glass and a darker rim. Remembered in the browser, so it's still
+// darker on the next visit (where storage is allowed - it's a nicety, not
+// state anything depends on).
+const visitedCubeColor = screenColor(70, 102, 114);
+const visitedRimColor = screenColor(14, 48, 56);
+const VISITED_FACE_OPACITY = 0.24;
+const VISITED_KEY = 'fluxandflow.visited';
+const visitedProjects = loadVisited();
+
+function loadVisited() {
+    try {
+        return new Set(JSON.parse(window.localStorage.getItem(VISITED_KEY)) || []);
+    } catch {
+        return new Set();
+    }
+}
+
+function markVisited(cube) {
+    cube.userData.visited = true;
+
+    const id = cube.userData.project?.id;
+    if (!id || visitedProjects.has(id)) return;
+
+    visitedProjects.add(id);
+    try {
+        window.localStorage.setItem(VISITED_KEY, JSON.stringify([...visitedProjects]));
+    } catch {
+        // Private browsing or blocked storage: darker for this visit only
+    }
+}
+
+// What a pebble rests at - every state that returns a pebble to rest, or
+// glows from rest, starts from these
+function restingFaceColor(cube) {
+    return cube.userData.visited ? visitedCubeColor : cubesColor;
+}
+
+function restingFaceOpacity(cube) {
+    return cube.userData.visited ? VISITED_FACE_OPACITY : CUBE_FACE_OPACITY;
+}
+
+function restingRimColor(cube) {
+    return cube.userData.visited ? visitedRimColor : selectedCubeColor;
+}
+
 // The spotlight's glow colour - the same orange as the drawer's pull
 // handle (--warm in styles.css), distinct from the teal the grid otherwise
 // rests at, so a jumping cube reads as "look at me" and not as a different
@@ -1175,6 +1221,7 @@ function createPlayground() {
         // Which slot this is, and the project sitting in it (null when empty)
         cube.userData.slot = slot;
         cube.userData.project = projectBySlot.get(slot) ?? null;
+        cube.userData.visited = visitedProjects.has(cube.userData.project?.id);
 
         // How this cube drifts while idle - see wanderOffset(). Position is
         // set every frame from this plus the slot, once layoutCubes() below
@@ -1943,12 +1990,12 @@ function applyFlow(cube) {
 
 function updateIdleCube(cube, elapsedTime) {
     placeAtRest(cube, elapsedTime);
-    cube.material.opacity = CUBE_FACE_OPACITY;
-    cube.material.color.set(cubesColor);
+    cube.material.opacity = restingFaceOpacity(cube);
+    cube.material.color.copy(restingFaceColor(cube));
     cube.material.emissive.setRGB(0, 0, 0);
 
     cube.userData.edges.material.opacity = 1;
-    cube.userData.edges.material.color.set(selectedCubeColor);
+    cube.userData.edges.material.color.copy(restingRimColor(cube));
 
     if (cube.userData.content) {
         cube.userData.content.scale.setScalar(cube.userData.contentBaseScale);
@@ -2017,7 +2064,8 @@ function updateSpotlightCube(cube, elapsedTime) {
     cube.scale.setScalar(1 + pulse * SPOTLIGHT_CUBE_SCALE_AMPLITUDE * intensity);
 
     // Clear glass at rest; the glow fills it in
-    cube.material.opacity = CUBE_FACE_OPACITY + (SPOTLIGHT_FACE_OPACITY - CUBE_FACE_OPACITY) * glow * intensity;
+    const restOpacity = restingFaceOpacity(cube);
+    cube.material.opacity = restOpacity + (SPOTLIGHT_FACE_OPACITY - restOpacity) * glow * intensity;
 
     // Blink the whole cube - face and edges alike - between its resting
     // colours and the spotlight's orange, never fully off so it
@@ -2026,11 +2074,11 @@ function updateSpotlightCube(cube, elapsedTime) {
     // by the scene's cyan lights, which turn an orange green - and it's
     // dimmed as the glow rises, or that cyan-lit grey washes the orange out
     // to tan.
-    cube.material.color.copy(cubesColor).multiplyScalar(1 - glow * intensity * SPOTLIGHT_FACE_DIM);
+    cube.material.color.copy(restingFaceColor(cube)).multiplyScalar(1 - glow * intensity * SPOTLIGHT_FACE_DIM);
     spotlightFaceColor.copy(spotlightGlowColor).multiplyScalar(glow * intensity * SPOTLIGHT_FACE_GLOW);
     cube.material.emissive.copy(spotlightFaceColor);
 
-    spotlightEdgeColor.copy(selectedCubeColor).lerp(spotlightGlowColor, glow * intensity);
+    spotlightEdgeColor.copy(restingRimColor(cube)).lerp(spotlightGlowColor, glow * intensity);
     cube.userData.edges.material.color.copy(spotlightEdgeColor);
     cube.userData.edges.material.opacity = 1 - intensity * 0.35 * (1 - glow);
 
@@ -2230,17 +2278,17 @@ function dropInProgress(elapsedTime) {
 }
 
 function updateDroppingCube(cube, elapsedTime) {
-    cube.material.opacity = CUBE_FACE_OPACITY;
-    cube.material.color.set(cubesColor);
+    cube.material.opacity = restingFaceOpacity(cube);
+    cube.material.color.copy(restingFaceColor(cube));
     cube.material.emissive.setRGB(0, 0, 0);
     cube.userData.edges.material.opacity = 1;
-    cube.userData.edges.material.color.set(selectedCubeColor);
+    cube.userData.edges.material.color.copy(restingRimColor(cube));
     if (cube.userData.content) cube.userData.content.scale.setScalar(cube.userData.contentBaseScale);
 
     // The clicked pebble's glass, rim and rock give way to its dissolve
     if (cube === droppingFrom) {
         const fade = 1 - Math.min((elapsedTime - dropStartedAt) / DISSOLVE_FADE, 1);
-        cube.material.opacity = CUBE_FACE_OPACITY * fade;
+        cube.material.opacity = restingFaceOpacity(cube) * fade;
         cube.userData.edges.material.opacity = fade;
         if (cube.userData.content) cube.userData.content.scale.setScalar(cube.userData.contentBaseScale * fade);
     }
@@ -2367,9 +2415,10 @@ function openProject(cube) {
     // instantly, so a residual glow colour would otherwise show through as
     // a brief orange tint while it fades - reset both, for the same reason
     // rotation and scale are reset above.
-    cube.material.color.set(cubesColor);
+    markVisited(cube);
+    cube.material.color.copy(restingFaceColor(cube));
     cube.material.emissive.setRGB(0, 0, 0);
-    cube.userData.edges.material.color.set(selectedCubeColor);
+    cube.userData.edges.material.color.copy(restingRimColor(cube));
 
     // Show the text straight away - it costs nothing and gives the click an
     // answer while the model is still downloading
@@ -2505,13 +2554,13 @@ function closeProject() {
     cubes.forEach((other) => {
         gsap.delayedCall(revealDelay, () => { other.material.depthWrite = true; });
 
-        gsap.to(other.material, { opacity: CUBE_FACE_OPACITY, duration: revealDuration, ease: 'power2.inOut', delay: revealDelay });
+        gsap.to(other.material, { opacity: restingFaceOpacity(other), duration: revealDuration, ease: 'power2.inOut', delay: revealDelay });
         gsap.to(other.userData.edges.material, { opacity: 1, duration: revealDuration, ease: 'power2.inOut', delay: revealDelay });
 
-        other.material.color.set(cubesColor);
+        other.material.color.copy(restingFaceColor(other));
 
         other.material.emissive.setRGB(0, 0, 0);
-        other.userData.edges.material.color.set(selectedCubeColor);
+        other.userData.edges.material.color.copy(restingRimColor(other));
         other.visible = true;
 
         if (other.userData.content) other.userData.content.visible = true;

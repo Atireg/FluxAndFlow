@@ -122,8 +122,10 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
 - **The catalog's "cubes" are pebbles.** Names in the code (`cubes`,
   `cubeSize`, `userData.edges`) are the cube-era ones. `userData.edges` is
   a rim mesh (a fresnel-patched MeshBasicMaterial), not edge lines - keep
-  driving it through `.material.color` / `.opacity`. See DECISIONS.md, "The
-  catalog's objects are pebbles".
+  driving it through `.material.color` / `.opacity`. A pebble's resting look
+  comes from `restingFaceColor` / `restingFaceOpacity` / `restingRimColor`
+  (darker once visited) - don't write `cubesColor` back directly. See
+  DECISIONS.md, "The catalog's objects are pebbles".
 - **Faded pebble faces have `depthWrite = false`** while a project is open,
   restored on close. Without this an invisible face still occludes what's
   behind it.
