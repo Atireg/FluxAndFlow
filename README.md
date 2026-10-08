@@ -38,10 +38,10 @@ Next up (waiting on content)
         credits. The fields hold unmistakable [PLACEHOLDER ...] text, put
         there to check the drawer works on the live site - it is live and
         needs replacing. State the role accurately
-    [ ] The aggregate (slot 1): a real title ("Aggregate" is a working one,
-        from the file name) and any text - with none it has no drawer
-    [ ] Check the licensing/attribution for the Rock Print and aggregate
-        models now that the repository is public and the site serves them
+    [ ] Emergent Space (slot 1): its text - with none it has no drawer
+    [ ] Check the licensing/attribution for the Rock Print and Emergent
+        Space models now that the repository is public and the site serves
+        them
     [ ] Confirm on Safari (Mac and iPhone), all fixed blind: tapping a
         pebble opens its project (it did nothing - selection no longer
         relies on Safari's `click`), and the names, their string and the
@@ -63,7 +63,7 @@ Navigation and general layout
 
 Catalog view
     [ ] The element of surprise or discovery - when hovered on a cube add little 3D objects representing each project (e.g. a rock, an aggregate, a spider...)
-        (the aggregate's pebble holds the aggregate (`thumbSize`); every
+        (Emergent Space's pebble holds its aggregate (`thumbSize`); every
         other pebble, empty slots included, holds the rock)
     [ ] Add a "magic/mystery" appearance (e.g. fog shader or lights)
         (scene fog is off for a reason - see DECISIONS.md before re-adding)
@@ -95,12 +95,12 @@ Done
 Catalog
     [x] Ten fixed slots (SLOT_COUNT), reachable on every viewport
     [x] Glass pebbles (cubes before), each its own shape, each holding the
-        little rock, with smaller pebbles scattered among them (instanced);
-        they float and rock, the pointer stirs them, no orbit
-    [x] One pebble at a time glows orange and jumps; its "Project XX" hangs
-        below it on a soft, thin string tied on with a dot, swinging in
-        gusts. Names scale with the pebbles on screen and draw over them.
-        Hover changes nothing
+        little rock or the project's own model; they float and rock, the
+        pointer stirs them, no orbit
+    [x] One pebble at a time glows orange and jumps; its name (a project's
+        title, "Project XX" for an empty slot) hangs below it on a soft,
+        thin string tied on with a dot, swinging in gusts. Names scale with
+        the pebbles on screen and draw over them. Hover changes nothing
     [x] Clicking a project: an instant boom, the others fall slowly, the
         clicked pebble dissolves into a cloud of points that becomes the
         project; opened projects' pebbles stay darker (remembered)
@@ -110,8 +110,9 @@ Project view
     [x] Rock Print lands on a view fitted to a phone screenshot; its points
         gather from a scattered cloud, in three inks and three sizes; it
         turns slowly (a turn every 80s) while the camera nods (`view.sway`)
-    [x] The aggregate (slot 1), from a plain mesh sampled into 60k points
-        as it loads; its own mesh, in the rock's ink, in its pebble
+    [x] Emergent Space (slot 1): an aggregate, from a plain mesh sampled
+        into 60k points as it loads; the mesh itself, in the rock's ink,
+        in its pebble
     [x] A grey fog rolls in behind the project
     [x] The About drawer: model moves left and stays whole on a wide screen,
         a close-up on a phone; five pictures in it

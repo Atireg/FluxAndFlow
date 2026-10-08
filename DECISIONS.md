@@ -14,7 +14,6 @@ Contents
 The catalog (the grid of pebbles - "cubes" in the code)
 - Pebbles, and a clicked one dissolves into points
 - A fixed number of slots
-- Small pebbles between the big ones
 - A pebble's state is a pure function of its mode and the clock
 - The spotlight: any pebble, held still, in the one orange
 - The glowing pebble's name hangs on a string
@@ -104,36 +103,6 @@ the viewport instead gave 0 pebbles on a portrait phone. A project's `slot`
 is stable; its on-screen place isn't, but the order is row-major.
 
 
-Small pebbles between the big ones
-----------------------------------
-
-The user asked for smaller pebbles around the project ones.
-`layoutSmallPebbles` (rerun by `layoutCubes`) drops `SMALL_PEBBLE_PER_SLOT`
-per big pebble at random over the grid and a margin around it, each kept
-clear of the big pebbles' homes and of the others, small ones more common
-(`SMALL_PEBBLE_RADIUS` 0.05-0.2 x cubeSize), at varied depths below
-(`SMALL_PEBBLE_SINK`). A first version, one per gap at the big ones'
-diagonals, read as too organised. Seeded (`seededRandom`), so a resize
-lays them out the same way.
-
-- **Instanced**: `SMALL_PEBBLE_SHAPES` pebble shapes, each an
-  InstancedMesh for its glass and one for its rim - six draw calls however
-  many there are (one mesh pair each was ~50). Each pebble is a bare
-  Object3D the shared pose code moves like a big one (`placeAtRest`,
-  `applyFlow`, `placeDroppingCube`); `syncSmallPebbles` copies the poses
-  into the instances every frame, under each one's own size, stretch and
-  heading (`userData.form`). The rim shader turns its normal by the
-  instance matrix (`USE_INSTANCING`).
-- **Decoration, not slots**: not in `cubes`, so raycasts, hover, the
-  spotlight and clicks never see them.
-- **They move with the grid**: the same wander and flow, knocked off by
-  the boom (`startDrop` gives them drop data too). Anything new that moves
-  or fades the grid has to handle both arrays.
-- **One material each** for glass and rim, shared by all of them, so
-  `openProject` / `closeProject` fade them with one tween each. Nothing
-  writes their opacity per frame, so the tweens aren't stomped.
-
-
 A pebble's state is a pure function of its mode and the clock
 -------------------------------------------------------------
 
@@ -184,11 +153,12 @@ Every ~5.3-5.6s one pebble glows orange and jumps, then the next.
 The glowing pebble's name hangs on a string
 -------------------------------------------
 
-`#spotlight-tag` reads "Project 01".."Project 10" by slot and pulses with
-the glow (down to `SPOTLIGHT_TAG_MIN`, 0.65, between beats - at 0.2 it
-read as see-through), gone once the pebble settles. Hovering it changes
-nothing - the spotlight runs its whole dwell. "Still empty..." wins on its
-pebble.
+`#spotlight-tag` reads the project's `title` ("Rock Print Pavilion",
+"Emergent Space"), or "Project 03".."Project 10" for an empty slot, and
+pulses with the glow (down to `SPOTLIGHT_TAG_MIN`, 0.65, between beats - at
+0.2 it read as see-through), gone once the pebble settles. Hovering it
+changes nothing - the spotlight runs its whole dwell. "Still empty..." wins
+on its pebble.
 
 **Size**: the tags scale with the pebbles on screen - `--pebble-px`, their
 radius in pixels, set by `fitCameraToGrid` - at 0.3 of it, never under
@@ -247,13 +217,14 @@ with the projects because `createPlayground()` runs before the rest of the
 file (TDZ). A binary `.glb` would be about a quarter smaller than the
 `.gltf`.
 
-A project with `thumbSize` shows its own model instead (the aggregate:
-`thumbModel` is the same `.glb` its project view samples into points). It's
-centred and scaled to that longest side, whatever units it was drawn in,
-and drawn in the rock's ink as it appears on screen (`THUMB_INK`, an unlit
-colour) rather than the file's own material - the aggregate's was a bright,
-glossy red. Without `thumbSize` the thumbnail is placed as the rock always
-was (0.2 scale, 1 unit down). Either way the spotlight pulses it from
+A project with `thumbSize` shows its own model instead (Emergent Space:
+`thumbModel` is the same `aggregate.glb` its project view samples into
+points, at 1.9 - the user had 2.4 made 20% smaller). It's centred and scaled
+to that longest side, whatever units it was drawn in, and drawn in the
+rock's ink as it appears on screen (`THUMB_INK`, an unlit colour) rather
+than the file's own material - the aggregate's is a bright, glossy red.
+Without `thumbSize` the thumbnail is placed as the rock always was (0.2
+scale, 1 unit down). Either way the spotlight pulses it from
 `contentBaseScale`.
 
 
@@ -349,7 +320,7 @@ less the 16° the model turns during the gather, so the shot is on screen as
 the gather completes - it shifts if `GATHER_DURATION`, `DETAIL_ROTATE_SPEED`
 or `DETAIL_MODEL_YAW` change.
 
-The aggregate's `{ elevation: 25 }` is there for the framing as much as the
+Emergent Space's `{ elevation: 25 }` is there for the framing as much as the
 angle: without a `view` the fit is the model's box at the moment it opens,
 and on a phone (`DETAIL_MARGIN.stackedParked` crops in) its long arms ran
 off the screen as it turned. Framed on its cube, they stay in.
@@ -441,18 +412,18 @@ decoder for any model that genuinely uses Draco.
 A mesh becomes points as it loads
 ---------------------------------
 
-The aggregate came as a plain triangle mesh straight from Blender (36 KB,
-~1,250 vertices, ~115 units across), not a point cloud. Rather than convert
-it offline, `loadPointCloudWithShaderMaterial` turns any `.glb` with no
-POINTS in it into a cloud (`pointsFromMeshes`): `MESH_SAMPLE_POINTS`
+Emergent Space's `aggregate.glb` came as a plain triangle mesh from Blender
+(36 KB, ~1,250 vertices, ~115 units across), not a point cloud. Rather than
+convert it offline, `loadPointCloudWithShaderMaterial` turns any `.glb` with
+no POINTS in it into a cloud (`pointsFromMeshes`): `MESH_SAMPLE_POINTS`
 (60,000) points scattered over the surface with three.js's
 `MeshSurfaceSampler`, shared between meshes by area, in world space (so the
 file's own rotation holds), then centred and scaled so the longest side is
 `MESH_FIT_SIZE` (cubeSize), since a mesh arrives in whatever units it was
 drawn in. From there it is an ordinary cloud: inks, sizes, gather. It
 downloads a fraction of what a sampled cloud would weigh (Rock Print's 78k
-quantized points are 922 KB) and a mesh exported from Rhino or Blender
-works as it is. A real point cloud is left exactly as it is.
+quantized points are 922 KB) and a mesh exported from Rhino or Blender works
+as it is. A real point cloud is left exactly as it is.
 
 
 Point size, three sizes, three inks
@@ -630,7 +601,9 @@ Catalog
   reached; then the glowing pebble's name as a white chip, as bare orange
   text on its face (unreadable), on a straight rod-like line, and on a taut,
   barely-moving string; the string see-through and fading in from the knot.
-- **Small pebbles one per diagonal gap** - too organised.
+- **Small pebbles** among the big ones: one per diagonal gap (too
+  organised), then scattered at random and drawn instanced - removed, the
+  user didn't like them.
 - **Send-off variants**: a 2s blow-out; a hard shake and fast fall; a swirl
   and rock; a push-and-hop wave; a tumbling fall with sideways drift;
   waiting for the last cube before the camera moved.

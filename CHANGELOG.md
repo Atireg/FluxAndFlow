@@ -66,15 +66,15 @@ list.
 not yet live). The why is in DECISIONS.md; rejected iterations are under
 its "Tried and removed".
 
-- **Catalog.** Cubes became glass pebbles, each its own shape, with smaller
-  ones scattered among them (instanced), rebuilt on one pure state function
-  per frame: they float and rock, the pointer stirs them, nothing orbits.
-  One pebble at a time glows orange and jumps, its "Project XX" hanging
-  below on a soft, simulated string that swings in gusts, tied on with a
-  dot; hover changes nothing. Names scale with the pebbles on screen and
-  draw over them. Every pebble holds the rock;
-  empty slots say "Still empty...". Opened projects' pebbles stay darker,
-  remembered in the browser.
+- **Catalog.** Cubes became glass pebbles, each its own shape, rebuilt on
+  one pure state function per frame: they float and rock, the pointer
+  stirs them, nothing orbits. One pebble at a time glows orange and jumps,
+  its name (the project's title, or "Project XX") hanging below on a soft,
+  simulated string that swings in gusts, tied on with a dot; hover changes
+  nothing. Names scale with the pebbles on screen and draw over them.
+  Pebbles hold the rock or the project's own model; empty slots say "Still
+  empty...". Opened projects' pebbles stay darker, remembered in the
+  browser. Smaller pebbles among them came and went.
 - **Opening a project.** An instant boom, the others fall slowly while the
   camera moves in, and the clicked pebble dissolves into a cloud of points
   that turns into the project's own. Camera moves only tilt (the old 90°
@@ -85,9 +85,10 @@ its "Tried and removed".
   double-tap zoom, hinted by a white touch point sized to the screen. The
   drawer moves the model left on a wide screen, a close-up on a phone, and
   holds five photos; its text is still a placeholder.
-- **The aggregate** (slot 1), the second project: the user's plain mesh,
-  sampled into a point cloud as it loads - any mesh .glb now works. Its
-  pebble holds the aggregate itself, in the rock's ink (`thumbSize`).
+- **Emergent Space** (slot 1), the second project: the user's aggregate,
+  a plain mesh sampled into a point cloud as it loads - any mesh .glb now
+  works. Its pebble holds the aggregate itself, in the rock's ink
+  (`thumbSize`).
 - **Site.** "Paper" palette throughout (the dark `Sky` dome removed); an
   inline start-up loader with real progress, at least 5s; clouds load only
   on click after `?cloudtest` measured the alternative.
@@ -104,8 +105,8 @@ its "Tried and removed".
 Open at end of session (see README, "Next up"):
 - Safari: confirm the tap and the stacking fixes.
 - Rock Print's real copy (live text is placeholder; state the role
-  accurately), and captions/credits for its five photos; the aggregate's
-  real title and any text.
+  accurately), and captions/credits for its five photos; Emergent Space's
+  text.
 - Model licensing/attribution for the public .glb files is unchecked.
 - A drawer video was discussed, not added - README has the agreed approach.
 - No per-project URLs; `?cloudtest` and `src/loader/` (dead code) can go.

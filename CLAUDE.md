@@ -20,9 +20,10 @@ and README's "Next up". As of the end of Session 2: everything built is live
 or on the branch (`git log origin/main..` shows anything not yet merged);
 what's waiting is content from the user (Rock Print's real copy - the live
 text is `[PLACEHOLDER ...]` - and photo credits/captions for its five drawer
-pictures; the aggregate's real title and text), a check that the blind
-Safari fixes work, plus model licensing and per-project URLs. Two projects
-exist: Rock Print (slot 0, "Project 01") and the aggregate (slot 1).
+pictures; Emergent Space's text), a check that the blind Safari fixes
+work, plus model licensing and per-project URLs. Two projects exist: Rock
+Print Pavilion (slot 0, a scanned point cloud) and Emergent Space (slot 1,
+an aggregate - a plain mesh, `aggregate.glb`, sampled into points).
 DECISIONS.md opens with a contents list; its "Tried and removed" section
 lists ideas the user has already seen and rejected - don't re-propose them
 without saying so. The catalog's look (pebbles, the orange spotlight, the
@@ -67,7 +68,7 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
     body: [],                                     // array of paragraph strings
     credits: '',
     thumbModel: 'models/rock.gltf',               // small model shown in the catalog pebble
-    thumbSize: 2.4,                               // optional: fit thumbModel to this longest side, in the rock's ink
+    // thumbSize: 1.9,                            // optional: fit thumbModel to this longest side, in the rock's ink (Emergent Space)
     detailModel: 'models/RockPrintStructureReduced.glb',  // loaded on click
     view: { elevation: 58, azimuth: 4, turn: 102,      // optional camera angle, degrees,
             zoom: { stacked: 1.75, side: 1.4 },            // closer than the cube's fit
@@ -82,6 +83,14 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
   empty slot shows the rock thumbnail (`EMPTY_SLOT_THUMB`) and answers a
   click with "Still empty...". Project count should not exceed
   `SLOT_COUNT` without raising it.
+- `title` is also the name that hangs under the pebble when it glows in
+  the catalog (an empty slot shows "Project XX"), so keep it short enough
+  to fit beside a pebble on a phone - "Rock Print Pavilion" is about the
+  longest that does.
+- `thumbSize` puts the project's own model in its pebble instead of the
+  rock, centred, scaled to that longest side (the pebble is 4.4 across)
+  and drawn in the rock's ink whatever its own material; Emergent Space
+  uses its `aggregate.glb` at 1.9.
 - `images` go in `static/images/`. The first spans the drawer's width, the
   rest sit two to a row. An entry without a `src` renders as an empty
   dashed frame, holding its place until the picture exists. Prepare new
@@ -94,7 +103,7 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
   the role accurately once written** — the page implies authorship of
   whatever it shows.
 - `detailModel` is a `.glb` in `static/models/`: a point cloud (Rock
-  Print) or a plain mesh (the aggregate), whose surface is sampled into
+  Print) or a plain mesh (Emergent Space), whose surface is sampled into
   points as it loads, centred and scaled to fit - see "A mesh becomes points
   as it loads" in DECISIONS.md. Give a new model a `view` (even just
   `{ elevation: 25 }`): without one the fit is the model's box at the
@@ -151,21 +160,15 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
   behave the same at 5 fps as at 120. Colours go through `paintGlow` (0
   resting, 1 the spotlight's orange). Hover deliberately changes nothing
   visible (DECISIONS.md, "Tried and removed").
-- **The small pebbles (`smallPebbles`) are not in `cubes`**, so raycasts
-  and the spotlight never see them - but they float, are stirred, fall in
-  the boom and fade with a project like the rest. They're drawn instanced:
-  each is a bare Object3D whose pose `syncSmallPebbles` copies into the
-  InstancedMeshes every frame. Anything new that moves or fades the grid
-  has to handle both arrays. See DECISIONS.md, "Small pebbles between the
-  big ones".
 - **The spotlight's tag hangs on a simulated rope.** `hangSpotlightTag`
   runs a small screen-space Verlet rope (`ROPE_*`) under gravity and a
   gusty `wind(t)`, then draws it as a curve in `#spotlight-string`. Its
   feel lives in the `TAG_*` constants (weight, damping, breeze, gusts,
   how far it may swing); they sit above `animate()` for the TDZ reason
-  below. The tags' font size follows `--pebble-px` (the pebbles' radius on
-  screen, set by `fitCameraToGrid`), not a fixed rem. See DECISIONS.md,
-  "The glowing pebble's name hangs on a string".
+  below. It reads the project's `title` (or "Project XX"); its font size
+  follows `--pebble-px` (the pebbles' radius on screen, set by
+  `fitCameraToGrid`), not a fixed rem. See DECISIONS.md, "The glowing
+  pebble's name hangs on a string".
 - **Safari can't be tested here.** Cloud sessions only have Chromium, and
   downloading Playwright's WebKit is blocked. Safari draws WebGL through
   Metal, which is strict where Chrome is lenient: keep GLSL inside defined
@@ -229,6 +232,14 @@ Testing tips learnt the hard way:
   Canvas grabs leave out everything drawn in HTML over it (the tags and
   their string, the CSS fog, the touch-point hint, the drawer) - check
   those with a real-time `page.screenshot`.
+- **One headless browser at a time.** Two in parallel slowed software
+  WebGL enough that a click's boom and camera move hadn't finished 9s
+  later, which looked like the click failing. Wait on state - e.g. `#fog`'s
+  opacity above 0.9 once a project is open - not on fixed timeouts.
+- **Finding a pebble to click**: hover shows nothing, so no label gives a
+  pebble away. The grid is row-major and centred; slot 0 sits around
+  (330, 190) at 1280x800 and (120, 155) at 390x844, slot 1 one step right
+  (~(550, 200) and ~(270, 150)) - near enough despite the float.
 - **Visited pebbles persist** in `localStorage` within a Playwright
   context: open a project and every later page in that context shows its
   pebble darker. Use a fresh context for a clean grid.

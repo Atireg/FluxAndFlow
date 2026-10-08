@@ -238,10 +238,10 @@ const projects = [
         ],
     },
     {
-        id: 'aggregate',
+        id: 'emergent-space',
         slot: 1,
-        // A working title, from the file's name - no text yet, so no drawer
-        title: 'Aggregate',
+        // No text yet, so no drawer
+        title: 'Emergent Space',
         year: '',
         role: '',
         context: '',
@@ -251,7 +251,7 @@ const projects = [
         // Its own mesh in its pebble, centred and scaled to this longest
         // side (units; the pebble is 4.4 across) - see addContentToCube
         thumbModel: 'models/aggregate.glb',
-        thumbSize: 2.4,
+        thumbSize: 1.9,
         // A plain mesh, not a point cloud: its surface is sampled into
         // points as it loads (see pointsFromMeshes)
         detailModel: 'models/aggregate.glb',
@@ -1147,8 +1147,8 @@ const PEBBLE_STRETCH = 0.08; // how far each is drawn out along its own axes
 const PEBBLE_DETAIL = 16; // icosphere subdivisions - smooth, still cheap to raycast
 const PEBBLE_RIM_POWER = 2.4; // how tightly the rim hugs the silhouette
 
-function makePebbleGeometry(seed, radius = PEBBLE_RADIUS, detail = PEBBLE_DETAIL) {
-    let geometry = new THREE.IcosahedronGeometry(radius, detail);
+function makePebbleGeometry(seed) {
+    let geometry = new THREE.IcosahedronGeometry(PEBBLE_RADIUS, PEBBLE_DETAIL);
 
     // Shared vertices, so the normals come out smooth rather than faceted
     geometry.deleteAttribute('normal');
@@ -1187,17 +1187,7 @@ function makeRimMaterial(color) {
     material.onBeforeCompile = (shader) => {
         shader.vertexShader = shader.vertexShader
             .replace('#include <common>', '#include <common>\nvarying vec3 vRimNormal;\nvarying vec3 vRimView;')
-            .replace('#include <project_vertex>', [
-                '#include <project_vertex>',
-                // An instance's own turn too (the small pebbles), near enough
-                // for a rim even where its scale isn't uniform
-                'vec3 rimNormal = normal;',
-                '#ifdef USE_INSTANCING',
-                'rimNormal = mat3(instanceMatrix) * rimNormal;',
-                '#endif',
-                'vRimNormal = normalize(normalMatrix * rimNormal);',
-                'vRimView = normalize(-mvPosition.xyz);',
-            ].join('\n'));
+            .replace('#include <project_vertex>', '#include <project_vertex>\nvRimNormal = normalize(normalMatrix * normal);\nvRimView = normalize(-mvPosition.xyz);');
         shader.fragmentShader = shader.fragmentShader
             .replace('#include <common>', '#include <common>\nvarying vec3 vRimNormal;\nvarying vec3 vRimView;')
             .replace('#include <opaque_fragment>', [
@@ -1209,143 +1199,6 @@ function makeRimMaterial(color) {
     material.customProgramCacheKey = () => 'pebble-rim';
 
     return material;
-}
-
-/**
- * Small pebbles, scattered among the big ones and around the grid's edge -
- * a beach rather than a tray. Decoration only: not in `cubes`, so nothing
- * hovers, glows or opens them. They float, the pointer stirs them and the
- * boom knocks them off the screen like the rest, a little below the big
- * ones. Seeded, so a resize lays them out the same way again.
- *
- * Drawn instanced: a few pebble shapes, each one InstancedMesh for its
- * glass and one for its rim, so however many there are they cost a
- * handful of draw calls. Each pebble is a bare Object3D that the shared
- * pose code (placeAtRest, applyFlow, placeDroppingCube) moves like a big
- * one; syncSmallPebbles copies the poses into the instances every frame.
- * One glass and one rim material across all of them, so opening and
- * closing a project fades them with one tween each.
- */
-const SMALL_PEBBLE_PER_SLOT = 2.6; // how many, per big pebble
-const SMALL_PEBBLE_RADIUS = [0.05, 0.2]; // as a share of cubeSize - a project's pebble is 0.44; small ones more common
-const SMALL_PEBBLE_MARGIN = 0.55; // how far past the outer pebbles they spread, as a share of the grid step
-const SMALL_PEBBLE_SINK = [1, 3]; // units below the big pebbles
-const SMALL_PEBBLE_SHAPES = 3;
-const SMALL_PEBBLE_DETAIL = 6; // icosphere subdivisions - small on screen, so fewer
-const SMALL_PEBBLE_RIM_OPACITY = 0.7;
-
-let smallPebbles = []; // poses only, never in the scene
-let smallPebbleMeshes = []; // per shape: { face, rim }
-const smallPebbleShapes = Array.from({ length: SMALL_PEBBLE_SHAPES }, (_, index) => (
-    makePebbleGeometry(index * 2.71 + 0.9, 1, SMALL_PEBBLE_DETAIL)
-));
-const smallPebbleMatrix = new THREE.Matrix4();
-const smallPebbleFace = new THREE.MeshStandardMaterial({
-    color: cubesColor,
-    metalness: 0.2,
-    roughness: 0.6,
-    transparent: true,
-    opacity: CUBE_FACE_OPACITY,
-});
-const smallPebbleRim = makeRimMaterial(selectedCubeColor);
-smallPebbleRim.opacity = SMALL_PEBBLE_RIM_OPACITY;
-
-// A repeatable sequence of 0..1 (mulberry32) - the same layout every time
-function seededRandom(seed) {
-    let state = seed >>> 0;
-    return () => {
-        state = (state + 0x6D2B79F5) >>> 0;
-        let t = state;
-        t = Math.imul(t ^ (t >>> 15), t | 1);
-        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-    };
-}
-
-// Dropped at random over the grid and a margin around it, each kept clear
-// of the big pebbles' homes and of the small ones already placed
-function layoutSmallPebbles() {
-    smallPebbleMeshes.forEach(({ face, rim }) => {
-        scene.remove(face, rim);
-        face.dispose();
-        rim.dispose();
-    });
-
-    const random = seededRandom(gridShape.cols * 97 + gridShape.rows);
-    const step = cubeSize * spacing;
-    const homes = cubes.map((cube) => cube.userData.slotPosition);
-    const minX = Math.min(...homes.map((home) => home.x)) - step * SMALL_PEBBLE_MARGIN;
-    const maxX = Math.max(...homes.map((home) => home.x)) + step * SMALL_PEBBLE_MARGIN;
-    const minZ = Math.min(...homes.map((home) => home.z)) - step * SMALL_PEBBLE_MARGIN;
-    const maxZ = Math.max(...homes.map((home) => home.z)) + step * SMALL_PEBBLE_MARGIN;
-    const wanted = Math.round(cubes.length * SMALL_PEBBLE_PER_SLOT);
-
-    const spots = [];
-    for (let attempt = 0; attempt < 4000 && spots.length < wanted; attempt++) {
-        const radius = cubeSize * THREE.MathUtils.lerp(...SMALL_PEBBLE_RADIUS, random() ** 1.6);
-        const x = THREE.MathUtils.lerp(minX, maxX, random());
-        const z = THREE.MathUtils.lerp(minZ, maxZ, random());
-
-        if (homes.some((home) => Math.hypot(home.x - x, home.z - z) < PEBBLE_RADIUS + radius * 0.3)) continue;
-        if (spots.some((spot) => Math.hypot(spot.x - x, spot.z - z) < spot.radius + radius + 0.25)) continue;
-
-        spots.push({ x, z, radius });
-    }
-
-    const counts = new Array(SMALL_PEBBLE_SHAPES).fill(0);
-    smallPebbles = spots.map((spot) => {
-        const pebble = new THREE.Object3D();
-        const shape = Math.floor(random() * SMALL_PEBBLE_SHAPES);
-        const stretch = 0.8 + 0.4 * random();
-
-        pebble.userData.slotPosition = { x: spot.x, z: spot.z };
-        pebble.userData.restY = -THREE.MathUtils.lerp(...SMALL_PEBBLE_SINK, random());
-        pebble.userData.wander = createWander();
-        pebble.userData.shape = shape;
-        pebble.userData.instance = counts[shape]++;
-
-        // Its own size, proportions and heading, under whatever pose it's given
-        pebble.userData.form = new THREE.Matrix4().compose(
-            new THREE.Vector3(),
-            new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), random() * Math.PI * 2),
-            new THREE.Vector3(spot.radius * stretch, spot.radius, spot.radius / stretch),
-        );
-
-        return pebble;
-    });
-
-    smallPebbleMeshes = smallPebbleShapes.map((geometry, shape) => {
-        const face = new THREE.InstancedMesh(geometry, smallPebbleFace, Math.max(counts[shape], 1));
-        const rim = new THREE.InstancedMesh(geometry, smallPebbleRim, Math.max(counts[shape], 1));
-        face.count = counts[shape];
-        rim.count = counts[shape];
-        rim.renderOrder = 1;
-
-        // They fall far off screen, and the bounds would go stale
-        face.frustumCulled = false;
-        rim.frustumCulled = false;
-
-        scene.add(face, rim);
-        return { face, rim };
-    });
-
-    syncSmallPebbles();
-}
-
-function syncSmallPebbles() {
-    smallPebbles.forEach((pebble) => {
-        pebble.updateMatrix();
-        smallPebbleMatrix.multiplyMatrices(pebble.matrix, pebble.userData.form);
-
-        const { face, rim } = smallPebbleMeshes[pebble.userData.shape];
-        face.setMatrixAt(pebble.userData.instance, smallPebbleMatrix);
-        rim.setMatrixAt(pebble.userData.instance, smallPebbleMatrix);
-    });
-
-    smallPebbleMeshes.forEach(({ face, rim }) => {
-        face.instanceMatrix.needsUpdate = true;
-        rim.instanceMatrix.needsUpdate = true;
-    });
 }
 
 /**
@@ -1633,8 +1486,6 @@ function layoutCubes() {
         // The hover animation nudges cubes around, so keep a home to return to
         cube.userData.slotPosition = { x: cube.position.x, z: cube.position.z };
     });
-
-    layoutSmallPebbles();
 }
 
 // Move the camera back far enough to frame the whole grid
@@ -2117,24 +1968,17 @@ function animate() {
             updateCube(cube, elapsedTime);
             applyFlow(cube);
         });
-        smallPebbles.forEach((pebble) => {
-            placeAtRest(pebble, elapsedTime);
-            applyFlow(pebble);
-        });
     } else if (viewState === 'dropping') {
         cubes.forEach((cube) => updateDroppingCube(cube, elapsedTime));
-        smallPebbles.forEach((pebble) => placeDroppingCube(pebble, elapsedTime));
         updateDissolve(elapsedTime);
     } else if (viewState === 'returning') {
         // Back home before they fade in, wherever the drop left them
         cubes.forEach((cube) => placeAtRest(cube, elapsedTime));
-        smallPebbles.forEach((pebble) => placeAtRest(pebble, elapsedTime));
     } else {
         // The camera starts moving in before the drop has finished - the
         // rest of the fall plays out under openProject's fade
         if (dropInProgress(elapsedTime)) {
             cubes.forEach((cube) => { if (cube !== selectedCube) placeDroppingCube(cube, elapsedTime); });
-            smallPebbles.forEach((pebble) => placeDroppingCube(pebble, elapsedTime));
         }
         updateDissolve(elapsedTime);
 
@@ -2153,7 +1997,6 @@ function animate() {
         }
     }
 
-    syncSmallPebbles();
     updateCubeTags(elapsedTime);
 
     // Update controls - except while a camera move is driving orientation
@@ -2220,7 +2063,7 @@ function paintGlow(cube, amount, rimOpacity = 1) {
 function placeAtRest(cube, elapsedTime) {
     const base = cube.userData.slotPosition;
     const offset = wanderOffset(cube.userData.wander, elapsedTime);
-    cube.position.set(base.x + offset.x, (cube.userData.restY ?? 0) + offset.y, base.z + offset.z);
+    cube.position.set(base.x + offset.x, offset.y, base.z + offset.z);
 
     cube.rotation.set(offset.tiltX, 0, offset.tiltZ);
     cube.scale.setScalar(1);
@@ -2270,9 +2113,9 @@ function trackFlowPointer(event) {
 function resetFlow() {
     flowPointerVelocity.set(0, 0);
     flowPointerKnown = false;
-    [cubes, smallPebbles].forEach((group) => group.forEach((cube) => {
+    cubes.forEach((cube) => {
         cube.userData.flow = { x: 0, z: 0, vx: 0, vz: 0 };
-    }));
+    });
 }
 
 function updateFlow(dt) {
@@ -2280,7 +2123,6 @@ function updateFlow(dt) {
     flowPointerVelocity.multiplyScalar(Math.exp(-dt / FLOW_POINTER_FADE));
 
     cubes.forEach((cube) => stepFlow(cube, dt));
-    smallPebbles.forEach((pebble) => stepFlow(pebble, dt));
 }
 
 // One body's push from the pointer: a damped spring towards where the
@@ -2580,7 +2422,9 @@ function updateCubeTags(elapsedTime) {
     if (spotlightShows) {
         const since = elapsedTime - spotlightStartedAt;
         const glow = (Math.sin((since / SPOTLIGHT_PULSE_PERIOD) * Math.PI * 2) + 1) / 2;
-        const label = `Project ${String(spotlightCube.userData.slot + 1).padStart(2, '0')}`;
+        // A project's own name; an empty slot its number
+        const label = spotlightCube.userData.project?.title
+            ?? `Project ${String(spotlightCube.userData.slot + 1).padStart(2, '0')}`;
         if (spotlightTag.textContent !== label) spotlightTag.textContent = label;
 
         const intensity = spotlightIntensity(elapsedTime);
@@ -2718,7 +2562,7 @@ function startDrop(cube) {
     getDissolve(cube);
     hoveredCube = null;
 
-    [cubes, smallPebbles].forEach((group) => group.forEach((other) => {
+    cubes.forEach((other) => {
         // Out along the screen, away from the chosen cube
         const away = other.position.clone().sub(cube.position).setY(0);
 
@@ -2728,7 +2572,7 @@ function startDrop(cube) {
             lag: away.length() * BOOM_WAVE,
             away: away.lengthSq() > 0 ? away.normalize() : away,
         };
-    }));
+    });
 
     // Partway through the fall rather than after it, so the camera's move
     // follows straight on from it. The fall keeps playing out in detail
@@ -2873,11 +2717,6 @@ function openProject(cube) {
 
         if (other.userData.content) other.userData.content.visible = false;
     });
-
-    // The small pebbles go with them
-    smallPebbleFace.depthWrite = false;
-    gsap.to(smallPebbleFace, { opacity: 0, duration: 0.8, ease: 'power2.out' });
-    gsap.to(smallPebbleRim, { opacity: 0, duration: 0.8, ease: 'power2.out' });
 
     // The face fades out over the next 0.8s rather than vanishing
     // instantly, so a residual glow colour would otherwise show through as
@@ -3033,10 +2872,6 @@ function closeProject() {
 
         if (other.userData.content) other.userData.content.visible = true;
     });
-
-    gsap.delayedCall(revealDelay, () => { smallPebbleFace.depthWrite = true; });
-    gsap.to(smallPebbleFace, { opacity: CUBE_FACE_OPACITY, duration: revealDuration, ease: 'power2.inOut', delay: revealDelay });
-    gsap.to(smallPebbleRim, { opacity: SMALL_PEBBLE_RIM_OPACITY, duration: revealDuration, ease: 'power2.inOut', delay: revealDelay });
 
     gsap.delayedCall(revealDelay + revealDuration, () => { viewState = 'catalog'; });
 
