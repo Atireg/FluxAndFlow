@@ -34,6 +34,7 @@ The project view: camera
 The project view: point cloud
 - Quantized, not Draco-compressed
 - A mesh becomes points as it loads
+- Emergent Space: aggregates dropped with live physics
 - Point size, three sizes, three inks
 - Points gather out of a scattered cloud
 - Safari: defined GLSL, visible failures
@@ -328,10 +329,10 @@ less the 16° the model turns during the gather, so the shot is on screen as
 the gather completes - it shifts if `GATHER_DURATION`, `DETAIL_ROTATE_SPEED`
 or `DETAIL_MODEL_YAW` change.
 
-Emergent Space's `{ elevation: 25 }` is there for the framing as much as the
-angle: without a `view` the fit is the model's box at the moment it opens,
-and on a phone (`DETAIL_MARGIN.stackedParked` crops in) its long arms ran
-off the screen as it turned. Framed on its cube, they stay in.
+Emergent Space's `view` is there for the framing as much as the angle:
+without one the fit is the model's box at the moment it opens, and on a
+phone (`DETAIL_MARGIN.stackedParked` crops in) a single aggregate's long
+arms ran off the screen as it turned. Framed on its cube, they stay in.
 
 
 Fitting allows for depth and for what else is on screen
@@ -435,6 +436,45 @@ of what a sampled cloud would weigh (Rock Print's 78k quantized points are
 922 KB) and a mesh exported from Rhino or Blender works as it is. A real
 point cloud is left exactly as it is.
 
+
+
+Emergent Space: aggregates dropped with live physics
+----------------------------------------------------
+
+The user asked for three aggregates falling onto a surface and interlocking,
+and chose live physics - a fresh drop every time the project opens - over a
+drop simulated once and played back, or one exported from their own
+Blender/Rhino simulation. A project's `drop: { count, size, ground }` does it
+(`src/pile.js`):
+
+- **The engine is cannon-es**, plain JavaScript, 36 KB gzipped. It's a
+  separate chunk loaded by `import()` only when a pile is built, and
+  `startDrop` starts that download as the pebble is clicked; the catalog
+  and Rock Print never load it.
+- **Collision shapes come from the mesh.** `findRods` finds the straight
+  rods a crossed-rod aggregate is made of (the furthest vertex gives a
+  direction, the vertices near that line refine it and give length and
+  radius) and each becomes a cylinder, `PILE_COLLISION_FATTEN` thicker than
+  drawn so the thin rods never pass through each other. The aggregate's
+  three rods are ~27 times longer than thick. A mesh that isn't made of
+  rods would need another shape.
+- **Drawn as points**: one sampled cloud, shared by every copy, each copy a
+  THREE.Points that `pile.sync()` moves to its body every frame. The
+  surface is a faint disc of points in the grey ink (`userData.tone`).
+- **Tuned to interlock.** Dropped a few hundred times off screen (the same
+  cannon-es setup in Node, counting drops where all three end up
+  touching): a lively drop - more spin, bounce and spread - left them
+  apart about half the time. Low bounce, high friction, damped tumbling,
+  a small start spread and a gentle pull to the middle (`PILE_PULL`, as if
+  the surface were a shallow dish; it also keeps the pile centred in the
+  frame) got 58 in 60. It settles in about 4.5s.
+- **Settle, then turn**: the model's slow turn waits for `pile.settledAt`
+  (every body asleep, or `PILE_SETTLE_AFTER`). Reopening calls
+  `restart()` for a new drop. The physics steps with the frame time
+  (capped like the flow), so a slow device plays it slower rather than
+  jumping.
+- **Framed** with `view: { elevation: 30, zoom: ... }` on the cube, like
+  Rock Print: the drop starts above the frame and lands in it.
 
 Point size, three sizes, three inks
 -----------------------------------

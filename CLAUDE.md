@@ -22,8 +22,10 @@ what's waiting is content from the user (Rock Print's real copy - the live
 text is `[PLACEHOLDER ...]` - and photo credits/captions for its five drawer
 pictures; Emergent Space's text), a check that the blind Safari fixes
 work, plus model licensing and per-project URLs. Two projects exist: Rock
-Print Pavilion (slot 0, a scanned point cloud) and Emergent Space (slot 1,
-an aggregate - a plain mesh, `aggregate.glb`, sampled into 8,000 points).
+Print Pavilion (slot 0, a scanned point cloud) and Emergent Space (slot 1:
+three copies of an aggregate - a plain mesh, `aggregate.glb`, sampled into
+8,000 points each - dropped onto a surface with live physics until they
+interlock, a new drop every time it opens).
 DECISIONS.md opens with a contents list; its "Tried and removed" section
 lists ideas the user has already seen and rejected - don't re-propose them
 without saying so. The catalog's look (pebbles, the orange spotlight, the
@@ -32,7 +34,9 @@ feedback: tune the existing constants before rebuilding any of it.
 
 ## Stack and commands
 
-Vanilla three.js + GSAP + Vite. No framework, no test suite.
+Vanilla three.js + GSAP + Vite, plus cannon-es (physics, loaded on demand
+only for Emergent Space's drop - `src/pile.js`). No framework, no test
+suite.
 
     npm install
     npm run dev      # dev server with HMR
@@ -76,6 +80,7 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
             sway: 13 },                                    // camera nods ± degrees, slowly
     gather: true,                                 // optional: points gather from a scattered cloud on open
     // points: 20000,                             // optional, a mesh detailModel only: how many points to sample
+    // drop: { count: 3, size: 3, ground: -1.2 }, // optional, a crossed-rod mesh only: copies dropped with physics (Emergent Space)
     images: [{ src: 'images/x.jpg', alt: '', caption: '', ratio: '3 / 2' }],  // drawer pictures; no src = empty frame
 }
 ```
@@ -112,6 +117,13 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
   moment it opens, and a long shape runs off a phone screen as it turns.
   If adding Draco or quantization to a cloud, read "Quantized, not
   Draco-compressed" first — Draco does not apply to POINTS at all.
+- `drop` drops `count` copies of a mesh onto a surface with real physics
+  (`src/pile.js`): its collision shape is the straight rods `findRods`
+  finds in the mesh, so it only suits rod-built aggregates. `size` is each
+  copy's longest side and `ground` the surface's height, in the cube's
+  units (5 across, centred on 0). The model turns only once the pile has
+  settled. See "Emergent Space: aggregates dropped with live physics" in
+  DECISIONS.md before retuning it.
 
 ## Things that will bite a fresh session
 
@@ -243,6 +255,12 @@ Testing tips learnt the hard way:
   (310, 185) at 1280x800 and (80, 139) at 390x844, slot 1 one step right
   (~(512, 183) and ~(260, 138)) - near enough despite the float. They move
   if `spacing` or the grid's fit changes: screenshot the catalog first.
+- **Tuning the pile's physics**: don't judge it from a few headless
+  screenshots - each drop is random and software rendering plays it in
+  slow motion. Run the same cannon-es setup in Node (import
+  `node_modules/cannon-es/dist/cannon-es.js`, the rods as cylinders, no
+  rendering) a few dozen times per setting and count how often all three
+  end up touching; that's how the `PILE_*` values were chosen.
 - **Visited pebbles persist** in `localStorage` within a Playwright
   context: open a project and every later page in that context shows its
   pebble darker. Use a fresh context for a clean grid.

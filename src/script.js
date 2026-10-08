@@ -6,6 +6,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import { mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { MeshSurfaceSampler } from 'three/examples/jsm/math/MeshSurfaceSampler.js';
+import { createPile, findRods, loadPhysics } from './pile.js';
 
 import pointCloudVertexShader from './shaders/pointCloud/vertex.glsl';
 import pointCloudFragmentShader from './shaders/pointCloud/fragment.glsl';
@@ -255,13 +256,18 @@ const projects = [
         // A plain mesh, not a point cloud: its surface is sampled into
         // points as it loads (see pointsFromMeshes)
         detailModel: 'models/aggregate.glb',
-        // Framed on its cube, so the long arms stay in frame as it turns,
-        // and seen a little from above so they read in depth
-        view: { elevation: 25 },
+        // Framed on its cube, so the pile stays in frame as it turns, and
+        // seen from above enough to read the surface and how they interlock
+        view: { elevation: 30, zoom: { side: 1.5, stacked: 1.3 } },
         // Fewer than a mesh gets by default - its arms are thin, and more
-        // read as solid rods rather than a cloud
+        // read as solid rods rather than a cloud. Per aggregate.
         points: 8000,
-        gather: true,
+        // Three copies dropped onto a surface with real physics, every time
+        // it opens, tumbling into one another until they settle - then the
+        // pile turns. `size` is each aggregate's longest side and `ground`
+        // the surface's height, both in the cube's units (5 across, centred
+        // on 0). See src/pile.js.
+        drop: { count: 3, size: 3, ground: -1.2 },
     },
 ];
 
@@ -705,11 +711,24 @@ function pointsFromMeshes(root, total = MESH_SAMPLE_POINTS) {
     geometry.computeBoundingBox();
     const size = geometry.boundingBox.getSize(new THREE.Vector3());
     const centre = geometry.boundingBox.getCenter(new THREE.Vector3());
+    const factor = MESH_FIT_SIZE / (Math.max(size.x, size.y, size.z) || 1);
     geometry.translate(-centre.x, -centre.y, -centre.z);
-    geometry.scale(...Array(3).fill(MESH_FIT_SIZE / (Math.max(size.x, size.y, size.z) || 1)));
+    geometry.scale(factor, factor, factor);
 
     const group = new THREE.Group();
     group.add(new THREE.Points(geometry));
+
+    // The meshes' vertices in the same space, for anything that needs the
+    // shape itself rather than points on it (a pile's rods)
+    const vertices = [];
+    meshes.forEach((mesh) => {
+        const position = mesh.geometry.attributes.position;
+        for (let i = 0; i < position.count; i++) {
+            vertices.push(new THREE.Vector3().fromBufferAttribute(position, i)
+                .applyMatrix4(mesh.matrixWorld).sub(centre).multiplyScalar(factor));
+        }
+    });
+    group.userData.vertices = vertices;
     return group;
 }
 
@@ -721,8 +740,9 @@ function loadPointCloudWithShaderMaterial({
     onError,
     gather = false,
     points,
+    drop,
 }) {
-    gltfLoader.load(glbPath, (gltf) => {
+    gltfLoader.load(glbPath, async (gltf) => {
         const materials = [];
 
         let hasPoints = false;
@@ -734,6 +754,24 @@ function loadPointCloudWithShaderMaterial({
                 return;
             }
             gltf.scene = sampled;
+
+            // Several copies dropped onto a surface with physics (src/pile.js)
+            if (drop) {
+                try {
+                    const pile = await createPile({
+                        template: sampled.children[0],
+                        rods: findRods(sampled.userData.vertices),
+                        count: drop.count ?? 3,
+                        size: drop.size ?? MESH_FIT_SIZE / 2,
+                        groundY: drop.ground ?? -MESH_FIT_SIZE / 4,
+                    });
+                    gltf.scene = pile.group;
+                    gltf.scene.userData.pile = pile;
+                } catch (error) {
+                    onError?.(error);
+                    return;
+                }
+            }
         }
 
         gltf.scene.traverse((child) => {
@@ -774,7 +812,8 @@ function loadPointCloudWithShaderMaterial({
                         pick -= POINT_INKS[tone].share;
                         tone++;
                     }
-                    tones[i] = tone;
+                    // A cloud can ask for one ink throughout (a pile's surface)
+                    tones[i] = child.userData.tone ?? tone;
                 }
                 geometry.setAttribute('aTone', new THREE.BufferAttribute(tones, 1));
                 // geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
@@ -2014,7 +2053,11 @@ function animate() {
             // Turns the model itself, not the camera, so the cube's edges stay
             // square to the canvas - see DETAIL_ROTATE_SPEED
             const since = elapsedTime - selectedCube.userData.detailRotateStartTime;
-            selectedCube.userData.detail.rotation.y = modelStartYaw(selectedCube.userData.project) + since * DETAIL_ROTATE_SPEED;
+            // A pile falls first and only starts turning once it has settled
+            const pile = selectedCube.userData.detail.userData.pile;
+            pile?.step(frameTime, since);
+            const turning = pile ? Math.max(since - pile.settledAt, 0) : since;
+            selectedCube.userData.detail.rotation.y = modelStartYaw(selectedCube.userData.project) + turning * DETAIL_ROTATE_SPEED;
 
             // Replays from scattered each time the project opens, since
             // detailRotateStartTime is reset whenever the model is shown
@@ -2584,6 +2627,9 @@ let droppingFrom = null;
 let dropStartedAt = -Infinity;
 
 function startDrop(cube) {
+    // A pile's physics engine starts downloading now, while the grid falls
+    if (cube.userData.project?.drop) loadPhysics();
+
     viewState = 'dropping';
     resetFlow();
     droppingFrom = cube;
@@ -2782,6 +2828,7 @@ function openProject(cube) {
     if (cube.userData.detail) {
         cube.userData.detail.visible = true;
         cube.userData.detail.rotation.y = modelStartYaw(project);
+        cube.userData.detail.userData.pile?.restart();
         cube.userData.detailRotateStartTime = clock.getElapsedTime();
         setProjectStatus(null);
         frameDetail(cube, { ease });
@@ -2798,6 +2845,7 @@ function openProject(cube) {
         parentObject: cube,
         gather: Boolean(project.gather),
         points: project.points,
+        drop: project.drop,
         // Say so rather than leave "Loading model" up forever, and keep the
         // real error for the browser's console
         onError: (error) => {

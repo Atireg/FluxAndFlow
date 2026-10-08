@@ -86,10 +86,12 @@ its "Tried and removed".
   double-tap zoom, hinted by a white touch point sized to the screen. The
   drawer moves the model left on a wide screen, a close-up on a phone, and
   holds five photos; its text is still a placeholder.
-- **Emergent Space** (slot 1), the second project: the user's aggregate,
-  a plain mesh sampled into an 8,000-point cloud as it loads - any mesh .glb now
-  works. Its pebble holds the aggregate itself, in the rock's ink
-  (`thumbSize`).
+- **Emergent Space** (slot 1), the second project: three of the user's
+  aggregates dropped onto a surface with live physics (cannon-es, loaded
+  only for it), tumbling into an interlocked pile, then turning - a new
+  drop each time. Each is a plain mesh sampled into 8,000 points as it
+  loads - any mesh .glb now works. Its pebble holds the aggregate itself,
+  in the rock's ink (`thumbSize`).
 - **Site.** "Paper" palette throughout (the dark `Sky` dome removed); an
   inline start-up loader with real progress, at least 5s; clouds load only
   on click after `?cloudtest` measured the alternative.
@@ -108,6 +110,7 @@ Open at end of session (see README, "Next up"):
 - Rock Print's real copy (live text is placeholder; state the role
   accurately), and captions/credits for its five photos; Emergent Space's
   text.
+- Emergent Space's physics drop: confirm it runs smoothly on a real phone.
 - Model licensing/attribution for the public .glb files is unchecked.
 - A drawer video was discussed, not added - README has the agreed approach.
 - No per-project URLs; `?cloudtest` and `src/loader/` (dead code) can go.

@@ -50,6 +50,8 @@ Next up (waiting on content)
         message in the project bar
     [ ] More projects: each needs a slot, a .glb (point cloud or mesh) and
         a `view` - see CLAUDE.md
+    [ ] Emergent Space's drop on a phone: confirm it runs smoothly on a real
+        device (it was only checked with software rendering here)
 
 Landing/welcome view
     [ ] Graphics (me as a figure?) + welcome text explaning the webside's concept
@@ -112,9 +114,11 @@ Project view
     [x] Rock Print lands on a view fitted to a phone screenshot; its points
         gather from a scattered cloud, in three inks and three sizes; it
         turns slowly (a turn every 80s) while the camera nods (`view.sway`)
-    [x] Emergent Space (slot 1): an aggregate, from a plain mesh sampled
-        into 8,000 points as it loads; the mesh itself, in the rock's ink,
-        in its pebble
+    [x] Emergent Space (slot 1): three aggregates dropped onto a surface
+        with live physics (cannon-es, loaded only for it), tumbling into an
+        interlocked pile - a new drop every time - then turning. Each from
+        a plain mesh sampled into 8,000 points as it loads; the mesh
+        itself, in the rock's ink, in its pebble
     [x] A grey fog rolls in behind the project
     [x] The About drawer: model moves left and stays whole on a wide screen,
         a close-up on a phone; five pictures in it
