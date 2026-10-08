@@ -121,8 +121,9 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
   (`src/pile.js`): its collision shape is the straight rods `findRods`
   finds in the mesh, so it only suits rod-built aggregates. `size` is each
   copy's longest side and `ground` the surface's height, in the cube's
-  units (5 across, centred on 0). The model turns only once the pile has
-  settled. See "Emergent Space: aggregates dropped with live physics" in
+  units (5 across, centred on 0). They're held hidden for `PILE_WAIT`,
+  then fall into view in slow motion (`PILE_TIME_SCALE`); the model turns
+  only once the pile has settled. See "Emergent Space: aggregates dropped with live physics" in
   DECISIONS.md before retuning it.
 
 ## Things that will bite a fresh session

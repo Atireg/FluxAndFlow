@@ -88,8 +88,9 @@ its "Tried and removed".
   holds five photos; its text is still a placeholder.
 - **Emergent Space** (slot 1), the second project: three of the user's
   aggregates dropped onto a surface with live physics (cannon-es, loaded
-  only for it), tumbling into an interlocked pile, then turning - a new
-  drop each time. Each is a plain mesh sampled into 8,000 points as it
+  only for it), falling into view in slow motion once the camera has
+  arrived, tumbling into an interlocked pile, then turning - a new drop
+  each time. Each is a plain mesh sampled into 8,000 points as it
   loads - any mesh .glb now works. Its pebble holds the aggregate itself,
   in the rock's ink (`thumbSize`).
 - **Site.** "Paper" palette throughout (the dark `Sky` dome removed); an

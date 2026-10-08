@@ -258,7 +258,7 @@ const projects = [
         detailModel: 'models/aggregate.glb',
         // Framed on its cube, so the pile stays in frame as it turns, and
         // seen from above enough to read the surface and how they interlock
-        view: { elevation: 30, zoom: { side: 1.5, stacked: 1.3 } },
+        view: { elevation: 30, zoom: { side: 1.5, stacked: 1.05 } },
         // Fewer than a mesh gets by default - its arms are thin, and more
         // read as solid rods rather than a cloud. Per aggregate.
         points: 8000,

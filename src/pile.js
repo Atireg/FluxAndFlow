@@ -21,7 +21,9 @@ const PILE_GRAVITY = 9.82; // m/s^2 - the aggregate is taken as PILE_REAL_SIZE a
 const PILE_REAL_SIZE = 1.2; // metres - a large designed aggregate, so it falls at that pace
 const PILE_STEP = 1 / 300; // seconds per physics step - the rods are thin, so small steps
 const PILE_MAX_STEPS = 30; // per frame, so a slow frame plays slower rather than skipping
-const PILE_SETTLE_AFTER = 9; // seconds - stop simulating by then even if something still twitches
+const PILE_SETTLE_AFTER = 9; // simulated seconds - stop by then even if something still twitches
+const PILE_WAIT = 1.2; // seconds after the project appears before they're let go - the camera has arrived, the points faded in
+const PILE_TIME_SCALE = 0.6; // the fall plays at this speed - slower to watch, and the same physics, so they land just as they would
 const PILE_COLLISION_FATTEN = 1.4; // rods collide a little thicker than drawn, so they never pass through
 // Tuned by dropping them a few hundred times off screen (cannon-es in
 // Node) and counting how often all three ended up touching: 58 in 60 with
@@ -32,7 +34,7 @@ const PILE_DAMPING = 0.2; // of sliding, per second
 const PILE_SPIN_DAMPING = 0.5; // of tumbling - they roll less once down
 const PILE_PULL = 1.5; // a gentle pull to the middle, as if the surface were a shallow dish - see step()
 const PILE_SPREAD = 0.05; // how far apart they start, sideways, as a share of the aggregate's size
-const PILE_FIRST_HEIGHT = 0.9; // the first starts this far above the ground, in aggregate sizes
+const PILE_FIRST_HEIGHT = 2; // the first starts this far above the ground, in aggregate sizes - above the frame, so it falls into view
 const PILE_HEIGHT_STEP = 0.7; // and each next one this much higher, so they land in turn
 const PILE_SPIN = 1; // radians/s, at most, of tumble as they're let go
 const PILE_SLEEP_SPEED = 0.08; // aggregate sizes per second - slower than this for a moment counts as at rest
@@ -196,11 +198,13 @@ export async function createPile({ template, rods, count, size, groundY }) {
         group,
         settledAt: Infinity,
         time: 0,
+        wait: 0,
 
         // A new drop: one above another, a little apart, each at its own
         // random angle and tumbling a little
         restart() {
             this.time = 0;
+            this.wait = PILE_WAIT;
             this.settledAt = Infinity;
             const random = new THREE.Quaternion();
             bodies.forEach((body, i) => {
@@ -222,7 +226,10 @@ export async function createPile({ template, rods, count, size, groundY }) {
                 body.wakeUp();
             });
             this.sync();
-            aggregates.forEach((points) => { points.visible = true; });
+
+            // Hidden while held: during the camera's move in, the start
+            // positions above the frame are in view
+            aggregates.forEach((points) => { points.visible = false; });
         },
 
         sync() {
@@ -236,8 +243,16 @@ export async function createPile({ template, rods, count, size, groundY }) {
         step(dt, since) {
             if (this.settledAt !== Infinity) return;
 
-            this.time += dt;
-            world.step(PILE_STEP, dt, PILE_MAX_STEPS);
+            // Held up above the frame until there's something to watch
+            if (this.wait > 0) {
+                this.wait -= dt;
+                if (this.wait > 0) return;
+                aggregates.forEach((points) => { points.visible = true; });
+            }
+
+            const simulated = dt * PILE_TIME_SCALE;
+            this.time += simulated;
+            world.step(PILE_STEP, simulated, PILE_MAX_STEPS);
             this.sync();
 
             const resting = bodies.every((body) => body.sleepState === CANNON.Body.SLEEPING);

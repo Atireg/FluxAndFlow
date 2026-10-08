@@ -468,13 +468,22 @@ Blender/Rhino simulation. A project's `drop: { count, size, ground }` does it
   a small start spread and a gentle pull to the middle (`PILE_PULL`, as if
   the surface were a shallow dish; it also keeps the pile centred in the
   frame) got 58 in 60. It settles in about 4.5s.
+- **Watchable**: at first the drop was over before anything could be seen -
+  it started the moment the model loaded, under the camera's move in and
+  the points' fade-in. Now they're held, hidden, for `PILE_WAIT` (1.2s),
+  start above the frame (`PILE_FIRST_HEIGHT` 2 sizes up; still 58 in 60
+  interlocking) so each falls into view, and the whole thing plays at
+  `PILE_TIME_SCALE` (0.6) - slow motion, which changes nothing about how
+  they land.
 - **Settle, then turn**: the model's slow turn waits for `pile.settledAt`
   (every body asleep, or `PILE_SETTLE_AFTER`). Reopening calls
   `restart()` for a new drop. The physics steps with the frame time
   (capped like the flow), so a slow device plays it slower rather than
   jumping.
 - **Framed** with `view: { elevation: 30, zoom: ... }` on the cube, like
-  Rock Print: the drop starts above the frame and lands in it.
+  Rock Print: the drop starts above the frame and lands in it. A phone gets
+  hardly any zoom (1.05): the pile lands up to a third of its size off
+  centre, and at 1.3 that cut it at the edge.
 
 Point size, three sizes, three inks
 -----------------------------------
