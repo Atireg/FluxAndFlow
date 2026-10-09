@@ -103,7 +103,8 @@ its "Tried and removed".
 - **Tails.** Every point on the move - gathering into Rock Print, flying
   out of a clicked pebble, falling into Emergent Space's ground - draws a
   tapering tail, computed in the shader from where it was a moment
-  before; the tails vanish as the points settle.
+  before; the tails vanish as the points settle. Shortened after a first
+  look, and Rock Print's gather slowed from 3.6s to 5.4s.
 - **Site.** "Paper" palette throughout (the dark `Sky` dome removed); an
   inline start-up loader with real progress, at least 5s; clouds load only
   on click after `?cloudtest` measured the alternative.

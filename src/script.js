@@ -189,10 +189,10 @@ const projects = [
         view: {
             elevation: 58,
             azimuth: 4,
-            // 118 in the screenshot, minus the 16 the model turns while its
+            // 118 in the screenshot, minus the 24 the model turns while its
             // points gather (GATHER_DURATION at DETAIL_ROTATE_SPEED), so the
             // shot is what's on screen as the gather completes
-            turn: 102,
+            turn: 94,
             zoom: { stacked: 1.75, side: 1.4 },
             lift: { stacked: 0.14, side: 0 },
             // Once the points have gathered, the camera slowly nods this many
@@ -651,7 +651,7 @@ gltfLoader.setDRACOLoader(dracoLoader);
  * points. Done in the vertex shader from two extra attributes, a start
  * position and a delay, so it costs nothing per frame beyond one uniform.
  */
-const GATHER_DURATION = 3.6; // seconds from opening the project to the last point home
+const GATHER_DURATION = 5.4; // seconds from opening the project to the last point home - 3.6 felt rushed
 const GATHER_SPREAD = 0.4; // share of that over which points set off
 const GATHER_SWIRL = 2.4; // radians the scatter turns through on the way in
 const GATHER_SCATTER = 1.5; // scatter radius, as a multiple of the model's own half-width
@@ -666,8 +666,8 @@ const GATHER_SCATTER = 1.5; // scatter radius, as a multiple of the model's own 
  * switched off once the motion is over. One quad per point, drawn
  * instanced under the points.
  */
-const GATHER_TRAIL = 0.3; // seconds back a gathering point's tail reaches
-const DISSOLVE_TRAIL = 0.25; // seconds back for the dissolve's points
+const GATHER_TRAIL = 0.15; // seconds back a gathering point's tail reaches - 0.3 read as too long
+const DISSOLVE_TRAIL = 0.12; // seconds back for the dissolve's points
 const TRAIL_OPACITY = 0.6; // a tail's ink at its head, as a share of its point's
 const trailResolution = { value: new THREE.Vector2(1, 1) }; // the drawing buffer, set each frame
 

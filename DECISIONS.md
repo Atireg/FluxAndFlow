@@ -349,7 +349,7 @@ model's bounding box (which balloons with scattered points), with
 `VIEW_FRAME_MARGIN`; on a phone with the drawer parked, it centres on the
 whole screen if the cube's top clears the bar.
 
-Rock Print's `{ elevation: 58, azimuth: 4, turn: 102, zoom: { stacked: 1.75,
+Rock Print's `{ elevation: 58, azimuth: 4, turn: 94, zoom: { stacked: 1.75,
 side: 1.4 }, lift: { stacked: 0.14, side: 0 }, sway: 13 }` was fitted to the
 user's phone screenshot: a throwaway build (never committed) froze the turn
 and gather and exposed a hook to set the view; renders at the screenshot's
@@ -357,7 +357,7 @@ viewport were scored by overlap (IoU) of their point masks, coarse then
 fine, which also showed the leftover error was placement - hence `lift`.
 The fitted phone zoom 1.9 was eased to 1.75 on request (it cropped the
 pavilion); desktop uses 1.4 and no lift. `turn` is the screenshot's 118°
-less the 16° the model turns during the gather, so the shot is on screen as
+less the 24° the model turns during the gather, so the shot is on screen as
 the gather completes - it shifts if `GATHER_DURATION`, `DETAIL_ROTATE_SPEED`
 or `DETAIL_MODEL_YAW` change.
 
@@ -560,7 +560,8 @@ Points gather out of a scattered cloud
 --------------------------------------
 
 With `gather: true`, every open starts the cloud as a flattened ball around
-the model that condenses over `GATHER_DURATION` (3.6s), each point
+the model that condenses over `GATHER_DURATION` (5.4s; 3.6s felt rushed),
+each point
 spiralling home at its own moment - all in the vertex shader, one uniform a
 frame. `addGatherAttributes` gives each point a start (`aScatter`, in the
 cloud's own quantized space, where three.js's bounding box also lives) and

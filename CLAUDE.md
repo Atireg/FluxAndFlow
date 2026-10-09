@@ -83,7 +83,7 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
     thumbModel: 'models/rock.gltf',               // small model shown in the catalog pebble
     // thumbSize: 1.9,                            // optional: fit thumbModel to this longest side, in the rock's ink (Emergent Space)
     detailModel: 'models/RockPrintStructureReduced.glb',  // loaded on click
-    view: { elevation: 58, azimuth: 4, turn: 102,      // optional camera angle, degrees,
+    view: { elevation: 58, azimuth: 4, turn: 94,       // optional camera angle, degrees,
             zoom: { stacked: 1.75, side: 1.4 },            // closer than the cube's fit
             lift: { stacked: 0.14, side: 0 },             // raised on screen (share of height)
             sway: 13 },                                    // camera nods ± degrees, slowly
