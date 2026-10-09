@@ -4,7 +4,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { gsap } from 'gsap';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
-import { mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+import { mergeGeometries, mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { MeshSurfaceSampler } from 'three/examples/jsm/math/MeshSurfaceSampler.js';
 import { createPile, findRods, loadPhysics, PILE_SURFACE_RADIUS } from './pile.js';
 
@@ -274,7 +274,7 @@ const projects = [
         // pile turns. `size` is each aggregate's longest side and `ground`
         // the surface's height, both in the cube's units (5 across, centred
         // on 0). See src/pile.js.
-        drop: { count: 3, size: 3, ground: -1.2 },
+        drop: { count: 3, size: 3, ground: -1.2, solid: true },
     },
 ];
 
@@ -736,7 +736,48 @@ function pointsFromMeshes(root, total = MESH_SAMPLE_POINTS) {
         }
     });
     group.userData.vertices = vertices;
+
+    // And the meshes themselves, merged, for drawing them solid (`drop.solid`)
+    group.userData.solid = mergeGeometries(meshes.map((mesh) => {
+        const solid = new THREE.BufferGeometry();
+        solid.setAttribute('position', mesh.geometry.attributes.position.clone());
+        if (mesh.geometry.index) solid.setIndex(mesh.geometry.index.clone());
+        solid.applyMatrix4(mesh.matrixWorld);
+        solid.translate(-centre.x, -centre.y, -centre.z);
+        solid.scale(factor, factor, factor);
+        solid.computeVertexNormals();
+        return solid;
+    }));
     return group;
+}
+
+/**
+ * A solid model drawn in the inks rather than lit by the scene (whose cyan
+ * lights would tint it): orange where it faces a fixed light from above,
+ * deepening to the dark red where it turns away - like the points' inks,
+ * laid on as shade. Opaque, so it hides what's behind it.
+ */
+function makeInkMaterial() {
+    return new THREE.ShaderMaterial({
+        uniforms: {
+            uLit: { value: POINT_INKS[1].color },
+            uShade: { value: POINT_INKS[0].color },
+        },
+        vertexShader: `
+varying vec3 vNormal;
+void main() {
+    vNormal = normalize(normalMatrix * normal);
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}`,
+        fragmentShader: `
+uniform vec3 uLit;
+uniform vec3 uShade;
+varying vec3 vNormal;
+void main() {
+    float light = max(dot(normalize(vNormal), normalize(vec3(-0.35, 0.8, 0.5))), 0.0);
+    gl_FragColor = vec4(mix(uShade, uLit, light), 1.0);
+}`,
+    });
 }
 
 function loadPointCloudWithShaderMaterial({
@@ -771,6 +812,9 @@ function loadPointCloudWithShaderMaterial({
                         count: drop.count ?? 3,
                         size: drop.size ?? MESH_FIT_SIZE / 2,
                         groundY: drop.ground ?? -MESH_FIT_SIZE / 4,
+                        // Drawn as the solid mesh in the inks, or as points
+                        solid: drop.solid ? sampled.userData.solid : null,
+                        solidMaterial: drop.solid ? makeInkMaterial() : null,
                     });
                     gltf.scene = pile.group;
                     gltf.scene.userData.pile = pile;

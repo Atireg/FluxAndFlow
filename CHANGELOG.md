@@ -88,14 +88,14 @@ its "Tried and removed".
   drawer moves the model left on a wide screen, a close-up on a phone, and
   holds five photos; its text is still a placeholder.
 - **Emergent Space** (slot 1), the second project: the clicked pebble's
-  points fall into a ground, and three of the user's aggregates drop onto it
-  with live physics (cannon-es, loaded only for it), falling into view in
-  slow motion once the camera has arrived, tumbling into an interlocked
-  pile, then turning - a new drop each time. Each is a plain mesh sampled
-  into 8,000 points as it loads - any mesh .glb now works. Its pebble holds
-  the aggregate itself, in the rock's ink (`thumbSize`). An About drawer
-  with placeholder text, to be replaced; opening it zooms in on the three
-  aggregates.
+  points fall into a ground (turning with the pile), and three of the user's
+  aggregates, drawn solid in the inks, drop onto it with live physics
+  (cannon-es, loaded only for it), falling into view in slow motion once the
+  camera has arrived, tumbling into an interlocked pile, then turning - a
+  new drop each time. Each is the user's plain mesh; any mesh .glb now
+  works, sampled into points as it loads. Its pebble holds the aggregate
+  itself, in the rock's ink (`thumbSize`). An About drawer with placeholder
+  text, to be replaced; opening it zooms in on the three aggregates.
 - **Site.** "Paper" palette throughout (the dark `Sky` dome removed); an
   inline start-up loader with real progress, at least 5s; clouds load only
   on click after `?cloudtest` measured the alternative.

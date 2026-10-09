@@ -22,8 +22,9 @@ and README's "Next up". As of the end of Session 2:
   `git log origin/main..` shows anything not yet merged.
 - **Two projects**: Rock Print Pavilion (slot 0, a scanned point cloud)
   and Emergent Space (slot 1: three copies of an aggregate - a plain mesh,
-  `aggregate.glb`, sampled into 8,000 points each - dropped onto a surface
-  with live physics until they interlock, a new drop every time it opens).
+  `aggregate.glb`, drawn solid in the inks - dropped with live physics onto
+  a ground formed by the clicked pebble's points, until they interlock; a
+  new drop every time it opens).
 - **Waiting on the user**: the real copy for both projects (the live drawer
   text is `[PLACEHOLDER ...]`), captions/credits for Rock Print's five
   pictures, model licensing, and a check on real devices that the blind
@@ -84,7 +85,7 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
             sway: 13 },                                    // camera nods ± degrees, slowly
     gather: true,                                 // optional: points gather from a scattered cloud on open
     // points: 20000,                             // optional, a mesh detailModel only: how many points to sample
-    // drop: { count: 3, size: 3, ground: -1.2 }, // optional, a crossed-rod mesh only: copies dropped with physics (Emergent Space)
+    // drop: { count: 3, size: 3, ground: -1.2, solid: true }, // optional, a crossed-rod mesh only: copies dropped with physics (Emergent Space)
     images: [{ src: 'images/x.jpg', alt: '', caption: '', ratio: '3 / 2' }],  // drawer pictures; no src = empty frame
 }
 ```
@@ -125,12 +126,13 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
   (`src/pile.js`): its collision shape is the straight rods `findRods` finds
   in the mesh, so it only suits rod-built aggregates. `size` is each copy's
   longest side and `ground` the surface's height, in the cube's units (5
-  across, centred on 0). The surface they land on is the clicked pebble's
-  dissolve, its points falling into a disc (`uGround` in the dissolve
-  shader). They're held hidden for `PILE_WAIT`, then fall into view in slow
-  motion (`PILE_TIME_SCALE`); the model turns only once the pile has
-  settled. See "Emergent Space: aggregates dropped with live physics" in
-  DECISIONS.md before retuning it.
+  across, centred on 0); `solid` draws them as the mesh itself in the inks
+  (`makeInkMaterial`) rather than points. The surface they land on is the
+  clicked pebble's dissolve, its points falling into a disc (`uGround` in
+  the dissolve shader). They're held hidden for `PILE_WAIT`, then fall into
+  view in slow motion (`PILE_TIME_SCALE`); the model turns only once the
+  pile has settled. See "Emergent Space: aggregates dropped with live
+  physics" in DECISIONS.md before retuning it.
 
 ## Things that will bite a fresh session
 

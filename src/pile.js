@@ -111,7 +111,7 @@ export function findRods(vertices, maxRods = 8) {
  * the group to show and a handle to drive it: restart() for a fresh drop,
  * step(dt, since) every frame, and settledAt once it has come to rest.
  */
-export async function createPile({ template, rods, count, size, groundY }) {
+export async function createPile({ template, rods, count, size, groundY, solid, solidMaterial }) {
     const CANNON = await loadPhysics();
 
     template.geometry.computeBoundingBox();
@@ -120,13 +120,20 @@ export async function createPile({ template, rods, count, size, groundY }) {
 
     const group = new THREE.Group();
     const aggregates = [];
+    // Each copy the sampled cloud, or - given `solid`, the mesh in the same
+    // space - the shape itself in `solidMaterial`
     for (let i = 0; i < count; i++) {
-        const points = new THREE.Points(template.geometry);
-        points.scale.setScalar(scale);
-        points.visible = false;
-        group.add(points);
-        aggregates.push(points);
+        const aggregate = solid
+            ? new THREE.Mesh(solid, solidMaterial)
+            : new THREE.Points(template.geometry);
+        aggregate.scale.setScalar(scale);
+        aggregate.visible = false;
+        group.add(aggregate);
+        aggregates.push(aggregate);
     }
+
+    // What the zoom hint picks its spots from (see maybeShowTapHint)
+    group.userData.points = aggregates[0];
 
     // The world, in the group's own units: gravity scaled so an aggregate
     // `size` across falls like one PILE_REAL_SIZE metres across
@@ -234,7 +241,7 @@ export async function createPile({ template, rods, count, size, groundY }) {
                 reach = 0;
                 low = Infinity;
                 high = -Infinity;
-                const position = template.geometry.attributes.position;
+                const position = aggregates[0].geometry.attributes.position;
                 const point = new THREE.Vector3();
                 aggregates.forEach((points) => {
                     for (let i = 0; i < position.count; i += 16) {

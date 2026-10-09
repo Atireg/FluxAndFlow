@@ -476,18 +476,23 @@ Blender/Rhino simulation. A project's `drop: { count, size, ground }` does it
   drawn so the thin rods never pass through each other. The aggregate's
   three rods are ~27 times longer than thick. A mesh that isn't made of
   rods would need another shape.
-- **Drawn as points**: one sampled cloud, shared by every copy, each copy a
-  THREE.Points that `pile.sync()` moves to its body every frame.
-- **The ground is the clicked pebble.** At the user's request the points
-  the pebble dissolves into swell out, then fall - each in turn, gathering
-  speed - to a place on a disc on the ground (`aGround`, `uGround` in the
-  dissolve shader; `PILE_SURFACE_RADIUS`), turn the grey ink, shrink and
-  lighten, and stay as the surface the aggregates land on: no crossfade
-  and no end for a project with a `drop` (`points.userData.ground` in
-  `updateDissolve`). It's laid by about 2.5s after the click, before the
-  first aggregate lands, and turns with the pile once it has settled (the
-  dissolve is the pebble's child, the pile the model's, so it's turned by
-  hand; `startDrop` squares it to the pebble again). A separate faint disc of grey points came first;
+- **Drawn solid** (`drop.solid`, at the user's request - "not as point
+  clouds"): the mesh itself, merged into the fitted space (`userData.solid`
+  from `pointsFromMeshes`), each copy a THREE.Mesh in `makeInkMaterial` -
+  orange where it faces a fixed light, deepening to the dark red, the
+  points' inks laid on as shade rather than the scene's cyan lights. Without
+  `solid` each copy is the shared sampled cloud. Either way `pile.sync()`
+  moves each to its body every frame, and the ground stays points.
+- **The ground is the clicked pebble.** At the user's request the points the
+  pebble dissolves into swell out, then fall - each in turn, gathering speed
+  - to a place on a disc on the ground (`aGround`, `uGround` in the dissolve
+  shader; `PILE_SURFACE_RADIUS`), turn the grey ink, shrink and lighten, and
+  stay as the surface the aggregates land on: no crossfade and no end for a
+  project with a `drop` (`points.userData.ground` in `updateDissolve`). It's
+  laid by about 2.5s after the click, before the first aggregate lands, and
+  turns with the pile once it has settled (the dissolve is the pebble's
+  child, the pile the model's, so it's turned by hand; `startDrop` squares
+  it to the pebble again). A separate faint disc of grey points came first;
   at full size the falling points read heavy and dark, hence the shrink.
 - **Tuned to interlock.** Dropped a few hundred times off screen (the same
   cannon-es setup in Node, counting drops where all three end up

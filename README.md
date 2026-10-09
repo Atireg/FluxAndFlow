@@ -115,7 +115,7 @@ Project view
         gather from a scattered cloud, in three inks and three sizes; it
         turns slowly (a turn every 80s) while the camera nods (`view.sway`)
     [x] Emergent Space (slot 1): the clicked pebble's points fall into a
-        ground, and three aggregates drop onto it with live physics
+        ground, and three solid aggregates drop onto it with live physics
         (cannon-es, loaded only for it), tumbling into an interlocked pile -
         a new drop every time - then turning. Each from a plain mesh sampled
         into 8,000 points as it loads; the mesh itself, in the rock's ink,
