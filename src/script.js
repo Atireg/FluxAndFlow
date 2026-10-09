@@ -2180,6 +2180,10 @@ function animate() {
             const turning = pile ? Math.max(since - pile.settledAt, 0) : since;
             selectedCube.userData.detail.rotation.y = modelStartYaw(selectedCube.userData.project) + turning * DETAIL_ROTATE_SPEED;
 
+            // A pile's ground (the pebble's dissolve, landed) turns with it
+            const dissolve = selectedCube.userData.dissolve;
+            if (pile && dissolve?.userData.ground) dissolve.rotation.y = turning * DETAIL_ROTATE_SPEED;
+
             // Replays from scattered each time the project opens, since
             // detailRotateStartTime is reset whenever the model is shown
             setGather(selectedCube.userData.detail, Math.min(since / GATHER_DURATION, 1));
@@ -2755,7 +2759,8 @@ function startDrop(cube) {
     resetFlow();
     droppingFrom = cube;
     dropStartedAt = clock.getElapsedTime();
-    getDissolve(cube);
+    // Square to the pebble again, however far a pile's ground turned last time
+    getDissolve(cube).rotation.y = 0;
     hoveredCube = null;
 
     cubes.forEach((other) => {

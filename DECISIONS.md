@@ -485,7 +485,9 @@ Blender/Rhino simulation. A project's `drop: { count, size, ground }` does it
   lighten, and stay as the surface the aggregates land on: no crossfade
   and no end for a project with a `drop` (`points.userData.ground` in
   `updateDissolve`). It's laid by about 2.5s after the click, before the
-  first aggregate lands. A separate faint disc of grey points came first;
+  first aggregate lands, and turns with the pile once it has settled (the
+  dissolve is the pebble's child, the pile the model's, so it's turned by
+  hand; `startDrop` squares it to the pebble again). A separate faint disc of grey points came first;
   at full size the falling points read heavy and dark, hence the shrink.
 - **Tuned to interlock.** Dropped a few hundred times off screen (the same
   cannon-es setup in Node, counting drops where all three end up
