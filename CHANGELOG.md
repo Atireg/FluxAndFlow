@@ -98,7 +98,12 @@ its "Tried and removed".
   works, sampled into points as it loads. Its pebble holds the aggregate
   itself, in the rock's ink (`thumbSize`). An About drawer with placeholder
   text, to be replaced, and five pictures (diagrams full width, `wide`);
-  opening it zooms in on the three aggregates.
+  opening it zooms in on the three aggregates (closer on a phone, where
+  it hadn't read as a zoom).
+- **Tails.** Every point on the move - gathering into Rock Print, flying
+  out of a clicked pebble, falling into Emergent Space's ground - draws a
+  tapering tail, computed in the shader from where it was a moment
+  before; the tails vanish as the points settle.
 - **Site.** "Paper" palette throughout (the dark `Sky` dome removed); an
   inline start-up loader with real progress, at least 5s; clouds load only
   on click after `?cloudtest` measured the alternative.

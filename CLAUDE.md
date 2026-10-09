@@ -119,16 +119,16 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
   all, rather than a handle onto an empty panel. See DECISIONS.md. **State
   the role accurately once written** — the page implies authorship of
   whatever it shows.
-- `detailModel` is a `.glb` in `static/models/`: a point cloud (Rock
-  Print) or a plain mesh (Emergent Space), whose surface is sampled into
-  points as it loads (`MESH_SAMPLE_POINTS`, 20,000, or the project's
-  `points`), centred and scaled to fit - see "A mesh becomes points as it
-  loads" in DECISIONS.md (Emergent Space samples too, but `drop.solid`
-  draws the mesh itself, so its points are never seen). Give a new model a `view` (even just
-  `{ elevation: 25 }`): without one the fit is the model's box at the
-  moment it opens, and a long shape runs off a phone screen as it turns.
-  If adding Draco or quantization to a cloud, read "Quantized, not
-  Draco-compressed" first — Draco does not apply to POINTS at all.
+- `detailModel` is a `.glb` in `static/models/`: a point cloud (Rock Print) or
+  a plain mesh (Emergent Space), whose surface is sampled into points as it
+  loads (`MESH_SAMPLE_POINTS`, 20,000, or the project's `points`), centred and
+  scaled to fit - see "A mesh becomes points as it loads" in DECISIONS.md
+  (Emergent Space samples too, but `drop.solid` draws the mesh itself, so its
+  points are never seen). Give a new model a `view` (even just
+  `{ elevation: 25 }`): without one the fit is the model's box at the moment
+  it opens, and a long shape runs off a phone screen as it turns. If adding
+  Draco or quantization to a cloud, read "Quantized, not Draco-compressed"
+  first — Draco does not apply to POINTS at all.
 - `drop` drops `count` copies of a mesh onto a surface with real physics
   (`src/pile.js`): its collision shape is the straight rods `findRods` finds
   in the mesh, so it only suits rod-built aggregates. `size` is each copy's
@@ -178,8 +178,8 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
   too, or it won't move with them). Each has a random size
   (`cube.userData.size`, `PEBBLE_SIZE_*`) baked into its geometry - never
   into `cube.scale`, which also scales the project's model once it opens;
-  anything placed relative to the pebble multiplies by it. See DECISIONS.md, "Pebbles, and a
-  clicked one dissolves into points".
+  anything placed relative to the pebble multiplies by it. See
+  DECISIONS.md, "Pebbles, and a clicked one dissolves into points".
 - **Faded pebble faces have `depthWrite = false`** while a project is open,
   restored on close. Without this an invisible face still occludes what's
   behind it.
@@ -215,6 +215,12 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
   top), and don't rely on `click` for taps on the canvas - iPhone/iPad
   Safari doesn't send it there; use `pointerup` on the canvas. See
   DECISIONS.md, "Safari: defined GLSL, visible failures".
+- **Moving points have tails** (`addTrails`, `shaders/trail/`): one
+  instanced quad per point whose shader re-runs the gather or dissolve a
+  moment earlier. They share their points' uniform objects - change how a
+  point moves in `pointCloud/gather.glsl` or `DISSOLVE_GLSL` and the tails
+  follow; a new motion needs a progress uniform the same way, nothing kept
+  from frame to frame. See DECISIONS.md, "Tails behind moving points".
 - **No per-project URLs yet.** The catalog/detail state is not reflected in
   the address bar. Don't assume a project is linkable.
 

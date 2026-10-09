@@ -8,8 +8,13 @@ import { mergeGeometries, mergeVertices } from 'three/examples/jsm/utils/BufferG
 import { MeshSurfaceSampler } from 'three/examples/jsm/math/MeshSurfaceSampler.js';
 import { createPile, findRods, loadPhysics, PILE_SURFACE_RADIUS } from './pile.js';
 
+import gatherGlsl from './shaders/pointCloud/gather.glsl';
 import pointCloudVertexShader from './shaders/pointCloud/vertex.glsl';
 import pointCloudFragmentShader from './shaders/pointCloud/fragment.glsl';
+
+import trailCornerGlsl from './shaders/trail/corner.glsl';
+import trailGatherVertexShader from './shaders/trail/gatherVertex.glsl';
+import trailGatherFragmentShader from './shaders/trail/gatherFragment.glsl';
 
 import smokeVertexShader from './shaders/smoke/vertex.glsl';
 import smokeFragmentShader from './shaders/smoke/fragment.glsl';
@@ -651,6 +656,72 @@ const GATHER_SPREAD = 0.4; // share of that over which points set off
 const GATHER_SWIRL = 2.4; // radians the scatter turns through on the way in
 const GATHER_SCATTER = 1.5; // scatter radius, as a multiple of the model's own half-width
 
+/**
+ * Tails: every point on its way somewhere - gathering into a model, or
+ * flying out of a clicked pebble and falling into a ground - draws a tail
+ * back to where it was a moment ago (shaders/trail/). Both motions are pure
+ * functions of one progress uniform, so a tail just asks the same function
+ * about a moment earlier: nothing is stored from frame to frame. A tail
+ * shrinks to nothing as its point slows into place, and the tails are
+ * switched off once the motion is over. One quad per point, drawn
+ * instanced under the points.
+ */
+const GATHER_TRAIL = 0.3; // seconds back a gathering point's tail reaches
+const DISSOLVE_TRAIL = 0.25; // seconds back for the dissolve's points
+const TRAIL_OPACITY = 0.6; // a tail's ink at its head, as a share of its point's
+const trailResolution = { value: new THREE.Vector2(1, 1) }; // the drawing buffer, set each frame
+
+// Tails for a cloud of points: its own attributes (`names`) per instance,
+// its place as aHome, and the uniforms it shares with the points - the same
+// objects, so whatever drives the points drives the tails
+function addTrails(points, { vertexShader, fragmentShader, names, lag }) {
+    const source = points.geometry;
+    const home = source.attributes.position;
+    const geometry = new THREE.InstancedBufferGeometry();
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute([0, -1, 0, 0, 1, 0, 1, -1, 0, 1, 1, 0], 3));
+    geometry.setIndex([0, 1, 2, 2, 1, 3]);
+
+    // Read out as floats, whatever the cloud is stored in (quantized)
+    const homes = new Float32Array(home.count * 3);
+    for (let i = 0; i < home.count; i++) {
+        homes[i * 3] = home.getX(i);
+        homes[i * 3 + 1] = home.getY(i);
+        homes[i * 3 + 2] = home.getZ(i);
+    }
+    geometry.setAttribute('aHome', new THREE.InstancedBufferAttribute(homes, 3));
+    names.forEach((name) => {
+        const attribute = source.attributes[name];
+        geometry.setAttribute(name, new THREE.InstancedBufferAttribute(attribute.array, attribute.itemSize, attribute.normalized));
+    });
+    geometry.instanceCount = home.count;
+
+    // The cloud's own extent, not the quad's, for anything framing the model
+    if (!source.boundingBox) source.computeBoundingBox();
+    if (!source.boundingSphere) source.computeBoundingSphere();
+    geometry.boundingBox = source.boundingBox.clone();
+    geometry.boundingSphere = source.boundingSphere.clone();
+
+    const trails = new THREE.Mesh(geometry, new THREE.ShaderMaterial({
+        transparent: true,
+        depthWrite: false,
+        depthTest: points.material.depthTest,
+        vertexShader,
+        fragmentShader,
+        uniforms: {
+            ...points.material.uniforms,
+            uResolution: trailResolution,
+            uTrailLag: { value: lag },
+            uTrailOpacity: { value: TRAIL_OPACITY },
+        },
+    }));
+    trails.frustumCulled = false; // it moves in the shader
+    trails.raycast = () => {}; // never something to click on
+    trails.renderOrder = points.renderOrder - 1; // under the points
+    trails.visible = false;
+    points.add(trails);
+    return trails;
+}
+
 // Somewhere in a flattened ball around the model, in the cloud's own space
 function addGatherAttributes(geometry) {
     geometry.computeBoundingBox();
@@ -700,6 +771,8 @@ function setGather(model, progress) {
     model.userData.pointMaterials?.forEach((material) => {
         material.uniforms.uGather.value = progress;
     });
+    // Tails while anything is still on its way
+    model.userData.trails?.forEach((trails) => { trails.visible = progress < 1; });
 }
 
 /**
@@ -835,6 +908,7 @@ function loadPointCloudWithShaderMaterial({
 }) {
     gltfLoader.load(glbPath, async (gltf) => {
         const materials = [];
+        const trails = [];
 
         let hasPoints = false;
         gltf.scene.traverse((child) => { if (child.isPoints) hasPoints = true; });
@@ -919,7 +993,7 @@ function loadPointCloudWithShaderMaterial({
                     depthTest: false,
                     transparent: true,
                     vertexColors: true,
-                    vertexShader: pointCloudVertexShader,
+                    vertexShader: gatherGlsl + pointCloudVertexShader,
                     fragmentShader: pointCloudFragmentShader,
                     uniforms:
                     {
@@ -943,10 +1017,20 @@ function loadPointCloudWithShaderMaterial({
 
                 // Replace the material with the custom ShaderMaterial
                 child.material = shaderMaterial;
+
+                if (gather) {
+                    trails.push(addTrails(child, {
+                        vertexShader: gatherGlsl + trailCornerGlsl + trailGatherVertexShader,
+                        fragmentShader: trailGatherFragmentShader,
+                        names: ['aScatter', 'aGatherDelay', 'aScale', 'aTone'],
+                        lag: GATHER_TRAIL / GATHER_DURATION,
+                    }));
+                }
             }
         });
 
         gltf.scene.userData.pointMaterials = materials;
+        gltf.scene.userData.trails = trails;
         gltf.scene.userData.gathers = gather;
 
         // Add the GLTF model to the specified parent object
@@ -1422,49 +1506,105 @@ const DISSOLVE_SWELL = 0.55; // how far the cloud swells past the pebble's surfa
 const DISSOLVE_DRIFT = 0.9; // units each point also wanders off on its own
 const DISSOLVE_POINT_SIZE = 0.07; // world units across
 
-const dissolveVertexShader = `
+// Where a dissolving point is at T (0..1 of the dissolve), shared by the
+// points and their tails. `falling` is how far down to a pile's ground it is
+const DISSOLVE_GLSL = `
 uniform float uT;
 uniform float uSwell;
-uniform float uPixelsPerUnit;
-uniform float uSize;
 uniform float uGround; // 1: the points fall and stay as a pile's surface (aGround)
 attribute vec3 aDrift;
 attribute float aDelay;
-attribute float aTone;
 attribute vec3 aNormal;
 attribute vec3 aGround;
-varying float vAlpha;
-varying float vInk;
-varying float vTone;
 ${PEBBLE_FLUX_GLSL}
 
-void main() {
+vec3 dissolvePosition(vec3 home, float T, out float falling) {
     // From the pebble's shape at the moment it was clicked, flux and all
-    vec3 start = position + aNormal * pebbleFlux(normalize(position)) * uFluxAmount;
+    vec3 start = home + aNormal * pebbleFlux(normalize(home)) * uFluxAmount;
 
-    float t = clamp((uT - aDelay) / (1.0 - aDelay), 0.0, 1.0);
+    float t = clamp((T - aDelay) / (1.0 - aDelay), 0.0, 1.0);
     float rest = 1.0 - t;
     float swell = 1.0 - rest * rest;
     vec3 p = start * (1.0 + uSwell * swell) + aDrift * swell;
 
     // Or swell out, then fall - each in turn, gathering speed - to its own
     // place on the ground, and stay there
-    float puff = smoothstep(0.0, 0.3, uT);
+    float puff = smoothstep(0.0, 0.3, T);
     vec3 swollen = start * (1.0 + uSwell * puff) + aDrift * puff;
-    float falling = clamp((uT - 0.25 - aDelay * 0.35) / 0.35, 0.0, 1.0);
+    falling = clamp((T - 0.25 - aDelay * 0.35) / 0.35, 0.0, 1.0);
     vec3 landed = mix(swollen, aGround, falling * falling);
-    p = mix(p, landed, uGround);
+    return mix(p, landed, uGround);
+}
 
-    vec4 mv = modelViewMatrix * vec4(p, 1.0);
+// How much ink a point lays down at T, before its tail's fade
+float dissolveAlpha(float T, float falling) {
+    float fading = 1.0 - smoothstep(0.55, 1.0, T);
+    return smoothstep(0.0, 0.12, T) * mix(fading, 1.0 - 0.45 * falling, uGround);
+}`;
+
+const dissolveVertexShader = `
+uniform float uPixelsPerUnit;
+uniform float uSize;
+attribute float aTone;
+varying float vAlpha;
+varying float vInk;
+varying float vTone;
+${DISSOLVE_GLSL}
+
+void main() {
+    float falling;
+    vec4 mv = modelViewMatrix * vec4(dissolvePosition(position, uT, falling), 1.0);
     gl_Position = projectionMatrix * mv;
     // Landed, they're finer and fainter - a ground, not a cloud
     float settled = falling * uGround;
     gl_PointSize = uSize * (1.0 - 0.5 * settled) * uPixelsPerUnit / max(-mv.z, 0.001);
 
-    float fading = 1.0 - smoothstep(0.55, 1.0, uT);
-    vAlpha = smoothstep(0.0, 0.12, uT) * mix(fading, 1.0 - 0.45 * falling, uGround);
+    vAlpha = dissolveAlpha(uT, falling);
     vInk = smoothstep(0.1, 0.6, uT);
     vTone = aTone;
+}`;
+
+// A dissolving point's tail (see addTrails)
+const dissolveTrailVertexShader = `
+uniform float uPixelsPerUnit;
+uniform float uSize;
+uniform float uTrailLag;
+attribute vec3 aHome;
+attribute float aTone;
+varying float vAlpha;
+varying float vInk;
+varying float vTone;
+${DISSOLVE_GLSL}
+${trailCornerGlsl}
+
+void main() {
+    float falling;
+    float before;
+    vec4 headView = modelViewMatrix * vec4(dissolvePosition(aHome, uT, falling), 1.0);
+    vec4 tailView = modelViewMatrix * vec4(dissolvePosition(aHome, max(uT - uTrailLag, 0.0), before), 1.0);
+
+    float settled = falling * uGround;
+    float width = uSize * (1.0 - 0.5 * settled) * uPixelsPerUnit / max(-headView.z, 0.001);
+    float moving;
+    gl_Position = trailCorner(headView, tailView, width, moving);
+
+    vAlpha = (1.0 - position.x) * moving * dissolveAlpha(uT, falling);
+    vInk = smoothstep(0.1, 0.6, uT);
+    vTone = aTone;
+}`;
+
+const dissolveTrailFragmentShader = `
+uniform vec3 uRim;
+uniform vec3 uInks[3];
+uniform float uOpacity;
+uniform float uTrailOpacity;
+varying float vAlpha;
+varying float vInk;
+varying float vTone;
+
+void main() {
+    vec3 ink = vTone < 0.5 ? uInks[0] : (vTone < 1.5 ? uInks[1] : uInks[2]);
+    gl_FragColor = vec4(mix(uRim, ink, vInk), vAlpha * uOpacity * uTrailOpacity);
 }`;
 
 const dissolveFragmentShader = `
@@ -1557,6 +1697,13 @@ function getDissolve(cube) {
     points.renderOrder = 2;
     points.raycast = () => {}; // never something to click on
 
+    points.userData.trails = addTrails(points, {
+        vertexShader: dissolveTrailVertexShader,
+        fragmentShader: dissolveTrailFragmentShader,
+        names: ['aNormal', 'aGround', 'aDrift', 'aDelay', 'aTone'],
+        lag: DISSOLVE_TRAIL / DISSOLVE_DURATION,
+    });
+
     cube.add(points);
     cube.userData.dissolve = points;
     return points;
@@ -1579,6 +1726,9 @@ function updateDissolve(elapsedTime) {
     const detail = droppingFrom.userData.detail;
     const shown = viewState === 'detail' && selectedCube === droppingFrom && detail?.visible;
     const reveal = shown && !ground ? revealAt(elapsedTime - droppingFrom.userData.detailRotateStartTime) : 0;
+
+    // Tails until everything has landed or gone
+    points.userData.trails.visible = t < 1;
 
     const uniforms = points.material.uniforms;
     uniforms.uT.value = Math.min(t, 1);
@@ -2077,8 +2227,10 @@ function frameDetail(object, { duration = 1.6, ease, fit, fitZoom } = {}) {
  * narrow one it covers the lower half, and the close-up is what fits.
  */
 // The fit of a pile's box allows for any turn and for its depth, which on a
-// phone's short strip above the drawer leaves it small - so closer there
-const PILE_DRAWER_ZOOM = { side: 1, stacked: 1.6 };
+// phone's short strip above the drawer leaves it small - so closer there:
+// 1.6 only kept it about the size it was before, which didn't read as a
+// zoom; at 2.2 it fills the strip, its outer rods running off the edges
+const PILE_DRAWER_ZOOM = { side: 1, stacked: 2.2 };
 
 function frameWithDrawerOpen(cube, options) {
     // A pile: in on the aggregates themselves, beside the drawer or above
@@ -2245,6 +2397,7 @@ function animate() {
     // Update smoke
     smokeMaterial.uniforms.uTime.value = elapsedTime;
     pebbleFluxTime.value = elapsedTime * PEBBLE_FLUX_SPEED;
+    renderer.getDrawingBufferSize(trailResolution.value);
 
     // The catalog's own motion - wander, hover, spotlight - only runs while
     // it is actually what's on screen. A click hands every cube to the

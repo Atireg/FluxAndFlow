@@ -3,17 +3,11 @@ uniform sampler2D uPerlinTexture;
 uniform float uPointScale;
 uniform float uSizeAttenuation; // 1.0 perspective, 0.0 orthographic
 
-// The gather: 0 = every point out at its scattered position, 1 = all home.
-// A cloud without the gather attributes reads them as 0 and leaves this at
-// 1, which puts every point at its own position - no gather at all.
-uniform float uGather;
-uniform float uGatherSpread; // the latest any point starts, as a share of the gather
-uniform float uGatherSwirl; // radians the scatter turns through on the way in
+// The gather's uniforms and attributes come from gather.glsl, put in front
+// of this file in script.js
 
 attribute float aScale;
 attribute float aTone; // which of the inks this point is drawn in: 0, 1 or 2
-attribute vec3 aScatter; // where this point starts, in the cloud's own space
-attribute float aGatherDelay; // 0..1, when it sets off within the spread
 // attribute vec3 color;
 
 varying vec2 vUv;
@@ -22,19 +16,8 @@ varying float vArrived;
 varying float vTone;
 
 void main() {
-        // Each point sets off at its own moment and eases home, settling
-        // gently rather than stopping dead
-        float t = clamp((uGather - aGatherDelay * uGatherSpread) / (1.0 - uGatherSpread), 0.0, 1.0);
-        float rest = 1.0 - t; // multiplied out: pow() of 0 is undefined in GLSL
-        float arrived = 1.0 - rest * rest * rest;
-
-        // The scatter swirls round the vertical axis as it closes in, so the
-        // points spiral in like a current rather than flying straight home
-        float angle = (1.0 - arrived) * uGatherSwirl;
-        vec3 scatter = aScatter;
-        scatter.xz = mat2(cos(angle), sin(angle), -sin(angle), cos(angle)) * scatter.xz;
-
-        vec3 gathered = mix(scatter, position, arrived);
+        float arrived = gatherArrived(uGather);
+        vec3 gathered = gatherPosition(position, arrived);
         vArrived = arrived;
         vTone = aTone;
 

@@ -37,6 +37,7 @@ The project view: point cloud
 - Emergent Space: aggregates dropped with live physics
 - Point size, three sizes, three inks
 - Points gather out of a scattered cloud
+- Tails behind moving points
 - Safari: defined GLSL, visible failures
 
 Page, colour and drawer
@@ -72,16 +73,15 @@ grid; renaming would have touched most of the file for nothing.
   (0.44 x cubeSize), wobbled by a few slow waves (`PEBBLE_LUMPS`), drawn out
   a little (`PEBBLE_STRETCH`), squashed flat (`PEBBLE_SQUASH`); a seed per
   slot. Vertices are merged first so normals are smooth.
-- **Sizes**: each pebble is drawn `PEBBLE_SIZE_MIN`..`PEBBLE_SIZE_MAX`
-  (1 to 1.8) times that, picked at random on every visit
-  (`cube.userData.size`); the larger ones reach into their neighbours and
-  push them aside (see "Bumps", below the flow). The size goes into the geometry, not `cube.scale`: the pebble
-  parents the project's model once it opens, and its scale is held at 1
-  there (and pulses only for the spotlight). Everything sized off the
-  pebble multiplies by it - the flux amount, the thumbnail
-  (`contentBaseScale`), the tag's anchors - and `fitCameraToGrid` frames
-  each edge pebble at its own size, so a big one on the edge stays on
-  screen.
+- **Sizes**: each pebble is drawn `PEBBLE_SIZE_MIN`..`PEBBLE_SIZE_MAX` (1 to
+  1.8) times that, picked at random on every visit (`cube.userData.size`); the
+  larger ones reach into their neighbours and push them aside (see "Bumps",
+  below the flow). The size goes into the geometry, not `cube.scale`: the
+  pebble parents the project's model once it opens, and its scale is held at 1
+  there (and pulses only for the spotlight). Everything sized off the pebble
+  multiplies by it - the flux amount, the thumbnail (`contentBaseScale`), the
+  tag's anchors - and `fitCameraToGrid` frames each edge pebble at its own
+  size, so a big one on the edge stays on screen.
 - **Flux**: each pebble slowly changes shape, as asked - three broad waves
   rolling over its surface on its own seed (`addPebbleFlux`, in the vertex
   shader; `PEBBLE_FLUX` 30% of the radius - 9% and then 15% read as too
@@ -399,7 +399,10 @@ pile lies) as a box round the axis the pile turns about, and `frameDetail`
 fits that box (`fit`) into the space beside or above the drawer, closer on
 a phone (`PILE_DRAWER_ZOOM`), where the box's allowance for any turn and
 for depth left it small in the short strip. The plain close-up showed only
-a couple of rods; fitting the whole cube showed a small pile.
+a couple of rods; fitting the whole cube showed a small pile. On a phone
+1.6 kept the pile about the size it was with the drawer parked - the user
+asked again for a zoom there - so it is 2.2: the pile fills the strip
+above the drawer and its outer rods may run off the edges.
 
 
 The model turns; the camera nods (`view.sway`)
@@ -562,7 +565,39 @@ spiralling home at its own moment - all in the vertex shader, one uniform a
 frame. `addGatherAttributes` gives each point a start (`aScatter`, in the
 cloud's own quantized space, where three.js's bounding box also lives) and
 a delay (`aGatherDelay`). `setGather` only touches clouds loaded to gather,
-or the shader would read a missing start as the origin.
+or the shader would read a missing start as the origin. The gather's maths
+lives in `shaders/pointCloud/gather.glsl`, put in front of the points' and
+the tails' vertex shaders in script.js, so both place a point the same way.
+
+
+Tails behind moving points
+--------------------------
+
+Asked for: tails on every point moving on screen, gone once the points
+have formed Rock Print or the ground. Two motions qualify - the gather and
+the clicked pebble's dissolve (flying apart, or falling into Emergent
+Space's ground) - and both are pure functions of one progress uniform, so a
+tail needs no history: its shader asks the same function where the point
+was a moment earlier (`GATHER_TRAIL`, `DISSOLVE_TRAIL`, in seconds) and
+draws a quad from there to the point, as wide as the point at its head and
+tapering to nothing, fading down its length (`shaders/trail/`,
+`addTrails`). Chosen over a trail of ghost points (beads, and many times
+the points to draw) and over line segments (WebGL lines are one device
+pixel wide, too faint at a phone's pixel ratio).
+
+- **One instanced quad per point**, its corner in `position` and the
+  cloud's own attributes as instance attributes (its place as `aHome`,
+  read out of the quantized cloud as floats). The material spreads in the
+  points' own uniform objects, so the gather, reveal, point scale and flux
+  drive the tails with no extra code; only `uResolution`
+  (`trailResolution`, set each frame), the lag and `TRAIL_OPACITY` are
+  theirs.
+- **Disappearing**: a point easing into place slows, so its tail shrinks to
+  nothing by itself (under ~2 pixels it's hidden); `setGather` and
+  `updateDissolve` switch the tails off once the motion is over, so they
+  cost nothing after.
+- The tails' geometry carries the cloud's bounding box, not the quad's:
+  `frameDetailCloseup` measures the model with `Box3.setFromObject`.
 
 
 Safari: defined GLSL, visible failures
