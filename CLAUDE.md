@@ -209,13 +209,13 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
   `fitCameraToGrid`), not a fixed rem. See DECISIONS.md, "The glowing
   pebble's name hangs on a string".
 - **Safari can't be tested here.** Cloud sessions only have Chromium, and
-  downloading Playwright's WebKit is blocked. Safari draws WebGL through
-  Metal, which is strict where Chrome is lenient: keep GLSL inside defined
-  behaviour (no reversed `smoothstep` edges, no `pow(0, y)`), stack HTML
-  over or under the canvas by z-index, never page order (the loader's flow
-  field -1, fog 0, canvas 1, tags, string and tap hint 2 - at equal z-index
-  Safari drew the canvas on top), and don't rely on `click` for taps on the canvas - iPhone/iPad
-  Safari doesn't send it there; use `pointerup` on the canvas. See
+  downloading Playwright's WebKit is blocked. Safari draws WebGL through Metal,
+  which is strict where Chrome is lenient: keep GLSL inside defined behaviour
+  (no reversed `smoothstep` edges, no `pow(0, y)`), stack HTML over or under
+  the canvas by z-index, never page order (the loader's flow field -1, fog 0,
+  canvas 1, tags, string and tap hint 2 - at equal z-index Safari drew the
+  canvas on top), and don't rely on `click` for taps on the canvas -
+  iPhone/iPad Safari doesn't send it there; use `pointerup` on the canvas. See
   DECISIONS.md, "Safari: defined GLSL, visible failures".
 - **Moving points have tails** (`addTrails`, `shaders/trail/`): one
   instanced quad per point whose shader re-runs the gather or dissolve a

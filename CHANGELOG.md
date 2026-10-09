@@ -41,9 +41,9 @@ layer, and no deployment — `git log` before this session shows a single
 - **Deployment.** Added the GitHub Pages workflow, made the repo public,
   disabled production sourcemaps, and published for the first time.
   Working tree is clean and `main` tracks the live site end to end.
-- **Docs.** This file, `CLAUDE.md`, and `DECISIONS.md` didn't exist before
-  this session; `README.md` existed only as the original TODO list and
-  hadn't been touched.
+- **Docs.** This file, `CLAUDE.md`, and `DECISIONS.md` didn't exist before this
+  session; `README.md` existed only as the original TODO list and hadn't been
+  touched.
 
 - **Process.** Added a standing instruction in `CLAUDE.md`: after a fixed
   issue, update whichever of README/DECISIONS/CHANGELOG it made stale,
