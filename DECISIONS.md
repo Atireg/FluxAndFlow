@@ -83,18 +83,19 @@ grid; renaming would have touched most of the file for nothing.
   multiplies by it - the flux amount, the thumbnail (`contentBaseScale`), the
   tag's anchors - and `fitCameraToGrid` frames each edge pebble at its own
   size, so a big one on the edge stays on screen.
-- **Pencil, not glass** (`addPencil`): asked for - "the blue isn't right,
-  a pencil sketching look". The face is graphite hatching on the paper:
-  shaded from a fixed upper-left light and darker towards the silhouette,
-  in up to three crossing layers of strokes (`PENCIL_STROKE_GAP` px apart,
-  wobbly, breaking off, with the paper's grain), laid in screen pixels from
-  the pebble's own centre so they travel with it. The rim is a graphite
-  outline with the same grain; the contents (rock, Emergent Space's
-  aggregate) are graphite too (`THUMB_INK`). The material's colour,
-  emissive and opacity mean what they did - graphite, the spotlight's
-  orange, how heavily it's drawn (`PENCIL_WEIGHT`, with an orange wash at
-  the glow's peak) - so paintGlow, the fades and the arrival work
-  unchanged. Before this: pale teal glass with teal rims.
+- **Pencil, not glass** (`addPencil`): asked for - "the blue isn't right, a
+  pencil sketching look". The face is graphite hatching on the paper: shaded
+  from a fixed upper-left light and darker towards the silhouette, in up to
+  three crossing layers of strokes (`PENCIL_STROKE_GAP` CSS px apart, each
+  about a device pixel wide - a CSS pixel read as too thick on a phone; wobbly,
+  breaking off, with the paper's grain), laid in screen pixels from the
+  pebble's own centre so they travel with it. The rim is a graphite outline
+  with the same grain; the contents (rock, Emergent Space's aggregate) are
+  graphite too (`THUMB_INK`). The material's colour, emissive and opacity mean
+  what they did - graphite, the spotlight's orange, how heavily it's drawn
+  (`PENCIL_WEIGHT`, with an orange wash at the glow's peak) - so paintGlow, the
+  fades and the arrival work unchanged. Before this: pale teal glass with teal
+  rims.
 - **Flux**: each pebble slowly changes shape, as asked - three broad waves
   rolling over its surface on its own seed (`addPebbleFlux`, in the vertex
   shader; `PEBBLE_FLUX` 30% of the radius - 9% and then 15% read as too
@@ -758,22 +759,25 @@ of real progress and elapsed time so a fast load fills it steadily rather
 than jumping to 100%. All its animation runs on elapsed time, not frames.
 On a fast load it's gone ~6s after the page opens.
 
-**The field stays.** Asked for: the loader's particles floating on around
-the pebbles. As the loader fades (`EXIT`, 2.6s - the streams used to pour
-into the centre), its canvas steps out of it into the page
-(`.flux-field`) and keeps running, eased to a calmer drift
-(`AMBIENT_FLUX`, `AMBIENT_ALPHA`, `AMBIENT_SHARE` of the streams; an ink
-of 0.2, then 0.3, read as too faint - it is 0.5).
-script.js hands it the pebbles' screen circles every frame
-(`updateFluxField` -> `window.fluxField.update`), and the streams part
-round each one: the part of a stream's drift heading into a pebble is
-turned aside, more the closer it is (`PART_REACH`, `PART_TURN`), so they
-slide round like a current round stones. It sits at z-index -1, under
-the fog (0) and the canvas (1) - by z-index, never page order (see
-"Safari"); body's background propagates to the root, so it still shows.
-While a project is open (`update(null)`) it fades out and, once faded,
-stops drawing. Kept in the 2D canvas it already was rather than ported to
-WebGL: it's one canvas fill and eight strokes a frame.
+**The streams carry on among the pebbles.** Asked for: the loader's
+particles floating on around the pebbles - and then, not crossing them
+even seen from above, drawn on the plane through their middles. A first
+version kept the loader's 2D canvas running behind the WebGL canvas, the
+streams parting round the pebbles' circles on screen; they still read as
+passing through. Now, as the loader fades (`EXIT`, 2.6s, its own streams
+calming to `AMBIENT_*`), the same current carries on in the scene
+(`src/streams.js`, `createStreams`): `STREAM_COUNT` streams on the y = 0
+plane, each a fading line through its last `STREAM_HISTORY` points,
+shaded between the loader's two colours by the way it flows. They part
+round each pebble's circle in the scene (`PART_REACH`, `PART_TURN`: the
+part of the drift heading into one is turned aside, one inside is eased
+out), and they draw after the pebbles (`renderOrder` 3), depth-tested, so
+a pebble's top hides whatever passes under it. A pebble only writes depth
+once it has mostly arrived (`applyArrival`), or the arriving, still
+invisible ones would cut holes in the streams. They fill the plane the
+overhead camera sees, start with the arrival and fade out while a project
+is open. WebGL lines are one device pixel: thinner on a phone than the
+canvas's were.
 
 
 `?cloudtest`, and why clouds load on click

@@ -110,8 +110,9 @@ its "Tried and removed".
   before; the tails vanish as the points settle. Shortened after a first
   look, and Rock Print's gather slowed from 3.6s to 5.4s.
 - **Site.** "Paper" palette throughout (the dark `Sky` dome removed); an
-  inline start-up loader with real progress, at least 5s, whose flow field
-  then stays, drifting round the pebbles; clouds load only
+  inline start-up loader with real progress, at least 5s, whose streams
+  then carry on in the scene among the pebbles, parting round them (and
+  never crossing them, seen from above); clouds load only
   on click after `?cloudtest` measured the alternative.
 - **Safari.** Tapping a pebble did nothing there: selection now uses the
   canvas's `pointerup`, not a window `click`. The names and the zoom hint

@@ -18,9 +18,10 @@
 </head>
 <body>
   <!-- Start-up loader: a field of flowing particles - the flux - that picks
-       up strength as the catalog loads. As the loader leaves, the field
-       stays behind the pebbles, calmer, its streams parting round each one
-       (script.js tells it where they are through window.fluxField). Inline, and ahead of everything else, so it's on screen
+       up strength as the catalog loads, and calms as the loader leaves -
+       handing over to the same streams drawn in the scene, among the
+       pebbles (createStreams in script.js). Inline, and ahead of
+       everything else, so it's on screen
        before the main script has even downloaded. script.js reports
        progress through window.fluxLoader; see DECISIONS.md. -->
   <div class="loader" id="loader" role="progressbar" aria-label="Loading Flux and Flow"
@@ -46,18 +47,12 @@
       // it rather than racing to 100% and sitting there
       var MIN_VISIBLE = 5000;
       // The exit: the loader fades onto the same paper the site sits on while
-      // the streams calm down - and stay, behind the pebbles
+      // its streams calm down to the pace of the scene's own, which carry on
+      // among the pebbles
       var EXIT = 2600; // ms - keep in step with .loader.is-leaving in styles.css
-      // Once the catalog is up the field drifts on behind it, gentler than
-      // while loading: slower, fainter, fewer streams
-      var AMBIENT_FLUX = 0.4; // 0..1, as the loading flux
-      var AMBIENT_ALPHA = 0.5; // a stream's ink - 0.2, then 0.3, read as too faint
-      var AMBIENT_SHARE = 0.85; // of the streams still drawn
-      // Round each pebble the streams part, like a current round stones:
-      // within this many of its radii they turn aside, and one that strays
-      // inside is eased back out
-      var PART_REACH = 1.35;
-      var PART_TURN = 0.6; // how much of the inward drift is turned aside each frame
+      var AMBIENT_FLUX = 0.4; // 0..1, as the loading flux, by the end of the exit
+      var AMBIENT_ALPHA = 0.5; // a stream's ink by then
+      var AMBIENT_SHARE = 0.85; // of the streams still drawn by then
       var SHADES = 8; // steps between a palette's two flow colours
 
       // "Paper", chosen from six palettes and since carried through the whole
@@ -92,10 +87,7 @@
       var lastFrame = null;
       var finishAt = null; // when the exit may start
       var leavingSince = null;
-      var ambient = 0; // 0 loading .. 1 behind the catalog
-      var obstacles = []; // the pebbles on screen: { x, y, r } in CSS pixels
-      var showing = true; // false while a project is open - see fluxField
-      var hiddenSince = null;
+      var ambient = 0; // 0 loading .. 1 by the end of the exit
       var width = 0, height = 0, dpr = 1, particles = [];
       var segments = new Float32Array(0), bins = new Uint8Array(0);
 
@@ -148,9 +140,7 @@
         var paced = Math.min(target, (now - startedAt) / MIN_VISIBLE);
         shown += (paced - shown) * (1 - Math.exp(-dt / 180));
 
-        // Hidden behind an open project, it rests once it has faded out
-        var resting = !showing && hiddenSince !== null && now - hiddenSince > 1500;
-        if (!still && !resting) drawField(now, dt / 16.7);
+        if (!still) drawField(now, dt / 16.7);
 
         var percent = Math.round(shown * 100);
         fill.style.transform = 'scaleX(' + shown + ')';
@@ -160,16 +150,17 @@
         if (finishAt !== null && leavingSince === null && now >= finishAt && shown > 0.97) {
           leavingSince = now;
           root.classList.add('is-leaving');
-          // The field steps out of the loader to stay, under the catalog
-          canvas.classList.add('flux-field');
-          document.body.insertBefore(canvas, root);
-          // ...and the pebbles surface (applyArrival in script.js)
+          // The pebbles surface, and the scene's streams start (script.js)
           window.dispatchEvent(new Event('fluxloader:leaving'));
         }
 
         if (leavingSince !== null) ambient = Math.min((now - leavingSince) / EXIT, 1);
 
-        if (leavingSince !== null && now - leavingSince > EXIT && root.parentNode) root.remove();
+        if (leavingSince !== null && now - leavingSince > EXIT) {
+          window.removeEventListener('resize', resize);
+          root.remove();
+          return;
+        }
 
         window.requestAnimationFrame(step);
       }
@@ -191,27 +182,6 @@
           var speed = (0.5 + 1.7 * flux) * frames;
           var vx = Math.cos(a) * speed;
           var vy = Math.sin(a) * speed;
-
-          // Round the pebbles: the part of the drift heading into one is
-          // turned aside, more the closer it is, so the stream slides round
-          for (var o = 0; o < obstacles.length; o++) {
-            var ob = obstacles[o];
-            var dx = p.x - ob.x, dy = p.y - ob.y;
-            var d = Math.sqrt(dx * dx + dy * dy) || 1;
-            var reach = ob.r * PART_REACH;
-            if (d >= reach) continue;
-            var nx = dx / d, ny = dy / d;
-            var near = 1 - d / reach;
-            var inward = vx * nx + vy * ny;
-            if (inward < 0) {
-              vx -= nx * inward * Math.min(1, near * PART_TURN * 3);
-              vy -= ny * inward * Math.min(1, near * PART_TURN * 3);
-            }
-            if (d < ob.r) {
-              vx += nx * speed * near;
-              vy += ny * speed * near;
-            }
-          }
 
           segments[i * 4] = p.x;
           segments[i * 4 + 1] = p.y;
@@ -257,19 +227,6 @@
           }
         }
       }
-
-      // The catalog's side: where the pebbles are, each frame, or null while
-      // a project is open - the field fades out then and rests
-      window.fluxField = {
-        update: function (pebbles) {
-          var show = pebbles !== null;
-          obstacles = pebbles || [];
-          if (show === showing) return;
-          showing = show;
-          hiddenSince = show ? null : performance.now();
-          canvas.classList.toggle('is-hidden', !show);
-        },
-      };
 
       window.fluxLoader = {
         progress: function (fraction) {

@@ -7,6 +7,7 @@ import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import { mergeGeometries, mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { MeshSurfaceSampler } from 'three/examples/jsm/math/MeshSurfaceSampler.js';
 import { createPile, findRods, loadPhysics, PILE_SURFACE_RADIUS } from './pile.js';
+import { createStreams } from './streams.js';
 
 import gatherGlsl from './shaders/pointCloud/gather.glsl';
 import pointCloudVertexShader from './shaders/pointCloud/vertex.glsl';
@@ -1508,8 +1509,10 @@ float pencilHatch(vec2 p, float angle, float gap) {
     float across = dot(p, vec2(-d.y, d.x));
     float along = dot(p, d);
     across += sin(along * 0.07 + across * 0.02) * 0.8;
-    float fromLine = abs(fract(across / gap) - 0.5) * gap;
-    float stroke = 1.0 - smoothstep(0.25, 1.0, fromLine);
+    // A stroke's width is in device pixels, not CSS ones: on a phone's
+    // dense screen a CSS-pixel stroke read as too thick
+    float fromLine = abs(fract(across / gap) - 0.5) * gap * uPencilPixelRatio;
+    float stroke = 1.0 - smoothstep(0.3, 1.1, fromLine);
     float lift = sin(along * 0.045 + floor(across / gap) * 2.7) * 0.5 + 0.5;
     return stroke * smoothstep(0.15, 0.45, lift);
 }`;
@@ -2493,28 +2496,33 @@ let flowPointerAt = 0;
 const clock = new THREE.Clock();
 let lastFrameTime = 0;
 
-// The loader's flow field drifts on behind the catalog, parting round the
-// pebbles (index.html, window.fluxField): where each sits on screen, each
-// frame, or null while a project is open
-const fieldPebbles = [];
-const fieldCentre = new THREE.Vector3();
-const fieldEdge = new THREE.Vector3();
+// The loader's streams, carried on among the pebbles (src/streams.js): they
+// part round each pebble in the scene, on the plane through their middles
+const streams = createStreams(scene);
+const streamPebbles = [];
+const streamView = { x: 20, z: 20 };
 
-function updateFluxField() {
-    if (!window.fluxField) return;
-    if (viewState !== 'catalog') {
-        window.fluxField.update(null);
-        return;
-    }
-
+function updateStreams(dt, elapsedTime) {
+    const show = viewState === 'catalog' || viewState === 'returning';
     cubes.forEach((cube, i) => {
-        const [x, y] = screenPoint(fieldCentre.copy(cube.position));
-        // Down the camera's axis world X is screen X, so the radius projects along it
-        const [ex] = screenPoint(fieldEdge.copy(cube.position).setX(cube.position.x + PEBBLE_RADIUS * cube.userData.size * cube.scale.x));
-        fieldPebbles[i] = { x, y, r: Math.abs(ex - x) };
+        streamPebbles[i] = {
+            x: cube.position.x,
+            z: cube.position.z,
+            // its lumps and stretch reach a little past the radius
+            r: PEBBLE_RADIUS * cube.userData.size * cube.scale.x * 1.1,
+        };
     });
-    fieldPebbles.length = cubes.length;
-    window.fluxField.update(fieldPebbles);
+    streamPebbles.length = cubes.length;
+
+    // The plane the overhead camera sees, so streams fill the screen
+    let view = null;
+    if (show && camera === perspectiveCamera) {
+        const halfZ = Math.abs(perspectiveCamera.position.y) * Math.tan(THREE.MathUtils.degToRad(perspectiveCamera.fov) / 2);
+        streamView.z = halfZ;
+        streamView.x = halfZ * perspectiveCamera.aspect;
+        view = streamView;
+    }
+    streams.update(dt, elapsedTime, streamPebbles, view, show && arrivalStartedAt <= elapsedTime);
 }
 
 function animate() {
@@ -2592,7 +2600,7 @@ function animate() {
     }
 
     updateCubeTags(elapsedTime);
-    updateFluxField();
+    updateStreams(frameTime, elapsedTime);
 
     // Update controls - except while a camera move is driving orientation
     // itself (see moveCamera's cameraOrientationLocked), since controls.update()
@@ -2849,6 +2857,8 @@ function applyArrival(cube, elapsedTime) {
     }
 
     const k = arrivalOf(cube, elapsedTime);
+    // Only once it's mostly there does it hide the streams passing under it
+    cube.material.depthWrite = k > 0.3;
     if (k >= 1) return;
 
     cube.scale.multiplyScalar(ARRIVAL_SMALLEST + (1 - ARRIVAL_SMALLEST) * k);

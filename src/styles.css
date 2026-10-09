@@ -247,21 +247,6 @@ canvas.webgl {
     height: 100%;
 }
 
-/* The loader's field, once it has stepped out of the loader to stay behind
-   the catalog: under the fog and the canvas by z-index (fog 0, canvas 1,
-   so this -1), never page order - see "Safari" in DECISIONS.md. Faded out
-   while a project is open. */
-.loader__field.flux-field {
-    position: fixed;
-    z-index: -1;
-    pointer-events: none;
-    transition: opacity 1.2s ease;
-}
-
-.loader__field.flux-field.is-hidden {
-    opacity: 0;
-}
-
 .loader__mark {
     position: relative; /* above the field */
     display: grid;

@@ -29,8 +29,9 @@ and README's "Next up". As of the end of Session 2:
 - **Catalog**: ten pebbles drawn in graphite pencil (`addPencil`), each a
   random size on every visit (ones that touch push each other apart), slowly
   changing shape; one at a time glows orange with its name hanging on a string
-  in the wind. Behind them the start-up loader's flow field drifts on, parting
-  round each pebble (index.html, fed by `updateFluxField`).
+  in the wind. Among them the start-up loader's streams carry on, drawn in
+  the scene on the plane through the pebbles' middles and parting round each
+  (`src/streams.js`).
 - **Waiting on the user**: the real copy for both projects (the live drawer
   text is `[PLACEHOLDER ...]`), captions/credits for both projects'
   pictures, model licensing, and a check on real devices that the blind
@@ -185,8 +186,10 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
   the pebble multiplies by it. See DECISIONS.md, "Pebbles, and a clicked one
   dissolves into points".
 - **Faded pebble faces have `depthWrite = false`** while a project is open,
-  restored on close. Without this an invisible face still occludes what's
-  behind it.
+  restored on close, and while a pebble is still arriving (`applyArrival`).
+  Without this an invisible face still occludes what's behind it - the
+  scene's streams (`src/streams.js`, drawn after the pebbles and
+  depth-tested, so a pebble hides what passes under it) would show holes.
 - **`animate()` runs its first frame the moment it's defined**, before the
   rest of `script.js` has executed. Any `const`/`let` it (or anything it
   calls) touches must be declared above it, or the page dies on load with a
@@ -219,11 +222,11 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
   downloading Playwright's WebKit is blocked. Safari draws WebGL through Metal,
   which is strict where Chrome is lenient: keep GLSL inside defined behaviour
   (no reversed `smoothstep` edges, no `pow(0, y)`), stack HTML over or under
-  the canvas by z-index, never page order (the loader's flow field -1, fog 0,
-  canvas 1, tags, string and tap hint 2 - at equal z-index Safari drew the
-  canvas on top), and don't rely on `click` for taps on the canvas -
-  iPhone/iPad Safari doesn't send it there; use `pointerup` on the canvas. See
-  DECISIONS.md, "Safari: defined GLSL, visible failures".
+  the canvas by z-index, never page order (fog 0, canvas 1, tags, string and
+  tap hint 2 - at equal z-index Safari drew the canvas on top), and don't rely
+  on `click` for taps on the canvas - iPhone/iPad Safari doesn't send it there;
+  use `pointerup` on the canvas. See DECISIONS.md, "Safari: defined GLSL,
+  visible failures".
 - **Moving points have tails** (`addTrails`, `shaders/trail/`): one
   instanced quad per point whose shader re-runs the gather or dissolve a
   moment earlier. They share their points' uniform objects - change how a
