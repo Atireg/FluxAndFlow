@@ -83,6 +83,18 @@ grid; renaming would have touched most of the file for nothing.
   multiplies by it - the flux amount, the thumbnail (`contentBaseScale`), the
   tag's anchors - and `fitCameraToGrid` frames each edge pebble at its own
   size, so a big one on the edge stays on screen.
+- **Pencil, not glass** (`addPencil`): asked for - "the blue isn't right,
+  a pencil sketching look". The face is graphite hatching on the paper:
+  shaded from a fixed upper-left light and darker towards the silhouette,
+  in up to three crossing layers of strokes (`PENCIL_STROKE_GAP` px apart,
+  wobbly, breaking off, with the paper's grain), laid in screen pixels from
+  the pebble's own centre so they travel with it. The rim is a graphite
+  outline with the same grain; the contents (rock, Emergent Space's
+  aggregate) are graphite too (`THUMB_INK`). The material's colour,
+  emissive and opacity mean what they did - graphite, the spotlight's
+  orange, how heavily it's drawn (`PENCIL_WEIGHT`, with an orange wash at
+  the glow's peak) - so paintGlow, the fades and the arrival work
+  unchanged. Before this: pale teal glass with teal rims.
 - **Flux**: each pebble slowly changes shape, as asked - three broad waves
   rolling over its surface on its own seed (`addPebbleFlux`, in the vertex
   shader; `PEBBLE_FLUX` 30% of the radius - 9% and then 15% read as too
@@ -299,17 +311,17 @@ project every pebble faded in together over 0.7s. Now, both times, each
 pebble surfaces out of the paper on its own beat: from `ARRIVAL_DEPTH`
 below its place, at `ARRIVAL_SMALLEST` of its size and clear, eased up to
 itself over `ARRIVAL_DURATION` (3.2s - 1.6 was still too fast), each
-setting off at a random moment within `ARRIVAL_STAGGER` (2.4s). Then,
-asked for too, what's inside them arrives one by one in a random order
-(`CONTENT_ARRIVAL_*`: the first 3.2s in, 0.35s apart, each growing in
-with a slight overshoot). Like the rest of a pebble's state it is a pure function
-of time (since `startArrival`), laid over whatever its mode has set by
-`applyArrival` - so the return no longer tweens opacity (GSAP's tween and
-the per-frame state fought, see `closeProject`); 'returning' paints the
-resting state each frame and the arrival scales it. The loader announces
-its exit with a `fluxloader:leaving` event, and its fade is long (`EXIT`
-2.6s, its wordmark lingering) so the pebbles surface as part of it: they
-start the moment it begins to clear (`ARRIVAL_AFTER_LOADER`, 0). Until
+setting off at a random moment within `ARRIVAL_STAGGER` (2.4s). Then, asked
+for too, what's inside them arrives one by one in a random order
+(`CONTENT_ARRIVAL_*`: the first 3.2s in, 0.35s apart, each growing in with
+a slight overshoot). Like the rest of a pebble's state it is a pure
+function of time (since `startArrival`), laid over whatever its mode has
+set by `applyArrival` - so the return no longer tweens opacity (GSAP's
+tween and the per-frame state fought, see `closeProject`); 'returning'
+paints the resting state each frame and the arrival scales it. The loader
+announces its exit with a `fluxloader:leaving` event, and its fade is long
+(`EXIT` 2.6s, its wordmark lingering) so the pebbles surface as part of it:
+they start the moment it begins to clear (`ARRIVAL_AFTER_LOADER`, 0). Until
 then `arrivalStartedAt` is Infinity: hidden under the loader.
 
 
@@ -656,11 +668,12 @@ The whole site is paper
 -----------------------
 
 Dark ink (`--ink`) on a warm light ground (`--bg` #f0ede6), a deep teal
-accent, the orange invitation. The background is the page, not the scene:
-the renderer is transparent (an old `Sky` dome that painted it dark is
-gone). Nothing is additive - on paper, adding light draws nothing - so
-glass and points blend normally. Scene colours go through `screenColor()`.
-The loader's `palette.bg` must stay equal to `--bg`.
+accent, the orange invitation; the pebbles are drawn in graphite pencil.
+The background is the page, not the scene: the renderer is transparent (an
+old `Sky` dome that painted it dark is gone). Nothing is additive - on
+paper, adding light draws nothing - so glass and points blend normally.
+Scene colours go through `screenColor()`. The loader's `palette.bg` must
+stay equal to `--bg`.
 
 
 Scene fog is off; the grey fog is a page layer
