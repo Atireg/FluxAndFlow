@@ -713,13 +713,29 @@ The start-up loader is inline and waits for real progress
 `#loader` is markup, CSS and a classic script in index.html, so it's on
 screen before the ~180 KB (gzipped) bundle arrives. Particles stream along
 braided currents around the wordmark, in paper, gathering strength with
-progress and pouring into the centre as it fades (`EXIT`, 0.9s). Progress is
+progress. Progress is
 real: script.js registers each start-up asset (`bootAsset`), and calls
 `window.fluxLoader.finish()` when all are done (failures count as done; a
 30s cap). It stays at least `MIN_VISIBLE` (5s), the bar showing the lesser
 of real progress and elapsed time so a fast load fills it steadily rather
 than jumping to 100%. All its animation runs on elapsed time, not frames.
 On a fast load it's gone ~6s after the page opens.
+
+**The field stays.** Asked for: the loader's particles floating on around
+the pebbles. As the loader fades (`EXIT`, 0.9s - the streams used to pour
+into the centre), its canvas steps out of it into the page
+(`.flux-field`) and keeps running, eased to a calmer drift
+(`AMBIENT_FLUX`, `AMBIENT_ALPHA`, `AMBIENT_SHARE` of the streams).
+script.js hands it the pebbles' screen circles every frame
+(`updateFluxField` -> `window.fluxField.update`), and the streams part
+round each one: the part of a stream's drift heading into a pebble is
+turned aside, more the closer it is (`PART_REACH`, `PART_TURN`), so they
+slide round like a current round stones. It sits at z-index -1, under
+the fog (0) and the canvas (1) - by z-index, never page order (see
+"Safari"); body's background propagates to the root, so it still shows.
+While a project is open (`update(null)`) it fades out and, once faded,
+stops drawing. Kept in the 2D canvas it already was rather than ported to
+WebGL: it's one canvas fill and eight strokes a frame.
 
 
 `?cloudtest`, and why clouds load on click

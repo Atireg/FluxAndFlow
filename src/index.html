@@ -18,8 +18,9 @@
 </head>
 <body>
   <!-- Start-up loader: a field of flowing particles - the flux - that picks
-       up strength as the catalog loads and pours into the centre as it
-       leaves. Inline, and ahead of everything else, so it's on screen
+       up strength as the catalog loads. As the loader leaves, the field
+       stays behind the pebbles, calmer, its streams parting round each one
+       (script.js tells it where they are through window.fluxField). Inline, and ahead of everything else, so it's on screen
        before the main script has even downloaded. script.js reports
        progress through window.fluxLoader; see DECISIONS.md. -->
   <div class="loader" id="loader" role="progressbar" aria-label="Loading Flux and Flow"
@@ -44,9 +45,19 @@
       // however fast the catalog loads, and the bar paces itself to fill over
       // it rather than racing to 100% and sitting there
       var MIN_VISIBLE = 5000;
-      // The exit: the streams pour into the centre while the loader fades -
-      // onto the same paper the site sits on, so only the grid appears
+      // The exit: the loader fades onto the same paper the site sits on while
+      // the streams calm down - and stay, behind the pebbles
       var EXIT = 900; // ms - keep in step with .loader.is-leaving in styles.css
+      // Once the catalog is up the field drifts on behind it, gentler than
+      // while loading: slower, fainter, fewer streams
+      var AMBIENT_FLUX = 0.3; // 0..1, as the loading flux
+      var AMBIENT_ALPHA = 0.3; // a stream's ink
+      var AMBIENT_SHARE = 0.6; // of the streams still drawn
+      // Round each pebble the streams part, like a current round stones:
+      // within this many of its radii they turn aside, and one that strays
+      // inside is eased back out
+      var PART_REACH = 1.35;
+      var PART_TURN = 0.6; // how much of the inward drift is turned aside each frame
       var SHADES = 8; // steps between a palette's two flow colours
 
       // "Paper", chosen from six palettes and since carried through the whole
@@ -81,6 +92,10 @@
       var lastFrame = null;
       var finishAt = null; // when the exit may start
       var leavingSince = null;
+      var ambient = 0; // 0 loading .. 1 behind the catalog
+      var obstacles = []; // the pebbles on screen: { x, y, r } in CSS pixels
+      var showing = true; // false while a project is open - see fluxField
+      var hiddenSince = null;
       var width = 0, height = 0, dpr = 1, particles = [];
       var segments = new Float32Array(0), bins = new Uint8Array(0);
 
@@ -133,7 +148,9 @@
         var paced = Math.min(target, (now - startedAt) / MIN_VISIBLE);
         shown += (paced - shown) * (1 - Math.exp(-dt / 180));
 
-        if (!still) drawField(now, dt / 16.7);
+        // Hidden behind an open project, it rests once it has faded out
+        var resting = !showing && hiddenSince !== null && now - hiddenSince > 1500;
+        if (!still && !resting) drawField(now, dt / 16.7);
 
         var percent = Math.round(shown * 100);
         fill.style.transform = 'scaleX(' + shown + ')';
@@ -143,13 +160,14 @@
         if (finishAt !== null && leavingSince === null && now >= finishAt && shown > 0.97) {
           leavingSince = now;
           root.classList.add('is-leaving');
+          // The field steps out of the loader to stay, under the catalog
+          canvas.classList.add('flux-field');
+          document.body.insertBefore(canvas, root);
         }
 
-        if (leavingSince !== null && now - leavingSince > EXIT) {
-          window.removeEventListener('resize', resize);
-          root.remove();
-          return;
-        }
+        if (leavingSince !== null) ambient = Math.min((now - leavingSince) / EXIT, 1);
+
+        if (leavingSince !== null && now - leavingSince > EXIT && root.parentNode) root.remove();
 
         window.requestAnimationFrame(step);
       }
@@ -161,21 +179,36 @@
         ctx.fillStyle = rgba(palette.bg, (1 - Math.pow(1 - 0.09, frames)).toFixed(3));
         ctx.fillRect(0, 0, width, height);
 
-        var flux = 0.3 + 0.7 * shown; // the flow gathers strength as loading goes
-        var pull = leavingSince === null ? 0 : Math.min((now - leavingSince) / EXIT, 1);
-        var cx = width / 2, cy = height / 2;
+        // The flow gathers strength as loading goes, then settles to a drift
+        var flux = (0.3 + 0.7 * shown) * (1 - ambient) + AMBIENT_FLUX * ambient;
+        var drawn = Math.round(particles.length * (1 - (1 - AMBIENT_SHARE) * ambient));
 
-        for (var i = 0; i < particles.length; i++) {
+        for (var i = 0; i < drawn; i++) {
           var p = particles[i];
           var a = angle(p.x, p.y, now);
           var speed = (0.5 + 1.7 * flux) * frames;
           var vx = Math.cos(a) * speed;
           var vy = Math.sin(a) * speed;
 
-          // On the way out, everything pours into the centre
-          if (pull > 0) {
-            vx += (cx - p.x) * Math.min(pull * 0.09 * frames, 1);
-            vy += (cy - p.y) * Math.min(pull * 0.09 * frames, 1);
+          // Round the pebbles: the part of the drift heading into one is
+          // turned aside, more the closer it is, so the stream slides round
+          for (var o = 0; o < obstacles.length; o++) {
+            var ob = obstacles[o];
+            var dx = p.x - ob.x, dy = p.y - ob.y;
+            var d = Math.sqrt(dx * dx + dy * dy) || 1;
+            var reach = ob.r * PART_REACH;
+            if (d >= reach) continue;
+            var nx = dx / d, ny = dy / d;
+            var near = 1 - d / reach;
+            var inward = vx * nx + vy * ny;
+            if (inward < 0) {
+              vx -= nx * inward * Math.min(1, near * PART_TURN * 3);
+              vy -= ny * inward * Math.min(1, near * PART_TURN * 3);
+            }
+            if (d < ob.r) {
+              vx += nx * speed * near;
+              vy += ny * speed * near;
+            }
           }
 
           segments[i * 4] = p.x;
@@ -188,15 +221,15 @@
           p.y += vy;
           p.age += frames;
 
-          if (pull === 0 && (p.age > p.life || p.x < 0 || p.x > width || p.y < 0 || p.y > height)) spawn(p);
+          if (p.age > p.life || p.x < 0 || p.x > width || p.y < 0 || p.y > height) spawn(p);
         }
 
         // One stroke per shade, rather than one per particle
-        var alpha = 0.18 + 0.42 * flux;
+        var alpha = (0.18 + 0.42 * flux) * (1 - ambient) + AMBIENT_ALPHA * ambient;
         ctx.lineWidth = 1;
         for (var b = 0; b < SHADES; b++) {
           ctx.beginPath();
-          for (var j = 0; j < particles.length; j++) {
+          for (var j = 0; j < drawn; j++) {
             if (bins[j] !== b) continue;
             ctx.moveTo(segments[j * 4], segments[j * 4 + 1]);
             ctx.lineTo(segments[j * 4 + 2], segments[j * 4 + 3]);
@@ -222,6 +255,19 @@
           }
         }
       }
+
+      // The catalog's side: where the pebbles are, each frame, or null while
+      // a project is open - the field fades out then and rests
+      window.fluxField = {
+        update: function (pebbles) {
+          var show = pebbles !== null;
+          obstacles = pebbles || [];
+          if (show === showing) return;
+          showing = show;
+          hiddenSince = show ? null : performance.now();
+          canvas.classList.toggle('is-hidden', !show);
+        },
+      };
 
       window.fluxLoader = {
         progress: function (fraction) {

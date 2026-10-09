@@ -2389,6 +2389,30 @@ let flowPointerAt = 0;
 const clock = new THREE.Clock();
 let lastFrameTime = 0;
 
+// The loader's flow field drifts on behind the catalog, parting round the
+// pebbles (index.html, window.fluxField): where each sits on screen, each
+// frame, or null while a project is open
+const fieldPebbles = [];
+const fieldCentre = new THREE.Vector3();
+const fieldEdge = new THREE.Vector3();
+
+function updateFluxField() {
+    if (!window.fluxField) return;
+    if (viewState !== 'catalog') {
+        window.fluxField.update(null);
+        return;
+    }
+
+    cubes.forEach((cube, i) => {
+        const [x, y] = screenPoint(fieldCentre.copy(cube.position));
+        // Down the camera's axis world X is screen X, so the radius projects along it
+        const [ex] = screenPoint(fieldEdge.copy(cube.position).setX(cube.position.x + PEBBLE_RADIUS * cube.userData.size * cube.scale.x));
+        fieldPebbles[i] = { x, y, r: Math.abs(ex - x) };
+    });
+    fieldPebbles.length = cubes.length;
+    window.fluxField.update(fieldPebbles);
+}
+
 function animate() {
     requestAnimationFrame(animate);
 
@@ -2457,6 +2481,7 @@ function animate() {
     }
 
     updateCubeTags(elapsedTime);
+    updateFluxField();
 
     // Update controls - except while a camera move is driving orientation
     // itself (see moveCamera's cameraOrientationLocked), since controls.update()

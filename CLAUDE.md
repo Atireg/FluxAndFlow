@@ -28,7 +28,9 @@ and README's "Next up". As of the end of Session 2:
   new drop every time it opens).
 - **Catalog**: ten glass pebbles, each a random size on every visit (ones
   that touch push each other apart), slowly changing shape; one at a time
-  glows orange with its name hanging on a string in the wind.
+  glows orange with its name hanging on a string in the wind. Behind them
+  the start-up loader's flow field drifts on, parting round each pebble
+  (index.html, fed by `updateFluxField`).
 - **Waiting on the user**: the real copy for both projects (the live drawer
   text is `[PLACEHOLDER ...]`), captions/credits for both projects'
   pictures, model licensing, and a check on real devices that the blind
@@ -210,9 +212,9 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
   downloading Playwright's WebKit is blocked. Safari draws WebGL through
   Metal, which is strict where Chrome is lenient: keep GLSL inside defined
   behaviour (no reversed `smoothstep` edges, no `pow(0, y)`), stack HTML
-  over or under the canvas by z-index, never page order (fog 0, canvas 1,
-  tags, string and tap hint 2 - at equal z-index Safari drew the canvas on
-  top), and don't rely on `click` for taps on the canvas - iPhone/iPad
+  over or under the canvas by z-index, never page order (the loader's flow
+  field -1, fog 0, canvas 1, tags, string and tap hint 2 - at equal z-index
+  Safari drew the canvas on top), and don't rely on `click` for taps on the canvas - iPhone/iPad
   Safari doesn't send it there; use `pointerup` on the canvas. See
   DECISIONS.md, "Safari: defined GLSL, visible failures".
 - **Moving points have tails** (`addTrails`, `shaders/trail/`): one
