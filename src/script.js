@@ -1300,6 +1300,10 @@ const PEBBLE_LUMPS = 0.06; // how far the surface wanders from round
 const PEBBLE_STRETCH = 0.08; // how far each is drawn out along its own axes
 const PEBBLE_DETAIL = 16; // icosphere subdivisions - smooth, still cheap to raycast
 const PEBBLE_RIM_POWER = 2.4; // how tightly the rim hugs the silhouette
+// Each pebble is drawn this many times PEBBLE_RADIUS across, picked at
+// random on every visit - the larger ones can reach into their neighbours
+const PEBBLE_SIZE_MIN = 1;
+const PEBBLE_SIZE_MAX = 1.8;
 
 /**
  * The flux: each pebble slowly changes shape - a few broad waves rolling
@@ -1328,14 +1332,14 @@ float pebbleFlux(vec3 n) {
 }`;
 
 // Patches a pebble material (glass or rim) to flux, on its own seed
-function addPebbleFlux(material, seed) {
+function addPebbleFlux(material, seed, size = 1) {
     const before = material.onBeforeCompile;
 
     material.onBeforeCompile = (shader, renderer) => {
         before?.(shader, renderer);
         shader.uniforms.uFluxTime = pebbleFluxTime;
         shader.uniforms.uFluxSeed = { value: seed };
-        shader.uniforms.uFluxAmount = { value: PEBBLE_RADIUS * PEBBLE_FLUX };
+        shader.uniforms.uFluxAmount = { value: PEBBLE_RADIUS * size * PEBBLE_FLUX };
         shader.vertexShader = shader.vertexShader
             .replace('#include <common>', `#include <common>\n${PEBBLE_FLUX_GLSL}`)
             .replace('#include <begin_vertex>', [
@@ -1349,8 +1353,8 @@ function addPebbleFlux(material, seed) {
     return material;
 }
 
-function makePebbleGeometry(seed) {
-    let geometry = new THREE.IcosahedronGeometry(PEBBLE_RADIUS, PEBBLE_DETAIL);
+function makePebbleGeometry(seed, size = 1) {
+    let geometry = new THREE.IcosahedronGeometry(PEBBLE_RADIUS * size, PEBBLE_DETAIL);
 
     // Shared vertices, so the normals come out smooth rather than faceted
     geometry.deleteAttribute('normal');
@@ -1545,7 +1549,7 @@ function getDissolve(cube) {
             // The pebble's flux, held where it was at the click (see updateDissolve)
             uFluxTime: { value: 0 },
             uFluxSeed: { value: cube.userData.fluxSeed ?? 0 },
-            uFluxAmount: { value: PEBBLE_RADIUS * PEBBLE_FLUX },
+            uFluxAmount: { value: PEBBLE_RADIUS * cube.userData.size * PEBBLE_FLUX },
         },
     }));
     points.userData.ground = Boolean(drop);
@@ -1595,24 +1599,28 @@ function createPlayground() {
     // One cube per slot. The count is fixed, so a project always has a home.
     for (let slot = 0; slot < SLOT_COUNT; slot++) {
         const seed = slot * 2.37 + 1.1;
-        const cubeGeometry = makePebbleGeometry(seed);
+        // Its size goes into the geometry, not the mesh's scale: the mesh
+        // also carries the project's model once it opens, which must not grow
+        const size = THREE.MathUtils.randFloat(PEBBLE_SIZE_MIN, PEBBLE_SIZE_MAX);
+        const cubeGeometry = makePebbleGeometry(seed, size);
         const cubeMaterial = addPebbleFlux(new THREE.MeshStandardMaterial({
             color: cubesColor,
             metalness: 0.2,
             roughness: 0.6,
             transparent: true,
             opacity: CUBE_FACE_OPACITY,
-        }), seed);
+        }), seed, size);
 
         const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
 
         // The pebble's rim, in place of a box's edge lines - see makeRimMaterial.
         // It fluxes with the glass, on the same seed, so it stays on it.
-        const edges = new THREE.Mesh(cubeGeometry, addPebbleFlux(makeRimMaterial(selectedCubeColor), seed));
+        const edges = new THREE.Mesh(cubeGeometry, addPebbleFlux(makeRimMaterial(selectedCubeColor), seed, size));
         edges.renderOrder = 1;
         cube.add(edges);
         cube.userData.edges = edges;
         cube.userData.fluxSeed = seed;
+        cube.userData.size = size;
 
         // Which slot this is, and the project sitting in it (null when empty)
         cube.userData.slot = slot;
@@ -1687,12 +1695,12 @@ function addContentToCube(cube) {
 
             content = new THREE.Group();
             content.add(fitted);
-            cube.userData.contentBaseScale = 1;
+            cube.userData.contentBaseScale = cube.userData.size;
         } else {
             // The rock, as drawn
             content = scene.clone();
-            content.position.set(0, -1, 0);
-            cube.userData.contentBaseScale = 0.2;
+            content.position.set(0, -cube.userData.size, 0);
+            cube.userData.contentBaseScale = 0.2 * cube.userData.size;
         }
 
         content.scale.setScalar(cube.userData.contentBaseScale);
@@ -1752,9 +1760,17 @@ function layoutCubes() {
 function fitCameraToGrid({ animate = false } = {}) {
     const step = cubeSize * spacing;
 
-    // Grid extents, measured to the outer faces of the edge cubes
-    const gridWidth = (gridShape.cols - 1) * step + cubeSize;
-    const gridDepth = (gridShape.rows - 1) * step + cubeSize;
+    // Grid extents, measured to the outer faces of the edge cubes - each
+    // as big as its pebble, so a large one on the edge stays on screen
+    let halfWidth = ((gridShape.cols - 1) * step + cubeSize) / 2;
+    let halfDepth = ((gridShape.rows - 1) * step + cubeSize) / 2;
+    cubes.forEach((cube) => {
+        const reach = cubeSize / 2 * cube.userData.size;
+        halfWidth = Math.max(halfWidth, Math.abs(cube.userData.slotPosition.x) + reach);
+        halfDepth = Math.max(halfDepth, Math.abs(cube.userData.slotPosition.z) + reach);
+    });
+    const gridWidth = halfWidth * 2;
+    const gridDepth = halfDepth * 2;
     const margin = 1.15;
 
     const halfFov = THREE.MathUtils.degToRad(CATALOG_FOV) / 2;
@@ -2533,7 +2549,7 @@ function updateSpotlightCube(cube, elapsedTime) {
 function placeTagOnCube(tag, cube) {
     // Down the screen is world +Z from the overhead catalog camera
     cube.updateMatrixWorld();
-    cubeTagAnchor.set(0, PEBBLE_RADIUS * PEBBLE_SQUASH, cubeSize * 0.36);
+    cubeTagAnchor.set(0, PEBBLE_RADIUS * PEBBLE_SQUASH, cubeSize * 0.36).multiplyScalar(cube.userData.size);
     cube.localToWorld(cubeTagAnchor).project(camera);
 
     const x = (cubeTagAnchor.x + 1) / 2 * screenWidth;
@@ -2561,7 +2577,7 @@ function hangSpotlightTag(cube, elapsedTime) {
     // Tied to the pebble's lower edge as seen from above - down the screen
     // is world +Z - just inside its rim
     cube.updateMatrixWorld();
-    const [ax, ay] = screenPoint(cube.localToWorld(tagPivot.set(0, 0, PEBBLE_RADIUS * 0.9)));
+    const [ax, ay] = screenPoint(cube.localToWorld(tagPivot.set(0, 0, PEBBLE_RADIUS * cube.userData.size * 0.9)));
     const [cx, cy] = screenPoint(cube.localToWorld(tagCentre.set(0, 0, 0)));
     const pebbleRadius = Math.hypot(ax - cx, ay - cy) / 0.9;
     const length = Math.max(TAG_STRING_MIN, pebbleRadius * TAG_STRING_LENGTH);

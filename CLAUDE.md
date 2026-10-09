@@ -170,7 +170,10 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
   (darker once visited) - don't write `cubesColor` back directly. Pebbles
   slowly change shape in the vertex shader (`addPebbleFlux`, on both the
   glass and the rim with the same seed - any new pebble material needs it
-  too, or it won't move with them). See DECISIONS.md, "Pebbles, and a
+  too, or it won't move with them). Each has a random size
+  (`cube.userData.size`, `PEBBLE_SIZE_*`) baked into its geometry - never
+  into `cube.scale`, which also scales the project's model once it opens;
+  anything placed relative to the pebble multiplies by it. See DECISIONS.md, "Pebbles, and a
   clicked one dissolves into points".
 - **Faded pebble faces have `depthWrite = false`** while a project is open,
   restored on close. Without this an invisible face still occludes what's

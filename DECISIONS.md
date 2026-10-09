@@ -68,10 +68,20 @@ cloud of points when clicked. **The code still calls them cubes**
 (`cubes`, `cubeSize`, `CUBE_FACE_OPACITY`...) and they sit in the cubeSize
 grid; renaming would have touched most of the file for nothing.
 
-- **Shape** (`makePebbleGeometry(seed)`): a sphere of `PEBBLE_RADIUS`
+- **Shape** (`makePebbleGeometry(seed, size)`): a sphere of `PEBBLE_RADIUS`
   (0.44 x cubeSize), wobbled by a few slow waves (`PEBBLE_LUMPS`), drawn out
   a little (`PEBBLE_STRETCH`), squashed flat (`PEBBLE_SQUASH`); a seed per
   slot. Vertices are merged first so normals are smooth.
+- **Sizes**: each pebble is drawn `PEBBLE_SIZE_MIN`..`PEBBLE_SIZE_MAX`
+  (1 to 1.8) times that, picked at random on every visit
+  (`cube.userData.size`); the larger ones may overlap their neighbours, as
+  asked. The size goes into the geometry, not `cube.scale`: the pebble
+  parents the project's model once it opens, and its scale is held at 1
+  there (and pulses only for the spotlight). Everything sized off the
+  pebble multiplies by it - the flux amount, the thumbnail
+  (`contentBaseScale`), the tag's anchors - and `fitCameraToGrid` frames
+  each edge pebble at its own size, so a big one on the edge stays on
+  screen.
 - **Flux**: each pebble slowly changes shape, as asked - three broad waves
   rolling over its surface on its own seed (`addPebbleFlux`, in the vertex
   shader; `PEBBLE_FLUX` 30% of the radius - 9% and then 15% read as too
