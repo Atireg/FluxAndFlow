@@ -1,7 +1,7 @@
 # Flux and Flow
 
 A portfolio: a catalog of projects explored in three dimensions. Each
-project is a pencil-sketched pebble in a grid (still called a "cube"
+project is a graphite pebble in a grid (still called a "cube"
 throughout the code); clicking one knocks the others off the screen,
 dissolves it into a cloud of points and opens the project's 3D model on the
 whole canvas (a point cloud, or Emergent Space's solid aggregates dropped
@@ -26,7 +26,7 @@ and README's "Next up". As of the end of Session 2:
   `aggregate.glb`, drawn solid in the inks - dropped with live physics onto
   a ground formed by the clicked pebble's points, until they interlock; a
   new drop every time it opens).
-- **Catalog**: ten pebbles drawn in graphite pencil (`addPencil`), each a
+- **Catalog**: ten pebbles shaded in graphite (`addGraphite`), each a
   random size on every visit (ones that touch push each other apart), slowly
   changing shape; one at a time glows orange with its name hanging on a string
   in the wind. Among them the start-up loader's streams carry on, drawn in
@@ -178,9 +178,9 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
   visited) - don't write `cubesColor` back directly. Pebbles slowly change
   shape in the vertex shader (`addPebbleFlux`, on both the face and the rim
   with the same seed - any new pebble material needs it too, or it won't move
-  with them). The face is pencil hatching (`addPencil`), not lit glass: its
+  with them). The face is a graphite shade (`addGraphite`), not lit glass: its
   colour is the graphite, its emissive the spotlight's orange, its opacity how
-  heavily it's drawn. Each has a random size (`cube.userData.size`,
+  heavily it's shaded. Each has a random size (`cube.userData.size`,
   `PEBBLE_SIZE_*`) baked into its geometry - never into `cube.scale`, which
   also scales the project's model once it opens; anything placed relative to
   the pebble multiplies by it. See DECISIONS.md, "Pebbles, and a clicked one

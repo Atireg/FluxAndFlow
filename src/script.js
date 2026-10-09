@@ -61,9 +61,10 @@ const SPOTLIGHT_FACE_OPACITY = 0.6; // at the peak of a beat
 // so these bypass that. See DECISIONS.md.
 const screenColor = (r, g, b) => new THREE.Color().setRGB(r / 255, g / 255, b / 255, THREE.LinearSRGBColorSpace);
 
-// On the paper ground (--bg in styles.css): the pebbles are pencil sketches
-// - graphite hatching (see addPencil) inside a graphite outline. They were
-// pale teal glass with teal rims until the user asked for a pencil look
+// On the paper ground (--bg in styles.css): the pebbles are graphite - a
+// smooth graphite shade (see addGraphite) inside a graphite outline. They
+// were pale teal glass with teal rims, then pencil hatching, until the user
+// kept the colour and dropped the strokes
 const cubesColor = screenColor(72, 72, 74);
 const selectedCubeColor = screenColor(40, 40, 42);
 
@@ -369,7 +370,7 @@ const EMPTY_SLOT_THUMB = 'models/rock.gltf';
 // A project's own thumbnail (`thumbSize`) is drawn in the rock's ink - its
 // colour on screen - whatever the file's own material, so the grid reads
 // as one set
-const THUMB_INK = new THREE.MeshBasicMaterial({ color: screenColor(44, 44, 47) }); // graphite, like the pebbles' pencil
+const THUMB_INK = new THREE.MeshBasicMaterial({ color: screenColor(44, 44, 47) }); // graphite, like the pebbles
 
 // Up here, not next to loadThumb: createPlayground() runs before that
 // part of the file has executed.
@@ -1477,86 +1478,40 @@ function makePebbleGeometry(seed, size = 1) {
 }
 
 /**
- * The pencil: a pebble's face drawn as graphite hatching on the paper
- * rather than lit glass. Shaded from a fixed light (upper left) and
- * darker towards the silhouette, then drawn in up to three layers of
- * strokes - one direction where it's light, crossed where it's darker, a
- * third in the darkest - each a little wobbly, breaking off now and then,
- * with the grain of the paper in it. The strokes are laid in screen
- * pixels from the pebble's own centre, so they move with it rather than
- * the pebble sliding under them. The material's colour, emissive and
- * opacity keep their meaning (paintGlow, the fades and the arrival drive
- * them as before): the colour is the graphite, the emissive the
- * spotlight's orange, and the opacity how heavily it's drawn.
+ * Graphite: a pebble's face shaded in graphite over the paper rather than
+ * lit glass - the scene's cyan lights would tint it blue. Shaded from a
+ * fixed light (upper left) and darker towards the silhouette, smoothly (it
+ * was pencil hatching; the user kept the colour and dropped the strokes).
+ * The material's colour, emissive and opacity keep their meaning
+ * (paintGlow, the fades and the arrival drive them as before): the colour
+ * is the graphite, the emissive the spotlight's orange, and the opacity how
+ * heavily it's shaded.
  */
-const PENCIL_STROKE_GAP = 6; // CSS pixels between strokes
-const PENCIL_WEIGHT = 4; // the opacity times this is how much a stroke covers (resting 0.14 -> 0.56)
-const pencilPixelRatio = { value: 1 }; // set each frame
+const GRAPHITE_WEIGHT = 4; // the opacity times this is how much it shades (resting 0.14 -> 0.56)
 
-const PENCIL_GLSL = `
-uniform vec2 uPencilViewport;
-uniform float uPencilPixelRatio;
-varying vec2 vPencilCentre;
-
-float pencilHash(vec2 q) {
-    return fract(sin(dot(q, vec2(12.9898, 78.233))) * 43758.5453);
-}
-
-// 1 on a stroke, 0 between: strokes ${PENCIL_STROKE_GAP}px apart at an angle,
-// wobbling as a hand does and breaking off now and then
-float pencilHatch(vec2 p, float angle, float gap) {
-    vec2 d = vec2(cos(angle), sin(angle));
-    float across = dot(p, vec2(-d.y, d.x));
-    float along = dot(p, d);
-    across += sin(along * 0.07 + across * 0.02) * 0.8;
-    // A stroke's width is in device pixels, not CSS ones: on a phone's
-    // dense screen a CSS-pixel stroke read as too thick
-    float fromLine = abs(fract(across / gap) - 0.5) * gap * uPencilPixelRatio;
-    float stroke = 1.0 - smoothstep(0.3, 1.1, fromLine);
-    float lift = sin(along * 0.045 + floor(across / gap) * 2.7) * 0.5 + 0.5;
-    return stroke * smoothstep(0.15, 0.45, lift);
-}`;
-
-function addPencil(material) {
+function addGraphite(material) {
     material.onBeforeCompile = (shader) => {
-        shader.uniforms.uPencilViewport = trailResolution;
-        shader.uniforms.uPencilPixelRatio = pencilPixelRatio;
-        shader.vertexShader = shader.vertexShader
-            .replace('#include <common>', '#include <common>\nuniform vec2 uPencilViewport;\nvarying vec2 vPencilCentre;')
-            .replace('#include <project_vertex>', [
-                '#include <project_vertex>',
-                // The pebble's centre on screen, in pixels, for the strokes to hang off
-                'vec4 pencilCentre = projectionMatrix * modelViewMatrix * vec4(0.0, 0.0, 0.0, 1.0);',
-                'vPencilCentre = (pencilCentre.xy / pencilCentre.w * 0.5 + 0.5) * uPencilViewport;',
-            ].join('\n'));
         shader.fragmentShader = shader.fragmentShader
-            .replace('#include <common>', `#include <common>\n${PENCIL_GLSL}`)
             .replace('#include <opaque_fragment>', [
                 // Light from the upper left, darker towards the silhouette
-                'vec3 pencilNormal = normalize(normal);',
-                'float pencilLit = dot(pencilNormal, normalize(vec3(-0.45, 0.55, 0.7))) * 0.5 + 0.5;',
-                'float pencilEdge = 1.0 - abs(pencilNormal.z);',
-                'float pencilDark = clamp((1.0 - pencilLit) * 1.1 + pencilEdge * 0.5, 0.0, 1.0);',
-                'vec2 pencilAt = (gl_FragCoord.xy - vPencilCentre) / uPencilPixelRatio;',
-                `float pencilCover = pencilHatch(pencilAt, 0.9, ${PENCIL_STROKE_GAP.toFixed(1)}) * smoothstep(0.2, 0.4, pencilDark)`,
-                `    + pencilHatch(pencilAt, -0.7, ${(PENCIL_STROKE_GAP * 1.15).toFixed(1)}) * smoothstep(0.45, 0.65, pencilDark)`,
-                `    + pencilHatch(pencilAt, 0.15, ${(PENCIL_STROKE_GAP * 0.85).toFixed(1)}) * smoothstep(0.7, 0.9, pencilDark);`,
-                'pencilCover = min(pencilCover, 1.0) * (0.55 + 0.45 * pencilHash(floor(gl_FragCoord.xy)));',
+                'vec3 graphiteNormal = normalize(normal);',
+                'float graphiteLit = dot(graphiteNormal, normalize(vec3(-0.45, 0.55, 0.7))) * 0.5 + 0.5;',
+                'float graphiteEdge = 1.0 - abs(graphiteNormal.z);',
+                'float graphiteDark = clamp((1.0 - graphiteLit) * 1.1 + graphiteEdge * 0.5, 0.0, 1.0);',
                 // Graphite, turning the spotlight's orange as it glows, with a
                 // light wash of it filling in at the peak
                 'outgoingLight = diffuseColor.rgb + totalEmissiveRadiance;',
-                `float pencilWash = smoothstep(0.15, 0.6, diffuseColor.a) * 0.35;`,
-                `diffuseColor.a = max(pencilCover * min(diffuseColor.a * ${PENCIL_WEIGHT.toFixed(1)}, 1.0), pencilWash);`,
+                'float graphiteWash = smoothstep(0.15, 0.6, diffuseColor.a) * 0.35;',
+                `diffuseColor.a = max((0.15 + 0.45 * graphiteDark) * min(diffuseColor.a * ${GRAPHITE_WEIGHT.toFixed(1)}, 1.0), graphiteWash);`,
                 '#include <opaque_fragment>',
             ].join('\n'));
     };
-    material.customProgramCacheKey = () => 'pebble-pencil';
+    material.customProgramCacheKey = () => 'pebble-graphite';
     return material;
 }
 
 // The rim: plain colour and opacity like any basic material, its alpha
-// weighted towards the silhouette - a pencil outline, so with the paper's
-// grain in it. Kept off pow(0, y), undefined in GLSL
+// weighted towards the silhouette. Kept off pow(0, y), undefined in GLSL
 // (see "Safari" in DECISIONS.md).
 function makeRimMaterial(color) {
     const material = new THREE.MeshBasicMaterial({ color, transparent: true, depthWrite: false });
@@ -1570,7 +1525,6 @@ function makeRimMaterial(color) {
             .replace('#include <opaque_fragment>', [
                 'float rimFacing = abs(dot(normalize(vRimNormal), normalize(vRimView)));',
                 `diffuseColor.a *= pow(max(1.0 - rimFacing, 0.0001), ${PEBBLE_RIM_POWER.toFixed(2)});`,
-                'diffuseColor.a *= 0.6 + 0.4 * fract(sin(dot(floor(gl_FragCoord.xy), vec2(12.9898, 78.233))) * 43758.5453);',
                 '#include <opaque_fragment>',
             ].join('\n'));
     };
@@ -1841,7 +1795,7 @@ function createPlayground() {
         // also carries the project's model once it opens, which must not grow
         const size = THREE.MathUtils.randFloat(PEBBLE_SIZE_MIN, PEBBLE_SIZE_MAX);
         const cubeGeometry = makePebbleGeometry(seed, size);
-        const cubeMaterial = addPebbleFlux(addPencil(new THREE.MeshStandardMaterial({
+        const cubeMaterial = addPebbleFlux(addGraphite(new THREE.MeshStandardMaterial({
             color: cubesColor,
             metalness: 0.2,
             roughness: 0.6,
@@ -2534,7 +2488,6 @@ function animate() {
     smokeMaterial.uniforms.uTime.value = elapsedTime;
     pebbleFluxTime.value = elapsedTime * PEBBLE_FLUX_SPEED;
     renderer.getDrawingBufferSize(trailResolution.value);
-    pencilPixelRatio.value = renderer.getPixelRatio();
 
     // The catalog's own motion - wander, hover, spotlight - only runs while
     // it is actually what's on screen. A click hands every cube to the

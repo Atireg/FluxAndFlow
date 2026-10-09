@@ -83,19 +83,18 @@ grid; renaming would have touched most of the file for nothing.
   multiplies by it - the flux amount, the thumbnail (`contentBaseScale`), the
   tag's anchors - and `fitCameraToGrid` frames each edge pebble at its own
   size, so a big one on the edge stays on screen.
-- **Pencil, not glass** (`addPencil`): asked for - "the blue isn't right, a
-  pencil sketching look". The face is graphite hatching on the paper: shaded
-  from a fixed upper-left light and darker towards the silhouette, in up to
-  three crossing layers of strokes (`PENCIL_STROKE_GAP` CSS px apart, each
-  about a device pixel wide - a CSS pixel read as too thick on a phone; wobbly,
-  breaking off, with the paper's grain), laid in screen pixels from the
-  pebble's own centre so they travel with it. The rim is a graphite outline
-  with the same grain; the contents (rock, Emergent Space's aggregate) are
-  graphite too (`THUMB_INK`). The material's colour, emissive and opacity mean
-  what they did - graphite, the spotlight's orange, how heavily it's drawn
-  (`PENCIL_WEIGHT`, with an orange wash at the glow's peak) - so paintGlow, the
-  fades and the arrival work unchanged. Before this: pale teal glass with teal
-  rims.
+- **Graphite, not glass** (`addGraphite`): asked for - "the blue isn't
+  right". First a pencil sketch: graphite hatching, crossing strokes, a
+  grainy outline; the user then kept the colour and dropped the strokes. The
+  face is now a smooth graphite shade over the paper, from a fixed
+  upper-left light and darker towards the silhouette - not the scene's
+  lighting, whose cyan lights would tint it blue. The rim is a plain
+  graphite outline; the contents (rock, Emergent Space's aggregate) are
+  graphite too (`THUMB_INK`). The material's colour, emissive and opacity
+  mean what they did - graphite, the spotlight's orange, how heavily it's
+  shaded (`GRAPHITE_WEIGHT`, with an orange wash at the glow's peak) - so
+  paintGlow, the fades and the arrival work unchanged. Before this: pale
+  teal glass with teal rims.
 - **Flux**: each pebble slowly changes shape, as asked - three broad waves
   rolling over its surface on its own seed (`addPebbleFlux`, in the vertex
   shader; `PEBBLE_FLUX` 30% of the radius - 9% and then 15% read as too
@@ -669,7 +668,7 @@ The whole site is paper
 -----------------------
 
 Dark ink (`--ink`) on a warm light ground (`--bg` #f0ede6), a deep teal
-accent, the orange invitation; the pebbles are drawn in graphite pencil.
+accent, the orange invitation; the pebbles are shaded in graphite.
 The background is the page, not the scene: the renderer is transparent (an
 old `Sky` dome that painted it dark is gone). Nothing is additive - on
 paper, adding light draws nothing - so glass and points blend normally.
@@ -807,6 +806,9 @@ Catalog
 - **Cubes** (box glass with teal edge lines; the cube's outline kept at 0.3
   around the model) - replaced by pebbles. Also shown: bubbles, morphing
   blobs, rounded cubes, plain clouds of points.
+- **Teal glass pebbles**, then **pencil-sketched ones** (graphite hatching
+  in crossing strokes with a grainy outline - too thick on a phone, then
+  dropped): the graphite colour stayed, shaded smoothly.
 - **Orbiting the catalog**; on hover, **a pulse** (jitter and ±20% size),
   **a teal tint**, then **orange with the name hanging below** (and the
   spotlit pebble handing over to it) - hover now changes nothing.

@@ -66,8 +66,8 @@ list.
 not yet live). The why is in DECISIONS.md; rejected iterations are under
 its "Tried and removed".
 
-- **Catalog.** Cubes became glass pebbles, then pencil sketches in
-  graphite (hatching, a grainy outline), each its own shape and slowly
+- **Catalog.** Cubes became glass pebbles, then graphite ones (pencil
+  hatching tried and dropped), each its own shape and slowly
   changing it, and a random size on each visit (touching, they push
   each other apart),
   rebuilt on one pure state function per frame: they float and rock, the
