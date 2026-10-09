@@ -117,9 +117,10 @@ its "Tried and removed".
 - **Docs.** DECISIONS regrouped (contents, "Tried and removed") and purged
   to what's current; README's TODO split into next up / open / done;
   CLAUDE.md gained "Where to pick up", the project fields as they now are
-  (`thumbSize`, `points`, `drop` and its `solid`, an image's `wide`), notes on the pebbles, the hanging tag
-  and the pile, the pebbles' random sizes, and testing tips (finding pebbles, one browser at a time,
-  tuning physics in Node).
+  (`thumbSize`, `points`, `drop` and its `solid`, an image's `wide`), notes
+  on the pebbles, the hanging tag and the pile, the pebbles' random sizes,
+  and testing tips (finding pebbles, one browser at a time, tuning physics
+  in Node).
 
 Open at end of session (see README, "Next up"):
 - Safari: confirm the tap and the stacking fixes.
