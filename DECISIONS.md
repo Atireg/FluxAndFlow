@@ -462,8 +462,9 @@ holds), then centred and scaled so the longest side is `MESH_FIT_SIZE`
 there it is an ordinary cloud: inks, sizes, gather. It downloads a fraction
 of what a sampled cloud would weigh (Rock Print's 78k quantized points are
 922 KB) and a mesh exported from Rhino or Blender works as it is. A real
-point cloud is left exactly as it is.
-
+point cloud is left exactly as it is. Emergent Space's aggregates are now
+drawn as the mesh itself (`drop.solid`, below); its sampled points are no
+longer seen.
 
 
 Emergent Space: aggregates dropped with live physics

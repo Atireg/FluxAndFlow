@@ -59,7 +59,7 @@ list.
 
 ---
 
-## Session 2 — 2026-10-04 / 2026-10-08
+## Session 2 — 2026-10-04 / 2026-10-09
 
 `e0c070e`..(branch head) on `ccr-584d8563-rtv32f`, fast-forward merged to
 `main` on each "merge and build" (`git log origin/main..` shows anything
@@ -109,8 +109,8 @@ its "Tried and removed".
 - **Docs.** DECISIONS regrouped (contents, "Tried and removed") and purged
   to what's current; README's TODO split into next up / open / done;
   CLAUDE.md gained "Where to pick up", the project fields as they now are
-  (`thumbSize`, `points`, `drop`), notes on the pebbles, the hanging tag
-  and the pile, and testing tips (finding pebbles, one browser at a time,
+  (`thumbSize`, `points`, `drop` and its `solid`, an image's `wide`), notes on the pebbles, the hanging tag
+  and the pile, the pebbles' random sizes, and testing tips (finding pebbles, one browser at a time,
   tuning physics in Node).
 
 Open at end of session (see README, "Next up"):

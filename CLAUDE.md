@@ -3,7 +3,8 @@
 A portfolio: a catalog of projects explored in three dimensions. Each
 project is a glass pebble in a grid (still called a "cube" throughout the
 code); clicking one knocks the others off the screen, dissolves it into a
-cloud of points and opens the project's 3D point cloud on the whole canvas,
+cloud of points and opens the project's 3D model on the whole canvas (a
+point cloud, or Emergent Space's solid aggregates dropped with physics),
 with its description in a pull-out drawer.
 
 Full project description and TODO list: `README.md`.
@@ -25,6 +26,9 @@ and README's "Next up". As of the end of Session 2:
   `aggregate.glb`, drawn solid in the inks - dropped with live physics onto
   a ground formed by the clicked pebble's points, until they interlock; a
   new drop every time it opens).
+- **Catalog**: ten glass pebbles, each a random size on every visit (the
+  larger overlap their neighbours), slowly changing shape; one at a time
+  glows orange with its name hanging on a string in the wind.
 - **Waiting on the user**: the real copy for both projects (the live drawer
   text is `[PLACEHOLDER ...]`), captions/credits for both projects'
   pictures, model licensing, and a check on real devices that the blind
@@ -119,7 +123,8 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
   Print) or a plain mesh (Emergent Space), whose surface is sampled into
   points as it loads (`MESH_SAMPLE_POINTS`, 20,000, or the project's
   `points`), centred and scaled to fit - see "A mesh becomes points as it
-  loads" in DECISIONS.md. Give a new model a `view` (even just
+  loads" in DECISIONS.md (Emergent Space samples too, but `drop.solid`
+  draws the mesh itself, so its points are never seen). Give a new model a `view` (even just
   `{ elevation: 25 }`): without one the fit is the model's box at the
   moment it opens, and a long shape runs off a phone screen as it turns.
   If adding Draco or quantization to a cloud, read "Quantized, not
@@ -271,7 +276,9 @@ Testing tips learnt the hard way:
   pebble away. The grid is row-major and centred; slot 0 sits around
   (310, 185) at 1280x800 and (80, 139) at 390x844, slot 1 one step right
   (~(512, 183) and ~(260, 138)) - near enough despite the float. They move
-  if `spacing` or the grid's fit changes: screenshot the catalog first.
+  if `spacing` or the grid's fit changes, and the pebbles' random sizes
+  make every load look different (a big edge pebble shrinks the whole
+  grid a little): screenshot the catalog first.
 - **Tuning the pile's physics**: don't judge it from a few headless
   screenshots - each drop is random and software rendering plays it in
   slow motion. Run the same cannon-es setup in Node (import
