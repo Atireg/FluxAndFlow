@@ -198,10 +198,12 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
   (`FLOW_STEP`, `TAG_STEP` for the rope) so they
   behave the same at 5 fps as at 120. Colours go through `paintGlow` (0
   resting, 1 the spotlight's orange). Hover deliberately changes nothing
-  visible (DECISIONS.md, "Tried and removed"). The grid's arrival (after the
-  loader, and back from a project) is laid over every mode by
-  `applyArrival` - opacity and scale are multiplied there, after the mode
-  has set them.
+  visible (DECISIONS.md, "Tried and removed"). The grid's arrival (as the
+  loader clears, and back from a project - the pebbles, then their
+  contents one by one) is laid over every mode by `applyArrival`: opacity
+  and scale, the content's too, are multiplied there after the mode has
+  set them, so whatever a mode leaves unset must be reset first or it
+  compounds (as 'returning' does for the content's scale).
 - **The spotlight's tag hangs on a simulated rope.** `hangSpotlightTag`
   runs a small screen-space Verlet rope (`ROPE_*`) under gravity and a
   gusty `wind(t)`, then draws it as a curve in `#spotlight-string`. Its

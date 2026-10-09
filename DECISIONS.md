@@ -298,14 +298,18 @@ there the moment the loader faded (0.9s), and on the way back from a
 project every pebble faded in together over 0.7s. Now, both times, each
 pebble surfaces out of the paper on its own beat: from `ARRIVAL_DEPTH`
 below its place, at `ARRIVAL_SMALLEST` of its size and clear, eased up to
-itself over `ARRIVAL_DURATION`, each setting off at a random moment within
-`ARRIVAL_STAGGER`. Like the rest of a pebble's state it is a pure function
+itself over `ARRIVAL_DURATION` (3.2s - 1.6 was still too fast), each
+setting off at a random moment within `ARRIVAL_STAGGER` (2.4s). Then,
+asked for too, what's inside them arrives one by one in a random order
+(`CONTENT_ARRIVAL_*`: the first 3.2s in, 0.35s apart, each growing in
+with a slight overshoot). Like the rest of a pebble's state it is a pure function
 of time (since `startArrival`), laid over whatever its mode has set by
 `applyArrival` - so the return no longer tweens opacity (GSAP's tween and
 the per-frame state fought, see `closeProject`); 'returning' paints the
 resting state each frame and the arrival scales it. The loader announces
-its exit with a `fluxloader:leaving` event, and its fade is longer
-(`EXIT` 1.4s); the pebbles start `ARRIVAL_AFTER_LOADER` into it. Until
+its exit with a `fluxloader:leaving` event, and its fade is long (`EXIT`
+2.6s, its wordmark lingering) so the pebbles surface as part of it: they
+start the moment it begins to clear (`ARRIVAL_AFTER_LOADER`, 0). Until
 then `arrivalStartedAt` is Infinity: hidden under the loader.
 
 
@@ -742,7 +746,7 @@ than jumping to 100%. All its animation runs on elapsed time, not frames.
 On a fast load it's gone ~6s after the page opens.
 
 **The field stays.** Asked for: the loader's particles floating on around
-the pebbles. As the loader fades (`EXIT`, 1.4s - the streams used to pour
+the pebbles. As the loader fades (`EXIT`, 2.6s - the streams used to pour
 into the centre), its canvas steps out of it into the page
 (`.flux-field`) and keeps running, eased to a calmer drift
 (`AMBIENT_FLUX`, `AMBIENT_ALPHA`, `AMBIENT_SHARE` of the streams; an ink

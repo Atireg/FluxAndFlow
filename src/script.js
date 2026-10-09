@@ -630,7 +630,7 @@ function reportBoot() {
 
 // The grid surfaces as the loader starts to leave - or at once, should
 // there be no loader
-const ARRIVAL_AFTER_LOADER = 0.3; // seconds into the loader's fade
+const ARRIVAL_AFTER_LOADER = 0; // seconds into the loader's fade - they surface as it clears
 window.addEventListener('fluxloader:leaving', () => startArrival(clock.getElapsedTime() + ARRIVAL_AFTER_LOADER));
 if (!document.getElementById('loader')) requestAnimationFrame(() => startArrival(clock.getElapsedTime()));
 
@@ -2389,10 +2389,15 @@ const FLOW_STEP = 1 / 120; // seconds per integration step
  * the whole grid appearing at once. A pure function of the time since it
  * began, laid over whatever the pebble's mode has set (see applyArrival).
  */
-const ARRIVAL_DURATION = 1.6; // seconds for one pebble to arrive
-const ARRIVAL_STAGGER = 0.9; // seconds - the latest any pebble sets off
+const ARRIVAL_DURATION = 3.2; // seconds for one pebble to arrive - 1.6 was too fast
+const ARRIVAL_STAGGER = 2.4; // seconds - the latest any pebble sets off
 const ARRIVAL_SMALLEST = 0.35; // the size it surfaces at, as a share of its own
 const ARRIVAL_DEPTH = 4; // units below its place it rises from
+// Then what's inside them - the rock, a project's model - one by one, in a
+// random order, once the pebbles have mostly surfaced
+const CONTENT_ARRIVAL_AFTER = 3.2; // seconds from the arrival's start to the first
+const CONTENT_ARRIVAL_STEP = 0.35; // seconds between one and the next
+const CONTENT_ARRIVAL_DURATION = 0.7; // seconds for each to grow in
 let arrivalStartedAt = Infinity; // hidden until the loader leaves
 // Pebbles that touch push each other apart, on the same springs - see bumpPebbles
 const BUMP_STIFFNESS = 40; // 1/s² per unit of overlap - soft, so they give a little and still overlap a little
@@ -2468,6 +2473,7 @@ function animate() {
         cubes.forEach((cube) => {
             placeAtRest(cube, elapsedTime);
             paintGlow(cube, 0);
+            cube.userData.content?.scale.setScalar(cube.userData.contentBaseScale);
         });
         updateFlow(frameTime);
         cubes.forEach(applyFlow);
@@ -2729,7 +2735,19 @@ function applyFlow(cube) {
 // of its own
 function startArrival(at) {
     arrivalStartedAt = at;
-    cubes.forEach((cube) => { cube.userData.arrivalDelay = Math.random() * ARRIVAL_STAGGER; });
+    const order = cubes.map((cube, i) => i).sort(() => Math.random() - 0.5);
+    cubes.forEach((cube, i) => {
+        cube.userData.arrivalDelay = Math.random() * ARRIVAL_STAGGER;
+        cube.userData.contentArrivalDelay = CONTENT_ARRIVAL_AFTER + order[i] * CONTENT_ARRIVAL_STEP;
+    });
+}
+
+// How far a pebble's content has grown in, 0..1, overshooting a touch
+function contentArrivalOf(cube, elapsedTime) {
+    const t = (elapsedTime - arrivalStartedAt - (cube.userData.contentArrivalDelay ?? 0)) / CONTENT_ARRIVAL_DURATION;
+    const k = Math.min(Math.max(t, 0), 1);
+    const back = 1.7;
+    return 1 + (back + 1) * (k - 1) ** 3 + back * (k - 1) ** 2;
 }
 
 // How far a pebble has arrived, 0..1, eased to settle rather than stop
@@ -2742,8 +2760,14 @@ function arrivalOf(cube, elapsedTime) {
 
 // On top of the pebble's mode: smaller, lower and fainter until it's here
 function applyArrival(cube, elapsedTime) {
+    const content = cube.userData.content;
+    if (content) {
+        const grown = contentArrivalOf(cube, elapsedTime);
+        content.visible = grown > 0.01;
+        if (grown !== 1) content.scale.multiplyScalar(Math.max(grown, 0.001));
+    }
+
     const k = arrivalOf(cube, elapsedTime);
-    if (cube.userData.content) cube.userData.content.visible = k > 0.02;
     if (k >= 1) return;
 
     cube.scale.multiplyScalar(ARRIVAL_SMALLEST + (1 - ARRIVAL_SMALLEST) * k);
