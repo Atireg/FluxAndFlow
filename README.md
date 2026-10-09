@@ -110,6 +110,8 @@ Catalog
         the project's own as they appear; opened projects' pebbles stay
         darker (remembered)
     [x] An empty slot's click answers "Still empty..."
+    [x] The grid arrives a pebble at a time, surfacing out of the paper -
+        after the loader and on the way back from a project
 
 Project view
     [x] Rock Print lands on a view fitted to a phone screenshot; its points

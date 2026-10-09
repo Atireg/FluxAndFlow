@@ -628,6 +628,12 @@ function reportBoot() {
     }
 }
 
+// The grid surfaces as the loader starts to leave - or at once, should
+// there be no loader
+const ARRIVAL_AFTER_LOADER = 0.3; // seconds into the loader's fade
+window.addEventListener('fluxloader:leaving', () => startArrival(clock.getElapsedTime() + ARRIVAL_AFTER_LOADER));
+if (!document.getElementById('loader')) requestAnimationFrame(() => startArrival(clock.getElapsedTime()));
+
 function sealBoot() {
     bootSealed = true;
     reportBoot();
@@ -2375,6 +2381,19 @@ const FLOW_TILT = 0.06; // radians of lean per unit/second of the cube's own spe
 const FLOW_TILT_MAX = 0.35; // radians
 const FLOW_POINTER_FADE = 0.12; // seconds for the pointer's speed to die away once it stops
 const FLOW_STEP = 1 / 120; // seconds per integration step
+
+/**
+ * The arrival: whenever the grid comes into view - as the start-up loader
+ * leaves, and on the way back from a project - each pebble surfaces out of
+ * the paper on its own beat, growing and clearing from nothing, rather than
+ * the whole grid appearing at once. A pure function of the time since it
+ * began, laid over whatever the pebble's mode has set (see applyArrival).
+ */
+const ARRIVAL_DURATION = 1.6; // seconds for one pebble to arrive
+const ARRIVAL_STAGGER = 0.9; // seconds - the latest any pebble sets off
+const ARRIVAL_SMALLEST = 0.35; // the size it surfaces at, as a share of its own
+const ARRIVAL_DEPTH = 4; // units below its place it rises from
+let arrivalStartedAt = Infinity; // hidden until the loader leaves
 // Pebbles that touch push each other apart, on the same springs - see bumpPebbles
 const BUMP_STIFFNESS = 40; // 1/s² per unit of overlap - soft, so they give a little and still overlap a little
 const BUMP_REACH = 0.95; // a pebble's reach, as a share of its radius - its glass just about touching
@@ -2439,15 +2458,20 @@ function animate() {
         cubes.forEach((cube) => updateCube(cube, elapsedTime));
         updateFlow(frameTime);
         cubes.forEach(applyFlow);
+        cubes.forEach((cube) => applyArrival(cube, elapsedTime));
     } else if (viewState === 'dropping') {
         cubes.forEach((cube) => updateDroppingCube(cube, elapsedTime));
         updateDissolve(elapsedTime);
     } else if (viewState === 'returning') {
         // Back home before they fade in, wherever the drop left them - and
         // already pushed apart, so they don't spring apart as they appear
-        cubes.forEach((cube) => placeAtRest(cube, elapsedTime));
+        cubes.forEach((cube) => {
+            placeAtRest(cube, elapsedTime);
+            paintGlow(cube, 0);
+        });
         updateFlow(frameTime);
         cubes.forEach(applyFlow);
+        cubes.forEach((cube) => applyArrival(cube, elapsedTime));
     } else {
         // The camera starts moving in before the drop has finished - the
         // rest of the fall plays out under openProject's fade
@@ -2699,6 +2723,33 @@ function applyFlow(cube) {
     const lean = (value) => THREE.MathUtils.clamp(value * FLOW_TILT, -FLOW_TILT_MAX, FLOW_TILT_MAX);
     cube.rotation.x += lean(flow.vz);
     cube.rotation.z -= lean(flow.vx);
+}
+
+// The grid's arrival begins (see ARRIVAL_DURATION), each pebble on a beat
+// of its own
+function startArrival(at) {
+    arrivalStartedAt = at;
+    cubes.forEach((cube) => { cube.userData.arrivalDelay = Math.random() * ARRIVAL_STAGGER; });
+}
+
+// How far a pebble has arrived, 0..1, eased to settle rather than stop
+function arrivalOf(cube, elapsedTime) {
+    const t = (elapsedTime - arrivalStartedAt - (cube.userData.arrivalDelay ?? 0)) / ARRIVAL_DURATION;
+    const k = Math.min(Math.max(t, 0), 1);
+    const rest = 1 - k;
+    return 1 - rest * rest * rest;
+}
+
+// On top of the pebble's mode: smaller, lower and fainter until it's here
+function applyArrival(cube, elapsedTime) {
+    const k = arrivalOf(cube, elapsedTime);
+    if (cube.userData.content) cube.userData.content.visible = k > 0.02;
+    if (k >= 1) return;
+
+    cube.scale.multiplyScalar(ARRIVAL_SMALLEST + (1 - ARRIVAL_SMALLEST) * k);
+    cube.position.y -= (1 - k) * ARRIVAL_DEPTH;
+    cube.material.opacity *= k;
+    cube.userData.edges.material.opacity *= k;
 }
 
 // Floating, as it rests. Hover changes nothing: the pebble under the
@@ -3391,12 +3442,11 @@ function closeProject() {
     const revealDelay = 0.35;
     const revealDuration = 0.7;
 
-    // Bring the catalog back
+    // Bring the catalog back: each pebble arrives in its own time, set per
+    // frame by applyArrival (no opacity tween, for the reason above)
+    startArrival(clock.getElapsedTime() + revealDelay);
     cubes.forEach((other) => {
         gsap.delayedCall(revealDelay, () => { other.material.depthWrite = true; });
-
-        gsap.to(other.material, { opacity: restingFaceOpacity(other), duration: revealDuration, ease: 'power2.inOut', delay: revealDelay });
-        gsap.to(other.userData.edges.material, { opacity: 1, duration: revealDuration, ease: 'power2.inOut', delay: revealDelay });
 
         other.material.color.copy(restingFaceColor(other));
 

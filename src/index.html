@@ -47,12 +47,12 @@
       var MIN_VISIBLE = 5000;
       // The exit: the loader fades onto the same paper the site sits on while
       // the streams calm down - and stay, behind the pebbles
-      var EXIT = 900; // ms - keep in step with .loader.is-leaving in styles.css
+      var EXIT = 1400; // ms - keep in step with .loader.is-leaving in styles.css
       // Once the catalog is up the field drifts on behind it, gentler than
       // while loading: slower, fainter, fewer streams
-      var AMBIENT_FLUX = 0.3; // 0..1, as the loading flux
-      var AMBIENT_ALPHA = 0.3; // a stream's ink
-      var AMBIENT_SHARE = 0.6; // of the streams still drawn
+      var AMBIENT_FLUX = 0.4; // 0..1, as the loading flux
+      var AMBIENT_ALPHA = 0.5; // a stream's ink - 0.2, then 0.3, read as too faint
+      var AMBIENT_SHARE = 0.85; // of the streams still drawn
       // Round each pebble the streams part, like a current round stones:
       // within this many of its radii they turn aside, and one that strays
       // inside is eased back out
@@ -163,6 +163,8 @@
           // The field steps out of the loader to stay, under the catalog
           canvas.classList.add('flux-field');
           document.body.insertBefore(canvas, root);
+          // ...and the pebbles surface (applyArrival in script.js)
+          window.dispatchEvent(new Event('fluxloader:leaving'));
         }
 
         if (leavingSince !== null) ambient = Math.min((now - leavingSince) / EXIT, 1);

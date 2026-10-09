@@ -22,6 +22,7 @@ The catalog (the grid of pebbles - "cubes" in the code)
 - "Still empty...", and tags as HTML over the canvas
 - Selecting: pointerup on the canvas, and drags don't count
 - Clicking a project knocks the rest of the grid off the screen
+- The grid arrives, a pebble at a time
 
 The project view: camera
 - The detail camera looks along the catalog's screen-up; every move slerps
@@ -287,6 +288,25 @@ A pebble is selected by the press's own `pointerup` on the canvas
 (`onCanvasSelect`; main mouse button, or any touch or pen), not a `click`
 on window - see "Safari". A press that travels over 5px is a drag
 (`wasDrag`): it stirs the grid, or orbits in a project, and never selects.
+
+
+The grid arrives, a pebble at a time
+------------------------------------
+
+Reported: the switch to the pebbles was too abrupt - the whole grid was
+there the moment the loader faded (0.9s), and on the way back from a
+project every pebble faded in together over 0.7s. Now, both times, each
+pebble surfaces out of the paper on its own beat: from `ARRIVAL_DEPTH`
+below its place, at `ARRIVAL_SMALLEST` of its size and clear, eased up to
+itself over `ARRIVAL_DURATION`, each setting off at a random moment within
+`ARRIVAL_STAGGER`. Like the rest of a pebble's state it is a pure function
+of time (since `startArrival`), laid over whatever its mode has set by
+`applyArrival` - so the return no longer tweens opacity (GSAP's tween and
+the per-frame state fought, see `closeProject`); 'returning' paints the
+resting state each frame and the arrival scales it. The loader announces
+its exit with a `fluxloader:leaving` event, and its fade is longer
+(`EXIT` 1.4s); the pebbles start `ARRIVAL_AFTER_LOADER` into it. Until
+then `arrivalStartedAt` is Infinity: hidden under the loader.
 
 
 Clicking a project knocks the rest of the grid off the screen
@@ -722,10 +742,11 @@ than jumping to 100%. All its animation runs on elapsed time, not frames.
 On a fast load it's gone ~6s after the page opens.
 
 **The field stays.** Asked for: the loader's particles floating on around
-the pebbles. As the loader fades (`EXIT`, 0.9s - the streams used to pour
+the pebbles. As the loader fades (`EXIT`, 1.4s - the streams used to pour
 into the centre), its canvas steps out of it into the page
 (`.flux-field`) and keeps running, eased to a calmer drift
-(`AMBIENT_FLUX`, `AMBIENT_ALPHA`, `AMBIENT_SHARE` of the streams).
+(`AMBIENT_FLUX`, `AMBIENT_ALPHA`, `AMBIENT_SHARE` of the streams; an ink
+of 0.2, then 0.3, read as too faint - it is 0.5).
 script.js hands it the pebbles' screen circles every frame
 (`updateFluxField` -> `window.fluxField.update`), and the streams part
 round each one: the part of a stream's drift heading into a pebble is

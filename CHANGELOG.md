@@ -76,7 +76,9 @@ its "Tried and removed".
   gusts, tied on with a dot; hover changes nothing. Names scale with the
   pebbles on screen and draw over them. Pebbles hold the rock or the
   project's own model; empty slots say "Still empty...". Opened projects'
-  pebbles stay darker, remembered in the browser. Smaller pebbles among them
+  pebbles stay darker, remembered in the browser. The grid arrives a
+  pebble at a time, surfacing out of the paper, after the loader and on
+  the way back from a project. Smaller pebbles among them
   came and went.
 - **Opening a project.** An instant boom, the others fall slowly while the
   camera moves in, and the clicked pebble dissolves into a cloud of points
