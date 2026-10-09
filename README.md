@@ -31,9 +31,8 @@ Next up (waiting on content or a check from the user)
         credits. Rock Print's and Emergent Space's fields hold unmistakable
         [PLACEHOLDER ...] text so their About drawers exist; it is live and
         needs replacing. State the role accurately
-    [ ] Captions / photo credits for Rock Print's five pictures, if wanted
-        (the `caption` fields are empty); pictures for Emergent Space's
-        drawer, if wanted
+    [ ] Captions / photo credits for both projects' five pictures, if
+        wanted (the `caption` fields are empty)
     [ ] A video in the drawer, if wanted. Agreed approach: a short clip
         (under ~1 min) compressed to a small MP4 in static/, playing as a
         silent loop with a poster frame; a longer film or one with sound
@@ -123,7 +122,7 @@ Project view
     [x] A grey fog rolls in behind the project
     [x] The About drawer: model moves left and stays whole on a wide screen,
         a close-up on a phone (Emergent Space: in on the pile in both);
-        five pictures in Rock Print's
+        five pictures in each, Emergent Space's diagrams full width
     [x] Double-click / double-tap zoom, hinted every 5s by a white touch
         point that scales with the screen
     [x] Camera moves only tilt, never roll

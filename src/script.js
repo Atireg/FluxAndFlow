@@ -256,6 +256,46 @@ const projects = [
         ],
         credits: '[PLACEHOLDER CREDITS]',
 
+        // All across the drawer's full width (`wide`) - three are diagrams
+        // whose text is unreadable at half
+        images: [
+            {
+                src: 'images/emergent-space-01-balloon.jpg',
+                alt: 'A red balloon pressed into a mass of white interlocking aggregates, above the same scene simulated, with contact forces drawn as red and blue arrows',
+                caption: '',
+                ratio: '1000 / 1285',
+                wide: true,
+            },
+            {
+                src: 'images/emergent-space-02-rig.jpg',
+                alt: 'The test rig, labelled: a computer and an Arduino Uno driving a power switching station and three-way magnet valves, fed by a compressor, inflating red balloons',
+                caption: '',
+                ratio: '1500 / 1064',
+                wide: true,
+            },
+            {
+                src: 'images/emergent-space-03-workflow.jpg',
+                alt: 'The simulation workflow: 200 aggregates dropped into a 400 by 400 by 200 box, their clump velocity and contact forces from PFC 3D read into Grasshopper, in side and top views',
+                caption: '',
+                ratio: '1500 / 966',
+                wide: true,
+            },
+            {
+                src: 'images/emergent-space-04-results.jpg',
+                alt: 'Ten simulations for each of two balloon positions: contact forces and clump velocity per aggregate, with means of 29 contacts and velocities of 0.66 and 0.93 mm',
+                caption: '',
+                ratio: '1500 / 959',
+                wide: true,
+            },
+            {
+                src: 'images/emergent-space-05-scan.jpg',
+                alt: 'A 3D scan of the physical model with two balloons in the aggregate mass, above the matching simulation',
+                caption: '',
+                ratio: '1000 / 1037',
+                wide: true,
+            },
+        ],
+
         // Its own mesh in its pebble, centred and scaled to this longest
         // side (units; the pebble is 4.4 across) - see addContentToCube
         thumbModel: 'models/aggregate.glb',
@@ -457,6 +497,9 @@ function showProject(project) {
 function imageFigure(image) {
     const figure = document.createElement('figure');
     figure.className = 'drawer__image';
+
+    // Across the drawer's whole width - a diagram's text is too small at half
+    if (image.wide) figure.classList.add('is-wide');
 
     const frame = document.createElement('div');
     frame.className = 'drawer__frame';

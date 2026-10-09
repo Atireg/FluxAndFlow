@@ -621,13 +621,17 @@ every width (`nowrap`, ellipsis if ever too long).
 Drawer pictures
 ---------------
 
-`images` entries (`{ src, alt, caption, ratio }`) render as figures under
-the text (`imageFigure`): the first full width, the rest two to a row,
-lazy-loaded, framed at their `ratio` so nothing jumps; no `src` is an empty
-dashed frame. The panel is 98% opaque so the cloud doesn't muddy them. Rock
-Print's five are sized for the drawer - lead 1500px, others 900px, ~1 MB
-in all, metadata stripped (CLAUDE.md has the recipe); captions/credits are
-still empty.
+`images` entries (`{ src, alt, caption, ratio, wide }`) render as figures
+under the text (`imageFigure`): the first full width, the rest two to a row
+unless `wide`, lazy-loaded, framed at their `ratio` so nothing jumps; no
+`src` is an empty dashed frame. The panel is 98% opaque so the cloud
+doesn't muddy them. Rock Print's five are photos sized for the drawer -
+lead 1500px, others 900px, ~1 MB in all, metadata stripped (CLAUDE.md has
+the recipe). Emergent Space's five are mostly diagrams with small text,
+unreadable at half the drawer, so all are `wide`: the landscape diagrams
+1500px across, the two portrait photos 1000px (enough for the drawer at
+twice the pixel density), ~950 KB in all. Captions/credits are empty for
+both.
 
 
 Asset paths resolve against the Vite base URL

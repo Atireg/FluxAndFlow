@@ -95,7 +95,8 @@ its "Tried and removed".
   new drop each time. Each is the user's plain mesh; any mesh .glb now
   works, sampled into points as it loads. Its pebble holds the aggregate
   itself, in the rock's ink (`thumbSize`). An About drawer with placeholder
-  text, to be replaced; opening it zooms in on the three aggregates.
+  text, to be replaced, and five pictures (diagrams full width, `wide`);
+  opening it zooms in on the three aggregates.
 - **Site.** "Paper" palette throughout (the dark `Sky` dome removed); an
   inline start-up loader with real progress, at least 5s; clouds load only
   on click after `?cloudtest` measured the alternative.
@@ -114,8 +115,8 @@ its "Tried and removed".
 Open at end of session (see README, "Next up"):
 - Safari: confirm the tap and the stacking fixes.
 - Rock Print's real copy (live text is placeholder; state the role
-  accurately), and captions/credits for its five photos; Emergent Space's
-  real copy (its drawer is placeholder too).
+  accurately), and Emergent Space's (its drawer is placeholder too);
+  captions/credits for both projects' pictures.
 - Emergent Space's physics drop: confirm it runs smoothly on a real phone.
 - Model licensing/attribution for the public .glb files is unchecked.
 - A drawer video was discussed, not added - README has the agreed approach.

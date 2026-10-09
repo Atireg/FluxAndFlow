@@ -672,7 +672,8 @@ canvas.webgl {
     margin: 0;
 }
 
-.drawer__image:first-child {
+.drawer__image:first-child,
+.drawer__image.is-wide {
     grid-column: 1 / -1;
 }
 

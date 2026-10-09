@@ -26,7 +26,7 @@ and README's "Next up". As of the end of Session 2:
   a ground formed by the clicked pebble's points, until they interlock; a
   new drop every time it opens).
 - **Waiting on the user**: the real copy for both projects (the live drawer
-  text is `[PLACEHOLDER ...]`), captions/credits for Rock Print's five
+  text is `[PLACEHOLDER ...]`), captions/credits for both projects'
   pictures, model licensing, and a check on real devices that the blind
   Safari fixes work and the physics drop runs smoothly.
 - **Not started**: per-project URLs, a landing view; README lists the rest.
@@ -86,7 +86,7 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
     gather: true,                                 // optional: points gather from a scattered cloud on open
     // points: 20000,                             // optional, a mesh detailModel only: how many points to sample
     // drop: { count: 3, size: 3, ground: -1.2, solid: true }, // optional, a crossed-rod mesh only: copies dropped with physics (Emergent Space)
-    images: [{ src: 'images/x.jpg', alt: '', caption: '', ratio: '3 / 2' }],  // drawer pictures; no src = empty frame
+    images: [{ src: 'images/x.jpg', alt: '', caption: '', ratio: '3 / 2', wide: false }],  // drawer pictures; no src = empty frame
 }
 ```
 
@@ -107,7 +107,9 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
   dashed frame, holding its place until the picture exists. Prepare new
   pictures as Rock Print's were: JPEG quality ~80, progressive, metadata
   stripped (no GPS on a public site), the lead about 1500px wide and the
-  rest about 900px - set `ratio` to the file's own width / height.
+  rest about 900px - set `ratio` to the file's own width / height. A
+  diagram with small text needs `wide: true` (full drawer width, as all of
+  Emergent Space's are), at about 1500px across, or 1000px if portrait.
 - Leaving `year`/`role`/`context`/`body`/`credits` empty is intentional, not
   a placeholder bug: a project with no description gets no drawer handle at
   all, rather than a handle onto an empty panel. See DECISIONS.md. **State
