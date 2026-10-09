@@ -2222,6 +2222,10 @@ const FLOW_DAMPING = 5.5; // 1/s - under-damped, so a cube overshoots a touch an
 const FLOW_TILT = 0.06; // radians of lean per unit/second of the cube's own speed
 const FLOW_TILT_MAX = 0.35; // radians
 const FLOW_POINTER_FADE = 0.12; // seconds for the pointer's speed to die away once it stops
+const FLOW_STEP = 1 / 120; // seconds per integration step
+// Pebbles that touch push each other apart, on the same springs - see bumpPebbles
+const BUMP_STIFFNESS = 40; // 1/s² per unit of overlap - soft, so they give a little and still overlap a little
+const BUMP_REACH = 0.95; // a pebble's reach, as a share of its radius - its glass just about touching
 
 const flowPointer = new THREE.Vector3();
 const flowPointerVelocity = new THREE.Vector2();
@@ -2254,17 +2258,19 @@ function animate() {
 
     if (viewState === 'catalog') {
         updateSpotlightCycle(elapsedTime);
+        // Each pebble's own place first; the flow and the bumps read it
+        cubes.forEach((cube) => updateCube(cube, elapsedTime));
         updateFlow(frameTime);
-        cubes.forEach((cube) => {
-            updateCube(cube, elapsedTime);
-            applyFlow(cube);
-        });
+        cubes.forEach(applyFlow);
     } else if (viewState === 'dropping') {
         cubes.forEach((cube) => updateDroppingCube(cube, elapsedTime));
         updateDissolve(elapsedTime);
     } else if (viewState === 'returning') {
-        // Back home before they fade in, wherever the drop left them
+        // Back home before they fade in, wherever the drop left them - and
+        // already pushed apart, so they don't spring apart as they appear
         cubes.forEach((cube) => placeAtRest(cube, elapsedTime));
+        updateFlow(frameTime);
+        cubes.forEach(applyFlow);
     } else {
         // The camera starts moving in before the drop has finished - the
         // rest of the fall plays out under openProject's fade
@@ -2383,6 +2389,10 @@ function placeAtRest(cube, elapsedTime) {
  *
  * Only motion pushes: a resting cursor exerts nothing, so the cube under it
  * stays put to be clicked.
+ *
+ * Pebbles also push each other: where two touch, each is shoved away from
+ * the other on the same spring (bumpPebbles), so one carried by the pointer,
+ * drifting, or swelling in the spotlight's jump nudges its neighbours along.
  */
 
 function trackFlowPointer(event) {
@@ -2422,41 +2432,80 @@ function updateFlow(dt) {
     // The pointer's push dies away once it stops moving
     flowPointerVelocity.multiplyScalar(Math.exp(-dt / FLOW_POINTER_FADE));
 
-    cubes.forEach((cube) => stepFlow(cube, dt));
-}
+    cubes.forEach((cube) => {
+        cube.userData.flow ??= { x: 0, z: 0, vx: 0, vz: 0 };
+        cube.userData.flow.target = flowTarget(cube);
+    });
 
-// One body's push from the pointer: a damped spring towards where the
-// pointer's motion would carry it
-function stepFlow(cube, dt) {
-    const flow = cube.userData.flow ?? (cube.userData.flow = { x: 0, z: 0, vx: 0, vz: 0 });
-    const home = cube.userData.slotPosition;
-
-    // Where the pointer's motion would carry this cube right now
-    let targetX = 0;
-    let targetZ = 0;
-
-    if (flowPointerKnown && home) {
-        const distance = Math.hypot(home.x - flowPointer.x, home.z - flowPointer.z);
-        const reach = Math.exp(-((distance / FLOW_RADIUS) ** 2));
-        targetX = flowPointerVelocity.x * FLOW_CARRY * reach;
-        targetZ = flowPointerVelocity.y * FLOW_CARRY * reach;
-
-        const length = Math.hypot(targetX, targetZ);
-        if (length > FLOW_MAX) {
-            targetX *= FLOW_MAX / length;
-            targetZ *= FLOW_MAX / length;
-        }
-    }
-
-    // A damped spring towards that, integrated in small steps
-    const steps = Math.ceil(dt / (1 / 120));
+    // Damped springs towards those, and the bumps, integrated in small steps
+    const steps = Math.ceil(dt / FLOW_STEP);
     const h = dt / steps;
     for (let i = 0; i < steps; i++) {
-        flow.vx += (FLOW_STIFFNESS * (targetX - flow.x) - FLOW_DAMPING * flow.vx) * h;
-        flow.vz += (FLOW_STIFFNESS * (targetZ - flow.z) - FLOW_DAMPING * flow.vz) * h;
-        flow.x += flow.vx * h;
-        flow.z += flow.vz * h;
+        cubes.forEach((cube) => {
+            const flow = cube.userData.flow;
+            flow.ax = FLOW_STIFFNESS * (flow.target.x - flow.x) - FLOW_DAMPING * flow.vx;
+            flow.az = FLOW_STIFFNESS * (flow.target.z - flow.z) - FLOW_DAMPING * flow.vz;
+        });
+        bumpPebbles();
+        cubes.forEach((cube) => {
+            const flow = cube.userData.flow;
+            flow.vx += flow.ax * h;
+            flow.vz += flow.az * h;
+            flow.x += flow.vx * h;
+            flow.z += flow.vz * h;
+        });
     }
+}
+
+// Where the pointer's motion would carry this cube right now
+function flowTarget(cube) {
+    const home = cube.userData.slotPosition;
+    const target = { x: 0, z: 0 };
+    if (!flowPointerKnown || !home) return target;
+
+    const distance = Math.hypot(home.x - flowPointer.x, home.z - flowPointer.z);
+    const reach = Math.exp(-((distance / FLOW_RADIUS) ** 2));
+    target.x = flowPointerVelocity.x * FLOW_CARRY * reach;
+    target.z = flowPointerVelocity.y * FLOW_CARRY * reach;
+
+    const length = Math.hypot(target.x, target.z);
+    if (length > FLOW_MAX) {
+        target.x *= FLOW_MAX / length;
+        target.z *= FLOW_MAX / length;
+    }
+    return target;
+}
+
+// Two pebbles that touch, seen from above (as the camera sees them), push
+// apart in proportion to how far they overlap - the bigger one, heavier,
+// giving way less. Soft: against the pull home they part only partly, so
+// big neighbours still overlap a little. Read from where each pebble is
+// this frame (cube.position, before the flow is added) plus its flow
+function bumpPebbles() {
+    for (let i = 0; i < cubes.length; i++) {
+        const a = cubes[i];
+        for (let j = i + 1; j < cubes.length; j++) {
+            const b = cubes[j];
+            const dx = a.position.x + a.userData.flow.x - b.position.x - b.userData.flow.x;
+            const dz = a.position.z + a.userData.flow.z - b.position.z - b.userData.flow.z;
+            const distance = Math.hypot(dx, dz);
+            const reach = bumpRadius(a) + bumpRadius(b);
+            if (distance >= reach || distance === 0) continue;
+
+            const push = BUMP_STIFFNESS * (reach - distance) / distance;
+            const massA = a.userData.size ** 2;
+            const massB = b.userData.size ** 2;
+            a.userData.flow.ax += push * dx / massA;
+            a.userData.flow.az += push * dz / massA;
+            b.userData.flow.ax -= push * dx / massB;
+            b.userData.flow.az -= push * dz / massB;
+        }
+    }
+}
+
+// Its scale too, so the spotlight's pulse shoves its neighbours
+function bumpRadius(cube) {
+    return PEBBLE_RADIUS * cube.userData.size * cube.scale.x * BUMP_REACH;
 }
 
 // On top of whatever the cube's mode has just set

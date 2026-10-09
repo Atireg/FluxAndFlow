@@ -97,7 +97,8 @@ Catalog
     [x] Ten fixed slots (SLOT_COUNT), reachable on every viewport, with
         room between them
     [x] Glass pebbles (cubes before), each its own shape and slowly
-        changing it, each a random size (up to 1.8x, so some overlap),
+        changing it, each a random size (up to 1.8x); touching, they
+        push each other apart,
         each holding the little rock or the project's own model; they
         float and rock, the pointer stirs them, no orbit
     [x] One pebble at a time glows orange and jumps; its name (a project's

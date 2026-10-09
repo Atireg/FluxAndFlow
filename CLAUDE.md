@@ -26,8 +26,8 @@ and README's "Next up". As of the end of Session 2:
   `aggregate.glb`, drawn solid in the inks - dropped with live physics onto
   a ground formed by the clicked pebble's points, until they interlock; a
   new drop every time it opens).
-- **Catalog**: ten glass pebbles, each a random size on every visit (the
-  larger overlap their neighbours), slowly changing shape; one at a time
+- **Catalog**: ten glass pebbles, each a random size on every visit (ones
+  that touch push each other apart), slowly changing shape; one at a time
   glows orange with its name hanging on a string in the wind.
 - **Waiting on the user**: the real copy for both projects (the live drawer
   text is `[PLACEHOLDER ...]`), captions/credits for both projects'
@@ -191,8 +191,9 @@ Edit the `projects` array near the top of `src/script.js` (currently ~line
   "A pebble's state is a pure function"). A GSAP tween on a property
   the per-frame update also writes gets silently overwritten - add a mode or
   keep the per-frame update out of that window instead. The exceptions are
-  the effects with memory - the pointer's flow and the tag's rope -
-  integrated in small steps (1/120 s, `TAG_STEP` for the rope) so they
+  the effects with memory - the pointer's flow (pebbles bumping each other
+  ride on it, `bumpPebbles`) and the tag's rope - integrated in small steps
+  (`FLOW_STEP`, `TAG_STEP` for the rope) so they
   behave the same at 5 fps as at 120. Colours go through `paintGlow` (0
   resting, 1 the spotlight's orange). Hover deliberately changes nothing
   visible (DECISIONS.md, "Tried and removed").

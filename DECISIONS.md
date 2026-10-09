@@ -74,8 +74,8 @@ grid; renaming would have touched most of the file for nothing.
   slot. Vertices are merged first so normals are smooth.
 - **Sizes**: each pebble is drawn `PEBBLE_SIZE_MIN`..`PEBBLE_SIZE_MAX`
   (1 to 1.8) times that, picked at random on every visit
-  (`cube.userData.size`); the larger ones may overlap their neighbours, as
-  asked. The size goes into the geometry, not `cube.scale`: the pebble
+  (`cube.userData.size`); the larger ones reach into their neighbours and
+  push them aside (see "Bumps", below the flow). The size goes into the geometry, not `cube.scale`: the pebble
   parents the project's model once it opens, and its scale is held at 1
   there (and pulses only for the spotlight). Everything sized off the
   pebble multiplies by it - the flux amount, the thumbnail
@@ -233,6 +233,19 @@ The pointer stirs the grid; the grid doesn't orbit
   motion pushes, so a resting cursor leaves the pebble it's aiming at
   alone. Zeroed by `resetFlow()` when the drop starts. Its state sits above
   `animate()` (see the TDZ note in CLAUDE.md).
+- **Bumps**: pebbles that touch push each other apart (`bumpPebbles`,
+  asked for once their random sizes made big ones overlap). The push goes
+  into the same spring state as the flow, so it is integrated in the same
+  steps and they lean the way they're shoved: in proportion to the
+  overlap seen from above (as the camera sees them - their heights
+  differ), the bigger, heavier one giving way less, reach `BUMP_REACH` of
+  the radius times the pebble's scale, so the spotlight's pulse shoves its
+  neighbours. Soft (`BUMP_STIFFNESS`) against the pull home, so neighbours
+  part only partly and big ones still overlap a little - the grid keeps
+  its order. It reads each pebble's place for the frame, so `updateCube`
+  runs before `updateFlow`; it also runs while the grid returns from a
+  project, so the pebbles are already apart as they fade in rather than
+  springing apart in view.
 
 
 Every pebble holds its thumbnail - the rock, or the project's own model
