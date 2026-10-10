@@ -253,9 +253,12 @@ The pointer stirs the grid; the grid doesn't orbit
   overlap seen from above (as the camera sees them - their heights
   differ), the bigger, heavier one giving way less, reach `BUMP_REACH` of
   the radius times the pebble's scale, so the spotlight's pulse shoves its
-  neighbours. Soft (`BUMP_STIFFNESS`) against the pull home, so neighbours
-  part only partly and big ones still overlap a little - the grid keeps
-  its order. It reads each pebble's place for the frame, so `updateCube`
+  neighbours. `BUMP_STIFFNESS` is 140, against the pull home's 28: at 40
+  big neighbours sank well into each other, and the user asked for more
+  repelling - now they keep about a tenth of the overlap, push just before
+  touching (`BUMP_REACH` 1.05) and shove each other visibly when the
+  pointer or the spotlight drives one into another. The grid keeps its
+  order: the pull home still wins over any distance. It reads each pebble's place for the frame, so `updateCube`
   runs before `updateFlow`; it also runs while the grid returns from a
   project, so the pebbles are already apart as they fade in rather than
   springing apart in view.

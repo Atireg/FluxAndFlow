@@ -69,7 +69,7 @@ its "Tried and removed".
 - **Catalog.** Cubes became glass pebbles, then graphite ones (pencil
   hatching tried and dropped), each its own shape and slowly
   changing it, and a random size on each visit (touching, they push
-  each other apart),
+  each other firmly apart),
   rebuilt on one pure state function per frame: they float and rock, the
   pointer stirs them, nothing orbits; spaced wider (1.4). One
   pebble at a time glows orange and jumps, its name (the project's title, or

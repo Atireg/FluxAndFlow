@@ -2437,8 +2437,8 @@ const CONTENT_ARRIVAL_STEP = 0.35; // seconds between one and the next
 const CONTENT_ARRIVAL_DURATION = 0.7; // seconds for each to grow in
 let arrivalStartedAt = Infinity; // hidden until the loader leaves
 // Pebbles that touch push each other apart, on the same springs - see bumpPebbles
-const BUMP_STIFFNESS = 40; // 1/s² per unit of overlap - soft, so they give a little and still overlap a little
-const BUMP_REACH = 0.95; // a pebble's reach, as a share of its radius - its glass just about touching
+const BUMP_STIFFNESS = 140; // 1/s² per unit of overlap - 40 let them sink into each other; asked to repel more
+const BUMP_REACH = 1.05; // a pebble's reach, as a share of its radius - they push just before their glass touches
 
 const flowPointer = new THREE.Vector3();
 const flowPointerVelocity = new THREE.Vector2();
