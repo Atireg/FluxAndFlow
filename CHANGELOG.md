@@ -234,6 +234,28 @@ only.
   alone.
   Verified headless in both layouts: a project opens, the drawer renders,
   the catalog comes back, no console errors.
+- **Then the warmth turned out to be invisible, and the far colour was moved
+  out.** The user reported seeing no change on the desktop, and they were
+  right. A pebble is laid down at about 0.27 alpha over paper, so only a
+  quarter of the chosen colour reaches the screen: the brown-grey moved the
+  ink a long way and the composited picture by about one count. Retuned to a
+  sienna (138, 80, 48), roughly three times stronger on screen — the median
+  warmth of the pebbles goes 8.0 flat → 10.0 → 13.4, and at the pebbles'
+  densest pixels 5.1 → 12.0. Green is left nearly alone on purpose; dropping
+  it turns the warmth pink rather than brown.
+  **The verification was the real failure**, and it is written up in
+  DECISIONS.md so it isn't repeated: the first round read the WebGL canvas
+  and unpremultiplied it, which recovers the ink's colour however faintly it
+  is laid down, and so reported a change the eye never saw. A page
+  screenshot is the composited result and is what to measure. Two further
+  attempts also failed — a fixed screen patch is swamped by the flux moving
+  the silhouette 30% of the radius, and selecting pebble "cores" by darkness
+  cannot measure lightness because the selection is conditioned on it.
+  There is a low ceiling here: making the drift unmistakable with colour
+  alone means going into the orange family, which "one orange means click
+  me" forbids. Letting the flux modulate the pebble's tone instead would
+  swing composited lightness by ~27 counts rather than 4, but it changes how
+  heavily a pebble is shaded — open for the user to decide.
 
 Open at end of session (see README, "Next up"): unchanged by this session —
 Safari still to confirm, both projects' real copy and picture credits still

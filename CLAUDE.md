@@ -332,6 +332,15 @@ Testing tips learnt the hard way:
 
 - **Wait for `#loader` to be removed** before clicking - at least 5s
   (`MIN_VISIBLE`) plus its 2.6s exit.
+- **Measure the page, not the canvas, for anything about colour.** Reading
+  the WebGL canvas and unpremultiplying it recovers the INK's colour however
+  faintly it is laid down - the pebbles sit at about 0.27 alpha over paper,
+  so a large ink change can be an invisible screen change. This reported a
+  pebble colour change as clearly visible when it could not be seen at all.
+  Use `page.screenshot()`, which is composited. Also: a fixed screen patch
+  can't isolate a pebble's colour, because the flux moves its silhouette by
+  30% of the radius; and picking "cores" by darkness can't measure
+  lightness, since the selection is conditioned on it.
 - **Software WebGL is slow** (1-30 fps) and GSAP's lag smoothing stretches
   tweens: something sluggish in a headless run may just be slow rendering.
   Log the state rather than trusting timing. For frame-exact checks use

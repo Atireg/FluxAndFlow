@@ -27,14 +27,26 @@ import { PEBBLE_COLOR, screenColor } from '../colors.js';
  *    with anything that dims it.
  */
 
-// Where the warmth goes: a brown-grey, between the point clouds' dark red
-// and warm grey, so the catalog and the project view read as one set.
-// Deliberately not orange (one orange means "click me") and not teal ("the
-// blue isn't right") - see DECISIONS.md.
-const WARM = screenColor(92, 74, 62);
+/**
+ * Where the warmth goes: a sienna, sitting between the point clouds' dark
+ * red and warm grey in hue, so the catalog and the project view read as one
+ * set. Deliberately not orange (one orange means "click me") and not teal
+ * ("the blue isn't right") - see DECISIONS.md.
+ *
+ * It has to be this far from graphite to be seen at all. A pebble is laid
+ * down at an alpha of roughly 0.27, so only about a quarter of whatever is
+ * chosen here reaches the screen - the rest is paper showing through. The
+ * first attempt used a brown-grey (92, 74, 62), which moved the ink a long
+ * way and the picture by about one count: invisible. Green is left nearly
+ * alone on purpose; dropping it (towards the dark red) turns the warmth
+ * pink rather than brown.
+ */
+const WARM = screenColor(138, 80, 48);
 
-// How warm a pebble gets at the crest of a wave. 0.6 read as too subtle,
-// as every quiet first pass here has.
+// How warm a pebble gets at the crest of a wave. Together with WARM this
+// swings the on-screen warmth (R-B) by about 21 counts between trough and
+// crest, against 7 for the first attempt. Dial this down first if it reads
+// as too much.
 const AMOUNT = 0.85;
 
 /**

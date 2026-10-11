@@ -873,6 +873,42 @@ pass here has.
 The rim is left alone: a near-black silhouette a pixel or two wide, where
 this would not read, and it already carries the spotlight's colour.
 
+**What it costs to be seen, and the measurement that got this wrong twice.**
+A pebble is laid down at an alpha of roughly 0.27, so only about a quarter of
+the chosen colour reaches the screen - the rest is paper showing through. The
+first attempt used a brown-grey (92, 74, 62): it moved the ink a long way and
+the picture by about one count, and the user saw nothing. The sienna here is
+about three times stronger on screen. Measured composited, over the whole
+catalog:
+
+| | flat | brown-grey (92,74,62) | sienna (138,80,48) |
+|---|---:|---:|---:|
+| mean pebble colour | rgb(195, 192, 187) | rgb(196, 193, 187) | rgb(199, 193, 186) |
+| warmth (R-B), median | 8.0 | 10.0 | 13.4 |
+| warmth at pebble cores | 5.1 | - | 12.0 |
+
+The mistake worth not repeating: the first round read the WebGL canvas
+directly and unpremultiplied it, which **recovers the ink's colour however
+faintly it is laid down**. It reported "warmth 0.0 -> 8.4" for a change the
+eye could not see at all. The canvas is transparent; the thing to measure is
+a page screenshot, which is the composited result. Two further attempts also
+failed and are worth knowing about: a fixed screen patch is useless because
+the flux changes the pebble's SHAPE by 30% of its radius, so silhouettes
+swell through the patch and swamp any colour reading (48% wobble in pixel
+count even with the float, flow and spotlight frozen); and selecting "pebble
+cores" by how dark they are cannot measure a lightness change, because the
+selection is conditioned on it.
+
+**There is a ceiling here, and it is low.** At 0.27 alpha, a colour that
+would make the drift unmistakable has to go into the orange family - which
+"one orange means click me" forbids. The alternative is to drop colour and
+let the flux modulate the pebble's TONE instead (its alpha): the eye is far
+more sensitive to lightness than to low-saturation hue, and +/-30% on the
+alpha swings composited lightness by about 27 counts rather than 4. That
+would be clearly visible and stay in graphite, but it changes how heavily a
+pebble is shaded, which is the pencil-ness the look was approved on - so it
+is the user's call, not a tune.
+
 
 How the code is laid out
 ========================
