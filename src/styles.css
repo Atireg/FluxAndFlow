@@ -457,6 +457,22 @@ canvas.webgl {
     transform: translateX(-0.25rem);
 }
 
+/* "Drop again", for a project dropped with physics: the way back's look, on
+   its line, so the bar doesn't grow taller and move the model's framing */
+.bar__replay {
+    margin-left: 1.5rem;
+}
+
+.bar__replay-icon {
+    display: inline-block;
+    transition: transform 0.4s ease;
+}
+
+.bar__replay:hover .bar__replay-icon,
+.bar__replay:focus-visible .bar__replay-icon {
+    transform: rotate(180deg);
+}
+
 .bar__title {
     margin: 0;
     font-size: clamp(1.4rem, 2.6vw, 2.1rem);

@@ -130,6 +130,10 @@ export default function App() {
         engineRef.current?.closeProject();
     }, []);
 
+    const replayDrop = useCallback(() => {
+        engineRef.current?.replayDrop();
+    }, []);
+
     // Escape backs out one step at a time: the drawer first, then the project
     useEffect(() => {
         const onKeyDown = (event) => {
@@ -161,7 +165,13 @@ export default function App() {
                 spotlightTagRef={spotlightTagRef}
             />
 
-            <ProjectBar ref={barRef} project={project} status={status} onClose={closeProject} />
+            <ProjectBar
+                ref={barRef}
+                project={project}
+                status={status}
+                onClose={closeProject}
+                onReplay={replayDrop}
+            />
 
             <ProjectDrawer
                 ref={drawerRef}

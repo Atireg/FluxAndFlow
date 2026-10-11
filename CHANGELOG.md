@@ -276,6 +276,19 @@ only.
   after they look still - while the physics keeps running until cannon
   sleeps, so nothing freezes mid-wobble. The drop itself is unchanged.
   Verified in both layouts, including a second drop on re-open.
+- **"Drop again" in Emergent Space.** A small button in the project bar
+  drops the pile again. It sits on the same line as "All projects" and in
+  its style, because on a phone the bar's height is reserved out of the
+  model's framing and a line of its own would move the shot. Shown for any
+  project with a `drop` once its model has loaded, so there's no
+  per-project code. The new drop starts after 0.3s rather than the opening's
+  1.2s, falls at the angle the model had reached instead of snapping back
+  to where it opened (`turnOffset`, through a new `modelTurn` helper that
+  the render loop now uses too), and the turn carries on from there once it
+  settles. Verified with a throwaway hook (removed) in both layouts: Rock
+  Print shows no button; on Emergent Space the click resets the drop, the
+  angle holds through the fall, then turns at the usual rate; no console
+  errors.
 
 Open at end of session (see README, "Next up"): unchanged by this session —
 Safari still to confirm, both projects' real copy and picture credits still

@@ -196,7 +196,9 @@ defineProject({
   dissolve falling into a disc (`uGround`). They're held hidden for
   `PILE_WAIT`, fall in slow motion (`PILE_TIME_SCALE`), and the model turns
   once they look still (`PILE_REST_*` - not cannon's sleep, which lags by a
-  second; the physics runs on until it does sleep). Read "Emergent Space: aggregates dropped with live physics"
+  second; the physics runs on until it does sleep). The bar's "Drop again"
+  (any project with a `drop`) restarts it at the angle it had reached
+  (`turnOffset`, `modelTurn`). Read "Emergent Space: aggregates dropped with live physics"
   before retuning; tune it in Node (testing tips).
 
 ## Things that will bite a fresh session

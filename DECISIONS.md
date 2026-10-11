@@ -595,7 +595,18 @@ Blender/Rhino simulation. A project's `drop: { count, size, ground }` does it
   pause mid-tumble can't start it). The physics keeps stepping until cannon
   does sleep (`pile.asleep`), so nothing freezes mid-wobble; the model just
   turns sooner. The bodies' own physics is unchanged, so the interlock rate
-  is too. Reopening calls `restart()` for a new drop. The physics steps
+  is too. Reopening calls `restart()` for a new drop.
+- **"Drop again"** (asked for): a small button in the project bar, on the
+  same line as "All projects" and in its style, shown for any project with
+  a `drop` once its model has loaded - so it's Emergent Space today, with no
+  per-project code. On its own line it would make the bar taller, and on a
+  phone the bar's height is reserved out of the model's framing, so the
+  shot would move. It calls `restart(PILE_REPLAY_WAIT)` - 0.3s rather than
+  `PILE_WAIT`'s 1.2s, since there's no camera move to wait for - and keeps
+  the angle the model had reached (`turnOffset`, read through `modelTurn`
+  in camera/framing.js) instead of snapping back to where it opened: the
+  new drop falls at that angle and the turn carries on from it once it
+  settles. The ground and the camera stay as they are. The physics steps
   with the frame time (capped like the flow), so a slow device plays it
   slower rather than jumping.
 - **Framed** with `view: { elevation: 30, zoom: ... }` on the cube, like

@@ -114,6 +114,20 @@ export function modelStartYaw(project) {
     return DETAIL_MODEL_YAW + THREE.MathUtils.degToRad(project?.view?.turn ?? 0);
 }
 
+/**
+ * How long the model has been turning, in seconds at DETAIL_ROTATE_SPEED,
+ * `since` it was shown. A pile only turns once it looks still; dropped
+ * again by hand, it keeps the angle it had reached (`turnOffset`) and
+ * carries on from there once the new drop settles, rather than snapping
+ * back to where it opened.
+ */
+export function modelTurn(model, since) {
+    const pile = model.userData.pile;
+    if (!pile) return since;
+
+    return (model.userData.turnOffset ?? 0) + Math.max(since - pile.settledAt, 0);
+}
+
 export function createFraming({ rig, screen, state, grid, ui }) {
     let swayStartedAt = null; // elapsed time the current run began; null while held
     let swayApplied = 0; // radians currently applied on top of the camera's own place

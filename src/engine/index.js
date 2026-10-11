@@ -4,7 +4,7 @@ import { createBoot } from './boot.js';
 import { createState } from './state.js';
 import { createVisited } from './visited.js';
 import { createCameraRig } from './camera/rig.js';
-import { createFraming, DETAIL_ROTATE_SPEED, modelStartYaw } from './camera/framing.js';
+import { createFraming, DETAIL_ROTATE_SPEED, modelStartYaw, modelTurn } from './camera/framing.js';
 import { createCatalog, findPebble } from './catalog.js';
 import { createDetail } from './detail.js';
 import { createTags } from './tags.js';
@@ -199,7 +199,7 @@ export function createEngine({ canvas, source, ui }) {
                 // A pile falls first and only starts turning once it has settled
                 const pile = model.userData.pile;
                 pile?.step(frameTime, since);
-                const turning = pile ? Math.max(since - pile.settledAt, 0) : since;
+                const turning = modelTurn(model, since);
                 model.rotation.y = modelStartYaw(project) + turning * DETAIL_ROTATE_SPEED;
 
                 // A pile's ground (the pebble's dissolve, landed) turns with it
@@ -406,6 +406,11 @@ export function createEngine({ canvas, source, ui }) {
 
         closeProject() {
             detail.closeProject();
+        },
+
+        // A project with a `drop`: let the pile fall again
+        replayDrop() {
+            detail.replayDrop();
         },
 
         /**

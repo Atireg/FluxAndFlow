@@ -151,6 +151,10 @@ Project view
         a new drop every time - then turning. Each from a plain mesh sampled
         into 8,000 points as it loads; the mesh itself, in the rock's ink,
         in its pebble; opening the About drawer zooms in on the three
+    [x] Emergent Space's turn starts as soon as the pile looks still (it
+        lagged the landing by ~2.5s, waiting on cannon's sleep), and a
+        "Drop again" button in the bar drops it again at the angle it had
+        reached
     [x] Points on the move (the gather, the dissolve, the fall into
         Emergent Space's ground) draw tapering tails, gone once they settle
     [x] A grey fog rolls in behind the project

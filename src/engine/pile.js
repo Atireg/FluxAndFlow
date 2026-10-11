@@ -23,6 +23,7 @@ const PILE_STEP = 1 / 300; // seconds per physics step - the rods are thin, so s
 const PILE_MAX_STEPS = 30; // per frame, so a slow frame plays slower rather than skipping
 const PILE_SETTLE_AFTER = 9; // simulated seconds - stop by then even if something still twitches
 const PILE_WAIT = 1.2; // seconds after the project appears before they're let go - the camera has arrived, the points faded in
+export const PILE_REPLAY_WAIT = 0.3; // the same, when dropped again by hand - nothing to wait for but the pile clearing
 const PILE_TIME_SCALE = 0.6; // the fall plays at this speed - slower to watch, and the same physics, so they land just as they would
 const PILE_COLLISION_FATTEN = 1.4; // rods collide a little thicker than drawn, so they never pass through
 // Tuned by dropping them a few hundred times off screen (cannon-es in
@@ -212,9 +213,9 @@ export async function createPile({ template, rods, count, size, groundY, solid, 
 
         // A new drop: one above another, a little apart, each at its own
         // random angle and tumbling a little
-        restart() {
+        restart(wait = PILE_WAIT) {
             this.time = 0;
-            this.wait = PILE_WAIT;
+            this.wait = wait;
             this.settledAt = Infinity;
             this.asleep = false;
             this.restFor = 0;

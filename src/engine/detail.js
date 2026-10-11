@@ -2,14 +2,14 @@ import * as THREE from 'three';
 import { gsap } from 'gsap';
 import { assetUrl } from './assets.js';
 import { getPanelLayout } from './layout.js';
-import { loadPhysics } from './pile.js';
+import { loadPhysics, PILE_REPLAY_WAIT } from './pile.js';
 import { loadPointCloud } from './pointcloud/load.js';
 import { GATHER_DURATION } from './pointcloud/gather.js';
 import { getDissolve } from './pebbles/dissolve.js';
 import { armDrop, DROP_BOOM_HANG, DROP_OPEN_AFTER } from './pebbles/drop.js';
 import { startArrival } from './pebbles/arrival.js';
 import { restingFaceColor, restingRimColor } from './pebbles/materials.js';
-import { modelStartYaw } from './camera/framing.js';
+import { modelStartYaw, modelTurn } from './camera/framing.js';
 
 /**
  * Detail view: the project's model on the whole canvas, its description in a
@@ -170,6 +170,7 @@ export function createDetail({
                 pebble.userData.detail.visible = true;
                 pebble.userData.detail.rotation.y = modelStartYaw(project);
                 pebble.userData.detail.userData.pile?.restart();
+                pebble.userData.detail.userData.turnOffset = 0;
                 pebble.userData.detailRotateStartTime = clock.getElapsedTime();
                 ui.onStatus(null);
                 framing.frameDetail(pebble, { ease });
@@ -286,6 +287,22 @@ export function createDetail({
 
             rig.exitDetailProjection(1.1);
             framing.fitToGrid({ animate: true });
+        },
+
+        /**
+         * Drop the pile again, from the bar's "Drop again". The new drop
+         * falls at the angle the model has reached rather than snapping back
+         * to where it opened, and the turn picks up from there once it has
+         * settled; the ground stays, and so does the camera.
+         */
+        replayDrop() {
+            const model = state.selected?.userData.detail;
+            const pile = model?.userData.pile;
+            if (state.view !== 'detail' || !pile) return;
+
+            const since = clock.getElapsedTime() - state.selected.userData.detailRotateStartTime;
+            model.userData.turnOffset = modelTurn(model, since);
+            pile.restart(PILE_REPLAY_WAIT);
         },
 
         toggleZoom(clientX, clientY) {
