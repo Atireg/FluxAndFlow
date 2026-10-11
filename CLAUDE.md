@@ -185,9 +185,9 @@ Edit the `projects` array near the top of `src/script.js` (~line 146):
 - **The streams** (`src/streams.js`) live in the scene on the y = 0 plane,
   parting round each pebble's circle in the scene and drifting towards the
   pointer while the mouse moves or a finger is down (`trackStreamPointer`,
-  `PULL_*`); they fade out while a project is open. The loader's own 2D canvas (index.html) only runs until
-  the loader leaves, announced by the `fluxloader:leaving` event, which
-  also starts the arrival.
+  `PULL_*`); they fade out while a project is open. The loader's own 2D canvas
+  (index.html) only runs until the loader leaves, announced by the
+  `fluxloader:leaving` event, which also starts the arrival.
 - **Moving points have tails** (`addTrails`, `shaders/trail/`): an
   instanced quad per point whose shader re-runs the gather or dissolve a
   moment earlier, sharing its points' uniform objects. Change how a point

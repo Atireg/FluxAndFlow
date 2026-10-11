@@ -66,21 +66,21 @@ list.
 not yet live). The why is in DECISIONS.md; rejected iterations are under
 its "Tried and removed".
 
-- **Catalog.** Cubes became glass pebbles, then graphite ones (teal glass
-  and pencil hatching tried and dropped), each its own shape and slowly
-  changing it, a random size on each visit; touching, they push each other
-  firmly apart. Rebuilt on one pure state function per frame: they float
-  and rock, the pointer stirs them, nothing orbits; spaced wider (1.4). One
-  pebble at a time glows orange and jumps, its name (the project's title,
-  or "Project XX") hanging below on a soft, simulated string that swings in
-  gusts, tied on with a dot; hover changes nothing. Names scale with the
-  pebbles on screen and draw over them. Pebbles hold the rock or the
-  project's own model, in graphite; empty slots say "Still empty...".
-  Opened projects' pebbles stay darker, remembered in the browser. The grid
-  arrives slowly, a pebble at a time, surfacing out of the paper as the
-  loader clears and on the way back from a project, then their contents
-  one by one. The loader's streams carry on among them, in the scene,
-  parting round each and drifting towards the mouse or a finger. Smaller pebbles among them came and went.
+- **Catalog.** Cubes became glass pebbles, then graphite ones (teal glass and
+  pencil hatching tried and dropped), each its own shape and slowly changing
+  it, a random size on each visit; touching, they push each other firmly apart.
+  Rebuilt on one pure state function per frame: they float and rock, the
+  pointer stirs them, nothing orbits; spaced wider (1.4). One pebble at a time
+  glows orange and jumps, its name (the project's title, or "Project XX")
+  hanging below on a soft, simulated string that swings in gusts, tied on with
+  a dot; hover changes nothing. Names scale with the pebbles on screen and draw
+  over them. Pebbles hold the rock or the project's own model, in graphite;
+  empty slots say "Still empty...". Opened projects' pebbles stay darker,
+  remembered in the browser. The grid arrives slowly, a pebble at a time,
+  surfacing out of the paper as the loader clears and on the way back from a
+  project, then their contents one by one. The loader's streams carry on among
+  them, in the scene, parting round each and drifting towards the mouse or a
+  finger. Smaller pebbles among them came and went.
 - **Opening a project.** An instant boom, the others fall slowly while the
   camera moves in, and the clicked pebble dissolves into a cloud of points
   that hands over to the project's own (a crossfade, not an overlap). Camera
