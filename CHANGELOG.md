@@ -297,6 +297,23 @@ only.
   with a throwaway hook (removed) over four cycles: each new drop began
   4.99-5.04s after the last settled, the turn stayed continuous, no
   console errors; the full drawer/zoom/re-open flow still passes.
+- **Emergent Space, four more at once.** (1) The repeat is now every 10s
+  after each drop comes to rest. (2) The fallen pile dissolves away over
+  1.2s before the next drop instead of vanishing - a dissolve into a fine
+  grain rather than an alpha fade, so three interlocked opaque solids need
+  no sorting. (3) Pulsing graphite dots mark where the aggregates
+  interlock, read from cannon's own contacts (`drop.contacts`), gathered
+  over the settle because cannon drops a contact once both bodies sleep.
+  (4) Each aggregate's velocity, live: an arrow along its motion and its
+  speed in m/s beside it, fading out as it comes to rest (`drop.velocity`).
+  All three are project settings, so the engine still has no per-project
+  code. One trap found and fixed on the way: the point-cloud loader gave
+  every `Points` in the model the cloud's shader, including the dots,
+  which then threw every frame and froze the turn - such points now set
+  `userData.ownMaterial`. Verified with a throwaway hook (removed): new
+  drops 11.85s after each settle, a smooth dissolve, up to six crossings
+  marked, three arrows and live readings while falling and none at rest,
+  the turn continuous, no errors; the full flow passes on a phone too.
 
 Open at end of session (see README, "Next up"): unchanged by this session —
 Safari still to confirm, both projects' real copy and picture credits still

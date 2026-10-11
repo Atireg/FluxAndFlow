@@ -154,8 +154,11 @@ Project view
     [x] Emergent Space's turn starts as soon as the pile looks still (it
         lagged the landing by ~2.5s, waiting on cannon's sleep), and a
         "Drop again" button in the bar drops it again at the angle it had
-        reached; it also drops again by itself 5s after each drop settles
-        (`drop.repeat`)
+        reached; it also drops again by itself 10s after each drop settles
+        (`drop.repeat`), the fallen pile dissolving away first; pulsing dots
+        mark where the aggregates interlock (`drop.contacts`), and an arrow
+        and a live m/s reading show each one's velocity as it falls
+        (`drop.velocity`)
     [x] Points on the move (the gather, the dissolve, the fall into
         Emergent Space's ground) draw tapering tails, gone once they settle
     [x] A grey fog rolls in behind the project

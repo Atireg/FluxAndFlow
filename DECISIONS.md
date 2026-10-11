@@ -607,14 +607,49 @@ Blender/Rhino simulation. A project's `drop: { count, size, ground }` does it
   in camera/framing.js) instead of snapping back to where it opened: the
   new drop falls at that angle and the turn carries on from it once it
   settles. The ground and the camera stay as they are.
-- **And on its own, every 5 seconds** (asked for): `drop.repeat: 5` drops
-  it again 5s after each drop comes to rest (`maybeRepeatDrop` in
-  detail.js, through the same replay). Timed from the rest, not the start:
-  a drop takes 5-8s to land on screen, so a plain 5s clock would cut every
-  one off mid-fall. A project setting rather than code, so another `drop`
-  can repeat or not; "Drop again" resets the wait. Measured over four
-  cycles: each new drop began 4.99-5.04s after the last settled, and the
-  turn stayed continuous across them. The physics steps
+- **And on its own** (asked for, first every 5 seconds, then 10):
+  `drop.repeat: 10` drops it again 10s after each drop comes to rest
+  (`maybeRepeatDrop` in detail.js, through the same replay). Timed from the
+  rest, not the start: a drop takes 5-8s to land on screen, so a plain
+  clock would cut a short repeat off mid-fall. A project setting rather
+  than code, so another `drop` can repeat or not; "Drop again" resets the
+  wait.
+- **The fallen pile dissolves away** before each new drop rather than
+  vanishing (asked for - "less abruptly"): `pile.replay()` runs a
+  `PILE_FADE_OUT` (1.2s, eased) before `restart()`, keeping the turn going
+  meanwhile and taking the angle at the moment of the new drop. It's a
+  dissolve into a fine grain (`uFade` in `makeInkMaterial`: a fixed hash
+  over the mesh's own space, more of it discarded as it rises), not an
+  alpha fade: the aggregates are opaque, and three interlocked transparent
+  solids would need sorting and show it. A sin-free hash, since sin() of
+  large arguments loses precision on some mobile GPUs. A pile of points
+  (no `solid`) still restarts at once.
+- **Pulsing dots where they interlock** (`drop.contacts`, asked for): read
+  straight from cannon's own contacts between two aggregates (the ground's
+  left out), merged within `CONTACT_MERGE` of a size since two rods crossing
+  give a cluster, shown once the pile looks still and faded with the
+  dissolve. Gathered over the settle rather than replaced each step: cannon
+  stops reporting a contact once both bodies touching are asleep, and they
+  sleep one by one. Graphite, not orange (one orange means "click me", and
+  the aggregates are drawn in it), each dot a solid centre with a ring
+  spreading on its own beat; drawn over the rods so a crossing at the back
+  isn't lost.
+- **Live velocity** (`drop.velocity`, asked for), the way the project's own
+  simulation plots clump velocity: an arrow from each aggregate's centre
+  along its motion, as long as it is fast, and its speed beside it in m/s -
+  physical speed with the aggregate taken as `PILE_REAL_SIZE` across, not
+  the 0.6x playback. Both fade out as it slows (`VELOCITY_GONE` to
+  `VELOCITY_FULL`), so the fall shows velocity and the settled pile shows
+  the interlocking dots. The numbers are HTML placed from the render loop
+  through refs (`detail.updateVelocityTags`), never React state.
+- **A trap this hit**: the point-cloud loader walks the whole model after
+  the pile is built and gives every `Points` the cloud's shader - including
+  the dots, whose own uniforms then vanished and threw every frame (which
+  also stopped the turn). A `Points` that brings its own look sets
+  `userData.ownMaterial`. Measured with a throwaway hook over two cycles:
+  each new drop 11.85s after the last settled (10 + the 1.2s dissolve + the
+  0.3s wait), up to six crossings marked, three arrows and live readings
+  while falling and none at rest, the turn continuous, no errors. The physics steps
   with the frame time (capped like the flow), so a slow device plays it
   slower rather than jumping.
 - **Framed** with `view: { elevation: 30, zoom: ... }` on the cube, like

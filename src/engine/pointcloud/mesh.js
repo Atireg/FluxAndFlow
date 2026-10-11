@@ -106,18 +106,37 @@ export function makeInkMaterial() {
         uniforms: {
             uLit: { value: POINT_INKS[1].color },
             uShade: { value: POINT_INKS[0].color },
+            // 0..1, how far it has dissolved away - see pile.js's fade
+            uFade: { value: 0 },
         },
         vertexShader: `
 varying vec3 vNormal;
+varying vec3 vInkLocal;
 void main() {
     vNormal = normalize(normalMatrix * normal);
+    vInkLocal = position;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 }`,
         fragmentShader: `
 uniform vec3 uLit;
 uniform vec3 uShade;
+uniform float uFade;
 varying vec3 vNormal;
+varying vec3 vInkLocal;
+
+// A fixed grain over the surface, in the mesh's own space so it turns with
+// it. Fading is done by dropping more of the grain - a dissolve into specks
+// rather than a see-through ghost - so it stays opaque and three interlocked
+// copies need no sorting. A hash without sin(), which loses precision on
+// some mobile GPUs.
+float inkGrain(vec3 p) {
+    p = fract(p * 0.3183099 + 0.1);
+    p *= 17.0;
+    return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
+}
+
 void main() {
+    if (inkGrain(floor(vInkLocal * 40.0)) < uFade) discard;
     float light = max(dot(normalize(vNormal), normalize(vec3(-0.35, 0.8, 0.5))), 0.0);
     gl_FragColor = vec4(mix(uShade, uLit, light), 1.0);
 }`,

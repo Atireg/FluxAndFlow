@@ -6,6 +6,7 @@ import ProjectDrawer from '../components/ProjectDrawer.jsx';
 import CatalogTags from '../components/CatalogTags.jsx';
 import TapHint from '../components/TapHint.jsx';
 import Fog from '../components/Fog.jsx';
+import VelocityTags from '../components/VelocityTags.jsx';
 
 /**
  * The page.
@@ -34,6 +35,7 @@ export default function App() {
     const emptyTagRef = useRef(null);
     const stringRef = useRef(null);
     const spotlightTagRef = useRef(null);
+    const velocityRef = useRef(null);
     const engineRef = useRef(null);
 
     /**
@@ -105,6 +107,7 @@ export default function App() {
                     spotlightString: stringRef.current,
                     stringPaths: stringRef.current?.querySelectorAll('path') ?? [],
                     knots: [...(stringRef.current?.querySelectorAll('circle') ?? [])],
+                    velocityTags: [...(velocityRef.current?.querySelectorAll('.velocity-tag') ?? [])],
                 },
             },
         });
@@ -158,6 +161,8 @@ export default function App() {
             <canvas className="webgl" ref={canvasRef} />
 
             <TapHint ref={tapHintRef} />
+
+            <VelocityTags ref={velocityRef} />
 
             <CatalogTags
                 emptyTagRef={emptyTagRef}

@@ -155,7 +155,8 @@ defineProject({
             sway: 13 },                                    // camera nods ± degrees, slowly
     gather: true,                                 // optional: points gather from a scattered cloud on open
     // points: 20000,                             // optional, a mesh detailModel only: how many points to sample
-    // drop: { count: 3, size: 3, ground: -1.2, solid: true, repeat: 5 }, // optional, a crossed-rod mesh only (Emergent Space)
+    // drop: { count: 3, size: 3, ground: -1.2, solid: true,   // optional, a crossed-rod mesh only (Emergent Space)
+    //         repeat: 10, contacts: true, velocity: true },      // again 10s after rest; interlock dots; live velocity
     images: [{ src: 'images/x.jpg', alt: '', caption: '', ratio: '3 / 2', wide: false }],  // drawer pictures; no src = empty frame
 })
 ```
@@ -198,8 +199,12 @@ defineProject({
   once they look still (`PILE_REST_*` - not cannon's sleep, which lags by a
   second; the physics runs on until it does sleep). The bar's "Drop again"
   (any project with a `drop`) restarts it at the angle it had reached
-  (`turnOffset`, `modelTurn`), and `drop.repeat` (Emergent Space: 5) does
-  the same that many seconds after each drop comes to rest. Read "Emergent Space: aggregates dropped with live physics"
+  (`turnOffset`, `modelTurn`), and `drop.repeat` (Emergent Space: 10) does
+  the same that many seconds after each drop comes to rest - the old pile
+  dissolving away first (`pile.replay`, `uFade` in `makeInkMaterial`).
+  `drop.contacts` pulses dots at the crossings (cannon's own contacts);
+  `drop.velocity` shows each aggregate's velocity as an arrow and a live
+  m/s tag (HTML via refs, `detail.updateVelocityTags`). Read "Emergent Space: aggregates dropped with live physics"
   before retuning; tune it in Node (testing tips).
 
 ## Things that will bite a fresh session
@@ -273,6 +278,10 @@ defineProject({
   `PULL_*`); they fade out while a project is open. The loader's own 2D canvas
   (index.html) only runs until the loader leaves, announced by the
   `fluxloader:leaving` event, which also starts the arrival.
+- **The cloud loader re-skins every `Points` in a model** (`pointcloud/
+  load.js` gives each the point-cloud shader). Anything else drawn as
+  points inside a model - the pile's interlocking dots - must set
+  `userData.ownMaterial`, or its uniforms vanish and it throws every frame.
 - **Moving points have tails** (`pointcloud/trails.js`,
   `shaders/trail/`): an
   instanced quad per point whose shader re-runs the gather or dissolve a

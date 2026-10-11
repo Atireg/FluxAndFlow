@@ -457,6 +457,29 @@ canvas.webgl {
     transform: translateX(-0.25rem);
 }
 
+/* The live speed beside each moving aggregate (a project's `drop.velocity`),
+   placed and written by the engine every frame. Small and quiet, with a
+   paper halo so it reads over the orange aggregates as well as the ground */
+.velocity-tag {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 2; /* above the canvas (1), like the other tags - not page order */
+    pointer-events: none;
+
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    white-space: nowrap;
+    color: var(--ink);
+    text-shadow: 0 0 0.35rem var(--bg), 0 0 0.15rem var(--bg);
+
+    opacity: 0;
+    will-change: transform, opacity;
+}
+
 /* "Drop again", for a project dropped with physics: the way back's look, on
    its line, so the bar doesn't grow taller and move the model's framing */
 .bar__replay {

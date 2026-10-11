@@ -62,6 +62,10 @@ export function loadPointCloud({
                         // Drawn as the solid mesh in the inks, or as points
                         solid: drop.solid ? sampled.userData.solid : null,
                         solidMaterial: drop.solid ? makeInkMaterial() : null,
+                        // Pulsing dots where they interlock, once at rest
+                        contacts: Boolean(drop.contacts),
+                        // Each aggregate's velocity, live, while it moves
+                        velocity: Boolean(drop.velocity),
                     });
                     gltf.scene = pile.group;
                     gltf.scene.userData.pile = pile;
@@ -73,7 +77,9 @@ export function loadPointCloud({
         }
 
         gltf.scene.traverse((child) => {
-            if (!child.isPoints) return;
+            // Points that bring their own look (a pile's interlocking dots)
+            // aren't part of the cloud
+            if (!child.isPoints || child.userData.ownMaterial) return;
 
             gltf.scene.userData.points ??= child;
             const geometry = child.geometry;

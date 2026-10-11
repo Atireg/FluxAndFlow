@@ -59,6 +59,7 @@ export function createDetail({
     zoomRaycaster.params.Points.threshold = 0.06;
 
     const tapHintPoint = new THREE.Vector3();
+    const velocityPoint = new THREE.Vector3();
 
     function markVisited(pebble) {
         pebble.userData.visited = true;
@@ -267,6 +268,7 @@ export function createDetail({
             state.tapHintNext = Infinity;
 
             if (pebble?.userData.detail) pebble.userData.detail.visible = false;
+            detail.hideVelocityTags();
             if (pebble?.userData.dissolve) pebble.userData.dissolve.visible = false;
 
             // Bring the catalog back: each pebble arrives in its own time, set
@@ -300,9 +302,13 @@ export function createDetail({
             const pile = model?.userData.pile;
             if (state.view !== 'detail' || !pile) return;
 
-            const since = clock.getElapsedTime() - state.selected.userData.detailRotateStartTime;
-            model.userData.turnOffset = modelTurn(model, since);
-            pile.restart(PILE_REPLAY_WAIT);
+            // The old pile dissolves first and keeps turning meanwhile, so
+            // the angle is taken when the new drop actually starts
+            const pebble = state.selected;
+            pile.replay(PILE_REPLAY_WAIT, () => {
+                const since = clock.getElapsedTime() - pebble.userData.detailRotateStartTime;
+                model.userData.turnOffset = modelTurn(model, since);
+            });
         },
 
         /**
@@ -318,6 +324,37 @@ export function createDetail({
             if (!pile || !repeat || pile.settledAt === Infinity) return;
 
             if (since - pile.settledAt >= repeat) detail.replayDrop();
+        },
+
+        /**
+         * The live speed beside each moving aggregate (`drop.velocity`), as
+         * HTML written straight from the render loop - it changes every
+         * frame, so never through React state. Beside its centre, on screen.
+         */
+        updateVelocityTags(model) {
+            const tags = ui.overlays.velocityTags ?? [];
+            const readings = model.userData.pile?.velocities() ?? [];
+
+            tags.forEach((tag, i) => {
+                const reading = readings[i];
+                if (!reading || reading.show <= 0) {
+                    tag.style.opacity = 0;
+                    return;
+                }
+
+                velocityPoint.set(reading.position.x, reading.position.y, reading.position.z);
+                model.localToWorld(velocityPoint).project(rig.camera);
+                const x = (velocityPoint.x + 1) / 2 * screen.width;
+                const y = (1 - velocityPoint.y) / 2 * screen.height;
+                const text = `${reading.mps.toFixed(2)} m/s`;
+                if (tag.textContent !== text) tag.textContent = text;
+                tag.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(0.9rem, -50%)`;
+                tag.style.opacity = reading.show;
+            });
+        },
+
+        hideVelocityTags() {
+            (ui.overlays.velocityTags ?? []).forEach((tag) => { tag.style.opacity = 0; });
         },
 
         toggleZoom(clientX, clientY) {
