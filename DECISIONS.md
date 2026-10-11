@@ -54,6 +54,12 @@ Loading
 - The start-up loader is inline and waits for real progress
 - `?cloudtest`, and why clouds load on click
 
+How the code is laid out
+- React owns the page; the engine owns the canvas
+- Every project is one module behind one schema
+- Shared mutable state is one object, passed in
+- Constants live next to what they tune
+
 Tried and removed
 
 
@@ -808,6 +814,144 @@ cache off, gzipped):
 
 So clouds load only when a project is opened; ten rock thumbnails cost
 ~2 MB. Remove the flag once real projects fill the grid.
+
+
+How the code is laid out
+========================
+
+
+React owns the page; the engine owns the canvas
+----------------------------------------------
+
+`src/script.js` was 3,733 lines holding everything: the project data, the
+three.js scene, the camera maths, the shaders and a few hundred lines of
+`document.createElement` building the bar and the drawer by hand. It is now
+`src/engine/` (the canvas), `src/components/` + `src/app/` (the page) and
+`src/projects/` (the content).
+
+React was brought in for the **page**, not the scene. The drawer is the
+clearest case: rendering a project's meta rows, paragraphs, five pictures
+and credits was imperative DOM building, re-done from scratch on every
+open, with an `imageFigure()` helper that had to remember to set
+`aspect-ratio`, `loading="lazy"` and the `is-empty` class in the right
+order. As a component it is the project's fields read straight off, and a
+new field is a line of JSX.
+
+The scene stayed imperative three.js, deliberately. A pebble's whole visual
+state is recomputed from its mode and the clock every frame (see "A
+pebble's state is a pure function"), 60 times a second, across ten pebbles,
+a Verlet rope in screen pixels, a point-cloud shader's uniforms and a
+physics world. react-three-fiber would mean expressing all of that as a
+component tree whose props change every frame - which is the one thing
+React's model does not make easier, and it would have meant re-deriving
+look-and-feel that took many rounds of feedback to settle. The engine is a
+single long-lived object with a `start()`, and that is the right shape for
+it.
+
+So the boundary is drawn at **how often a thing changes**:
+
+- React state: which project is open, what the bar says, whether the drawer
+  is out. Three values, changing on a click.
+- The engine: everything per-frame.
+
+They meet at the `ui` object `createEngine` takes (callbacks out: a project
+opened, the status changed, roll the fog in) and the three methods it
+returns (`closeProject`, `setDrawerOpen`, `dispose`).
+
+The per-frame HTML - the pebbles' names, the string, "Still empty...", the
+tap hint - is the one place this needs care. Those move every frame, so
+they must not go through React state: React renders the elements and hands
+their DOM nodes to the engine through refs (`ui.overlays`), and the engine
+writes `style.transform` and the SVG path's `d` directly, exactly as before.
+A `useState` per frame there would re-render the tree 60 times a second for
+nothing.
+
+`main.jsx` deliberately does **not** wrap the app in `StrictMode`: it mounts
+every effect twice in development, which would build a second WebGL renderer
+and a second render loop on the same canvas.
+
+To revisit: if the scene ever becomes mostly static objects reacting to
+state rather than to the clock, react-three-fiber becomes worth it. While
+the clock drives everything, it does not.
+
+
+Every project is one module behind one schema
+---------------------------------------------
+
+Projects were entries in a `projects` array near the top of `script.js`,
+about 200 lines of object literal for two projects, with the engine reaching
+into fields directly (`project?.view?.elevation ?? 0`, `drop.size ?? 3`)
+wherever it needed one.
+
+Now each project is its own file - `src/projects/rock-print.js`,
+`emergent-space.js` - exporting `defineProject({ ... })`, and
+`src/projects/index.js` lists them. `defineProject` is the single place that
+says what a project may declare: it fills the defaults, normalises the
+pictures, and throws on the mistakes that would otherwise show as something
+subtly wrong on screen - no `detailModel`, a slot outside `SLOT_COUNT`, a
+`body` that isn't an array, two projects claiming the same slot (which
+silently hid one of them before).
+
+The point is that the behaviour is uniform: there is no per-project branch
+anywhere in the engine. A project that wants to behave differently says so
+in its own file through `view`, `gather`, `drop`, `points` or `thumbSize`,
+and the one code path reads it. Adding a project is: write the module, add
+it to the list.
+
+The engine does not import `src/projects/` at all. It is handed
+`catalogSource` - how many slots, what sits in each, the empty slot's
+thumbnail, how to label a pebble - so the catalog knows nothing about this
+particular portfolio's content.
+
+`hasDescription` and `metaRows` moved into the schema too, because the
+drawer and the "no description, no drawer" rule have to agree on what counts
+as described, and they used to decide separately.
+
+
+Shared mutable state is one object, passed in
+---------------------------------------------
+
+`script.js` kept about a dozen module-level `let`s - `viewState`,
+`selectedCube`, `hoveredCube`, `drawerOpen`, `spotlightCube`,
+`droppingFrom`, `arrivalStartedAt` and so on - that most of the file read
+and several parts wrote.
+
+Splitting the file could not just hand each module its own copy: the
+catalog, the detail view, the camera and the tags genuinely have to agree
+about which pebble is selected and which mode the view is in. So there is
+one `state` object (`engine/state.js`), created in `createEngine` and passed
+to the parts that need it. The modules that need a scene, a camera rig or
+the grid take those as arguments too (`createCatalog({ scene, grid, state,
+... })`), rather than importing a singleton.
+
+The grid is shared the same way: `grid = { pebbles, shape }`, filled by the
+catalog and read by the camera. That breaks what would otherwise be a cycle
+between them.
+
+The benefit beyond tidiness: **the temporal-dead-zone trap is gone**.
+`animate()` used to run its first frame the moment it was defined, before
+the rest of the file had executed, so any `const` it touched had to be
+declared above it - which is why `TAG_*`, `FLOW_*` and the DOM lookups were
+all hoisted to the top of the file with comments saying so. It bit three
+times. Now nothing runs until `engine.start()` is called, so declaration
+order no longer matters and constants can live where they belong.
+
+
+Constants live next to what they tune
+-------------------------------------
+
+With the TDZ reason gone there was a choice: one big `constants.js`, or each
+constant beside the code it governs. They are beside the code - `TAG_*` in
+`engine/tags.js`, `FLOW_*` and `BUMP_*` in `pebbles/flow.js`, `SPOTLIGHT_*`
+in `pebbles/spotlight.js`, `DETAIL_MARGIN` and the sway in
+`camera/framing.js`, and so on - because the comment explaining why a number
+is 0.88 and not 1.05 is only useful next to the arithmetic that uses it, and
+those comments are most of the value here.
+
+`engine/constants.js` keeps only the handful that several modules must
+agree on: `CUBE_SIZE`, `SPACING`, `PEBBLE_RADIUS`, `PEBBLE_SQUASH`, the
+pebble size range and `MESH_FIT_SIZE`. Its header lists where everything
+else lives, so a constant is still findable without grepping.
 
 
 Tried and removed

@@ -1,0 +1,68 @@
+import * as THREE from 'three';
+import { PEBBLE_RADIUS } from './constants.js';
+import { createStreams } from './streams.js';
+
+/**
+ * The loader's streams, carried on among the pebbles (streams.js): they live
+ * in the scene on the y = 0 plane, part round each pebble's circle and drift
+ * towards the pointer while the mouse moves or a finger is down. They fade
+ * out while a project is open.
+ */
+const STREAM_POINTER_IDLE = 0.35; // seconds after the mouse stops that they let go
+
+export function createStreamsView({ scene, grid, state, rig }) {
+    const streams = createStreams(scene);
+    const pebbleCircles = [];
+    const view = { x: 20, z: 20 };
+
+    // Where the pointer is on the streams' plane, for them to drift towards
+    const pointer = { x: 0, z: 0, at: -Infinity, touching: false };
+
+    return {
+        trackPointer(hit) {
+            pointer.x = hit.x;
+            pointer.z = hit.z;
+            pointer.at = performance.now() / 1000;
+        },
+
+        setTouching(touching) {
+            pointer.touching = touching;
+        },
+
+        update(dt, elapsedTime) {
+            const show = state.view === 'catalog' || state.view === 'returning';
+
+            grid.pebbles.forEach((pebble, i) => {
+                pebbleCircles[i] = {
+                    x: pebble.position.x,
+                    z: pebble.position.z,
+                    // its lumps and stretch reach a little past the radius
+                    r: PEBBLE_RADIUS * pebble.userData.size * pebble.scale.x * 1.1,
+                };
+            });
+            pebbleCircles.length = grid.pebbles.length;
+
+            // The plane the overhead camera sees, so streams fill the screen
+            let seen = null;
+            if (show && rig.camera === rig.perspectiveCamera) {
+                const halfZ = Math.abs(rig.perspectiveCamera.position.y)
+                    * Math.tan(THREE.MathUtils.degToRad(rig.perspectiveCamera.fov) / 2);
+                view.z = halfZ;
+                view.x = halfZ * rig.perspectiveCamera.aspect;
+                seen = view;
+            }
+
+            const moving = performance.now() / 1000 - pointer.at < STREAM_POINTER_IDLE;
+            const pull = state.view === 'catalog' && (moving || pointer.touching) ? pointer : null;
+
+            streams.update(
+                dt,
+                elapsedTime,
+                pebbleCircles,
+                seen,
+                show && state.arrivalStartedAt <= elapsedTime,
+                pull,
+            );
+        },
+    };
+}

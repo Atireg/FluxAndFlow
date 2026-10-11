@@ -1,5 +1,5 @@
 // The tail of a gathering point. Put after gather.glsl (pointCloud) and
-// corner.glsl in script.js
+// corner.glsl in pointcloud/load.js
 uniform float uPointScale;
 uniform float uSizeAttenuation; // 1.0 perspective, 0.0 orthographic
 uniform float uTrailLag; // how far back the tail reaches, in gather progress

@@ -3,17 +3,27 @@ Flux and Flow — a catalog of projects, explored in three dimensions.
 Live at https://atireg.github.io/FluxAndFlow/ (deployed from `main` by
 .github/workflows/deploy.yml on every push).
 
-Adding a project: edit the `projects` array near the top of src/script.js
-(the fields are listed in CLAUDE.md). Each entry declares the slot it sits
-in and its own models - a point cloud, or a plain mesh sampled into points
-as it loads - and any text field left empty is skipped rather than
-rendered blank. An optional `view` sets the camera angle the project opens
-on (and, with `sway`, a slow nod of the camera); `gather: true` makes its
-points gather out of a scattered cloud each time it opens; `drop` drops
-copies of a rod-built mesh onto a surface with physics; `images` fills the
-drawer's picture frames. Slots with no project show the rock thumbnail and
-answer a click with "Still empty...". See DECISIONS.md for why things are
-built the way they are, and CHANGELOG.md for what changed when.
+The code: React renders the page (`src/app/`, `src/components/`), an
+engine of focused modules runs the canvas (`src/engine/`), and each project
+is its own module (`src/projects/`). CLAUDE.md maps the files; DECISIONS.md
+says why the line between React and the engine is drawn where it is.
+
+Adding a project is two steps: write `src/projects/<id>.js` exporting
+`defineProject({ ... })`, then add it to the `catalog` array in
+`src/projects/index.js`. Each declares the slot it sits in and its own
+models - a point cloud, or a plain mesh sampled into points as it loads -
+and any text field left empty is skipped rather than rendered blank. An
+optional `view` sets the camera angle the project opens on (and, with
+`sway`, a slow nod of the camera); `gather: true` makes its points gather
+out of a scattered cloud each time it opens; `drop` drops copies of a
+rod-built mesh onto a surface with physics; `images` fills the drawer's
+picture frames. The fields are listed in CLAUDE.md and in
+`src/projects/schema.js`, which fills the defaults and rejects a
+half-declared project rather than letting it render wrong. There is no
+per-project branch in the engine, so nothing else needs touching. Slots
+with no project show the rock thumbnail and answer a click with "Still
+empty...". See DECISIONS.md for why things are built the way they are, and
+CHANGELOG.md for what changed when.
 
 Add `?cloudtest` to the address to fill every slot with a copy of the
 first project - a load test, see DECISIONS.md.
@@ -86,8 +96,17 @@ Performance and tech
         unread - the points are drawn in three inks. Use it, or drop it
         (~315 KB less per cloud)
     [ ] Remove `?cloudtest` once there are real projects to fill the grid
-    [ ] src/loader/ is dead code - nothing imports it (an old, unused
-        preloader; the start-up loader lives inline in src/index.html)
+    [x] src/loader/ was dead code - removed (an old, unused preloader; the
+        start-up loader lives inline in src/index.html). src/shaders/grid/
+        went with it, never imported by anything
+    [ ] `lil-gui` is still a dependency but nothing imports it - the debug
+        panel has been commented out since before Session 1. Drop it, or
+        wire it back up for tuning
+    [ ] src/engine/smoke.js is parked, not in the scene - it is the
+        candidate for the "fog shader" idea below. Use it or delete it
+    [ ] The JS bundle is one 884 KB chunk (252 KB gzipped); Vite warns
+        about it. cannon-es already splits out on demand - three.js could
+        too
 
 Sound?
 
@@ -138,6 +157,11 @@ Project view
     [x] Camera moves only tilt, never roll
 
 Site
+    [x] React structure: the page in components (`src/app/`,
+        `src/components/`), the canvas in an engine of focused modules
+        (`src/engine/`), one module per project behind one schema
+        (`src/projects/`) - `src/script.js` was 3,733 lines holding all of
+        it. Look and feel unchanged
     [x] "Paper" palette and Fira Sans everywhere
     [x] Start-up loader (inline, real progress, at least 5s); its streams
         carry on in the scene among the pebbles, parting round them and

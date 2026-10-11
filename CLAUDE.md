@@ -8,6 +8,8 @@ point cloud, or Emergent Space's solid aggregates dropped with physics),
 with its description in a pull-out drawer.
 
 - `README.md` - the project and its TODO list.
+- `src/` is React (the page) + `src/engine/` (the canvas) + `src/projects/`
+  (the content). See "Stack and commands" below.
 - `DECISIONS.md` - why things are built the way they are. Read the
   relevant entry before touching the camera/projection math, the fog, the
   point-cloud pipeline, the pebbles or the drawer; it exists so those
@@ -19,7 +21,7 @@ with its description in a pull-out drawer.
 ## Where to pick up
 
 Read the last entry of `CHANGELOG.md` (its "Open at end of session" list)
-and README's "Next up". As of the end of Session 2:
+and README's "Next up". As of the end of Session 3:
 
 - **State**: everything built is live, or on the branch - `git log
   origin/main..` shows anything not yet merged.
@@ -38,6 +40,10 @@ and README's "Next up". As of the end of Session 2:
   pictures, model licensing, and checks on real devices (the blind Safari
   fixes, the physics drop, the streams' strength on a phone).
 - **Not started**: per-project URLs, a landing view; README lists the rest.
+- **Structure**: Session 3 moved `src/script.js` (3,733 lines) into React
+  components, an engine of focused modules and one module per project. No
+  look-and-feel was changed; the maths and every constant were carried over
+  as they were.
 
 ## Working with the user
 
@@ -59,17 +65,48 @@ and README's "Next up". As of the end of Session 2:
 
 ## Stack and commands
 
-Vanilla three.js + GSAP + Vite, plus cannon-es (physics, loaded on demand
-only for Emergent Space's drop - `src/pile.js`). No framework, no test
-suite.
+React + three.js + GSAP + Vite, plus cannon-es (physics, loaded on demand
+only for Emergent Space's drop - `src/engine/pile.js`). No test suite.
 
     npm install
     npm run dev      # dev server with HMR
     npm run build    # production build into dist/
 
-Main files: `src/script.js` (nearly everything), `src/pile.js` (the
-physics drop), `src/streams.js` (the catalog's streams), `src/index.html`
-(the inline start-up loader), `src/shaders/` (point cloud, gather, tails).
+React owns the page; the engine owns the canvas. Read "React owns the page;
+the engine owns the canvas" in DECISIONS.md before moving anything across
+that line.
+
+    src/index.html          the inline start-up loader, and #root. Nothing else
+    src/main.jsx            mounts <App/> (no StrictMode - see the file)
+    src/app/App.jsx         the page: React state, the refs, the `ui` bridge
+    src/components/         ProjectBar, ProjectDrawer, ProjectImage,
+                            CatalogTags, TapHint, Fog
+    src/projects/           the content: one module per project + schema.js
+    src/engine/             the canvas - index.js assembles and runs it
+    src/styles.css          all of it, unchanged
+
+Inside `src/engine/`:
+
+    index.js             createEngine(): builds everything, the render loop, input
+    state.js             the shared mutable state (what were top-level `let`s)
+    constants.js         the few cross-cutting numbers; its header maps the rest
+    colors.js            screenColor() and every scene colour
+    assets.js            assetUrl() and the gltf/texture loaders
+    boot.js              start-up progress, reported to the inline loader
+    visited.js           which projects have been opened (localStorage)
+    layout.js            the side/stacked breakpoint and the drawer's share
+    catalog.js           the grid of pebbles, thumbnails, the idle/spotlight modes
+    detail.js            opening and closing a project, the zoom, the tap hint
+    tags.js              the names, their rope and "Still empty...", in screen pixels
+    streams.js           the streams themselves
+    streams-view.js      wiring them to the pebbles, the camera and the pointer
+    pile.js              the physics drop
+    smoke.js             parked, not in the scene - see the file
+    pebbles/             geometry, materials, wander, flow, arrival, spotlight,
+                         dissolve, drop
+    pointcloud/          load, mesh sampling, gather, trails
+    camera/              rig (cameras, controls, renderer), framing (where it goes)
+    shaders/             point cloud, gather, tails, smoke
 
 ## Repository and deployment
 
@@ -86,10 +123,21 @@ physics drop), `src/streams.js` (the catalog's streams), `src/index.html`
 
 ## Adding or editing a project
 
-Edit the `projects` array near the top of `src/script.js` (~line 146):
+Two steps, and nothing else:
+
+1. write `src/projects/<id>.js`, exporting `defineProject({ ... })`
+2. add it to the `catalog` array in `src/projects/index.js`
+
+There is **no per-project branch anywhere in the engine**: a project that
+wants to behave differently says so through `view`, `gather`, `drop`,
+`points` or `thumbSize`, and the one code path reads it. `defineProject`
+(in `src/projects/schema.js`) fills the defaults, normalises the pictures
+and throws on a missing `detailModel`, a slot outside `SLOT_COUNT`, a
+`body` that isn't an array, or two projects claiming one slot. Copy
+`rock-print.js` as the worked example.
 
 ```js
-{
+defineProject({
     id: 'rock-print',
     slot: 0,                                    // fixed grid position, 0-indexed
     title: 'Rock Print Pavilion',
@@ -107,12 +155,17 @@ Edit the `projects` array near the top of `src/script.js` (~line 146):
     // points: 20000,                             // optional, a mesh detailModel only: how many points to sample
     // drop: { count: 3, size: 3, ground: -1.2, solid: true }, // optional, a crossed-rod mesh only (Emergent Space)
     images: [{ src: 'images/x.jpg', alt: '', caption: '', ratio: '3 / 2', wide: false }],  // drawer pictures; no src = empty frame
-}
+})
 ```
 
 - **Slots**: the grid always has `SLOT_COUNT` (10) pebbles; an empty slot
   shows the rock (`EMPTY_SLOT_THUMB`) and answers a click with "Still
-  empty...". Raise `SLOT_COUNT` before adding an eleventh project.
+  empty...". Both live in `src/projects/schema.js`; raise `SLOT_COUNT`
+  before adding an eleventh project.
+- The engine never imports `src/projects/`: it is handed `catalogSource`
+  (slot count, what sits in each slot, the empty thumbnail, how to label a
+  pebble). Keep it that way - the engine shouldn't know this portfolio's
+  content.
 - **`title`** is also the name that hangs under the glowing pebble, so keep
   it short enough for a phone - "Rock Print Pavilion" is about the longest.
 - **`thumbSize`** puts the project's own model in its pebble instead of the
@@ -120,7 +173,8 @@ Edit the `projects` array near the top of `src/script.js` (~line 146):
   Every thumbnail is drawn in graphite (`THUMB_INK`).
 - **Text fields** left empty are intentional: a project with no description
   gets no drawer handle at all. **State the role accurately** once written.
-- **`images`** go in `static/images/`. The first spans the drawer, the rest
+- **`images`** go in `static/images/` and are rendered by
+  `components/ProjectImage.jsx`. The first spans the drawer, the rest
   sit two to a row unless `wide: true` (diagrams with small text - all of
   Emergent Space's). No `src` = an empty dashed frame. Prepare as JPEG
   quality ~80, progressive, metadata stripped (no GPS on a public site);
@@ -133,7 +187,7 @@ Edit the `projects` array near the top of `src/script.js` (~line 146):
   turns. Before adding Draco or quantization to a cloud, read "Quantized,
   not Draco-compressed" - Draco does not apply to POINTS.
 - **`drop`** drops `count` copies of a mesh with real physics
-  (`src/pile.js`), colliding as the straight rods `findRods` finds - so only
+  (`src/engine/pile.js`), colliding as the straight rods `findRods` finds - so only
   rod-built aggregates. `size` is each copy's longest side, `ground` the
   surface's height (cube units: 5 across, centred on 0); `solid` draws the
   mesh itself (`makeInkMaterial`). The surface is the clicked pebble's
@@ -144,14 +198,22 @@ Edit the `projects` array near the top of `src/script.js` (~line 146):
 
 ## Things that will bite a fresh session
 
-- **`animate()` runs its first frame the moment it's defined**, before the
-  rest of `script.js` has executed. Any `const`/`let` it - or anything it
-  calls - touches must be declared above it, or the page dies on load with
-  a temporal-dead-zone error. This has happened three times.
+- **The temporal-dead-zone trap is gone.** `animate()` used to run its
+  first frame the moment it was defined, so anything it touched had to be
+  declared above it; it bit three times, and it is why constants used to be
+  hoisted to the top of the file. Nothing now runs until
+  `engine.start()`, so declaration order is free and constants live beside
+  the code they tune. Don't re-introduce work at module scope in
+  `src/engine/`.
+- **Per-frame HTML must not go through React state.** The pebbles' names,
+  the string, "Still empty..." and the tap hint move every frame: React
+  renders the elements and the engine writes their `style`/`d` through refs
+  (`ui.overlays`, `ui.showTapHint`). React state is only for what changes
+  on a click - the open project, the bar's status, the drawer.
 - **A pebble's state is recomputed from mode + clock every frame**
-  ("A pebble's state is a pure function"). A GSAP tween on a property the
-  per-frame update also writes is silently overwritten - add a mode, or
-  keep the update out of that window. Colours go through `paintGlow` (0
+  ("A pebble's state is a pure function", `engine/catalog.js`). A GSAP
+  tween on a property the per-frame update also writes is silently
+  overwritten - add a mode, or keep the update out of that window. Colours go through `paintGlow` (0
   resting, 1 the spotlight's orange); hover deliberately changes nothing.
   - Exceptions, with memory, integrated in fixed small steps so they behave
     the same at 5 fps as at 120: the pointer's flow, which the pebbles'
@@ -162,8 +224,10 @@ Edit the `projects` array near the top of `src/script.js` (~line 146):
     the content's too - after the mode has set them. Whatever a mode
     leaves unset must be reset first or it compounds ('returning' resets
     the content's scale).
-- **The catalog's "cubes" are pebbles.** Names in the code (`cubes`,
-  `cubeSize`, `userData.edges`) are cube-era. `userData.edges` is a rim
+- **The catalog's "cubes" are pebbles.** The code now says `pebble`
+  throughout, but the grid unit is still `CUBE_SIZE` and the rim is still
+  `userData.edges` - both cube-era, and the CSS classes
+  (`.cube-tag`) are too. `userData.edges` is a rim
   mesh (fresnel-patched MeshBasicMaterial) - drive it through
   `.material.color` / `.opacity`. The face is a graphite shade
   (`addGraphite`), not lit glass: its colour is the graphite, its emissive
@@ -182,35 +246,39 @@ Edit the `projects` array near the top of `src/script.js` (~line 146):
   (`applyArrival`). An invisible face would otherwise occlude what's
   behind it - the streams draw after the pebbles, depth-tested, so a
   pebble hides what passes under it, and would show holes.
-- **The streams** (`src/streams.js`) live in the scene on the y = 0 plane,
+- **The streams** (`src/engine/streams.js`, wired up in `streams-view.js`)
+  live in the scene on the y = 0 plane,
   parting round each pebble's circle in the scene and drifting towards the
   pointer while the mouse moves or a finger is down (`trackStreamPointer`,
   `PULL_*`); they fade out while a project is open. The loader's own 2D canvas
   (index.html) only runs until the loader leaves, announced by the
   `fluxloader:leaving` event, which also starts the arrival.
-- **Moving points have tails** (`addTrails`, `shaders/trail/`): an
+- **Moving points have tails** (`pointcloud/trails.js`,
+  `shaders/trail/`): an
   instanced quad per point whose shader re-runs the gather or dissolve a
   moment earlier, sharing its points' uniform objects. Change how a point
-  moves in `pointCloud/gather.glsl` or `DISSOLVE_GLSL` and the tails
-  follow.
-- **The spotlight's tag hangs on a simulated rope**: `hangSpotlightTag`, a
-  screen-space Verlet rope (`ROPE_*`) under gravity and a gusty `wind(t)`,
-  drawn into `#spotlight-string`. Its feel lives in the `TAG_*` constants
-  (above `animate()`, for the TDZ reason). Its font size follows
-  `--pebble-px` (set by `fitCameraToGrid`), not a fixed rem.
-- **Two cameras, two fields of view**: `CATALOG_FOV = 45`,
-  `DETAIL_FOV = { side: 45, stacked: 30 }`, breakpoint 860px
-  (`SIDE_PANEL_QUERY`). A phone gets the longer lens because a wide one
+  moves in `shaders/pointCloud/gather.glsl` or `DISSOLVE_GLSL`
+  (`pebbles/dissolve.js`) and the tails follow.
+- **The spotlight's tag hangs on a simulated rope**: `hangSpotlightTag` in
+  `engine/tags.js`, a screen-space Verlet rope (`ROPE_*`) under gravity and
+  a gusty `wind(t)`, drawn into the SVG `CatalogTags` renders. Its feel
+  lives in that file's `TAG_*` constants. Its font size follows
+  `--pebble-px` (set by `framing.fitToGrid`), not a fixed rem.
+- **Two cameras, two fields of view** (`camera/rig.js`):
+  `CATALOG_FOV = 45`, `DETAIL_FOV = { side: 45, stacked: 30 }`, breakpoint
+  860px (`SIDE_PANEL_QUERY` in `engine/layout.js`). A phone gets the longer lens because a wide one
   makes the cube's faces converge like a tunnel.
-- **`DETAIL_MARGIN`** is below 1 on a parked phone drawer and above 1 once
+- **`DETAIL_MARGIN`** (`camera/framing.js`) is below 1 on a parked phone
+  drawer and above 1 once
   it's open - not interchangeable; check both. It only governs the
   square-on default; a project with a `view` uses `VIEW_FRAME_MARGIN`.
 - **The background is the page's CSS `--bg`** ("paper"), not the scene: the
   renderer is transparent. **No additive blending** - it draws nothing on
   paper. Give scene colours with `screenColor()`.
-- **Scene fog is off** (`scene.fog = null`; the original config was
-  inverted). The grey fog in the project view is a CSS layer (`#fog`)
-  behind the transparent canvas.
+- **Scene fog is off** (`scene.fog = null` in `engine/index.js`; the
+  original config was inverted). The grey fog in the project view is a CSS
+  layer (`components/Fog.jsx`) behind the transparent canvas, toggled
+  through `ui.onFog`.
 - **Safari can't be tested here** (Chromium only; WebKit's download is
   blocked). Safari's WebGL runs on Metal, strict where Chrome is lenient:
   keep GLSL inside defined behaviour (no reversed `smoothstep` edges, no
@@ -259,8 +327,17 @@ Testing tips learnt the hard way:
   opacity above 0.9 once a project is open), not fixed timeouts.
 - **Finding a pebble to click**: slot 0 sits around (310, 185) at
   1280x800 and (80, 139) at 390x844, slot 1 one step right - but random
-  sizes and the bumps shift them every load; screenshot the catalog first
-  (for yourself, not the user).
+  sizes and the bumps shift them every load. More reliable: wait for the
+  spotlight tag to read the project's name, then click the knot the string
+  is tied to (`.tag-string__knot`'s `cx`/`cy`) - the page then tells you
+  where the pebble actually is. The knot sits at 0.9 of the radius, which
+  the flux can pull the surface inside, so walk up the screen from it a few
+  times (0, 14, 28... px) until the click lands.
+- **Useful selectors**, all driven by React state so they say what the app
+  thinks: `.bar.is-open`, `.bar__title`, `.bar__status` (empty once the
+  model has loaded), `.drawer.is-available` / `.is-open`,
+  `body.drawer-open`, `.drawer__image`, `.cube-tag--spotlight`,
+  `.cube-tag--empty`, `#fog` opacity.
 - **Tuning the pile's physics**: run the same cannon-es setup in Node
   (`node_modules/cannon-es/dist/cannon-es.js`, rods as cylinders, no
   rendering) a few dozen times per setting and count how often all three

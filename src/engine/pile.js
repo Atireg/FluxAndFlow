@@ -39,7 +39,7 @@ const PILE_HEIGHT_STEP = 0.7; // and each next one this much higher, so they lan
 const PILE_SPIN = 1; // radians/s, at most, of tumble as they're let go
 const PILE_SLEEP_SPEED = 0.08; // aggregate sizes per second - slower than this for a moment counts as at rest
 // The surface they land on is drawn by the clicked pebble's dissolve, its
-// points falling to a disc this wide (see getDissolve in script.js)
+// points falling to a disc this wide (see getDissolve in pebbles/dissolve.js)
 export const PILE_SURFACE_RADIUS = 0.9; // in aggregate sizes
 
 /**

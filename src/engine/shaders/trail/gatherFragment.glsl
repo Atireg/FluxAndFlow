@@ -1,4 +1,4 @@
-uniform vec3 uInks[3]; // dark red, orange, grey - POINT_INKS in script.js
+uniform vec3 uInks[3]; // dark red, orange, grey - POINT_INKS in engine/colors.js
 uniform float uOpacity; // the most ink a point lays down - POINT_OPACITY
 uniform float uReveal; // 0..1, the cloud fading in - REVEAL_DURATION
 uniform float uTrailOpacity; // a tail's ink at its head, as a share of its point's

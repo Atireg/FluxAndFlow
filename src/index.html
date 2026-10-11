@@ -20,9 +20,9 @@
   <!-- Start-up loader: a field of flowing particles - the flux - that picks
        up strength as the catalog loads, and calms as the loader leaves -
        handing over to the same streams drawn in the scene, among the
-       pebbles (createStreams in script.js). Inline, and ahead of
+       pebbles (engine/streams.js). Inline, and ahead of
        everything else, so it's on screen
-       before the main script has even downloaded. script.js reports
+       before React has even downloaded. The engine reports
        progress through window.fluxLoader; see DECISIONS.md. -->
   <div class="loader" id="loader" role="progressbar" aria-label="Loading Flux and Flow"
        aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
@@ -150,7 +150,7 @@
         if (finishAt !== null && leavingSince === null && now >= finishAt && shown > 0.97) {
           leavingSince = now;
           root.classList.add('is-leaving');
-          // The pebbles surface, and the scene's streams start (script.js)
+          // The pebbles surface, and the scene's streams start (engine/)
           window.dispatchEvent(new Event('fluxloader:leaving'));
         }
 
@@ -249,68 +249,15 @@
     })();
   </script>
 
-  <!-- A grey fog that rolls in behind the scene while a project is open:
-       a page layer under the transparent canvas, not three.js fog - see
-       DECISIONS.md -->
-  <div class="fog" id="fog" aria-hidden="true"></div>
+  <!--
+    Everything below the start-up loader is rendered by React (src/main.jsx):
+    the fog layer, the canvas, the pebbles' name tags and the double-tap hint,
+    the project bar and the About drawer. See src/app/App.jsx for the layer
+    order and why the loader above is NOT one of them - it has to be on screen
+    before this module has downloaded.
+  -->
+  <div id="root"></div>
 
-  <canvas class="webgl"></canvas>
-
-  <!-- A touch point that turns up every few seconds over the open model and
-       taps twice, hinting that a double-click/double-tap zooms in. Placed
-       and started by maybeShowTapHint in script.js. -->
-  <div class="tap-hint" id="tap-hint" aria-hidden="true">
-    <span class="tap-hint__ripple"></span>
-    <span class="tap-hint__ripple tap-hint__ripple--second"></span>
-    <span class="tap-hint__dot"></span>
-  </div>
-
-  <!-- The answer to clicking a slot with no project in it yet; placed by
-       updateCubeTags in script.js for a moment after the click -->
-  <div class="cube-tag cube-tag--empty" id="empty-tag" aria-hidden="true">Still empty...</div>
-  <!-- The tag's string: a faint glow under a fine line, and a dot where
-       it's tied on -->
-  <svg class="tag-string" id="spotlight-string" aria-hidden="true">
-    <path class="tag-string__glow" />
-    <path class="tag-string__line" />
-    <circle class="tag-string__knot-glow" />
-    <circle class="tag-string__knot" />
-  </svg>
-  <div class="cube-tag cube-tag--spotlight" id="spotlight-tag" aria-hidden="true"></div>
-
-  <!-- Always on screen while a project is open: just enough to say what you
-       are looking at and how to get back -->
-  <header class="bar" id="bar" aria-hidden="true">
-    <button class="bar__back" id="project-close" type="button">
-      <span class="bar__back-arrow" aria-hidden="true">&larr;</span> All projects
-    </button>
-
-    <h1 class="bar__title" id="project-title"></h1>
-    <p class="bar__status" id="project-status" role="status"></p>
-  </header>
-
-  <!-- The description, pulled out from the edge on demand -->
-  <aside class="drawer" id="drawer" aria-hidden="true">
-    <button class="drawer__handle" id="drawer-handle" type="button"
-            aria-expanded="false" aria-controls="drawer-content">
-      <span class="drawer__pulse" aria-hidden="true"></span>
-      <span class="drawer__label">About</span>
-      <span class="drawer__chevron" aria-hidden="true">&lsaquo;</span>
-    </button>
-
-    <div class="drawer__content" id="drawer-content">
-      <!-- Mirrors #project-title; shown only on narrow viewports, where the
-           bar's own title hides once the drawer is open (see styles.css) so
-           the two don't both eat vertical space at once. -->
-      <h2 class="drawer__title" id="drawer-title"></h2>
-      <dl class="drawer__meta" id="project-meta"></dl>
-      <div class="drawer__body" id="project-body"></div>
-      <!-- A project's images - each an empty frame until it has a file -->
-      <div class="drawer__images" id="project-images"></div>
-      <p class="drawer__credits" id="project-credits"></p>
-    </div>
-  </aside>
-
-  <script type="module" src="script.js"></script>
+  <script type="module" src="main.jsx"></script>
 </body>
 </html>

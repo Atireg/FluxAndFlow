@@ -136,3 +136,76 @@ Open at end of session (see README, "Next up"):
 - Model licensing/attribution for the public .glb files is unchecked.
 - A drawer video was discussed, not added - README has the agreed approach.
 - No per-project URLs; `?cloudtest` and `src/loader/` (dead code) can go.
+
+
+---
+
+## Session 3 — 2026-10-11
+
+`09484e9`..(branch head) on `claude/react-project-structure-gdpqdq`. Asked
+for the `src/` folder to be organised, structured with React, and the way a
+project is added to be reusable and the same everywhere. The why is in
+DECISIONS.md, "How the code is laid out".
+
+**No look-and-feel changes.** The camera maths, the shaders, the pebbles'
+motion and every tuning constant were carried over as they were, comments
+included, so the site renders exactly as it did. This session is structure
+only.
+
+- **React for the page.** `src/script.js` (3,733 lines, holding everything)
+  is gone. The bar, the About drawer, its pictures, the pebbles' name tags,
+  the tap hint and the fog layer are components (`src/components/`), mounted
+  by `src/app/App.jsx`. `src/index.html` is now just the inline start-up
+  loader and `#root` — the loader stays inline on purpose, so it is on
+  screen before React has downloaded.
+  React state is only the three things that change on a click: which project
+  is open, the bar's status, whether the drawer is out. The per-frame HTML
+  (names, the string, "Still empty...", the tap hint) is rendered by React
+  but written by the engine through refs, because a `useState` per frame
+  would re-render the tree 60 times a second.
+- **The scene stayed imperative three.js**, deliberately — not
+  react-three-fiber. A pebble's whole state is recomputed from its mode and
+  the clock every frame, which is the one thing React's model doesn't help
+  with, and porting it would have meant re-deriving a look that took many
+  rounds of feedback. Reasoning and the condition for revisiting are in
+  DECISIONS.md.
+- **One module per project.** `src/projects/rock-print.js` and
+  `emergent-space.js` export `defineProject({ ... })`; `src/projects/index.js`
+  lists them. `schema.js` is the one place that says what a project may
+  declare: it fills the defaults, normalises the pictures, and throws on a
+  missing `detailModel`, a slot outside `SLOT_COUNT`, a `body` that isn't an
+  array, or two projects claiming one slot (which used to hide one of them
+  silently). There is no per-project branch in the engine — behaviour comes
+  from `view` / `gather` / `drop` / `points` / `thumbSize` — and the engine
+  doesn't import `src/projects/` at all; it is handed a `catalogSource`.
+  Adding a project is: write the module, add it to the list.
+- **The engine split** into `src/engine/`: `index.js` (assembly, render
+  loop, input), `state.js`, `catalog.js`, `detail.js`, `tags.js`,
+  `pebbles/` (geometry, materials, wander, flow, arrival, spotlight,
+  dissolve, drop), `pointcloud/` (load, mesh, gather, trails), `camera/`
+  (rig, framing), and the existing `pile.js` / `streams.js` / `shaders/`.
+  The dozen top-level `let`s became one `state` object passed in; the grid
+  is shared as `{ pebbles, shape }`, which breaks the catalog/camera cycle.
+- **The temporal-dead-zone trap is gone** — the one that bit three times.
+  Nothing runs at module scope now; `engine.start()` does. So constants no
+  longer have to be hoisted and live beside the code they tune (`TAG_*` in
+  `tags.js`, `FLOW_*` in `pebbles/flow.js`, and so on), with
+  `engine/constants.js` keeping only the few that several modules share and
+  a header mapping the rest.
+- **Dead code removed**: `src/loader/` (an old preloader nothing imported)
+  and `src/shaders/grid/` (never imported by anything). `smoke.js` was kept
+  but parked and documented — it is the candidate for the "fog shader" idea.
+- **Verified** against the gzipped production build and the dev server,
+  driven headless in both layouts: the loader clearing, the grid arriving,
+  the names on their strings, Rock Print's gather, Emergent Space's physics
+  drop (including a second drop on re-open), both drawers, the double-tap
+  zoom, an empty slot's "Still empty...", Escape backing out one step at a
+  time, closing back to a live catalog, and `?cloudtest`. No console errors
+  in any run.
+
+Open at end of session (see README, "Next up"): unchanged by this session —
+Safari still to confirm, both projects' real copy and picture credits still
+wanted, Emergent Space's drop and the streams still unchecked on a real
+phone, model licensing unchecked, no per-project URLs. New and small:
+`lil-gui` is still a dependency nothing imports, `smoke.js` is parked, and
+the JS bundle is one 884 KB chunk Vite warns about.

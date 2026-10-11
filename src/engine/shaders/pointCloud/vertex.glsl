@@ -4,7 +4,7 @@ uniform float uPointScale;
 uniform float uSizeAttenuation; // 1.0 perspective, 0.0 orthographic
 
 // The gather's uniforms and attributes come from gather.glsl, put in front
-// of this file in script.js
+// of this file in pointcloud/load.js
 
 attribute float aScale;
 attribute float aTone; // which of the inks this point is drawn in: 0, 1 or 2

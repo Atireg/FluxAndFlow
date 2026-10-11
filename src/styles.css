@@ -1,5 +1,6 @@
 /**
- * Palette - kept in step with the scene colours in script.js. "Paper": dark
+ * Palette - kept in step with the scene colours in src/engine/colors.js.
+ * "Paper": dark
  * ink on a warm light ground, the loader's palette carried through the
  * whole site so the two meet without a jump.
  */
@@ -16,7 +17,7 @@
     /**
      * The one warm note in the palette: the invitation - the pulsing cube
      * and the drawer's pull handle use this one orange.
-     * spotlightGlowColor in script.js is kept in step by hand.
+     * SPOTLIGHT_GLOW_COLOR in src/engine/colors.js is kept in step by hand.
      */
     --hint-fill: #fff; /* the double-tap hint: a white touch point... */
     --hint-line: #111; /* ...with a black outline and rings */
@@ -27,7 +28,8 @@
     --warm-deep-rgb: 92, 44, 10; /* --warm-deep, for rgba() */
 
     /**
-     * How much of the viewport the drawer covers once it is open. script.js
+     * How much of the viewport the drawer covers once it is open.
+     * src/engine/layout.js
      * frames the 3D model into the space that is left, so these must stay in
      * step with PANEL_FRACTION there.
      */
@@ -307,7 +309,7 @@ canvas.webgl {
 /**
  * The tags on a catalog cube: "Still empty..." after clicking an empty slot,
  * and "Project 01"... on the cube glowing orange. Positioned and faded from
- * script.js every frame.
+ * src/engine/tags.js every frame.
  */
 .cube-tag {
     position: fixed;

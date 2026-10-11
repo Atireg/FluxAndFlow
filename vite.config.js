@@ -1,3 +1,4 @@
+import react from '@vitejs/plugin-react'
 import restart from 'vite-plugin-restart'
 import glsl from 'vite-plugin-glsl'
 
@@ -18,6 +19,7 @@ export default {
     },
     plugins:
     [
+        react(), // JSX and React fast refresh
         restart({ restart: [ '../static/**', ] }), // Restart server on static file change
         glsl() // Handle shader files
     ]
