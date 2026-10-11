@@ -37,7 +37,22 @@ const PILE_SPREAD = 0.05; // how far apart they start, sideways, as a share of t
 const PILE_FIRST_HEIGHT = 2; // the first starts this far above the ground, in aggregate sizes - above the frame, so it falls into view
 const PILE_HEIGHT_STEP = 0.7; // and each next one this much higher, so they land in turn
 const PILE_SPIN = 1; // radians/s, at most, of tumble as they're let go
-const PILE_SLEEP_SPEED = 0.08; // aggregate sizes per second - slower than this for a moment counts as at rest
+const PILE_SLEEP_SPEED = 0.08; // cannon's sleep limit, x size - see the note on PILE_REST_* below
+
+/**
+ * When the turn starts: as soon as the pile LOOKS still, not when cannon
+ * puts every body to sleep. Cannon's sleep test lumps linear and angular
+ * speed together against one size-scaled limit (0.24 for a 3-unit
+ * aggregate) and then waits 0.6s more, so it fired about a simulated second
+ * after the aggregates had stopped translating - the residual rock of a
+ * long, thin rod decays slowly - and the turn visibly lagged the landing.
+ * Measured on the drop: still below these by sim ~3.0s, asleep at ~3.95s.
+ * The physics carries on after this until cannon does sleep, so nothing
+ * freezes mid-wobble; the model just starts turning a second sooner.
+ */
+const PILE_REST_SPEED = 0.12; // aggregate sizes per second
+const PILE_REST_SPIN = 0.35; // radians per second
+const PILE_REST_TIME = 0.2; // simulated seconds both must hold
 // The surface they land on is drawn by the clicked pebble's dissolve, its
 // points falling to a disc this wide (see getDissolve in pebbles/dissolve.js)
 export const PILE_SURFACE_RADIUS = 0.9; // in aggregate sizes
@@ -189,9 +204,11 @@ export async function createPile({ template, rods, count, size, groundY, solid, 
 
     const pile = {
         group,
-        settledAt: Infinity,
+        settledAt: Infinity, // when the turn starts - see PILE_REST_*
+        asleep: false, // when the physics stops costing anything
         time: 0,
         wait: 0,
+        restFor: 0,
 
         // A new drop: one above another, a little apart, each at its own
         // random angle and tumbling a little
@@ -199,6 +216,8 @@ export async function createPile({ template, rods, count, size, groundY, solid, 
             this.time = 0;
             this.wait = PILE_WAIT;
             this.settledAt = Infinity;
+            this.asleep = false;
+            this.restFor = 0;
             const random = new THREE.Quaternion();
             bodies.forEach((body, i) => {
                 const a = Math.random() * Math.PI * 2;
@@ -270,7 +289,7 @@ export async function createPile({ template, rods, count, size, groundY, solid, 
 
         // Runs until everything has come to rest, then stops costing anything
         step(dt, since) {
-            if (this.settledAt !== Infinity) return;
+            if (this.asleep) return;
 
             // Held up above the frame until there's something to watch
             if (this.wait > 0) {
@@ -284,8 +303,18 @@ export async function createPile({ template, rods, count, size, groundY, solid, 
             world.step(PILE_STEP, simulated, PILE_MAX_STEPS);
             this.sync();
 
-            const resting = bodies.every((body) => body.sleepState === CANNON.Body.SLEEPING);
-            if (resting || this.time > PILE_SETTLE_AFTER) this.settledAt = since;
+            // The turn starts once nothing visibly moves...
+            const still = bodies.every((body) => body.velocity.length() < PILE_REST_SPEED * size
+                && body.angularVelocity.length() < PILE_REST_SPIN);
+            this.restFor = still ? this.restFor + simulated : 0;
+            const timedOut = this.time > PILE_SETTLE_AFTER;
+            if (this.settledAt === Infinity && (this.restFor >= PILE_REST_TIME || timedOut)) {
+                this.settledAt = since;
+            }
+
+            // ...and the physics stops once cannon has put everything to sleep
+            const sleeping = bodies.every((body) => body.sleepState === CANNON.Body.SLEEPING);
+            if (sleeping || timedOut) this.asleep = true;
         },
     };
 

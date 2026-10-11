@@ -195,7 +195,8 @@ defineProject({
   mesh itself (`makeInkMaterial`). The surface is the clicked pebble's
   dissolve falling into a disc (`uGround`). They're held hidden for
   `PILE_WAIT`, fall in slow motion (`PILE_TIME_SCALE`), and the model turns
-  once settled. Read "Emergent Space: aggregates dropped with live physics"
+  once they look still (`PILE_REST_*` - not cannon's sleep, which lags by a
+  second; the physics runs on until it does sleep). Read "Emergent Space: aggregates dropped with live physics"
   before retuning; tune it in Node (testing tips).
 
 ## Things that will bite a fresh session

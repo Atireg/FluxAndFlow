@@ -583,10 +583,21 @@ Blender/Rhino simulation. A project's `drop: { count, size, ground }` does it
   `PILE_TIME_SCALE` (0.6) - slow motion, which changes nothing about how
   they land.
 - **Settle, then turn**: the model's slow turn waits for `pile.settledAt`
-  (every body asleep, or `PILE_SETTLE_AFTER`). Reopening calls
-  `restart()` for a new drop. The physics steps with the frame time
-  (capped like the flow), so a slow device plays it slower rather than
-  jumping.
+  - the moment the pile *looks* still: every body under `PILE_REST_SPEED`
+  (0.12 sizes/s) and `PILE_REST_SPIN` (0.35 rad/s) for `PILE_REST_TIME`
+  (0.2 simulated s), or `PILE_SETTLE_AFTER`. It used to wait for cannon to
+  put every body to sleep, and the turn visibly lagged the landing (asked
+  to fix): cannon's test lumps linear and angular speed together against
+  one size-scaled limit, then waits 0.6s more, and a long thin rod's last
+  rock decays slowly - measured over two drops, they stopped moving by sim
+  ~3.0s and fell asleep at ~3.95s, a 2.4-2.7s wait on screen. Now the turn
+  starts 0.45-0.5s after they look still (the 0.2s is deliberate, so a
+  pause mid-tumble can't start it). The physics keeps stepping until cannon
+  does sleep (`pile.asleep`), so nothing freezes mid-wobble; the model just
+  turns sooner. The bodies' own physics is unchanged, so the interlock rate
+  is too. Reopening calls `restart()` for a new drop. The physics steps
+  with the frame time (capped like the flow), so a slow device plays it
+  slower rather than jumping.
 - **Framed** with `view: { elevation: 30, zoom: ... }` on the cube, like
   Rock Print: the drop starts above the frame and lands in it. A phone gets
   hardly any zoom (1.05): the pile lands up to a third of its size off

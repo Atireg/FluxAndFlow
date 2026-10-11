@@ -266,6 +266,16 @@ only.
   radius, a selection conditioned on lightness, and each pebble's own
   fourfold alpha range swallowing the spread). The live site is the
   instrument for this one.
+- **Emergent Space: the turn no longer lags the landing.** The model's slow
+  turn waited for cannon to put every aggregate to sleep, which comes about
+  a simulated second after they visibly stop: cannon lumps linear and
+  angular speed against one size-scaled limit and then waits 0.6s more,
+  and a thin rod's last rock decays slowly. Measured with a throwaway hook
+  (removed): a 2.4-2.7s wait on screen. The turn now starts when every body
+  is under 0.12 sizes/s and 0.35 rad/s for 0.2 simulated seconds - 0.45-0.5s
+  after they look still - while the physics keeps running until cannon
+  sleeps, so nothing freezes mid-wobble. The drop itself is unchanged.
+  Verified in both layouts, including a second drop on re-open.
 
 Open at end of session (see README, "Next up"): unchanged by this session —
 Safari still to confirm, both projects' real copy and picture credits still
