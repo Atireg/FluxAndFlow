@@ -314,6 +314,12 @@ only.
   drops 11.85s after each settle, a smooth dissolve, up to six crossings
   marked, three arrows and live readings while falling and none at rest,
   the turn continuous, no errors; the full flow passes on a phone too.
+- **The aggregates fall slower**: `PILE_TIME_SCALE` 0.6 → 0.4, so a drop
+  plays at 40% of real speed instead of 60%. Playback only - the same
+  physics, so they land and interlock exactly as before. The arrows and m/s
+  readings still show physical speed, so they now read faster than the
+  motion looks; and the turn starts about 0.5s after the pile looks still
+  rather than 0.3s, since that settle window is in simulated time.
 
 Open at end of session (see README, "Next up"): unchanged by this session —
 Safari still to confirm, both projects' real copy and picture credits still

@@ -580,7 +580,7 @@ Blender/Rhino simulation. A project's `drop: { count, size, ground }` does it
   the points' fade-in. Now they're held, hidden, for `PILE_WAIT` (1.2s),
   start above the frame (`PILE_FIRST_HEIGHT` 2 sizes up; still 58 in 60
   interlocking) so each falls into view, and the whole thing plays at
-  `PILE_TIME_SCALE` (0.6) - slow motion, which changes nothing about how
+  `PILE_TIME_SCALE` (0.4; 0.6 until asked to fall slower) - slow motion, which changes nothing about how
   they land.
 - **Settle, then turn**: the model's slow turn waits for `pile.settledAt`
   - the moment the pile *looks* still: every body under `PILE_REST_SPEED`

@@ -25,7 +25,7 @@ const PILE_SETTLE_AFTER = 9; // simulated seconds - stop by then even if somethi
 const PILE_WAIT = 1.2; // seconds after the project appears before they're let go - the camera has arrived, the points faded in
 export const PILE_REPLAY_WAIT = 0.3; // the same, when dropped again - nothing to wait for but the pile clearing
 const PILE_FADE_OUT = 1.2; // seconds the fallen pile takes to dissolve away before the next drop - hiding it at once read as abrupt
-const PILE_TIME_SCALE = 0.6; // the fall plays at this speed - slower to watch, and the same physics, so they land just as they would
+const PILE_TIME_SCALE = 0.4; // the fall plays at this speed - slower to watch, and the same physics, so they land just as they would (0.6 was asked to be slower)
 const PILE_COLLISION_FATTEN = 1.4; // rods collide a little thicker than drawn, so they never pass through
 // Tuned by dropping them a few hundred times off screen (cannon-es in
 // Node) and counting how often all three ended up touching: 58 in 60 with
