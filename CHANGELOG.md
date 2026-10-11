@@ -80,7 +80,7 @@ its "Tried and removed".
   arrives slowly, a pebble at a time, surfacing out of the paper as the
   loader clears and on the way back from a project, then their contents
   one by one. The loader's streams carry on among them, in the scene,
-  parting round each. Smaller pebbles among them came and went.
+  parting round each and drifting towards the mouse or a finger. Smaller pebbles among them came and went.
 - **Opening a project.** An instant boom, the others fall slowly while the
   camera moves in, and the clicked pebble dissolves into a cloud of points
   that hands over to the project's own (a crossfade, not an overlap). Camera

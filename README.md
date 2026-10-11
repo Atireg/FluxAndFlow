@@ -140,7 +140,8 @@ Project view
 Site
     [x] "Paper" palette and Fira Sans everywhere
     [x] Start-up loader (inline, real progress, at least 5s); its streams
-        carry on in the scene among the pebbles, parting round them
+        carry on in the scene among the pebbles, parting round them and
+        drifting towards the mouse or a finger
     [x] Point clouds load only on click (ten at start-up measured ~9.7 MB)
     [x] Point cloud 2.2 MB -> 922 KB (quantized)
     [x] Project bar, drawer, resizing across the phone/desktop breakpoint

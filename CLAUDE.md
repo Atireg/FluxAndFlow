@@ -183,8 +183,9 @@ Edit the `projects` array near the top of `src/script.js` (~line 146):
   behind it - the streams draw after the pebbles, depth-tested, so a
   pebble hides what passes under it, and would show holes.
 - **The streams** (`src/streams.js`) live in the scene on the y = 0 plane,
-  parting round each pebble's circle in the scene; they fade out while a
-  project is open. The loader's own 2D canvas (index.html) only runs until
+  parting round each pebble's circle in the scene and drifting towards the
+  pointer while the mouse moves or a finger is down (`trackStreamPointer`,
+  `PULL_*`); they fade out while a project is open. The loader's own 2D canvas (index.html) only runs until
   the loader leaves, announced by the `fluxloader:leaving` event, which
   also starts the arrival.
 - **Moving points have tails** (`addTrails`, `shaders/trail/`): an

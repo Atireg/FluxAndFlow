@@ -781,6 +781,17 @@ overhead camera sees, start with the arrival and fade out while a project
 is open. WebGL lines are one device pixel: thinner on a phone than the
 canvas's were.
 
+**They drift towards the pointer.** Asked for: while the mouse moves over
+the grid, or while a finger is down, the streams float slowly towards it,
+and go back to their own current once the mouse stops
+(`STREAM_POINTER_IDLE`, 0.35s) or the finger lifts. The pull eases in and
+out (`PULL_IN`, `PULL_OUT`), takes over most but not all of a stream's way
+(`PULL_SHARE`), at `PULL_SPEED` - slower than the current - and slows
+within `PULL_SLOW` of the pointer so they gather rather than swarm. The
+parting round the pebbles still applies on the way. script.js tracks the
+pointer on the streams' plane (`trackStreamPointer`), apart from the
+flow's own tracking, since a tap with no move must count too.
+
 
 `?cloudtest`, and why clouds load on click
 ------------------------------------------

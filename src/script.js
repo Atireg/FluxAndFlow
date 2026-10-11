@@ -2455,6 +2455,10 @@ let lastFrameTime = 0;
 const streams = createStreams(scene);
 const streamPebbles = [];
 const streamView = { x: 20, z: 20 };
+// Where the pointer is on the streams' plane, for them to drift towards
+// while the mouse moves or a finger is down (see trackStreamPointer)
+const STREAM_POINTER_IDLE = 0.35; // seconds after the mouse stops that they let go
+const streamPointer = { x: 0, z: 0, at: -Infinity, touching: false };
 
 function updateStreams(dt, elapsedTime) {
     const show = viewState === 'catalog' || viewState === 'returning';
@@ -2476,7 +2480,9 @@ function updateStreams(dt, elapsedTime) {
         streamView.x = halfZ * perspectiveCamera.aspect;
         view = streamView;
     }
-    streams.update(dt, elapsedTime, streamPebbles, view, show && arrivalStartedAt <= elapsedTime);
+    const moving = performance.now() / 1000 - streamPointer.at < STREAM_POINTER_IDLE;
+    const pointer = viewState === 'catalog' && (moving || streamPointer.touching) ? streamPointer : null;
+    streams.update(dt, elapsedTime, streamPebbles, view, show && arrivalStartedAt <= elapsedTime, pointer);
 }
 
 function animate() {
@@ -3670,6 +3676,27 @@ document.documentElement.addEventListener('mouseleave', () => { hoveredCube = nu
 
 // Pointer, not mouse, so a finger dragged across the grid stirs it too
 window.addEventListener('pointermove', trackFlowPointer);
+
+// The streams drift towards the pointer while the mouse moves, or while a
+// finger (or pen) is down - see updateStreams
+function trackStreamPointer(event) {
+    if (viewState !== 'catalog') return;
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    raycaster.setFromCamera(mouse, camera);
+    if (!raycaster.ray.intersectPlane(flowPlane, flowHit)) return;
+    streamPointer.x = flowHit.x;
+    streamPointer.z = flowHit.z;
+    streamPointer.at = performance.now() / 1000;
+}
+window.addEventListener('pointermove', trackStreamPointer);
+window.addEventListener('pointerdown', (event) => {
+    trackStreamPointer(event);
+    if (event.pointerType !== 'mouse') streamPointer.touching = true;
+});
+const releaseStreams = (event) => { if (event.pointerType !== 'mouse') streamPointer.touching = false; };
+window.addEventListener('pointerup', releaseStreams);
+window.addEventListener('pointercancel', releaseStreams);
 
 // Selecting answers the press's own pointerup on the canvas, not a `click`
 // on window: Safari on iPhone and iPad doesn't send `click` for a tap on a

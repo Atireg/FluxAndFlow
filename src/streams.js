@@ -21,6 +21,14 @@ const STREAM_ALPHA = 0.55; // a line's ink at its head
 const STREAM_FADE = 1.2; // seconds to come in or go
 const PART_REACH = 1.4; // within this many of a pebble's radii a stream turns aside
 const PART_TURN = 1.8; // how much of the drift into it is turned aside, at its edge
+// Towards the pointer: while the mouse moves over the grid or a finger is
+// down, the streams drift slowly towards it (still parting round the
+// pebbles on the way), and go back to their own current once it stops
+const PULL_SPEED = 1.6; // units a second - slower than the current
+const PULL_SHARE = 0.85; // how much of a stream's way the pull takes over, at full
+const PULL_SLOW = 2; // units - within this of the pointer they slow, rather than swarm it
+const PULL_IN = 0.8; // seconds for the pull to take hold
+const PULL_OUT = 1.6; // seconds to let go
 
 // The loader's two flow colours, a stream shaded between them by the way it
 // flows (index.html's palette)
@@ -83,6 +91,8 @@ export function createStreams(scene) {
     const sinceSample = new Float32Array(STREAM_COUNT);
     let extent = { x: 20, z: 20 };
     let started = false;
+    let pull = 0; // 0..1, eased
+    const pullTo = { x: 0, z: 0 };
 
     function spawn(i, randomAge) {
         const x = (Math.random() * 2 - 1) * extent.x;
@@ -100,9 +110,10 @@ export function createStreams(scene) {
         /**
          * One frame. `pebbles`: [{ x, z, r }] in the scene; `view`: the half
          * width and depth of the plane the camera sees ({ x, z }); `show`:
-         * whether they belong on screen (the catalog) - they fade in and out.
+         * whether they belong on screen (the catalog) - they fade in and out;
+         * `pointer`: { x, z } on their plane while it should draw them, or null.
          */
-        update(dt, t, pebbles, view, show) {
+        update(dt, t, pebbles, view, show, pointer) {
             const target = show ? 1 : 0;
             const opacity = material.uniforms.uOpacity;
             opacity.value += Math.sign(target - opacity.value) * Math.min(Math.abs(target - opacity.value), dt / STREAM_FADE);
@@ -110,6 +121,12 @@ export function createStreams(scene) {
             if (!lines.visible) return;
 
             if (view) extent = view;
+            if (pointer) {
+                pullTo.x = pointer.x;
+                pullTo.z = pointer.z;
+            }
+            pull = pointer ? Math.min(pull + dt / PULL_IN, 1) : Math.max(pull - dt / PULL_OUT, 0);
+            const pulling = pull * pull * (3 - 2 * pull) * PULL_SHARE;
             if (!started) {
                 for (let i = 0; i < STREAM_COUNT; i++) spawn(i, true);
                 started = true;
@@ -123,6 +140,16 @@ export function createStreams(scene) {
                 const a = angle(x, z, t);
                 let vx = Math.cos(a) * STREAM_SPEED;
                 let vz = Math.sin(a) * STREAM_SPEED;
+
+                // Drawn slowly towards the pointer
+                if (pulling > 0) {
+                    const tx = pullTo.x - x;
+                    const tz = pullTo.z - z;
+                    const d = Math.hypot(tx, tz) || 1;
+                    const speed = PULL_SPEED * Math.min(d / PULL_SLOW, 1);
+                    vx += (tx / d * speed - vx) * pulling;
+                    vz += (tz / d * speed - vz) * pulling;
+                }
 
                 // Round the pebbles: the part of the drift heading into one is
                 // turned aside, more the closer it is; one inside is eased out
@@ -165,7 +192,7 @@ export function createStreams(scene) {
 
                 // Its lines, fading back along it, and in and out over its life
                 const lifeFade = Math.min(age[i] / 0.4, 1, (life[i] - age[i]) / 0.4);
-                const shade = (Math.sin(a) + 1) / 2;
+                const shade = (vz / (Math.hypot(vx, vz) || 1) + 1) / 2; // by the way it's going
                 const r = (FROM[0] + (TO[0] - FROM[0]) * shade) / 255;
                 const g = (FROM[1] + (TO[1] - FROM[1]) * shade) / 255;
                 const b = (FROM[2] + (TO[2] - FROM[2]) * shade) / 255;
