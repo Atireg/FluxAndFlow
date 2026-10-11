@@ -7,7 +7,7 @@ import {
     VISITED_RIM_COLOR,
 } from '../colors.js';
 import { addPebbleFlux } from './geometry.js';
-import { GRADIENT_APPLY_GLSL, GRADIENT_GLSL, gradientTint } from './gradient.js';
+import { GRADIENT_APPLY_GLSL, GRADIENT_GLSL, TONE_GLSL, gradientTint } from './gradient.js';
 
 /**
  * How a pebble is painted.
@@ -58,8 +58,13 @@ export function addGraphite(material) {
                 // Graphite, turning the spotlight's orange as it glows, with a
                 // light wash of it filling in at the peak
                 'outgoingLight = diffuseColor.rgb + totalEmissiveRadiance;',
-                'float graphiteWash = smoothstep(0.15, 0.6, diffuseColor.a) * 0.35;',
-                `diffuseColor.a = max((0.15 + 0.45 * graphiteDark) * min(diffuseColor.a * ${GRAPHITE_WEIGHT.toFixed(1)}, 1.0), graphiteWash);`,
+                // The material's own opacity, before the shading overwrites it
+                'float graphiteOpacity = diffuseColor.a;',
+                'float graphiteWash = smoothstep(0.15, 0.6, graphiteOpacity) * 0.35;',
+                // ...and the same wave changing how heavily it is laid down.
+                // Applied to the shaded term only, so the wash stays a floor.
+                TONE_GLSL,
+                `diffuseColor.a = max((0.15 + 0.45 * graphiteDark) * min(graphiteOpacity * ${GRAPHITE_WEIGHT.toFixed(1)}, 1.0) * pebbleBreath, graphiteWash);`,
                 '#include <opaque_fragment>',
             ].join('\n'));
     };

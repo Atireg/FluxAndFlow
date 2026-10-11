@@ -45,9 +45,27 @@ const WARM = screenColor(138, 80, 48);
 
 // How warm a pebble gets at the crest of a wave. Together with WARM this
 // swings the on-screen warmth (R-B) by about 21 counts between trough and
-// crest, against 7 for the first attempt. Dial this down first if it reads
-// as too much.
+// crest, against 7 for the first attempt. Dial this down first if the
+// colour reads as too much.
 const AMOUNT = 0.85;
+
+/**
+ * How much the same wave also changes how heavily the pebble is laid down -
+ * its tone, +/- this share.
+ *
+ * Colour alone could not carry this. At about 0.27 alpha only a quarter of
+ * WARM reaches the screen, so the drift moved the picture by around four
+ * counts of lightness and could not be seen; going strong enough to fix
+ * that with colour means entering the orange family, which "one orange
+ * means click me" rules out. The eye is far more sensitive to lightness
+ * than to low-saturation hue, so 0.20 here swings composited lightness by
+ * roughly 18 counts and stays in graphite.
+ *
+ * It is damped out as the spotlight's glow rises (see TONE_GLSL): the
+ * glowing pebble already pulses, and a second density ripple on top muddies
+ * the one signal that means "click me".
+ */
+const TONE = 0.2;
 
 /**
  * The tint as a ratio against the resting graphite, so multiplying by it at
@@ -75,7 +93,25 @@ export const GRADIENT_GLSL = [
     'varying float vPebbleFlux;',
 ].join('\n');
 
+// The wave at this point, 0 at a trough and 1 at a crest. Both the colour
+// and the tone read it, so they drift together.
 export const GRADIENT_APPLY_GLSL = [
-    `float pebbleWarmth = ${AMOUNT.toFixed(2)} * clamp(vPebbleFlux * 0.5 + 0.5, 0.0, 1.0);`,
-    'diffuseColor.rgb *= mix(vec3(1.0), uGradientTint, pebbleWarmth);',
+    'float pebbleWave = clamp(vPebbleFlux * 0.5 + 0.5, 0.0, 1.0);',
+    `diffuseColor.rgb *= mix(vec3(1.0), uGradientTint, ${AMOUNT.toFixed(2)} * pebbleWave);`,
+].join('\n');
+
+/**
+ * The tone half, spliced in after the graphite shading has been worked out,
+ * so it scales whatever that arrived at - including a pebble faded down by
+ * the arrival, which then breathes as it surfaces.
+ *
+ * `graphiteOpacity` is the material's own opacity: 0.14 at rest, 0.24 once
+ * visited, up to 0.6 at the peak of a glow. The smoothstep damps this out
+ * over that range (edges in increasing order - a reversed smoothstep is
+ * undefined on Safari; see DECISIONS.md).
+ */
+export const TONE_GLSL = [
+    `float pebbleBreath = 1.0 + ${TONE.toFixed(2)}`,
+    '    * (1.0 - smoothstep(0.25, 0.5, graphiteOpacity))',
+    '    * (pebbleWave * 2.0 - 1.0);',
 ].join('\n');

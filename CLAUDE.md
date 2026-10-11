@@ -337,10 +337,14 @@ Testing tips learnt the hard way:
   faintly it is laid down - the pebbles sit at about 0.27 alpha over paper,
   so a large ink change can be an invisible screen change. This reported a
   pebble colour change as clearly visible when it could not be seen at all.
-  Use `page.screenshot()`, which is composited. Also: a fixed screen patch
-  can't isolate a pebble's colour, because the flux moves its silhouette by
-  30% of the radius; and picking "cores" by darkness can't measure
-  lightness, since the selection is conditioned on it.
+  Use `page.screenshot()`, which is composited. Three further traps, all hit
+  for real: a whole-image aggregate cancels any per-pebble effect, since ten
+  pebbles sit at ten independent flux phases; a fixed screen patch can't
+  isolate one pebble, because the flux moves its silhouette by 30% of the
+  radius; and picking "cores" by darkness can't measure lightness, since the
+  selection is conditioned on it. A pebble's own shading already varies its
+  alpha fourfold across its surface, which swallows most spread metrics -
+  for anything subtle on the pebbles, the live site is the instrument.
 - **Software WebGL is slow** (1-30 fps) and GSAP's lag smoothing stretches
   tweens: something sluggish in a headless run may just be slow rendering.
   Log the state rather than trusting timing. For frame-exact checks use

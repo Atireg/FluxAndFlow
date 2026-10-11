@@ -899,15 +899,45 @@ count even with the float, flow and spotlight frozen); and selecting "pebble
 cores" by how dark they are cannot measure a lightness change, because the
 selection is conditioned on it.
 
-**There is a ceiling here, and it is low.** At 0.27 alpha, a colour that
-would make the drift unmistakable has to go into the orange family - which
-"one orange means click me" forbids. The alternative is to drop colour and
-let the flux modulate the pebble's TONE instead (its alpha): the eye is far
-more sensitive to lightness than to low-saturation hue, and +/-30% on the
-alpha swings composited lightness by about 27 counts rather than 4. That
-would be clearly visible and stay in graphite, but it changes how heavily a
-pebble is shaded, which is the pencil-ness the look was approved on - so it
-is the user's call, not a tune.
+**So the same wave also changes the tone.** Colour has a low ceiling here:
+at 0.27 alpha, a colour strong enough to make the drift unmistakable has to
+enter the orange family, which "one orange means click me" forbids. The eye
+is far more sensitive to lightness than to low-saturation hue, so the wave
+also multiplies the pebble's alpha by 1 +/- `TONE` (0.20) - a pebble at a
+crest is laid down a fifth more heavily than at a trough. It is applied to
+the shaded term only, so the orange wash stays a floor, and it scales
+whatever the shading arrived at, so a pebble faded down by the arrival
+breathes as it surfaces.
+
+**Damped out as the spotlight rises.** The glowing pebble already pulses in
+scale and colour; a second density ripple on top muddies the one signal that
+means "click me". The material's own opacity doubles as the tell - 0.14 at
+rest, 0.24 once visited, up to 0.6 at the peak of a glow - so the tone drift
+fades over `smoothstep(0.25, 0.5, graphiteOpacity)`, reaching zero by the
+peak. Edges in increasing order, since a reversed smoothstep is undefined on
+Safari.
+
+**What could not be measured, and why.** The tone drift's magnitude is
+arithmetic on the shader (alpha times 1 +/- 0.2) and the shader was verified
+to compile, render and open a project in both layouts - but no aggregate
+measurement here can confirm how it *looks*, and four were tried:
+
+- a whole-image mean cancels, because ten pebbles sit at ten independent
+  phases and the modulation is symmetric about 1 by design
+- a fixed screen patch is swamped by the flux moving a pebble's silhouette
+  30% of its radius (48% wobble in pixel count even with the float, flow and
+  spotlight frozen in a throwaway build)
+- picking "pebble cores" by how dark they are cannot measure a lightness
+  change, because the selection is conditioned on it
+- the spread of lightness over the image is unmoved (sd 35.69 flat, 35.73
+  with the tone drift), because each pebble's own shading already varies its
+  alpha fourfold across its surface - 0.084 facing the eye to 0.336 at the
+  silhouette - and a fifth on top of that is lost in it
+
+That last figure is also the useful one for tuning: a pebble already spans
+about 43 counts of lightness from its lit face to its silhouette, so `TONE`
+at 0.20 moves its densest parts by around 22 counts over a wave. Judge it by
+eye on the live site; `TONE` and `AMOUNT` are the two dials.
 
 
 How the code is laid out

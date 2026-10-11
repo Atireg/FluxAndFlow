@@ -251,11 +251,21 @@ only.
   attempts also failed — a fixed screen patch is swamped by the flux moving
   the silhouette 30% of the radius, and selecting pebble "cores" by darkness
   cannot measure lightness because the selection is conditioned on it.
-  There is a low ceiling here: making the drift unmistakable with colour
-  alone means going into the orange family, which "one orange means click
-  me" forbids. Letting the flux modulate the pebble's tone instead would
-  swing composited lightness by ~27 counts rather than 4, but it changes how
-  heavily a pebble is shaded — open for the user to decide.
+- **And the same wave now changes the pebble's tone as well as its colour**,
+  which the user chose when the ceiling on colour was put to them. Colour
+  alone could not get there: at 0.27 alpha, strong enough to be unmistakable
+  means entering the orange family that "one orange means click me" forbids.
+  So the wave also multiplies the alpha by 1 ± `TONE` (0.20) — a pebble at a
+  crest is laid down a fifth more heavily than at a trough — applied to the
+  shaded term only so the orange wash stays a floor, and damped out as the
+  spotlight's glow rises so it doesn't muddy the one "click me" signal.
+  Its magnitude is arithmetic on the shader, verified to compile, render and
+  open a project in both layouts; but no aggregate measurement here can
+  confirm how it *looks*, and DECISIONS.md records the four that were tried
+  and why each fails (phase cancellation, the silhouette moving 30% of the
+  radius, a selection conditioned on lightness, and each pebble's own
+  fourfold alpha range swallowing the spread). The live site is the
+  instrument for this one.
 
 Open at end of session (see README, "Next up"): unchanged by this session —
 Safari still to confirm, both projects' real copy and picture credits still
