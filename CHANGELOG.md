@@ -203,9 +203,34 @@ only.
   time, closing back to a live catalog, and `?cloudtest`. No console errors
   in any run.
 
+- **Gradient colour on the pebbles' faces**, asked for as an exploration.
+  Five options behind `?pebbles=sanguine|edge|field|breath|both`, default
+  unchanged, so it can be compared on the live site and then baked in — the
+  way `?loaderpreview` was used for the loader's palette. The gradients run
+  along the light (`shadow`), at the silhouette (`rim`), across the whole
+  grid in world space (`field`, on a shared span uniform set at layout, like
+  the flux's clock) or with the shape waves (`flux`, which needed
+  `addPebbleFlux` to send `vPebbleFlux`/`vPebbleWorld` on to the fragment
+  shader). No orange and no teal: one orange means "click me", and "the blue
+  isn't right". The far colours are the point clouds' own inks, so the
+  catalog and the project view read as one set.
+  The useful thing learnt: a pebble's *tone* is in its alpha, not its
+  colour — `addGraphite` keeps `outgoingLight` flat and varies
+  `diffuseColor.a` — so colour and shading are independent here.
+  A first pass had `edge`, `field` and `breath` at the measurement floor
+  (warm grey is too near graphite to register across a grid); their far
+  colours were moved out until each clearly cleared it. `flux` turns out to
+  add no spread across a single face — its waves are broad enough that each
+  pebble is near-uniform at any instant, so it reads as ten pebbles in
+  drifting tones rather than a gradient across one. The rim is left alone.
+  Verified headless: all five compile, still lay down ink, and open a
+  project without error in both layouts.
+
 Open at end of session (see README, "Next up"): unchanged by this session —
 Safari still to confirm, both projects' real copy and picture credits still
 wanted, Emergent Space's drop and the streams still unchecked on a real
 phone, model licensing unchecked, no per-project URLs. New and small:
 `lil-gui` is still a dependency nothing imports, `smoke.js` is parked, and
-the JS bundle is one 884 KB chunk Vite warns about.
+the JS bundle is one 884 KB chunk Vite warns about. **Waiting on the user:**
+pick a pebble gradient (or none) from `?pebbles=`, after which that flag
+should be removed.

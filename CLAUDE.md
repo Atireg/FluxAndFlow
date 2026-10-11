@@ -103,7 +103,8 @@ Inside `src/engine/`:
     pile.js              the physics drop
     smoke.js             parked, not in the scene - see the file
     pebbles/             geometry, materials, wander, flow, arrival, spotlight,
-                         dissolve, drop
+                         dissolve, drop, gradient (a face-colour exploration,
+                         off unless `?pebbles=` asks for it)
     pointcloud/          load, mesh sampling, gather, trails
     camera/              rig (cameras, controls, renderer), framing (where it goes)
     shaders/             point cloud, gather, tails, smoke
@@ -236,7 +237,19 @@ defineProject({
   `restingRimColor` (darker once visited) - never write `cubesColor` back
   directly.
   - Pebbles change shape in the vertex shader (`addPebbleFlux`, face and
-    rim on the same seed - any new pebble material needs it too).
+    rim on the same seed - any new pebble material needs it too). It also
+    sends `vPebbleFlux` and `vPebbleWorld` on to the fragment shader, for a
+    face gradient to read.
+  - **A pebble's tone is in its alpha, not its colour.** `addGraphite` sets
+    `outgoingLight` to one flat colour and varies `diffuseColor.a` - how
+    heavily it's laid down on the paper. That's what makes it read as
+    pencil. So changing a pebble's colour (see `pebbles/gradient.js`) leaves
+    the shading alone, and vice versa.
+  - `?pebbles=<name>` previews a gradient colour on the face; the default is
+    unchanged and splices no extra GLSL at all. **Temporary** - once the
+    user picks one it becomes the default and the flag goes (as
+    `?loaderpreview` did). Don't add orange or teal to it: one orange means
+    "click me", and "the blue isn't right".
   - Each pebble's random size (`cube.userData.size`, `PEBBLE_SIZE_*`) is
     baked into its geometry, never `cube.scale`: the pebble parents the
     project's model once it opens. Anything placed relative to a pebble

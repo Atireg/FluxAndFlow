@@ -54,6 +54,9 @@ Loading
 - The start-up loader is inline and waits for real progress
 - `?cloudtest`, and why clouds load on click
 
+The catalog, continued
+- Gradient colour on a pebble's face (an open exploration)
+
 How the code is laid out
 - React owns the page; the engine owns the canvas
 - Every project is one module behind one schema
@@ -814,6 +817,77 @@ cache off, gzipped):
 
 So clouds load only when a project is opened; ten rock thumbnails cost
 ~2 MB. Remove the flag once real projects fill the grid.
+
+
+The catalog, continued
+======================
+
+
+Gradient colour on a pebble's face (an open exploration)
+--------------------------------------------------------
+
+**Open question, not a decision.** Five options are built behind
+`?pebbles=<name>`; the default is unchanged. Once one is chosen it becomes
+the default and the flag goes - the same way `?loaderpreview` was used to
+pick the loader's palette and then removed.
+
+The thing to understand before touching this: **the graphite shading puts
+all of its tone in the alpha, not in the colour.** `addGraphite` sets
+`outgoingLight` to one flat colour and then varies `diffuseColor.a` - how
+heavily the pebble is laid down over the paper. That is what makes it read
+as pencil rather than as a lit solid. So a gradient here does not touch the
+shading: it only lets the colour being laid down vary, and the existing tone
+rides on top of it unchanged. `paintGlow`, the fades and the arrival keep
+working because none of their meanings move.
+
+Where a gradient can run, all of it already computed by the graphite patch,
+so none of it costs anything per frame:
+
+- `shadow` - deepest where the light doesn't reach (`1.0 - graphiteLit`)
+- `rim` - at the silhouette only (`graphiteEdge`)
+- `field` - across the whole grid in world space, each pebble sampling the
+  part of it that it sits in
+- `flux` - following the shape waves, so the colour is never still
+
+`field` needs the grid's extent, so `uGradientSpan` is a shared uniform
+object set by `catalog.layout()` - the same pattern as the flux's shared
+clock - and the wash therefore spans exactly the pebbles that exist, however
+the viewport arranged them. `flux` needs the wave value in the fragment
+shader, so `addPebbleFlux` now always sends `vPebbleFlux` and `vPebbleWorld`
+on from the vertex shader; a varying the fragment ignores is free.
+
+**Two colours are deliberately not offered.** Orange, because one orange
+means "click me" - the spotlight and the About handle - and a pebble that is
+partly orange at rest spends that signal. And teal or blue, because "the
+blue isn't right": teal glass, a teal hover tint and a single teal ink have
+all been tried and taken out. The far colours are the point clouds' own inks
+(the dark red and the warm grey) and a brown-grey between them, so the
+catalog and the project view read as one set.
+
+**Measured, because a shader that won't compile draws nothing silently.**
+Each option was loaded headless and the canvas sampled over several frames:
+every one compiles, still lays down ink, and opens a project without error,
+in both layouts. Reading the colour back is noisy - the canvas is
+transparent and unpremultiplying an alpha of about 0.3 costs a few counts
+per channel - so the first pass could not tell "subtle" from "invisible":
+`edge`, `field` and `breath` all sat at the measurement floor. Rather than
+chase the measurement, the far colours were moved out (warm grey was too
+near graphite to register across a whole grid) until each option clearly
+cleared it. The spread of warmth across inked pixels went from 6.8 flat to
+19-22 for all five, and `field` alone shows a left-to-right tilt of about 11
+against the flat default's -0.6 - which is the direct confirmation that the
+shared span and the world-position varying are right.
+
+One finding worth keeping: `flux` adds warmth variation but **no** spread
+across a single face. Its three waves are broad enough that each pebble is
+near-uniform at any instant, so it reads as ten pebbles in slowly-drifting
+tones rather than as a gradient across one. That may be the more appealing
+of the two things - it is just not what the name suggests.
+
+The rim is left alone. It is a near-black silhouette a pixel or two wide,
+where a gradient would not read, and it already carries the spotlight's
+colour signal. Worth revisiting only if a chosen face gradient makes the
+neutral outline look wrong against it.
 
 
 How the code is laid out
