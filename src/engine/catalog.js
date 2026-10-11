@@ -5,7 +5,6 @@ import { THUMB_INK_COLOR } from './colors.js';
 import { makePebbleMaterials, paintGlow } from './pebbles/materials.js';
 import { makePebbleGeometry } from './pebbles/geometry.js';
 import { createWander, placeAtRest } from './pebbles/wander.js';
-import { fieldReach, gradientSpan } from './pebbles/gradient.js';
 import { poseSpotlightPebble } from './pebbles/spotlight.js';
 
 /**
@@ -188,16 +187,6 @@ export function createCatalog({ scene, grid, state, boot, visited, source }) {
                 pebble.userData.slotPosition = { x: pebble.position.x, z: pebble.position.z };
             });
 
-            /**
-             * How far the grid reaches along a face gradient's `field` axis,
-             * shared by every pebble's material - so that wash spans exactly
-             * the pebbles that exist, however this viewport arranged them.
-             * Harmless when no gradient is switched on.
-             */
-            gradientSpan.value = Math.max(
-                ...grid.pebbles.map((pebble) => fieldReach(pebble.position.x, pebble.position.z)),
-                1,
-            );
         },
 
         /**

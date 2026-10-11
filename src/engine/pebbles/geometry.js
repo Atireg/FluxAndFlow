@@ -63,18 +63,16 @@ export function addPebbleFlux(material, seed, size = 1) {
             .replace('#include <common>', [
                 '#include <common>',
                 PEBBLE_FLUX_GLSL,
-                // Sent on for a face gradient to read (pebbles/gradient.js).
-                // Always written, whether or not a gradient is switched on: a
-                // varying the vertex writes and the fragment ignores is free.
+                // Sent on for the face's colour to drift with (see
+                // pebbles/gradient.js). The rim's fragment shader ignores it,
+                // which is free.
                 'varying float vPebbleFlux;',
-                'varying vec3 vPebbleWorld;',
             ].join('\n'))
             .replace('#include <begin_vertex>', [
                 '#include <begin_vertex>',
                 'float pebbleFluxHere = pebbleFlux(normalize(position));',
                 'transformed += normal * pebbleFluxHere * uFluxAmount;',
                 'vPebbleFlux = pebbleFluxHere;',
-                'vPebbleWorld = (modelMatrix * vec4(transformed, 1.0)).xyz;',
             ].join('\n'));
     };
 

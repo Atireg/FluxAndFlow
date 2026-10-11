@@ -203,34 +203,41 @@ only.
   time, closing back to a live catalog, and `?cloudtest`. No console errors
   in any run.
 
-- **Gradient colour on the pebbles' faces**, asked for as an exploration.
-  Five options behind `?pebbles=sanguine|edge|field|breath|both`, default
-  unchanged, so it can be compared on the live site and then baked in — the
-  way `?loaderpreview` was used for the loader's palette. The gradients run
-  along the light (`shadow`), at the silhouette (`rim`), across the whole
-  grid in world space (`field`, on a shared span uniform set at layout, like
-  the flux's clock) or with the shape waves (`flux`, which needed
-  `addPebbleFlux` to send `vPebbleFlux`/`vPebbleWorld` on to the fragment
-  shader). No orange and no teal: one orange means "click me", and "the blue
-  isn't right". The far colours are the point clouds' own inks, so the
+- **Each pebble's warmth now drifts with its own shape waves** — graphite at
+  a trough, a brown-grey at a crest, on the same flux the shape rides, so no
+  two pebbles are the same shade at once and none of them holds still.
+  Explored as five options behind a `?pebbles=` flag (gradients along the
+  light, at the silhouette, across the whole grid, with the shape, and two
+  at once); the shape-driven one was chosen, so it is now the default and
+  the flag, the other four axes and the machinery `field` needed (a shared
+  span uniform set at layout, a `vPebbleWorld` varying) are all gone. The
+  rejected four are described under "Tried and removed" in DECISIONS.md,
+  with what it would take to bring any of them back.
+  No orange and no teal: one orange means "click me", and "the blue isn't
+  right". The far colour sits between the point clouds' own inks, so the
   catalog and the project view read as one set.
-  The useful thing learnt: a pebble's *tone* is in its alpha, not its
-  colour — `addGraphite` keeps `outgoingLight` flat and varies
-  `diffuseColor.a` — so colour and shading are independent here.
-  A first pass had `edge`, `field` and `breath` at the measurement floor
-  (warm grey is too near graphite to register across a grid); their far
-  colours were moved out until each clearly cleared it. `flux` turns out to
-  add no spread across a single face — its waves are broad enough that each
-  pebble is near-uniform at any instant, so it reads as ten pebbles in
-  drifting tones rather than a gradient across one. The rim is left alone.
-  Verified headless: all five compile, still lay down ink, and open a
-  project without error in both layouts.
+  Two things learnt, both in DECISIONS.md. A pebble's **tone is in its
+  alpha, not its colour** — `addGraphite` keeps `outgoingLight` flat and
+  varies `diffuseColor.a` — so colour and shading are independent here. And
+  the tint has to be a **multiplier, not a colour to mix towards**: that was
+  a real bug, caught by reasoning rather than by measurement, because
+  `paintGlow` dims the face to a tenth as the spotlight's orange rises and
+  an absolute `mix()` put a brown back over it. Carrying the tint as a ratio
+  against the resting graphite composes with the dimming and with a visited
+  pebble's darker base. Measured either side: the spotlight's orange is
+  unchanged (rgb(177, 106, 54) → rgb(176, 106, 56)) while the resting
+  pebbles go from a median warmth of 0.0 to 8.4, their spread from 11.1 to
+  17.8, drifting a couple of counts over 18s.
+  Honest about what it is not: it adds no gradient across a single face. The
+  flux's waves are broad enough that each pebble is near-uniform at any
+  instant. That is the look chosen; "gradient" oversells it. The rim is left
+  alone.
+  Verified headless in both layouts: a project opens, the drawer renders,
+  the catalog comes back, no console errors.
 
 Open at end of session (see README, "Next up"): unchanged by this session —
 Safari still to confirm, both projects' real copy and picture credits still
 wanted, Emergent Space's drop and the streams still unchecked on a real
 phone, model licensing unchecked, no per-project URLs. New and small:
 `lil-gui` is still a dependency nothing imports, `smoke.js` is parked, and
-the JS bundle is one 884 KB chunk Vite warns about. **Waiting on the user:**
-pick a pebble gradient (or none) from `?pebbles=`, after which that flag
-should be removed.
+the JS bundle is one 884 KB chunk Vite warns about.

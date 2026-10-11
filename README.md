@@ -28,9 +28,6 @@ CHANGELOG.md for what changed when.
 Add `?cloudtest` to the address to fill every slot with a copy of the
 first project - a load test, see DECISIONS.md.
 
-Add `?pebbles=sanguine|edge|field|breath|both` to preview a gradient colour
-on the pebbles' faces - an open exploration, off by default. Pick one and it
-becomes the default and the flag goes; see DECISIONS.md.
 
     npm install
     npm run dev      # dev server
@@ -41,12 +38,6 @@ TO DOs
 ======
 
 Next up (waiting on content or a check from the user)
-    [ ] Pick a pebble gradient, or none: `?pebbles=sanguine` (warms into
-        shadow, most like a drawing), `edge` (a warm turn at the silhouette
-        only), `field` (one wash across the whole grid), `breath` (each
-        pebble's warmth drifting with its shape), `both` (field + shadow).
-        Then it becomes the default and `?pebbles=` is removed. Orange and
-        teal were deliberately left out - see DECISIONS.md
     [ ] The real copy for both projects - year, role, context, body,
         credits. Rock Print's and Emergent Space's fields hold unmistakable
         [PLACEHOLDER ...] text so their About drawers exist; it is live and
@@ -127,6 +118,10 @@ Done
 Catalog
     [x] Ten fixed slots (SLOT_COUNT), reachable on every viewport, with
         room between them
+    [x] Each pebble's warmth drifts with its own shape waves - graphite at
+        a trough, a brown-grey at a crest - so no two are the same shade at
+        once and none holds still. Chosen from five options; the other four
+        are under "Tried and removed" in DECISIONS.md
     [x] Pebbles shaded in graphite (teal glass, pencil hatching and cubes
         before), each its own shape and slowly
         changing it, each a random size (up to 1.8x); touching, they

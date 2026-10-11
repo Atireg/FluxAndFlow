@@ -55,7 +55,7 @@ Loading
 - `?cloudtest`, and why clouds load on click
 
 The catalog, continued
-- Gradient colour on a pebble's face (an open exploration)
+- A pebble's colour drifts with its shape
 
 How the code is laid out
 - React owns the page; the engine owns the canvas
@@ -823,71 +823,55 @@ The catalog, continued
 ======================
 
 
-Gradient colour on a pebble's face (an open exploration)
---------------------------------------------------------
+A pebble's colour drifts with its shape
+---------------------------------------
 
-**Open question, not a decision.** Five options are built behind
-`?pebbles=<name>`; the default is unchanged. Once one is chosen it becomes
-the default and the flag goes - the same way `?loaderpreview` was used to
-pick the loader's palette and then removed.
+Each pebble's warmth follows its own shape waves (`pebbles/gradient.js`):
+graphite at a trough, a brown-grey at a crest, on the same flux the shape
+rides, so no two pebbles are the same shade at the same moment and none of
+them holds still. Chosen from five previewed options - the other four are
+under "Tried and removed".
 
-The thing to understand before touching this: **the graphite shading puts
-all of its tone in the alpha, not in the colour.** `addGraphite` sets
+Two things to know before touching it.
+
+**A pebble's tone is in its alpha, not its colour.** `addGraphite` sets
 `outgoingLight` to one flat colour and then varies `diffuseColor.a` - how
 heavily the pebble is laid down over the paper. That is what makes it read
-as pencil rather than as a lit solid. So a gradient here does not touch the
-shading: it only lets the colour being laid down vary, and the existing tone
-rides on top of it unchanged. `paintGlow`, the fades and the arrival keep
-working because none of their meanings move.
+as pencil rather than as a lit solid. So this changes only which colour is
+laid down; the shading rides on top, untouched, and `paintGlow`, the fades
+and the arrival all keep working because none of their meanings move.
 
-Where a gradient can run, all of it already computed by the graphite patch,
-so none of it costs anything per frame:
+**It is a multiplier, not a colour to mix towards.** This was a real bug,
+caught by reasoning rather than by the first round of measurement.
+`paintGlow` dims the face's own colour to a tenth as the spotlight's orange
+rises - it has to, or the scene's cyan lights turn that orange green - and a
+visited pebble rests darker. `mix(diffuseColor.rgb, WARM, k)` ignores both:
+at the peak of a glow it put a brown back over a face that is supposed to
+have dropped out, polluting the one orange that means "click me". The fix is
+to carry the tint as a ratio against the resting graphite
+(`WARM / PEBBLE_COLOR`, about 1.28/1.03/0.84) and multiply, which composes
+with anything that dims the face. Measured either side: the spotlight's
+orange reads rgb(177, 106, 54) flat and rgb(176, 106, 56) with this on -
+unchanged - while the resting pebbles go from a median warmth (R-B) of 0.0
+to 8.4, their spread from 11.1 to 17.8, and that median drifts through a
+couple of counts over 18 seconds.
 
-- `shadow` - deepest where the light doesn't reach (`1.0 - graphiteLit`)
-- `rim` - at the silhouette only (`graphiteEdge`)
-- `field` - across the whole grid in world space, each pebble sampling the
-  part of it that it sits in
-- `flux` - following the shape waves, so the colour is never still
+Worth noting what this is **not**: it adds no gradient across a single face.
+The flux's three waves are broad enough that each pebble is near-uniform at
+any instant, so it reads as ten pebbles in slowly-drifting tones rather than
+as a gradient across one. That is the look that was chosen; the name
+"gradient" oversells it.
 
-`field` needs the grid's extent, so `uGradientSpan` is a shared uniform
-object set by `catalog.layout()` - the same pattern as the flux's shared
-clock - and the wash therefore spans exactly the pebbles that exist, however
-the viewport arranged them. `flux` needs the wave value in the fragment
-shader, so `addPebbleFlux` now always sends `vPebbleFlux` and `vPebbleWorld`
-on from the vertex shader; a varying the fragment ignores is free.
+The far colour is a brown-grey between the point clouds' dark red and warm
+grey, so the catalog and the project view read as one set. **Orange and teal
+are deliberately not available**: one orange means "click me" (the spotlight
+and the About handle), and "the blue isn't right" - teal glass, a teal hover
+tint and a single teal ink have all been tried and taken out. `AMOUNT` (0.85)
+and `WARM` are the two knobs; 0.6 read as too subtle, as every quiet first
+pass here has.
 
-**Two colours are deliberately not offered.** Orange, because one orange
-means "click me" - the spotlight and the About handle - and a pebble that is
-partly orange at rest spends that signal. And teal or blue, because "the
-blue isn't right": teal glass, a teal hover tint and a single teal ink have
-all been tried and taken out. The far colours are the point clouds' own inks
-(the dark red and the warm grey) and a brown-grey between them, so the
-catalog and the project view read as one set.
-
-**Measured, because a shader that won't compile draws nothing silently.**
-Each option was loaded headless and the canvas sampled over several frames:
-every one compiles, still lays down ink, and opens a project without error,
-in both layouts. Reading the colour back is noisy - the canvas is
-transparent and unpremultiplying an alpha of about 0.3 costs a few counts
-per channel - so the first pass could not tell "subtle" from "invisible":
-`edge`, `field` and `breath` all sat at the measurement floor. Rather than
-chase the measurement, the far colours were moved out (warm grey was too
-near graphite to register across a whole grid) until each option clearly
-cleared it. The spread of warmth across inked pixels went from 6.8 flat to
-19-22 for all five, and `field` alone shows a left-to-right tilt of about 11
-against the flat default's -0.6 - which is the direct confirmation that the
-shared span and the world-position varying are right.
-
-One finding worth keeping: `flux` adds warmth variation but **no** spread
-across a single face. Its three waves are broad enough that each pebble is
-near-uniform at any instant, so it reads as ten pebbles in slowly-drifting
-tones rather than as a gradient across one. That may be the more appealing
-of the two things - it is just not what the name suggests.
-
-The rim is left alone. It is a near-black silhouette a pixel or two wide,
-where a gradient would not read, and it already carries the spotlight's
-colour signal. Worth revisiting only if a chosen face gradient makes the
-neutral outline look wrong against it.
+The rim is left alone: a near-black silhouette a pixel or two wide, where
+this would not read, and it already carries the spotlight's colour.
 
 
 How the code is laid out
@@ -1051,6 +1035,18 @@ Catalog
 - **Small pebbles** among the big ones: one per diagonal gap (too
   organised), then scattered at random and drawn instanced - removed, the
   user didn't like them.
+- **Four of the five pebble colour gradients**, previewed behind a
+  since-removed `?pebbles=` flag and passed over for the one that drifts
+  with the shape: `sanguine` (warming into red chalk where the light falls
+  away - the strongest, and the most like a drawing), `edge` (a warm red
+  turn at the silhouette only), `field` (one wash across the whole grid,
+  each pebble sampling the part it sat in - it needed a shared span uniform
+  set at layout, and a `vPebbleWorld` varying, both now gone) and `both`
+  (field plus shadow). Each ran off a term the graphite patch already
+  computed, so any of them is cheap to bring back; the span and the varying
+  are what `field` would need again. Warm grey was too near graphite to
+  register across a whole grid, which is why `field` ended up on the
+  brown-grey.
 - **Send-off variants**: a 2s blow-out; a hard shake and fast fall; a swirl
   and rock; a push-and-hop wave; a tumbling fall with sideways drift;
   waiting for the last cube before the camera moved.

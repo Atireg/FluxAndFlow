@@ -7,7 +7,7 @@ import {
     VISITED_RIM_COLOR,
 } from '../colors.js';
 import { addPebbleFlux } from './geometry.js';
-import { chosenGradient, gradientGlsl, gradientSpan, gradientUniformsGlsl } from './gradient.js';
+import { GRADIENT_APPLY_GLSL, GRADIENT_GLSL, gradientTint } from './gradient.js';
 
 /**
  * How a pebble is painted.
@@ -39,38 +39,31 @@ const GRAPHITE_WEIGHT = 4; // the opacity times this is how much it shades (rest
  * fixed light (upper left) and darker towards the silhouette, smoothly (it
  * was pencil hatching; the user kept the colour and dropped the strokes).
  */
-export function addGraphite(material, gradient = null) {
+export function addGraphite(material) {
     material.onBeforeCompile = (shader) => {
-        if (gradient) {
-            gradient.layers.forEach((layer) => {
-                shader.uniforms[layer.uniform] = { value: layer.color };
-            });
-            shader.uniforms.uGradientSpan = gradientSpan;
-
-            shader.fragmentShader = shader.fragmentShader
-                .replace('#include <common>', `#include <common>\n${gradientUniformsGlsl(gradient)}`);
-        }
+        shader.uniforms.uGradientTint = gradientTint;
 
         shader.fragmentShader = shader.fragmentShader
+            .replace('#include <common>', `#include <common>\n${GRADIENT_GLSL}`)
             .replace('#include <opaque_fragment>', [
                 // Light from the upper left, darker towards the silhouette
                 'vec3 graphiteNormal = normalize(normal);',
                 'float graphiteLit = dot(graphiteNormal, normalize(vec3(-0.45, 0.55, 0.7))) * 0.5 + 0.5;',
                 'float graphiteEdge = 1.0 - abs(graphiteNormal.z);',
                 'float graphiteDark = clamp((1.0 - graphiteLit) * 1.1 + graphiteEdge * 0.5, 0.0, 1.0);',
-                // Optional: let the colour vary across the face before it is
-                // laid down. The tone below is untouched - it is carried in
-                // the alpha, not in this colour. See pebbles/gradient.js.
-                gradient ? gradientGlsl(gradient) : '',
+                // The warmth drifting with the pebble's shape waves. A
+                // multiplier, so a face paintGlow has dimmed stays dimmed -
+                // see pebbles/gradient.js.
+                GRADIENT_APPLY_GLSL,
                 // Graphite, turning the spotlight's orange as it glows, with a
                 // light wash of it filling in at the peak
                 'outgoingLight = diffuseColor.rgb + totalEmissiveRadiance;',
                 'float graphiteWash = smoothstep(0.15, 0.6, diffuseColor.a) * 0.35;',
                 `diffuseColor.a = max((0.15 + 0.45 * graphiteDark) * min(diffuseColor.a * ${GRAPHITE_WEIGHT.toFixed(1)}, 1.0), graphiteWash);`,
                 '#include <opaque_fragment>',
-            ].filter(Boolean).join('\n'));
+            ].join('\n'));
     };
-    material.customProgramCacheKey = () => `pebble-graphite|${gradient?.name ?? 'flat'}`;
+    material.customProgramCacheKey = () => 'pebble-graphite';
     return material;
 }
 
@@ -104,8 +97,6 @@ export function makeRimMaterial(color) {
  * on the face. One place, so a new pebble can never be built with half the
  * treatment.
  */
-const gradient = chosenGradient();
-
 export function makePebbleMaterials(seed, size) {
     const face = addPebbleFlux(addGraphite(new THREE.MeshStandardMaterial({
         color: PEBBLE_COLOR,
@@ -113,7 +104,7 @@ export function makePebbleMaterials(seed, size) {
         roughness: 0.6,
         transparent: true,
         opacity: FACE_OPACITY,
-    }), gradient), seed, size);
+    })), seed, size);
 
     const rim = addPebbleFlux(makeRimMaterial(PEBBLE_RIM_COLOR), seed, size);
 
