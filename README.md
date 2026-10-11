@@ -51,6 +51,8 @@ Next up (waiting on content or a check from the user)
         a `view` - see CLAUDE.md
     [ ] Emergent Space's drop on a phone: confirm it runs smoothly on a real
         device (it was only checked with software rendering here)
+    [ ] The catalog's streams on a phone: WebGL draws them one device pixel
+        wide - darker (`STREAM_ALPHA` in src/streams.js) if they're faint
 
 Landing/welcome view
     [ ] Graphics (me as a figure?) + welcome text explaning the webside's concept

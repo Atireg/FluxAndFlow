@@ -59,29 +59,28 @@ list.
 
 ---
 
-## Session 2 — 2026-10-04 / 2026-10-09
+## Session 2 — 2026-10-04 / 2026-10-11
 
 `e0c070e`..(branch head) on `ccr-584d8563-rtv32f`, fast-forward merged to
 `main` on each "merge and build" (`git log origin/main..` shows anything
 not yet live). The why is in DECISIONS.md; rejected iterations are under
 its "Tried and removed".
 
-- **Catalog.** Cubes became glass pebbles, then graphite ones (pencil
-  hatching tried and dropped), each its own shape and slowly
-  changing it, and a random size on each visit (touching, they push
-  each other firmly apart),
-  rebuilt on one pure state function per frame: they float and rock, the
-  pointer stirs them, nothing orbits; spaced wider (1.4). One
-  pebble at a time glows orange and jumps, its name (the project's title, or
-  "Project XX") hanging below on a soft, simulated string that swings in
+- **Catalog.** Cubes became glass pebbles, then graphite ones (teal glass
+  and pencil hatching tried and dropped), each its own shape and slowly
+  changing it, a random size on each visit; touching, they push each other
+  firmly apart. Rebuilt on one pure state function per frame: they float
+  and rock, the pointer stirs them, nothing orbits; spaced wider (1.4). One
+  pebble at a time glows orange and jumps, its name (the project's title,
+  or "Project XX") hanging below on a soft, simulated string that swings in
   gusts, tied on with a dot; hover changes nothing. Names scale with the
   pebbles on screen and draw over them. Pebbles hold the rock or the
-  project's own model; empty slots say "Still empty...". Opened projects'
-  pebbles stay darker, remembered in the browser. The grid arrives
-  slowly, a pebble at a time, surfacing out of the paper as the loader
-  clears and on the way back from a project, then their contents one by
-  one. Smaller pebbles among them
-  came and went.
+  project's own model, in graphite; empty slots say "Still empty...".
+  Opened projects' pebbles stay darker, remembered in the browser. The grid
+  arrives slowly, a pebble at a time, surfacing out of the paper as the
+  loader clears and on the way back from a project, then their contents
+  one by one. The loader's streams carry on among them, in the scene,
+  parting round each. Smaller pebbles among them came and went.
 - **Opening a project.** An instant boom, the others fall slowly while the
   camera moves in, and the clicked pebble dissolves into a cloud of points
   that hands over to the project's own (a crossfade, not an overlap). Camera
@@ -111,9 +110,8 @@ its "Tried and removed".
   look, and Rock Print's gather slowed from 3.6s to 5.4s.
 - **Site.** "Paper" palette throughout (the dark `Sky` dome removed); an
   inline start-up loader with real progress, at least 5s, whose streams
-  then carry on in the scene among the pebbles, parting round them (and
-  never crossing them, seen from above); clouds load only
-  on click after `?cloudtest` measured the alternative.
+  then carry on in the scene (above); clouds load only on click after
+  `?cloudtest` measured the alternative.
 - **Safari.** Tapping a pebble did nothing there: selection now uses the
   canvas's `pointerup`, not a window `click`. The names and the zoom hint
   showed behind the pebbles and the cloud: overlays now stack by z-index.
@@ -124,15 +122,17 @@ its "Tried and removed".
   CLAUDE.md gained "Where to pick up", the project fields as they now are
   (`thumbSize`, `points`, `drop` and its `solid`, an image's `wide`), notes
   on the pebbles, the hanging tag and the pile, the pebbles' random sizes,
-  and testing tips (finding pebbles, one browser at a time, tuning physics
-  in Node).
+  the arrival, the streams and the tails, how the user likes to work, and
+  testing tips (finding pebbles, one browser at a time, tuning physics in
+  Node); cleaned at the end of the session.
 
 Open at end of session (see README, "Next up"):
 - Safari: confirm the tap and the stacking fixes.
 - Rock Print's real copy (live text is placeholder; state the role
   accurately), and Emergent Space's (its drawer is placeholder too);
   captions/credits for both projects' pictures.
-- Emergent Space's physics drop: confirm it runs smoothly on a real phone.
+- Emergent Space's physics drop: confirm it runs smoothly on a real phone;
+  the scene's streams too (one device pixel wide there - maybe faint).
 - Model licensing/attribution for the public .glb files is unchecked.
 - A drawer video was discussed, not added - README has the agreed approach.
 - No per-project URLs; `?cloudtest` and `src/loader/` (dead code) can go.
