@@ -289,6 +289,14 @@ only.
   Print shows no button; on Emergent Space the click resets the drop, the
   angle holds through the fall, then turns at the usual rate; no console
   errors.
+- **And it drops again by itself every 5 seconds**, read as 5s after each
+  drop comes to rest: a drop takes 5-8s to land on screen, so a plain 5s
+  clock would cut every one off mid-fall. A new project setting,
+  `drop.repeat: 5` (validated in the schema), so it's declared by Emergent
+  Space rather than coded for it; "Drop again" resets the wait. Measured
+  with a throwaway hook (removed) over four cycles: each new drop began
+  4.99-5.04s after the last settled, the turn stayed continuous, no
+  console errors; the full drawer/zoom/re-open flow still passes.
 
 Open at end of session (see README, "Next up"): unchanged by this session —
 Safari still to confirm, both projects' real copy and picture credits still

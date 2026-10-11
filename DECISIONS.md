@@ -606,7 +606,15 @@ Blender/Rhino simulation. A project's `drop: { count, size, ground }` does it
   the angle the model had reached (`turnOffset`, read through `modelTurn`
   in camera/framing.js) instead of snapping back to where it opened: the
   new drop falls at that angle and the turn carries on from it once it
-  settles. The ground and the camera stay as they are. The physics steps
+  settles. The ground and the camera stay as they are.
+- **And on its own, every 5 seconds** (asked for): `drop.repeat: 5` drops
+  it again 5s after each drop comes to rest (`maybeRepeatDrop` in
+  detail.js, through the same replay). Timed from the rest, not the start:
+  a drop takes 5-8s to land on screen, so a plain 5s clock would cut every
+  one off mid-fall. A project setting rather than code, so another `drop`
+  can repeat or not; "Drop again" resets the wait. Measured over four
+  cycles: each new drop began 4.99-5.04s after the last settled, and the
+  turn stayed continuous across them. The physics steps
   with the frame time (capped like the flow), so a slow device plays it
   slower rather than jumping.
 - **Framed** with `view: { elevation: 30, zoom: ... }` on the cube, like

@@ -212,6 +212,7 @@ export function createEngine({ canvas, source, ui }) {
                 setReveal(model, revealAt(since));
 
                 detail.maybeShowTapHint(model, since);
+                detail.maybeRepeatDrop(model, since);
                 framing.updateSway(project, since, elapsedTime);
             }
         }

@@ -155,7 +155,7 @@ defineProject({
             sway: 13 },                                    // camera nods ± degrees, slowly
     gather: true,                                 // optional: points gather from a scattered cloud on open
     // points: 20000,                             // optional, a mesh detailModel only: how many points to sample
-    // drop: { count: 3, size: 3, ground: -1.2, solid: true }, // optional, a crossed-rod mesh only (Emergent Space)
+    // drop: { count: 3, size: 3, ground: -1.2, solid: true, repeat: 5 }, // optional, a crossed-rod mesh only (Emergent Space)
     images: [{ src: 'images/x.jpg', alt: '', caption: '', ratio: '3 / 2', wide: false }],  // drawer pictures; no src = empty frame
 })
 ```
@@ -198,7 +198,8 @@ defineProject({
   once they look still (`PILE_REST_*` - not cannon's sleep, which lags by a
   second; the physics runs on until it does sleep). The bar's "Drop again"
   (any project with a `drop`) restarts it at the angle it had reached
-  (`turnOffset`, `modelTurn`). Read "Emergent Space: aggregates dropped with live physics"
+  (`turnOffset`, `modelTurn`), and `drop.repeat` (Emergent Space: 5) does
+  the same that many seconds after each drop comes to rest. Read "Emergent Space: aggregates dropped with live physics"
   before retuning; tune it in Node (testing tips).
 
 ## Things that will bite a fresh session

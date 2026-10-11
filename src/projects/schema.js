@@ -111,6 +111,11 @@ function normaliseDrop(drop, { id }) {
         throw new Error(`Project "${id}": drop should be an object`);
     }
 
+    // `repeat`: drop again this many seconds after each drop comes to rest
+    if (drop.repeat !== undefined && !(drop.repeat > 0)) {
+        throw new Error(`Project "${id}": drop.repeat should be a number of seconds above 0`);
+    }
+
     return { ...drop };
 }
 

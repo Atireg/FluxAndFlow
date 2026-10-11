@@ -305,6 +305,21 @@ export function createDetail({
             pile.restart(PILE_REPLAY_WAIT);
         },
 
+        /**
+         * A project's `drop.repeat`: drop the pile again this many seconds
+         * after it has come to rest - after it LOOKS still (pile.settledAt),
+         * so each drop lands and turns a while before the next. Timed from
+         * the rest rather than the start, since a drop takes longer than a
+         * short repeat to land. "Drop again" resets the wait.
+         */
+        maybeRepeatDrop(model, since) {
+            const pile = model.userData.pile;
+            const repeat = state.selected?.userData.project?.drop?.repeat;
+            if (!pile || !repeat || pile.settledAt === Infinity) return;
+
+            if (since - pile.settledAt >= repeat) detail.replayDrop();
+        },
+
         toggleZoom(clientX, clientY) {
             if (state.view !== 'detail' || !state.selected) return;
 
