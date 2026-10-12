@@ -56,3 +56,6 @@ export const POINT_OPACITY = 0.6;
 // Graphite, like the pebbles: every thumbnail is drawn in this, whatever
 // the file's own material, so the grid reads as one set
 export const THUMB_INK_COLOR = screenColor(44, 44, 47);
+
+// The paper itself (--bg in styles.css), for fading an opaque ink into it
+export const PAPER_COLOR = screenColor(240, 237, 230);

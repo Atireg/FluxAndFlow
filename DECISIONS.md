@@ -496,7 +496,12 @@ after the arrival, like it; the depth comes from the camera's height,
 `grid.viewHeight`, so it's the same on every screen). Backwards, not
 straight down: straight down, the perspective drew every sunk pebble in
 towards the middle, into a clump behind the chosen ones; along the camera's
-line each stays where it was, only smaller. No colour change - one orange
+line each stays where it was, only smaller. They also fade (asked for), to
+`FOCUS_INK` (35%) of their ink - face and rim by opacity, the opaque
+thumbnail by mixing its own copy of the ink towards the paper
+(`fadeFocus`). The opacity is only faded where a mode sets it every frame
+(catalog, dropping, returning): it multiplies, and under the open
+project's fade-out tween it would compound. No colour change - one orange
 means "click me". While a kind is chosen only that kind jumps (asked for):
 the spotlight only lands on it, and one already glowing on another kind
 when the choice changes settles at once - its dwell shortened so the

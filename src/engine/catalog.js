@@ -65,7 +65,6 @@ export function createCatalog({ scene, grid, state, boot, visited, source }) {
                 const box = new THREE.Box3().setFromObject(model);
                 const extent = box.getSize(new THREE.Vector3());
                 model.position.copy(box.getCenter(new THREE.Vector3())).negate();
-                model.traverse((child) => { if (child.isMesh) child.material = THUMB_INK; });
 
                 const fitted = new THREE.Group();
                 fitted.scale.setScalar(size / (Math.max(extent.x, extent.y, extent.z) || 1));
@@ -77,10 +76,14 @@ export function createCatalog({ scene, grid, state, boot, visited, source }) {
             } else {
                 // The rock, as drawn
                 content = scene.clone();
-                content.traverse((child) => { if (child.isMesh) child.material = THUMB_INK; });
                 content.position.set(0, -pebble.userData.size, 0);
                 pebble.userData.contentBaseScale = 0.2 * pebble.userData.size;
             }
+
+            // Its own copy of the ink, for the filter to fade (pebbles/focus.js)
+            const ink = THUMB_INK.clone();
+            content.traverse((child) => { if (child.isMesh) child.material = ink; });
+            pebble.userData.contentInk = ink;
 
             content.scale.setScalar(pebble.userData.contentBaseScale);
             pebble.add(content);

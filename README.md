@@ -148,7 +148,7 @@ Catalog
     [x] An empty slot's click answers "Still empty..."
     [x] Three kinds of project - research, teaching, the real world - each
         tagged in its bar; a filter in the catalog brings one kind forward
-        and pushes the others back to half their size
+        and pushes the others back to half their size, fainter
     [x] The grid arrives slowly, a pebble at a time, surfacing out of the
         paper as the loader clears (and on the way back from a project),
         then what's inside them one by one

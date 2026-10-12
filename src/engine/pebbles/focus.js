@@ -1,10 +1,13 @@
+import { PAPER_COLOR, THUMB_INK_COLOR } from '../colors.js';
+
 /**
  * The catalog's filter: bring one kind of project forward and sink the rest.
  * A pebble not of the chosen kind is pushed back along the line from the
  * overhead camera through it, until it looks FOCUS_SCALE of its size - so it
- * stays where it was on screen, only smaller, and the kind in focus stands
- * out by being nearer, not by a colour (one orange means "click me", and the
- * graphite holds the rest). Straight down was tried first: the camera's
+ * stays where it was on screen, only smaller - and fainter (`fadeFocus`,
+ * FOCUS_INK of its graphite, the thumbnail fading into the paper) - so the
+ * kind in focus stands out by being nearer and darker, not by a colour (one
+ * orange means "click me"). Straight down was tried first: the camera's
  * perspective drew every sunk pebble in towards the middle, into a clump
  * behind the chosen ones. Sunk below the streams' plane, the streams run
  * over them. Choosing no kind brings every pebble back up.
@@ -16,6 +19,7 @@
  */
 const FOCUS_SCALE = 0.5; // a sunk pebble looks this share of its size
 const FOCUS_TIME = 1.4; // seconds to sink or rise
+const FOCUS_INK = 0.35; // a sunk pebble keeps this share of its ink
 
 function eased(t) {
     return t * t * (3 - 2 * t);
@@ -61,4 +65,20 @@ export function applyFocus(pebble, viewHeight, elapsedTime) {
     pebble.position.x *= reach;
     pebble.position.z *= reach;
     pebble.position.y = viewHeight - (viewHeight - pebble.position.y) * reach;
+}
+
+/**
+ * After the mode has painted the pebble: as faint as it has sunk. Only where
+ * a mode sets the opacity every frame (catalog, dropping, returning) - it
+ * multiplies, and would compound under the open project's fade-out tween.
+ * The thumbnail is opaque, so it's mixed towards the paper instead; that's
+ * set from scratch each time, so it never compounds.
+ */
+export function fadeFocus(pebble, elapsedTime) {
+    const fade = sunk(pebble, elapsedTime) * (1 - FOCUS_INK);
+    pebble.userData.contentInk?.color.copy(THUMB_INK_COLOR).lerp(PAPER_COLOR, fade);
+    if (fade <= 0) return;
+
+    pebble.material.opacity *= 1 - fade;
+    pebble.userData.edges.material.opacity *= 1 - fade;
 }

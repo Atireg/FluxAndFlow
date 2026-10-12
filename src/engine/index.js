@@ -11,7 +11,7 @@ import { createTags } from './tags.js';
 import { createStreamsView } from './streams-view.js';
 import { createFlow } from './pebbles/flow.js';
 import { applyArrival, ARRIVAL_AFTER_LOADER, startArrival } from './pebbles/arrival.js';
-import { applyFocus, inFocus, setFocus } from './pebbles/focus.js';
+import { applyFocus, fadeFocus, inFocus, setFocus } from './pebbles/focus.js';
 import { initSpotlightCycle, updateSpotlightCycle } from './pebbles/spotlight.js';
 import { placeAtRest } from './pebbles/wander.js';
 import { paintGlow } from './pebbles/materials.js';
@@ -177,9 +177,11 @@ export function createEngine({ canvas, source, ui }) {
             grid.pebbles.forEach(flow.apply);
             grid.pebbles.forEach((pebble) => applyArrival(pebble, state.arrivalStartedAt, elapsedTime));
             grid.pebbles.forEach((pebble) => applyFocus(pebble, grid.viewHeight, elapsedTime));
+            grid.pebbles.forEach((pebble) => fadeFocus(pebble, elapsedTime));
         } else if (state.view === 'dropping') {
             grid.pebbles.forEach((pebble) => updateDroppingPebble(pebble, state, elapsedTime));
             grid.pebbles.forEach((pebble) => applyFocus(pebble, grid.viewHeight, elapsedTime));
+            grid.pebbles.forEach((pebble) => fadeFocus(pebble, elapsedTime));
             updateDissolve({ state, renderer: rig.renderer, camera: rig.camera, elapsedTime });
         } else if (state.view === 'returning') {
             // Back home before they fade in, wherever the drop left them -
@@ -194,6 +196,7 @@ export function createEngine({ canvas, source, ui }) {
             grid.pebbles.forEach(flow.apply);
             grid.pebbles.forEach((pebble) => applyArrival(pebble, state.arrivalStartedAt, elapsedTime));
             grid.pebbles.forEach((pebble) => applyFocus(pebble, grid.viewHeight, elapsedTime));
+            grid.pebbles.forEach((pebble) => fadeFocus(pebble, elapsedTime));
         } else {
             // The camera starts moving in before the drop has finished - the
             // rest of the fall plays out under openProject's fade

@@ -189,7 +189,7 @@ in DECISIONS.md.
 (`category`, required; a tag after the name in the bar). Both projects are
 research; the empty slots stand in for four of each other kind. A filter
 top left in the catalog brings one kind forward and pushes the other
-pebbles back along the camera's line to half their size (straight down
+pebbles back along the camera's line to half their size, and fainter (straight down
 clumped them in the middle); only the chosen kind jumps (one glowing on
 another kind settles as soon as the choice changes), and a click on a sunk
 pebble brings its kind forward.
