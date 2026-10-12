@@ -36,6 +36,7 @@ The project view: point cloud
 - Quantized, not Draco-compressed
 - A mesh becomes points as it loads
 - Emergent Space: aggregates dropped with live physics
+- Timed zooms on Rock Print (`autoZoom`)
 - Point size, three sizes, three inks
 - Points gather out of a scattered cloud
 - Tails behind moving points
@@ -462,7 +463,7 @@ shares). The fit is computed once at the start angle; Rock Print stays in
 frame across a full turn.
 
 `view.sway` (Rock Print 13°) nods the camera that far above and below, over
-`SWAY_PERIOD` (16s; 8° over 20s read as too subtle). `updateSway` applies
+`SWAY_PERIOD` (22s, asked for "a bit slower" than 16s; 8° over 20s read as too subtle). `updateSway` applies
 it as a change from last frame's angle about the camera's right axis
 through the target, so it rides on whatever the camera is doing - landing
 view, drawer, zoom, the visitor's orbit. It holds while a move is in flight
@@ -700,6 +701,25 @@ Blender/Rhino simulation. A project's `drop: { count, size, ground }` does it
   Rock Print: the drop starts above the frame and lands in it. A phone gets
   hardly any zoom (1.05): the pile lands up to a third of its size off
   centre, and at 1.3 that cut it at the edge.
+
+Timed zooms on Rock Print (`autoZoom`)
+--------------------------------------
+
+Asked for: "zoom ins and outs on the model every 10 seconds". `autoZoom: 10`
+moves the camera in on a random point of the cloud (to `AUTO_ZOOM`, 0.4 of
+its distance - the double-click's), then 10s later back out to the frame,
+and so on, from once the points have gathered (`maybeAutoZoom` in
+detail.js). The same move as Emergent Space's close-up (`CLOSE_UP_MOVE`,
+1.6s) and the same following (`follow`): aimed where the point will be
+when the camera arrives, then translated with it as the model turns, so
+it stays put on screen. Postponed a second at a time while the camera is
+moving, the visitor orbits, or a phone's drawer covers the model; a
+visitor's own double-click restarts the wait, so it isn't undone straight
+away. Can't go with a `drop` (its close-ups are the zoom there). The
+sway carries on, nodding about the zoomed-in point. If a move runs long
+(a slow frame), the point ends a little off centre and is followed from
+there - not re-centred, since the centre beside a side drawer is offset.
+
 
 Point size, three sizes, three inks
 -----------------------------------

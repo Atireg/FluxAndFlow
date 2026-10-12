@@ -171,6 +171,9 @@ Project view
         point that scales with the screen, "double-click" ("double-tap"
         on a touch screen) hanging from it on a bouncing black string
         like the catalog's; off for Emergent Space (`zoom: false`)
+    [x] Rock Print zooms in on a point of the pavilion and back out every
+        10s by itself (`autoZoom`), following the point as it turns; its
+        camera nods more slowly (22s)
     [x] Camera moves only tilt, never roll
 
 Site

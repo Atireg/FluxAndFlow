@@ -226,6 +226,7 @@ export function createEngine({ canvas, source, ui }) {
 
                 detail.maybeShowTapHint(model, since);
                 detail.maybeRepeatDrop(model, since);
+                detail.maybeAutoZoom(model, since);
                 detail.updateVelocityTags(model);
                 framing.updateSway(project, since, elapsedTime);
             }

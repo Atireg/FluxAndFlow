@@ -132,7 +132,7 @@ Two steps, and nothing else:
 
 There is **no per-project branch anywhere in the engine**: a project that
 wants to behave differently says so through `view`, `gather`, `drop`,
-`points`, `thumbSize` or `zoom`, and the one code path reads it. `defineProject`
+`points`, `thumbSize`, `zoom` or `autoZoom`, and the one code path reads it. `defineProject`
 (in `src/projects/schema.js`) fills the defaults, normalises the pictures
 and throws on a missing `detailModel`, a slot outside `SLOT_COUNT`, a
 `body` that isn't an array, or two projects claiming one slot. Copy
@@ -156,6 +156,7 @@ defineProject({
     gather: true,                                 // optional: points gather from a scattered cloud on open
     // points: 20000,                             // optional, a mesh detailModel only: how many points to sample
     // zoom: false,                               // optional: no double-click zoom or its hint (Emergent Space)
+    autoZoom: 10,                                 // optional: camera moves in on a point / back out every 10s (not with `drop`)
     // drop: { count: 3, size: 3, ground: -1.2, solid: true,   // optional, a crossed-rod mesh only (Emergent Space)
     //         contacts: true, closeUp: { hold: 5, after: 5 },   // interlock dots; camera in on one 5s, out, drop 5s later
     //         velocity: true },                                  // live velocity (or `repeat: 10`: drop again 10s after rest)

@@ -27,6 +27,7 @@
  *   gather        points gather from a scattered cloud on open
  *   points        a mesh detailModel only: how many points to sample
  *   zoom          false: no double-click/double-tap zoom, and no hint for it
+ *   autoZoom      seconds: the camera moves in on the model, or back out, this often
  *   drop          a crossed-rod mesh only: copies dropped with live physics
  *   images        drawer pictures - see normaliseImage
  *
@@ -138,6 +139,14 @@ function normaliseDrop(drop, { id }) {
     return { ...drop };
 }
 
+// Not with a `drop`, whose own close-ups (`drop.closeUp`) move the camera
+function normaliseAutoZoom(autoZoom, { id, drop }) {
+    if (autoZoom === undefined) return undefined;
+    if (!(autoZoom > 0)) throw new Error(`Project "${id}": autoZoom should be a number of seconds above 0`);
+    if (drop) throw new Error(`Project "${id}": autoZoom can't go with a drop`);
+    return autoZoom;
+}
+
 export function defineProject(project) {
     if (!project || typeof project !== 'object') {
         throw new Error('A project should be an object');
@@ -193,6 +202,7 @@ export function defineProject(project) {
         gather: Boolean(project.gather),
         points: project.points,
         zoom: project.zoom !== false,
+        autoZoom: normaliseAutoZoom(project.autoZoom, project),
         drop: normaliseDrop(project.drop, { id }),
 
         images: images.map((image, index) => normaliseImage(image, { id, index })),

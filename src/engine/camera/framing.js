@@ -67,7 +67,7 @@ const DETAIL_MODEL_YAW = Math.PI / 2;
  * the landing shot is exactly the fitted one. Each time it resumes it starts
  * from zero where the camera now is and grows in over SWAY_EASE_IN - no jump.
  */
-const SWAY_PERIOD = 16; // seconds for one nod up, down and back
+const SWAY_PERIOD = 22; // seconds for one nod up, down and back
 const SWAY_EASE_IN = 2; // seconds to grow into the full nod after resuming
 
 /**

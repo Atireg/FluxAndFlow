@@ -352,6 +352,11 @@ only.
 - **No double-click zoom in Emergent Space** (`zoom: false`, a new project
   setting): no zoom on double-click/double-tap and no hint dot; the
   automatic close-ups still run.
+- **Rock Print zooms by itself** every 10s - in on a random point of the
+  pavilion, following it as the model turns, then back out (`autoZoom:
+  10`, a new project setting) - and its camera nods more slowly
+  (`SWAY_PERIOD` 16s → 22s). Checked headless over three cycles: the
+  point held at the centre each time once the move arrived, no errors.
 
 Open at end of session (see README, "Next up"): unchanged by this session —
 Safari still to confirm, both projects' real copy and picture credits still

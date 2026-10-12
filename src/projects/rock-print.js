@@ -55,6 +55,10 @@ export default defineProject({
         sway: 13,
     },
 
+    // Every 10 seconds the camera moves in on a point of the pavilion, then
+    // back out, following the point as the model turns
+    autoZoom: 10,
+
     // Each time the project opens, its points start out scattered and
     // slowly gather into the pavilion - see GATHER_DURATION
     gather: true,

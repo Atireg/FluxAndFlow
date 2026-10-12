@@ -64,6 +64,14 @@ const CLOSE_UP_AFTER = 1; // seconds after the pile is asleep - the dots have fa
 const CLOSE_UP_ZOOM = 0.3; // the camera ends up this fraction of its distance away
 const CLOSE_UP_MOVE = 1.6; // seconds each way - slower than a double-click's zoom
 
+/**
+ * A project's `autoZoom`: every that many seconds the camera moves in on a
+ * random point of the model, or back out - the same move and following as
+ * the close-up above. From once the points have gathered; a visitor's own
+ * double-click restarts the wait.
+ */
+const AUTO_ZOOM = 0.4; // the camera ends up this fraction of its distance away
+
 export function createDetail({
     state, grid, rig, framing, screen, clock, visited, perlinTexture, ui,
 }) {
@@ -72,6 +80,11 @@ export function createDetail({
 
     const tapHintPoint = new THREE.Vector3();
     const velocityPoint = new THREE.Vector3();
+
+    // The timed zoom: when it next moves (in `since` seconds), and the point
+    // of the cloud it's on while in
+    const autoZoom = { next: Infinity, since: 0, index: -1, last: null };
+    const autoZoomPoint = new THREE.Vector3();
 
     // Where the close-up is: 'idle', 'in' (moving in or holding), 'out'
     // (moving out or waiting to drop). `settledAt` says which drop it's for.
@@ -102,17 +115,41 @@ export function createDetail({
     }
 
     /**
-     * Where interlock `index` will be in the world `ahead` seconds from now,
-     * the model having turned on by then
+     * Where something on the model will be in the world `ahead` seconds from
+     * now, the model having turned on by then - `toWorld(target)` puts it in
+     * the world as things stand
      */
-    function contactAhead(model, pile, index, ahead, target) {
+    function worldAhead(model, ahead, toWorld, target) {
         const turned = model.rotation.y;
         model.rotation.y += ahead * DETAIL_ROTATE_SPEED;
         model.updateMatrixWorld(true);
-        pile.contactAt(index, target);
+        toWorld(target);
         model.rotation.y = turned;
         model.updateMatrixWorld(true);
         return target;
+    }
+
+    function contactAhead(model, pile, index, ahead, target) {
+        return worldAhead(model, ahead, (t) => pile.contactAt(index, t), target);
+    }
+
+    /**
+     * Keeps a point the camera has moved in on where it is on screen as the
+     * model turns under it, by moving the camera with it - once the move
+     * has arrived, and not after the visitor has zoomed back out or while
+     * they orbit by hand. `tracker.last` is where it was last frame.
+     */
+    function follow(tracker, point) {
+        if (rig.orientationLocked || !state.detailZoomed || rig.visitorOrbiting) {
+            tracker.last = null;
+            return;
+        }
+        if (tracker.last) {
+            const moved = point.clone().sub(tracker.last);
+            rig.camera.position.add(moved);
+            rig.controls.target.add(moved);
+        }
+        tracker.last = (tracker.last ?? new THREE.Vector3()).copy(point);
     }
 
     // A crossing that will be on screen once the camera gets there, if any
@@ -232,6 +269,11 @@ export function createDetail({
 
             // The first double-tap hint waits until the points have gathered
             state.tapHintNext = GATHER_DURATION + TAP_HINT_AFTER_GATHER;
+
+            // ...and so does the first timed zoom
+            const every = pebble.userData.project?.autoZoom;
+            autoZoom.next = every ? (pebble.userData.project.gather ? GATHER_DURATION : 0) + every : Infinity;
+            autoZoom.index = -1;
 
             rig.enterDetailProjection();
 
@@ -410,6 +452,58 @@ export function createDetail({
             if (drop?.repeat && since - pile.settledAt >= drop.repeat) detail.replayDrop();
         },
 
+        // A project's `autoZoom`, a step each frame
+        maybeAutoZoom(model, since) {
+            const every = state.selected?.userData.project?.autoZoom;
+            autoZoom.since = since;
+            if (!every) return;
+
+            const points = model.userData.points;
+            const toWorld = (target) => points.localToWorld(target.fromBufferAttribute(points.geometry.attributes.position, autoZoom.index));
+
+            // While in, the camera follows its point as the model turns
+            if (autoZoom.index >= 0 && points) follow(autoZoom, toWorld(autoZoomPoint));
+
+            if (since < autoZoom.next) return;
+
+            /**
+             * Not while the camera is already moving, or the visitor is
+             * orbiting, or a narrow screen's drawer covers the model - try
+             * again shortly
+             */
+            const { mode } = getPanelLayout(state.drawerOpen);
+            if (rig.orientationLocked || rig.visitorOrbiting || (state.drawerOpen && mode !== 'side') || !points) {
+                autoZoom.next = since + 1;
+                return;
+            }
+            autoZoom.next = since + every;
+
+            if (state.detailZoomed) {
+                framing.reframe(state.selected, { duration: CLOSE_UP_MOVE });
+                autoZoom.index = -1;
+                return;
+            }
+
+            /**
+             * In on a random point of the cloud that will be well inside the
+             * frame once the camera gets there, aimed where it will be by
+             * then
+             */
+            const count = points.geometry.attributes.position.count;
+            for (let tries = 0; tries < 40; tries++) {
+                autoZoom.index = Math.floor(Math.random() * count);
+                worldAhead(model, CLOSE_UP_MOVE, toWorld, autoZoomPoint);
+                const aim = autoZoomPoint.clone();
+                autoZoomPoint.project(rig.camera);
+                if (Math.abs(autoZoomPoint.x) < 0.5 && Math.abs(autoZoomPoint.y) < 0.5) {
+                    autoZoom.last = null;
+                    zoomTo(aim, AUTO_ZOOM, CLOSE_UP_MOVE);
+                    return;
+                }
+            }
+            autoZoom.index = -1;
+        },
+
         // A project's `drop.closeUp`, a step each frame once the pile is at rest
         runCloseUp(model, pile, { hold, after }, since) {
             // A new drop has come to rest
@@ -432,22 +526,8 @@ export function createDetail({
             }
 
             if (closeUp.phase === 'in') {
-                /**
-                 * Once there, the camera follows the crossing as the pile
-                 * turns, so it stays put on screen - unless the visitor has
-                 * zoomed back out or is orbiting by hand
-                 */
-                if (!rig.orientationLocked && state.detailZoomed && !rig.visitorOrbiting) {
-                    pile.contactAt(closeUp.index, closeUpPoint);
-                    if (closeUp.last) {
-                        const moved = closeUpPoint.clone().sub(closeUp.last);
-                        rig.camera.position.add(moved);
-                        rig.controls.target.add(moved);
-                    }
-                    closeUp.last = (closeUp.last ?? new THREE.Vector3()).copy(closeUpPoint);
-                } else {
-                    closeUp.last = null;
-                }
+                // Once there, the camera follows the crossing as the pile turns
+                follow(closeUp, pile.contactAt(closeUp.index, closeUpPoint));
 
                 if (since - closeUp.at >= CLOSE_UP_MOVE + hold) {
                     endCloseUp();
@@ -495,6 +575,13 @@ export function createDetail({
         toggleZoom(clientX, clientY) {
             if (state.view !== 'detail' || !state.selected) return;
             if (state.selected.userData.project?.zoom === false) return; // a project can turn it off
+
+            // A visitor's own zoom isn't undone by the timed one straight after
+            const every = state.selected.userData.project?.autoZoom;
+            if (every) {
+                autoZoom.next = autoZoom.since + every;
+                autoZoom.index = -1;
+            }
 
             const { camera, controls } = rig;
 
