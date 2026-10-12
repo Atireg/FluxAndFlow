@@ -26,6 +26,7 @@
  *   view          camera angle in degrees - see normaliseView
  *   gather        points gather from a scattered cloud on open
  *   points        a mesh detailModel only: how many points to sample
+ *   zoom          false: no double-click/double-tap zoom, and no hint for it
  *   drop          a crossed-rod mesh only: copies dropped with live physics
  *   images        drawer pictures - see normaliseImage
  *
@@ -191,6 +192,7 @@ export function defineProject(project) {
         view: normaliseView(project.view, { id }),
         gather: Boolean(project.gather),
         points: project.points,
+        zoom: project.zoom !== false,
         drop: normaliseDrop(project.drop, { id }),
 
         images: images.map((image, index) => normaliseImage(image, { id, index })),

@@ -57,7 +57,8 @@ const PILE_REST_SPIN = 0.35; // radians per second
 const PILE_REST_TIME = 0.2; // simulated seconds both must hold
 /**
  * Where the aggregates interlock, marked with pulsing dots once the pile has
- * come to rest (a project's `drop.contacts`). The points are cannon's own
+ * come fully to rest - every aggregate asleep, not just looking still (a
+ * project's `drop.contacts`). The points are cannon's own
  * contacts between two aggregates - the ground's are left out - merged where
  * several sit together, since two rods crossing give a small cluster.
  * Blue, by request (graphite at first, then cyan) - it reads against the
@@ -67,6 +68,7 @@ const PILE_REST_TIME = 0.2; // simulated seconds both must hold
  */
 const CONTACT_MAX = 24; // dots at most
 const CONTACT_MERGE = 0.12; // contacts closer than this, in aggregate sizes, are one dot
+const CONTACT_PARTED = 0.04; // a crossing whose two sides have drifted this far apart, in sizes, is dropped
 const CONTACT_PX = 30; // the dot's sprite across, CSS px - room for its ring to spread
 const CONTACT_PULSE = 1.6; // seconds per pulse
 const CONTACT_FADE_IN = 0.6; // seconds to appear once the pile is still
@@ -322,36 +324,86 @@ export async function createPile({
      * Gathered over the settle rather than replaced each step: cannon stops
      * reporting a contact once both bodies touching it are asleep, and they
      * fall asleep one by one, so a fresh list each step would lose dots.
-     * Cleared by restart().
+     *
+     * Each is kept in both bodies' own frames, not as a fixed point, so it
+     * moves with them through the last of the settle - and shown only once
+     * everything is asleep (placeContacts), dropping any whose two sides
+     * have parted since. Read as fixed points and shown as soon as the pile
+     * looked still, a crossing that slid or came apart in that last second
+     * left its dot hanging in the air. Cleared by restart().
      */
     const marked = [];
     const contactPoint = new THREE.Vector3();
+    const nearPoint = new THREE.Vector3();
+    const sideI = new CANNON.Vec3();
+    const sideJ = new CANNON.Vec3();
+    const local = new CANNON.Vec3();
+
+    // A mark's point now: halfway between where each body has it
+    function markWorld(m, target) {
+        bodies[m.i].pointToWorldFrame(m.onI, sideI);
+        bodies[m.j].pointToWorldFrame(m.onJ, sideJ);
+        return target.set((sideI.x + sideJ.x) / 2, (sideI.y + sideJ.y) / 2, (sideI.z + sideJ.z) / 2);
+    }
+
     function readContacts() {
         if (!markers) return;
 
         for (const c of world.contacts) {
-            if (!bodies.includes(c.bi) || !bodies.includes(c.bj)) continue; // the ground's
+            const i = bodies.indexOf(c.bi);
+            const j = bodies.indexOf(c.bj);
+            if (i < 0 || j < 0) continue; // the ground's
 
-            contactPoint.set(c.bi.position.x + c.ri.x, c.bi.position.y + c.ri.y, c.bi.position.z + c.ri.z);
-            const near = marked.find((m) => m.mean.distanceTo(contactPoint) < CONTACT_MERGE * size);
+            // Where each side has it; halfway between, for the dot
+            sideI.set(c.bi.position.x + c.ri.x, c.bi.position.y + c.ri.y, c.bi.position.z + c.ri.z);
+            sideJ.set(c.bj.position.x + c.rj.x, c.bj.position.y + c.rj.y, c.bj.position.z + c.rj.z);
+            contactPoint.set((sideI.x + sideJ.x) / 2, (sideI.y + sideJ.y) / 2, (sideI.z + sideJ.z) / 2);
+            local.set(contactPoint.x, contactPoint.y, contactPoint.z);
+
+            const near = marked.find((m) => ((m.i === i && m.j === j) || (m.i === j && m.j === i))
+                && markWorld(m, nearPoint).distanceTo(contactPoint) < CONTACT_MERGE * size);
             if (near) {
-                near.n = Math.min(near.n + 1, 30); // follows the last small shifts, then holds
-                near.mean.lerp(contactPoint, 1 / near.n);
+                // Follows the latest reading, so a crossing that slides
+                // along a rod moves with it
+                bodies[near.i].pointToLocalFrame(local, near.onI);
+                bodies[near.j].pointToLocalFrame(local, near.onJ);
             } else if (marked.length < CONTACT_MAX) {
-                marked.push({ mean: contactPoint.clone(), n: 1 });
+                const m = { i, j, onI: new CANNON.Vec3(), onJ: new CANNON.Vec3() };
+                c.bi.pointToLocalFrame(local, m.onI);
+                c.bj.pointToLocalFrame(local, m.onJ);
+                marked.push(m);
             }
         }
+    }
+
+    /**
+     * Once everything is asleep: each crossing where its two bodies now put
+     * it, and only those still touching - the two sides within
+     * CONTACT_PARTED of each other
+     */
+    function placeContacts() {
+        if (!markers) return;
 
         const position = markers.geometry.attributes.position;
-        marked.forEach((m, i) => position.setXYZ(i, m.mean.x, m.mean.y, m.mean.z));
+        let shown = 0;
+        for (const m of marked) {
+            bodies[m.i].pointToWorldFrame(m.onI, sideI);
+            bodies[m.j].pointToWorldFrame(m.onJ, sideJ);
+            if (sideI.distanceTo(sideJ) > CONTACT_PARTED * size) continue;
+            markWorld(m, contactPoint);
+            position.setXYZ(shown++, contactPoint.x, contactPoint.y, contactPoint.z);
+        }
         position.needsUpdate = true;
-        markers.geometry.setDrawRange(0, marked.length);
+        markers.geometry.setDrawRange(0, shown);
+        shownContacts = shown;
     }
+    let shownContacts = 0;
 
     const pile = {
         group,
         settledAt: Infinity, // when the turn starts - see PILE_REST_*
         asleep: false, // when the physics stops costing anything
+        restedAt: Infinity, // when it did, as settledAt - the dots show from here
         time: 0,
         wait: 0,
         restFor: 0,
@@ -359,13 +411,13 @@ export async function createPile({
         onFaded: null,
         markedFor: 0, // seconds the interlocking dots have been showing
 
-        // How many interlocks have been marked so far, and where one is in
+        // How many interlocks are shown (none until asleep), and where one is in
         // the world - for the camera's close-up on one (detail.js)
         get contactCount() {
-            return markers ? marked.length : 0;
+            return markers && this.asleep ? shownContacts : 0;
         },
         contactAt(index, target) {
-            return markers.localToWorld(target.copy(marked[index].mean));
+            return markers.localToWorld(target.fromBufferAttribute(markers.geometry.attributes.position, index));
         },
 
         /**
@@ -408,6 +460,8 @@ export async function createPile({
             }
             this.settledAt = Infinity;
             this.asleep = false;
+            this.restedAt = Infinity;
+            shownContacts = 0;
             this.restFor = 0;
             const random = new THREE.Quaternion();
             bodies.forEach((body, i) => {
@@ -517,9 +571,9 @@ export async function createPile({
                 arrow.cone.material.opacity = show;
             });
 
-            // The interlocking dots: in once the pile looks still, pulsing on
-            // their own clock, out as it dissolves
-            if (markers && this.settledAt !== Infinity) {
+            // The interlocking dots: in once the pile is asleep and they're
+            // placed, pulsing on their own clock, out as it dissolves
+            if (markers && this.asleep) {
                 this.markedFor += dt;
                 const fade = solidMaterial?.uniforms.uFade?.value ?? 0;
                 markers.material.uniforms.uTime.value = this.markedFor;
@@ -568,7 +622,11 @@ export async function createPile({
 
             // ...and the physics stops once cannon has put everything to sleep
             const sleeping = bodies.every((body) => body.sleepState === CANNON.Body.SLEEPING);
-            if (sleeping || timedOut) this.asleep = true;
+            if (sleeping || timedOut) {
+                this.asleep = true;
+                this.restedAt = since;
+                placeContacts();
+            }
         },
     };
 

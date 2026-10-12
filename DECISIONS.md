@@ -648,6 +648,10 @@ Blender/Rhino simulation. A project's `drop: { count, size, ground }` does it
   crossing: it just waits and drops. The tap hint stays away while the
   camera is in. Requires `contacts`; can't be combined with `repeat`
   (`defineProject` throws).
+- **No double-click zoom here** (asked for): `zoom: false` on the project
+  turns off double-click/double-tap zoom and its hint (`toggleZoom`,
+  `maybeShowTapHint`); the close-ups are the zoom. The close-up's own
+  camera move doesn't go through `toggleZoom`, so it's unaffected.
 - **The fallen pile dissolves away** before each new drop rather than
   vanishing (asked for - "less abruptly"): `pile.replay()` runs a
   `PILE_FADE_OUT` (1.2s, eased) before `restart()`, keeping the turn going
@@ -661,10 +665,16 @@ Blender/Rhino simulation. A project's `drop: { count, size, ground }` does it
 - **Pulsing dots where they interlock** (`drop.contacts`, asked for): read
   straight from cannon's own contacts between two aggregates (the ground's
   left out), merged within `CONTACT_MERGE` of a size since two rods crossing
-  give a cluster, shown once the pile looks still and faded with the
-  dissolve. Gathered over the settle rather than replaced each step: cannon
-  stops reporting a contact once both bodies touching are asleep, and they
-  sleep one by one. Blue, asked for (graphite at first, then cyan; not orange, which
+  give a cluster, faded with the dissolve. Gathered over the settle rather
+  than replaced each step: cannon stops reporting a contact once both
+  bodies touching are asleep, and they sleep one by one. Shown only once
+  every aggregate is asleep (`pile.restedAt`), not when the pile first
+  looks still: in that last second a crossing could slide or part, and a
+  dot read as a fixed point was left hanging in the air ("false or in the
+  air", the user). So each crossing is kept in both bodies' own frames,
+  following them, and on sleep any whose two sides have drifted more than
+  `CONTACT_PARTED` (0.04 of a size) apart is dropped. The close-up waits
+  for them (`CLOSE_UP_AFTER` from `restedAt`). Blue, asked for (graphite at first, then cyan; not orange, which
   means "click me"); the velocity arrows stay graphite. Each dot a solid centre with a ring
   spreading on its own beat; drawn over the rods so a crossing at the back
   isn't lost.

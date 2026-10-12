@@ -170,7 +170,7 @@ Project view
     [x] Double-click / double-tap zoom, hinted every 5s by a white touch
         point that scales with the screen, "double-click" ("double-tap"
         on a touch screen) hanging from it on a bouncing black string
-        like the catalog's
+        like the catalog's; off for Emergent Space (`zoom: false`)
     [x] Camera moves only tilt, never roll
 
 Site

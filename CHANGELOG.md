@@ -342,6 +342,16 @@ only.
   screen), and its word, string and knot are black like the dot's outline
   rather than orange.
 - **The interlock dots are blue** (they were cyan).
+- **Interlock dots only once it's truly still.** They showed as soon as
+  the pile looked still, at points fixed then, so a crossing that slid or
+  parted in the last second left a dot in the air. Now each crossing
+  follows its two aggregates, the dots appear only once every aggregate is
+  asleep, and any crossing whose sides have parted is dropped; the
+  close-up waits for them. Checked headless over two drops (dots in 1.4s
+  and 7.4s after the turn began, close-up centred, no errors).
+- **No double-click zoom in Emergent Space** (`zoom: false`, a new project
+  setting): no zoom on double-click/double-tap and no hint dot; the
+  automatic close-ups still run.
 
 Open at end of session (see README, "Next up"): unchanged by this session —
 Safari still to confirm, both projects' real copy and picture credits still

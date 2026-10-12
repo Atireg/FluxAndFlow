@@ -85,5 +85,8 @@ export default defineProject({
     // seconds, back out, and 5 seconds later they drop again.
     // `velocity`: each one's velocity, live, as an arrow and m/s, while it moves.
     // See src/engine/pile.js.
+    // No double-click zoom (or its hint): the camera's own close-ups on the
+    // interlocks do the zooming here.
+    zoom: false,
     drop: { count: 3, size: 3, ground: -1.2, solid: true, contacts: true, closeUp: { hold: 5, after: 5 }, velocity: true },
 });

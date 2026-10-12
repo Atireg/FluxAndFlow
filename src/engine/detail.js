@@ -60,7 +60,7 @@ const TAP_HINT_GAP = 5; // seconds from one hint to the next
  * crossing is picked at random among those on screen; with none marked, it
  * just waits and drops again.
  */
-const CLOSE_UP_AFTER = 1; // seconds after the pile looks still - the dots have faded in
+const CLOSE_UP_AFTER = 1; // seconds after the pile is asleep - the dots have faded in
 const CLOSE_UP_ZOOM = 0.3; // the camera ends up this fraction of its distance away
 const CLOSE_UP_MOVE = 1.6; // seconds each way - slower than a double-click's zoom
 
@@ -417,7 +417,7 @@ export function createDetail({
                 Object.assign(closeUp, { phase: 'waiting', pile, settledAt: pile.settledAt });
             }
 
-            if (closeUp.phase === 'waiting' && since - pile.settledAt >= CLOSE_UP_AFTER) {
+            if (closeUp.phase === 'waiting' && since - pile.restedAt >= CLOSE_UP_AFTER) {
                 closeUp.index = pickContact(model, pile);
                 closeUp.at = since;
                 closeUp.last = null;
@@ -494,6 +494,7 @@ export function createDetail({
 
         toggleZoom(clientX, clientY) {
             if (state.view !== 'detail' || !state.selected) return;
+            if (state.selected.userData.project?.zoom === false) return; // a project can turn it off
 
             const { camera, controls } = rig;
 
@@ -520,6 +521,7 @@ export function createDetail({
         maybeShowTapHint(model, since) {
             if (since < state.tapHintNext) return;
             if (closeUp.phase === 'in') return; // the close-up's camera is busy
+            if (state.selected?.userData.project?.zoom === false) return; // nothing to hint at
 
             state.tapHintNext = since + TAP_HINT_GAP;
 
