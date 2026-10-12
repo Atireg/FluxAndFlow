@@ -1097,12 +1097,14 @@ come through (`scheduleExit`). The catalog loads underneath while the
 welcome is read, so the count usually runs straight to 100%.
 
 The words were first one paragraph from the user's notes on self-organised
-criticality; asked to be split up and made more business-like, they're
-now what the user offers (the user's own list of services: strategy,
-custom software and automation, training, websites for practices,
-academic supervision - and, kept on request, generative art on commission
-and yoga in English), then the research and the playground in one closing
-paragraph. That runs taller than a small phone (375x667), so the loader
+criticality; then, asked for something more business-like, a plain list of
+the user's services; then, worked through with the user line by line, three
+short paragraphs that keep the mystery but say what's on offer: the hidden
+currents in a practice and the one small change; the user's background,
+architecture and code; and the services as what's done with the currents
+(strategy, software and automation, teaching, websites - and art from code
+and yoga where they slow down). No closing paragraph: the button invites.
+A longer version ran taller than a small phone (375x667), so the loader
 scrolls: `place-items: start center` with the mark's `margin-block: auto`
 centres it when it fits and starts it at the top when it doesn't (plain
 centring would cut its head off, out of reach), the particle field is
