@@ -1,8 +1,8 @@
 # Flux and Flow
 
 A portfolio: a catalog of projects explored in three dimensions. Each
-project is a graphite pebble in a grid (still called a "cube" throughout
-the code); clicking one knocks the others off the screen, dissolves it into
+project is a graphite pebble in a grid (a "cube" in a few cube-era names
+- `CUBE_SIZE`, `.cube-tag`); clicking one knocks the others off the screen, dissolves it into
 a cloud of points and opens the project's 3D model on the whole canvas (a
 point cloud, or Emergent Space's solid aggregates dropped with physics),
 with its description in a pull-out drawer.
@@ -23,29 +23,29 @@ with its description in a pull-out drawer.
 Read the last entry of `CHANGELOG.md` (its "Open at end of session" list)
 and README's "Next up". As of the end of Session 3:
 
-- **State**: everything built is live, or on the branch - `git log
-  origin/main..` shows anything not yet merged.
+- **State**: everything built is live - `git log origin/main..` shows
+  anything not yet merged.
 - **Catalog**: ten pebbles shaded in graphite, each a random size on every
-  visit, slowly changing shape, pushing apart where they touch; one at a
-  time glows orange with its name hanging on a string in the wind. The
-  grid arrives slowly as the loader clears, the pebbles' contents one by
-  one, and the loader's streams carry on among them in the scene.
-- **Two projects**: Rock Print Pavilion (slot 0, a scanned point cloud
-  that gathers out of a scattered cloud) and Emergent Space (slot 1: three
-  copies of a plain mesh, `aggregate.glb`, drawn solid in the inks and
-  dropped with live physics onto a ground of the clicked pebble's points
-  until they interlock - a new drop every time). Moving points have tails.
+  visit, slowly changing shape and warmth, pushing apart where they touch;
+  one at a time glows orange with its name hanging on a string in the
+  wind. The grid arrives slowly as the loader clears, and the loader's
+  streams carry on among the pebbles in the scene.
+- **Rock Print Pavilion** (slot 0): a scanned point cloud that gathers out
+  of a scattered cloud, turns, and nods. Every 10s the camera moves in by
+  itself, then out - alternately on a point of the pavilion and from
+  inside, at eye height among the columns (`autoZoom`, `eyeLevel`). A
+  double-click holds it still until the next (`doubleClick: 'hold'`).
+- **Emergent Space** (slot 1): three solid aggregates dropped with live
+  physics onto a ground of the clicked pebble's points, a new drop each
+  time; velocity arrows while they fall, blue dots where they interlock
+  once at rest, then the camera closes in on one interlock, backs out, the
+  floor slows to a stop and it drops again (`drop.closeUp`). No
+  double-click (`doubleClick: 'none'`).
 - **Waiting on the user**: the real copy for both projects (the live drawer
-  text is `[PLACEHOLDER ...]`), captions/credits for both projects'
-  pictures, model licensing, and checks on real devices (the blind Safari
-  fixes, the physics drop, the streams' strength on a phone).
+  text is `[PLACEHOLDER ...]`), captions/credits for the pictures, model
+  licensing, and checks on real devices (the blind Safari fixes, the
+  physics drop, the streams on a phone, the inside view on a phone).
 - **Not started**: per-project URLs, a landing view; README lists the rest.
-- **Catalog colour**: each pebble's warmth now drifts with its own shape
-  waves (chosen from five previewed options; see DECISIONS.md).
-- **Structure**: Session 3 moved `src/script.js` (3,733 lines) into React
-  components, an engine of focused modules and one module per project. No
-  look-and-feel was changed; the maths and every constant were carried over
-  as they were.
 
 ## Working with the user
 
@@ -59,6 +59,10 @@ and README's "Next up". As of the end of Session 3:
 - **Wording**: "project view" has sometimes meant the catalog of pebbles.
   When a request names something that only exists in one view, read it as
   that view, and say how it was read.
+- **Requests come in quick succession**, often several in one message or
+  mid-turn, each a small look-and-feel step on what was just built. Do
+  them in order, as project settings where they're per project, and say
+  in one line how an ambiguous one was read.
 - **Look and feel** went through many rounds of feedback (the pebbles, the
   orange spotlight, the name on a string, the arrival, the streams): tune
   the existing constants before rebuilding any of it.
@@ -98,7 +102,8 @@ Inside `src/engine/`:
     visited.js           which projects have been opened (localStorage)
     layout.js            the side/stacked breakpoint and the drawer's share
     catalog.js           the grid of pebbles, thumbnails, the idle/spotlight modes
-    detail.js            opening and closing a project, the zoom, the tap hint
+    detail.js            opening and closing a project, double-click, the timed zooms
+                         and close-ups, the tap hint
     tags.js              the names, their rope, the tap hint's string, "Still empty...", in screen pixels
     streams.js           the streams themselves
     streams-view.js      wiring them to the pebbles, the camera and the pointer
@@ -252,8 +257,8 @@ defineProject({
   (`addGraphite`), not lit glass: its colour is the graphite, its emissive
   the spotlight's orange, its opacity how heavily it's shaded. Resting
   looks come from `restingFaceColor` / `restingFaceOpacity` /
-  `restingRimColor` (darker once visited) - never write `cubesColor` back
-  directly.
+  `restingRimColor` (darker once visited) - never write a resting colour
+  back directly.
   - Pebbles change shape in the vertex shader (`addPebbleFlux`, face and
     rim on the same seed - any new pebble material needs it too). It also
     sends `vPebbleFlux` on to the fragment shader, for the face's warmth to
@@ -282,8 +287,8 @@ defineProject({
 - **The streams** (`src/engine/streams.js`, wired up in `streams-view.js`)
   live in the scene on the y = 0 plane,
   parting round each pebble's circle in the scene and drifting towards the
-  pointer while the mouse moves or a finger is down (`trackStreamPointer`,
-  `PULL_*`); they fade out while a project is open. The loader's own 2D canvas
+  pointer while the mouse moves or a finger is down (`trackPointer` in
+  `streams-view.js`, `PULL_*`); they fade out while a project is open. The loader's own 2D canvas
   (index.html) only runs until the loader leaves, announced by the
   `fluxloader:leaving` event, which also starts the arrival.
 - **The cloud loader re-skins every `Points` in a model** (`pointcloud/
@@ -308,6 +313,16 @@ defineProject({
   carries `.cube-tag--spotlight` (for its look), so it's rendered after
   `CatalogTags`: `querySelector('.cube-tag--spotlight')` and
   `.tag-string__knot` still find the catalog's first.
+- **The camera's moves in the project view all go through `moveCamera`**
+  (`camera/rig.js`), and the automatic ones follow what they moved in on
+  as the model turns (`follow`, `worldAhead` in `detail.js`): aim where it
+  will be when the camera arrives, then translate with it. The model's
+  turn is `modelTurn` (`camera/framing.js`) - a pile's waits for it to
+  settle and slows to a stop before a new drop (`pile.turnStop`), and a
+  held model's subtracts the time held (`model.userData.held`). Standing
+  inside (`eyeLevel`) lowers the camera's near plane (`rig.baseNear` is
+  the usual one), widens the lens, and caps how big a point by the camera
+  draws (`vertex.glsl`).
 - **Two cameras, two fields of view** (`camera/rig.js`):
   `CATALOG_FOV = 45`, `DETAIL_FOV = { side: 45, stacked: 30 }`, breakpoint
   860px (`SIDE_PANEL_QUERY` in `engine/layout.js`). A phone gets the longer lens because a wide one
@@ -380,7 +395,7 @@ Testing tips learnt the hard way:
   `requestAnimationFrame` wrapper via `toDataURL` (it leaves out the HTML
   overlays) - slow, so only when it matters.
 - **One headless browser at a time**: two in parallel slowed software
-  WebGL enough to look like a failed click. Wait on state (e.g. `#fog`'s
+  WebGL enough to look like a failed click. Wait on state (e.g. `.fog`'s
   opacity above 0.9 once a project is open), not fixed timeouts.
 - **Finding a pebble to click**: slot 0 sits around (310, 185) at
   1280x800 and (80, 139) at 390x844, slot 1 one step right - but random
@@ -394,7 +409,7 @@ Testing tips learnt the hard way:
   thinks: `.bar.is-open`, `.bar__title`, `.bar__status` (empty once the
   model has loaded), `.drawer.is-available` / `.is-open`,
   `body.drawer-open`, `.drawer__image`, `.cube-tag--spotlight`,
-  `.cube-tag--empty`, `#fog` opacity.
+  `.cube-tag--empty`, `.fog` opacity, `.tap-hint.is-showing`.
 - **Tuning the pile's physics**: run the same cannon-es setup in Node
   (`node_modules/cannon-es/dist/cannon-es.js`, rods as cylinders, no
   rendering) a few dozen times per setting and count how often all three

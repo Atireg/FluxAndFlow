@@ -21,8 +21,9 @@ The catalog (the grid of pebbles - "cubes" in the code)
 - Every pebble holds its thumbnail - the rock, or the project's own model
 - "Still empty...", and tags as HTML over the canvas
 - Selecting: pointerup on the canvas, and drags don't count
-- Clicking a project knocks the rest of the grid off the screen
 - The grid arrives, a pebble at a time
+- Clicking a project knocks the rest of the grid off the screen
+- A pebble's colour drifts with its shape
 
 The project view: camera
 - The detail camera looks along the catalog's screen-up; every move slerps
@@ -31,12 +32,12 @@ The project view: camera
 - The open drawer: the whole model beside it, or a close-up below it
 - The model turns; the camera nods (`view.sway`)
 - Double-click / double-tap zoom, and the touch-point hint
+- Timed zooms on Rock Print (`autoZoom`), holding it, from inside
 
 The project view: point cloud
 - Quantized, not Draco-compressed
 - A mesh becomes points as it loads
 - Emergent Space: aggregates dropped with live physics
-- Timed zooms on Rock Print (`autoZoom`), holding it, from inside
 - Point size, three sizes, three inks
 - Points gather out of a scattered cloud
 - Tails behind moving points
@@ -54,9 +55,6 @@ Page, colour and drawer
 Loading
 - The start-up loader is inline and waits for real progress
 - `?cloudtest`, and why clouds load on click
-
-The catalog, continued
-- A pebble's colour drifts with its shape
 
 How the code is laid out
 - React owns the page; the engine owns the canvas
@@ -76,12 +74,12 @@ Pebbles, and a clicked one dissolves into points
 
 Chosen from five rendered options (pebbles, bubbles, morphing blobs,
 rounded cubes, clouds of points): pebbles in the grid that turn into a
-cloud of points when clicked. **The code still calls them cubes**
-(`cubes`, `cubeSize`, `CUBE_FACE_OPACITY`...) and they sit in the cubeSize
-grid; renaming would have touched most of the file for nothing.
+cloud of points when clicked. The code says `pebble` throughout, but
+the grid unit is still `CUBE_SIZE`, the rim `userData.edges` and the CSS
+classes `.cube-tag` - cube-era names left as they are.
 
 - **Shape** (`makePebbleGeometry(seed, size)`): a sphere of `PEBBLE_RADIUS`
-  (0.44 x cubeSize), wobbled by a few slow waves (`PEBBLE_LUMPS`), drawn out
+  (0.44 x `CUBE_SIZE`), wobbled by a few slow waves (`PEBBLE_LUMPS`), drawn out
   a little (`PEBBLE_STRETCH`), squashed flat (`PEBBLE_SQUASH`); a seed per
   slot. Vertices are merged first so normals are smooth.
 - **Sizes**: each pebble is drawn `PEBBLE_SIZE_MIN`..`PEBBLE_SIZE_MAX` (1 to
@@ -91,7 +89,7 @@ grid; renaming would have touched most of the file for nothing.
   pebble parents the project's model once it opens, and its scale is held at 1
   there (and pulses only for the spotlight). Everything sized off the pebble
   multiplies by it - the flux amount, the thumbnail (`contentBaseScale`), the
-  tag's anchors - and `fitCameraToGrid` frames each edge pebble at its own
+  tag's anchors - and `framing.fitToGrid` frames each edge pebble at its own
   size, so a big one on the edge stays on screen.
 - **Graphite, not glass** (`addGraphite`): asked for - "the blue isn't
   right". First a pencil sketch: graphite hatching, crossing strokes, a
@@ -131,13 +129,13 @@ grid; renaming would have touched most of the file for nothing.
   `revealAt`) while the dissolve's fade out over the same second. If the
   model is still downloading, the dissolve simply runs on.
 - **No frame in the project view.** The pebble has dissolved; the project
-  stands alone in the fog. Framing still fits the invisible cubeSize box.
+  stands alone in the fog. Framing still fits the invisible `CUBE_SIZE` box.
 - **Visited pebbles stay darker**, like visited links: once its project has
   been opened (`markVisited` in `openProject`; "Still empty..." doesn't
   count), a pebble rests in deeper glass with a darker rim. Every state
   that rests or glows takes its base from `restingFaceColor` /
-  `restingFaceOpacity` / `restingRimColor` - never write `cubesColor` back
-  directly. Ids are kept in `localStorage` (`fluxandflow.visited`); where
+  `restingFaceOpacity` / `restingRimColor`, so nothing writes a resting
+  colour back directly. Ids are kept in `localStorage` (`fluxandflow.visited`); where
   storage is blocked it lasts for the visit.
 
 
@@ -146,11 +144,11 @@ A fixed number of slots
 
 `SLOT_COUNT = 10` decides how many pebbles exist; the viewport only decides
 the arrangement (`computeGridShape` picks the column count closest to the
-viewport's proportions, `fitCameraToGrid` frames it). Sizing the grid from
+viewport's proportions, `framing.fitToGrid` frames it). Sizing the grid from
 the viewport instead gave 0 pebbles on a portrait phone. A project's `slot`
 is stable; its on-screen place isn't, but the order is row-major. Pebbles
-sit `spacing` (1.4) cubeSizes apart, centre to centre - 1.2 felt crowded;
-`fitCameraToGrid` pulls back to fit whatever the spacing, so they get
+sit `SPACING` (1.4) `CUBE_SIZE`s apart, centre to centre - 1.2 felt crowded;
+`fitToGrid` pulls back to fit whatever the spacing, so they get
 smaller on screen as it grows.
 
 
@@ -158,10 +156,10 @@ A pebble's state is a pure function of its mode and the clock
 -------------------------------------------------------------
 
 Every frame each pebble's whole state - pose, colour, opacity, its rock's
-scale - is computed fresh from its mode and the clock (`updateIdleCube`,
-`updateSpotlightCube`, and the grid-wide `'dropping'` and `'returning'`
-modes). Nothing accumulates, so nothing drifts or needs resetting. Colour
-goes through `paintGlow(cube, amount)`: 0 is the pebble's resting self, 1
+scale - is computed fresh from its mode and the clock (`engine/catalog.js`:
+the idle and spotlight modes, and the grid-wide `'dropping'` and
+`'returning'` modes). Nothing accumulates, so nothing drifts or needs resetting. Colour
+goes through `paintGlow(pebble, amount)`: 0 is the pebble's resting self, 1
 the spotlight's orange.
 
 **Hover changes nothing**: the pebble under the pointer keeps its look and
@@ -172,7 +170,7 @@ Two traps it sets, both hit for real:
 
 - **A per-frame write beats a one-off tween on the same property.** Closing
   once flipped straight back to `'catalog'`, whose idle update rewrote
-  opacity every frame and stomped the reveal's fade. `viewState` stays
+  opacity every frame and stomped the reveal's fade. `state.view` stays
   `'returning'` until the reveal's tweens finish.
 - **The clicked pebble carries whatever the click caught it holding** into
   the project view, so `openProject` zeroes its rotation and scale and
@@ -192,7 +190,7 @@ Every ~5.3-5.6s one pebble glows orange and jumps, then the next.
   `SPOTLIGHT_FADE_IN`, out over `SPOTLIGHT_FADE_OUT`), so it leaves and
   rejoins the float without a snap.
 - **One orange for "click me"**, `#ff8c32`: the glowing pebble and the
-  About handle (`--warm`; `spotlightGlowColor` kept in step by hand).
+  About handle (`--warm`; `SPOTLIGHT_GLOW_COLOR` kept in step by hand).
 - **Showing that orange took two things.** Colours are given as raw screen
   values (`screenColor()`), because the renderer outputs linear values and a
   hex string is converted on the way in (it came out brick red). And the
@@ -204,7 +202,7 @@ Every ~5.3-5.6s one pebble glows orange and jumps, then the next.
 The glowing pebble's name hangs on a string
 -------------------------------------------
 
-`#spotlight-tag` reads the project's `title` ("Rock Print Pavilion",
+The spotlight's tag (`.cube-tag--spotlight`, in `CatalogTags`) reads the project's `title` ("Rock Print Pavilion",
 "Emergent Space"), or "Project 03".."Project 10" for an empty slot, and
 pulses with the glow (down to `SPOTLIGHT_TAG_MIN`, 0.65, between beats - at
 0.2 it read as see-through), gone once the pebble settles. Hovering it
@@ -212,7 +210,7 @@ changes nothing - the spotlight runs its whole dwell. "Still empty..." wins
 on its pebble.
 
 **Size**: the tags scale with the pebbles on screen - `--pebble-px`, their
-radius in pixels, set by `fitCameraToGrid` - at 0.3 of it, never under
+radius in pixels, set by `framing.fitToGrid` - at 0.3 of it, never under
 0.95rem. A phone (radius ~49px) stays as it was; 1280px wide gets ~22px,
 1920 ~30px. A fixed rem looked small on wide screens.
 
@@ -231,7 +229,8 @@ with a quicker flutter, mostly from one side), felt by the tag as well as
 the string and arriving a moment later further down (`TAG_WAVE_LAG`), so it
 ripples; off under reduced motion. A heavy tag, strong damping and a
 string-only breeze kept it taut and read as stiff. Drawn as one Catmull-Rom
-curve (`#spotlight-string`). The tag turns with the string's overall lean,
+curve (`.tag-string`), by the same `createRope` / `drawRope` the tap
+hint's string uses. The tag turns with the string's overall lean,
 not just its last link (which spun it whenever the end kinked); the knot is
 spread across steps and the swing capped at `TAG_MAX_SWING` (~55 degrees),
 or a slow frame flips it. Text is `--warm-text`, a shade deeper than
@@ -254,8 +253,7 @@ The pointer stirs the grid; the grid doesn't orbit
   water - velocity times `FLOW_CARRY`, Gaussian falloff (`FLOW_RADIUS`),
   capped (`FLOW_MAX`), on an under-damped spring, in fixed steps. Only
   motion pushes, so a resting cursor leaves the pebble it's aiming at
-  alone. Zeroed by `resetFlow()` when the drop starts. Its state sits above
-  `animate()` (see the TDZ note in CLAUDE.md).
+  alone. Zeroed by `resetFlow()` when the drop starts (`pebbles/flow.js`).
 - **Bumps**: pebbles that touch push each other apart (`bumpPebbles`, asked for
   once their random sizes made big ones overlap). The push goes into the same
   spring state as the flow, so it is integrated in the same steps and they lean
@@ -268,7 +266,7 @@ The pointer stirs the grid; the grid doesn't orbit
   just before touching (`BUMP_REACH` 1.05) and shove each other visibly when
   the pointer or the spotlight drives one into another. The grid keeps its
   order: the pull home still wins over any distance. It reads each pebble's
-  place for the frame, so `updateCube` runs before `updateFlow`; it also runs
+  place for the frame, so the catalog's update runs before the flow's; it also runs
   while the grid returns from a project, so the pebbles are already apart as
   they fade in rather than springing apart in view.
 
@@ -278,10 +276,8 @@ Every pebble holds its thumbnail - the rock, or the project's own model
 
 Empty slots use `EMPTY_SLOT_THUMB` (the same rock). `loadThumb` keeps one
 promise per path and each pebble adds a `clone()`, so ten rocks are one
-187 KB download. `EMPTY_SLOT_THUMB`, `THUMB_INK` and `thumbScenes` sit up
-with the projects because `createPlayground()` runs before the rest of the
-file (TDZ). A binary `.glb` would be about a quarter smaller than the
-`.gltf`.
+187 KB download (`EMPTY_SLOT_THUMB` lives in `src/projects/schema.js`). A
+binary `.glb` would be about a quarter smaller than the `.gltf`.
 
 A project with `thumbSize` shows its own model instead (Emergent Space:
 `thumbModel` is the same `aggregate.glb` its project view samples into
@@ -297,11 +293,11 @@ scale, 1 unit down). Either way the spotlight pulses it from
 "Still empty...", and tags as HTML over the canvas
 --------------------------------------------------
 
-Clicking an empty slot shows `#empty-tag` on it for `EMPTY_TAG_DURATION`,
+Clicking an empty slot shows "Still empty..." (`.cube-tag--empty`) on it for `EMPTY_TAG_DURATION`,
 fading over `EMPTY_TAG_FADE` - the quiet ink chip, not the orange, since an
 empty slot isn't an invitation. Tags are HTML over the canvas, not sprites:
 real Fira Sans, sharp at any pixel ratio, styled in CSS, and
-`pointer-events: none`. `placeTagOnCube` projects a point on the pebble's
+`pointer-events: none`. `placeTagOnPebble` projects a point on the pebble's
 top towards the bottom of the screen.
 
 
@@ -355,643 +351,6 @@ waiting for them read as a pause. A model landing mid-move finishes the
 move in the time left rather than restarting it. Closing is `'returning'`:
 pebbles are placed home each frame while the grid fades back in. Clicks,
 hover, Escape and resize only act in `'catalog'` and `'detail'`.
-
-
-The project view: camera
-========================
-
-
-The detail camera looks along the catalog's screen-up; every move slerps
-------------------------------------------------------------------------
-
-Opening and closing used to roll the grid 90°: the detail camera looked
-along +X, so the two views disagreed about "sideways", and the roll landed
-in one frame at OrbitControls' overhead pole. The detail camera's default
-heading (azimuth 0 in `viewDirection`) now sits on +Z looking along -Z, the
-catalog's screen-up, so every transition is a pure tilt; the model is
-turned a quarter (`DETAIL_MODEL_YAW`) to show the face it was authored for.
-
-Every animated move goes through `moveCamera`, which tweens position and
-target and slerps the quaternion to exactly where `lookAt` would leave it,
-with `cameraOrientationLocked` keeping `controls.update()` out until it
-lands. It and `animateFov` cancel any move in flight first. To verify: on a
-pure tilt the quaternion's Y and Z stay 0 (Rock Print: ~0.03, its 4°
-azimuth). If the catalog's axes ever change, azimuth 0 must follow its
-screen-up; keep a project's `view.azimuth` small.
-
-
-The default view, and a project's own `view`
---------------------------------------------
-
-Without a `view`, the camera looks square-on along Z (one-point
-perspective; an oblique view and `DETAIL_PROJECTION = 'orthographic'` were
-tried and rejected). `DETAIL_FOV` is 45° side by side, 30° on a phone,
-where 45° reads as a tunnel. `controls.autoRotate` stays off; the model
-turns instead.
-
-A project's `view` sets its landing shot: `elevation`, `azimuth`, `turn`
-(the model's spin when it appears), and optionally `zoom` (closer than the
-cube's fit) and `lift` (higher on screen, a share of its height), each one
-number or `{ side, stacked }`. A `view` is framed on the cube, not the
-model's bounding box (which balloons with scattered points), with
-`VIEW_FRAME_MARGIN`; on a phone with the drawer parked, it centres on the
-whole screen if the cube's top clears the bar.
-
-Rock Print's `{ elevation: 58, azimuth: 4, turn: 94, zoom: { stacked: 1.75,
-side: 1.4 }, lift: { stacked: 0.14, side: 0 }, sway: 13 }` was fitted to the
-user's phone screenshot: a throwaway build (never committed) froze the turn
-and gather and exposed a hook to set the view; renders at the screenshot's
-viewport were scored by overlap (IoU) of their point masks, coarse then
-fine, which also showed the leftover error was placement - hence `lift`.
-The fitted phone zoom 1.9 was eased to 1.75 on request (it cropped the
-pavilion); desktop uses 1.4 and no lift. `turn` is the screenshot's 118°
-less the 24° the model turns during the gather, so the shot is on screen as
-the gather completes - it shifts if `GATHER_DURATION`, `DETAIL_ROTATE_SPEED`
-or `DETAIL_MODEL_YAW` change.
-
-Emergent Space's `view` is there for the framing as much as the angle:
-without one the fit is the model's box at the moment it opens, and on a
-phone (`DETAIL_MARGIN.stackedParked` crops in) a single aggregate's long
-arms ran off the screen as it turned. Framed on its cube, they stay in.
-
-
-Fitting allows for depth and for what else is on screen
--------------------------------------------------------
-
-`frameDetail` adds the box's depth along the view axis (the near face
-projects larger), and fits into what's left once the drawer (width side by
-side, height on a phone) and the bar (height, phones only, measured live by
-`barFraction()`) have taken their share. `DETAIL_MARGIN` (default view
-only) crops in on a phone with the drawer parked - a width-limited fit
-would leave the model in a thin band - and backs off past 1 with it open,
-where height is the limit.
-
-
-The open drawer: the whole model beside it, or a close-up below it
-------------------------------------------------------------------
-
-`frameWithDrawerOpen` decides, for the drawer, resize, a late model load and
-zooming back out. On a wide screen the drawer sits beside the model, so
-`frameDetail` fits it into the space left (the project's `view` and side
-zoom kept); the hint and zoom work there, kept clear of the drawer. On a
-phone the drawer covers the lower half, so it's the close-up
-(`frameDetailCloseup`: `CLOSEUP_ELEVATION` 38° on the project's heading,
-`CLOSEUP_DISTANCE_FACTOR` of its radius) - an atmospheric crop, not the
-whole piece. Rock Print's steeper angle left only fragments of pillars
-there, hence the fixed elevation.
-
-A pile (Emergent Space) is framed on its aggregates instead, in both
-layouts - a zoom in on the three, asked for by the user: `pile.bounds()`
-gives their extent from their points (or, still falling, where a settled
-pile lies) as a box round the axis the pile turns about, and `frameDetail`
-fits that box (`fit`) into the space beside or above the drawer, closer on
-a phone (`PILE_DRAWER_ZOOM`), where the box's allowance for any turn and
-for depth left it small in the short strip. The plain close-up showed only
-a couple of rods; fitting the whole cube showed a small pile. On a phone
-1.6 kept the pile about the size it was with the drawer parked - the user
-asked again for a zoom there - so it is 2.2: the pile fills the strip
-above the drawer and its outer rods may run off the edges.
-
-
-The model turns; the camera nods (`view.sway`)
-----------------------------------------------
-
-The model turns inside the pebble's place, a full turn every 80s
-(`DETAIL_ROTATE_SPEED`; 40s read as too fast), computed from
-`detailRotateStartTime` (reset when the model appears, which the gather
-shares). The fit is computed once at the start angle; Rock Print stays in
-frame across a full turn.
-
-`view.sway` (Rock Print 13°) nods the camera that far above and below, over
-`SWAY_PERIOD` (22s, asked for "a bit slower" than 16s; 8° over 20s read as too subtle). `updateSway` applies
-it as a change from last frame's angle about the camera's right axis
-through the target, so it rides on whatever the camera is doing - landing
-view, drawer, zoom, the visitor's orbit. It holds while a move is in flight
-or the visitor orbits, and until the gather is done, then restarts from
-zero with a `SWAY_EASE_IN`, so it never jumps. Only elevation changes.
-Opt-in: it would break a square-on default view.
-
-
-Double-click / double-tap zoom, and the touch-point hint
---------------------------------------------------------
-
-`toggleDetailZoom` moves the camera to `DETAIL_ZOOM` (40%) of its distance
-towards the cloud's nearest point under the pointer, keeping the direction
-of view; again returns to the frame. A mouse uses `dblclick`; touch
-double-taps are timed by hand on `pointerup` by the events' own
-`timeStamp` (`DOUBLE_TAP_TIME`, `DOUBLE_TAP_DISTANCE`) - phones don't
-reliably send `dblclick`, and where they do it's ignored for touch, or it
-would zoom in and straight back out.
-
-`#tap-hint` is a white disc with a black outline and rings that presses
-twice (2.2s CSS animation), readable over the cloud, the fog and the paper,
-and not competing with the orange. Its size (`--hint-size`) follows the
-screen's shorter side, 3vmin between 1.1rem (a phone, as before) and 2.6rem;
-it sits at `z-index` 2, over the canvas. `maybeShowTapHint` shows it once
-the gather is done, then every `TAP_HINT_GAP` (5s), on a random on-screen
-point of the cloud clear of the bar and any side drawer - zoomed in too,
-where it invites zooming back out. It skips while the camera moves or a
-phone's drawer is open.
-
-Hanging from the dot's bottom, asked for "similar to the string and text"
-of the catalog: the spotlight's string and lettering, with just
-"double-click" ("double-tap" on a touch screen, by `(hover: none)`), set
-by App's `showTapHint` when a hint appears. Both in the dot's black
-(`--hint-line`) - first orange with "Double-click to zoom in" (or "zoom
-out" while zoomed), until the user asked for the one word, in black. It is the same rope as the spotlight's (`createRope` and
-`drawRope` in `engine/tags.js`, the spotlight's unchanged) with the
-`HINT_*` settings: elastic and slack where the spotlight's is stiff, so it
-starts bunched up at the knot (`HINT_OPEN`), falls open, overshoots to
-about 1.5 times its length and bounces, and each of the dot's two presses
-tugs it again (`HINT_TAPS`, matching `tap-hint-press`). It lives and fades
-with the dot's 2.2s (`HINT_LIFE`, `hintOpacity` copying `tap-hint-life`),
-so the CSS animation and those constants must change together. Hints now
-stay above the lower quarter of the screen (y > -0.5), leaving room for
-the words below. The tags' engine module gets the hint through
-`index.js`, which wraps the `ui` handed to `detail.js` - the dot stays
-React's, the string the engine's.
-
-
-The project view: point cloud
-=============================
-
-
-Quantized, not Draco-compressed
--------------------------------
-
-The original `.glb` declared Draco but nothing used it: 2.2 MB of raw
-float32, plus a 336 KB decoder downloaded for nothing. Draco doesn't apply
-to non-indexed POINTS at all. `KHR_mesh_quantization` does: int16 positions
-and uint8 colours, 28 -> 10 bytes a point, 2.2 MB -> 922 KB, about a
-millimetre of precision. COLOR_0 (the scan's colours) is still in the file
-but unread - dropping it would save ~315 KB. `static/draco/` keeps the
-decoder for any model that genuinely uses Draco.
-
-
-A mesh becomes points as it loads
----------------------------------
-
-Emergent Space's `aggregate.glb` came as a plain triangle mesh from Blender
-(36 KB, ~1,250 vertices, ~115 units across), not a point cloud. Rather than
-convert it offline, `loadPointCloudWithShaderMaterial` turns any `.glb` with
-no POINTS in it into a cloud (`pointsFromMeshes`): `MESH_SAMPLE_POINTS`
-(20,000; a project's `points` overrides it - Emergent Space uses 8,000, as
-60,000 and then 20,000 read as solid rods on the aggregate's thin arms)
-points scattered over the surface with three.js's `MeshSurfaceSampler`,
-shared between meshes by area, in world space (so the file's own rotation
-holds), then centred and scaled so the longest side is `MESH_FIT_SIZE`
-(cubeSize), since a mesh arrives in whatever units it was drawn in. From
-there it is an ordinary cloud: inks, sizes, gather. It downloads a fraction
-of what a sampled cloud would weigh (Rock Print's 78k quantized points are
-922 KB) and a mesh exported from Rhino or Blender works as it is. A real
-point cloud is left exactly as it is. Emergent Space's aggregates are now
-drawn as the mesh itself (`drop.solid`, below); its sampled points are no
-longer seen.
-
-
-Emergent Space: aggregates dropped with live physics
-----------------------------------------------------
-
-The user asked for three aggregates falling onto a surface and interlocking,
-and chose live physics - a fresh drop every time the project opens - over a
-drop simulated once and played back, or one exported from their own
-Blender/Rhino simulation. A project's `drop: { count, size, ground }` does it
-(`src/pile.js`):
-
-- **The engine is cannon-es**, plain JavaScript, 36 KB gzipped. It's a
-  separate chunk loaded by `import()` only when a pile is built, and
-  `startDrop` starts that download as the pebble is clicked; the catalog
-  and Rock Print never load it.
-- **Collision shapes come from the mesh.** `findRods` finds the straight
-  rods a crossed-rod aggregate is made of (the furthest vertex gives a
-  direction, the vertices near that line refine it and give length and
-  radius) and each becomes a cylinder, `PILE_COLLISION_FATTEN` thicker than
-  drawn so the thin rods never pass through each other. The aggregate's
-  three rods are ~27 times longer than thick. A mesh that isn't made of
-  rods would need another shape.
-- **Drawn solid** (`drop.solid`, at the user's request - "not as point
-  clouds"): the mesh itself, merged into the fitted space (`userData.solid`
-  from `pointsFromMeshes`), each copy a THREE.Mesh in `makeInkMaterial` -
-  orange where it faces a fixed light, deepening to the dark red, the
-  points' inks laid on as shade rather than the scene's cyan lights. Without
-  `solid` each copy is the shared sampled cloud. Either way `pile.sync()`
-  moves each to its body every frame, and the ground stays points.
-- **The ground is the clicked pebble.** At the user's request the points the
-  pebble dissolves into swell out, then fall - each in turn, gathering speed
-  - to a place on a disc on the ground (`aGround`, `uGround` in the dissolve
-  shader; `PILE_SURFACE_RADIUS`), turn the grey ink, shrink and lighten, and
-  stay as the surface the aggregates land on: no crossfade and no end for a
-  project with a `drop` (`points.userData.ground` in `updateDissolve`). It's
-  laid by about 2.5s after the click, before the first aggregate lands, and
-  turns with the pile once it has settled (the dissolve is the pebble's
-  child, the pile the model's, so it's turned by hand; `startDrop` squares
-  it to the pebble again). A separate faint disc of grey points came first;
-  at full size the falling points read heavy and dark, hence the shrink.
-- **Tuned to interlock.** Dropped a few hundred times off screen (the same
-  cannon-es setup in Node, counting drops where all three end up
-  touching): a lively drop - more spin, bounce and spread - left them
-  apart about half the time. Low bounce, high friction, damped tumbling,
-  a small start spread and a gentle pull to the middle (`PILE_PULL`, as if
-  the surface were a shallow dish; it also keeps the pile centred in the
-  frame) got 58 in 60. It settles in about 4.5s.
-- **Watchable**: at first the drop was over before anything could be seen -
-  it started the moment the model loaded, under the camera's move in and
-  the points' fade-in. Now they're held, hidden, for `PILE_WAIT` (1.2s),
-  start above the frame (`PILE_FIRST_HEIGHT` 2 sizes up; still 58 in 60
-  interlocking) so each falls into view, and the whole thing plays at
-  `PILE_TIME_SCALE` (0.4; 0.6 until asked to fall slower) - slow motion, which changes nothing about how
-  they land.
-- **Settle, then turn**: the model's slow turn waits for `pile.settledAt`
-  - the moment the pile *looks* still: every body under `PILE_REST_SPEED`
-  (0.12 sizes/s) and `PILE_REST_SPIN` (0.35 rad/s) for `PILE_REST_TIME`
-  (0.2 simulated s), or `PILE_SETTLE_AFTER`. It used to wait for cannon to
-  put every body to sleep, and the turn visibly lagged the landing (asked
-  to fix): cannon's test lumps linear and angular speed together against
-  one size-scaled limit, then waits 0.6s more, and a long thin rod's last
-  rock decays slowly - measured over two drops, they stopped moving by sim
-  ~3.0s and fell asleep at ~3.95s, a 2.4-2.7s wait on screen. Now the turn
-  starts 0.45-0.5s after they look still (the 0.2s is deliberate, so a
-  pause mid-tumble can't start it). The physics keeps stepping until cannon
-  does sleep (`pile.asleep`), so nothing freezes mid-wobble; the model just
-  turns sooner. The bodies' own physics is unchanged, so the interlock rate
-  is too. Reopening calls `restart()` for a new drop.
-- **"Drop again"** (asked for): a small button in the project bar, on the
-  same line as "All projects" and in its style, shown for any project with
-  a `drop` once its model has loaded - so it's Emergent Space today, with no
-  per-project code. On its own line it would make the bar taller, and on a
-  phone the bar's height is reserved out of the model's framing, so the
-  shot would move. It calls `restart(PILE_REPLAY_WAIT)` - 0.3s rather than
-  `PILE_WAIT`'s 1.2s, since there's no camera move to wait for - and keeps
-  the angle the model had reached (`turnOffset`, read through `modelTurn`
-  in camera/framing.js) instead of snapping back to where it opened: the
-  new drop falls at that angle and the turn carries on from it once it
-  settles. The ground and the camera stay as they are.
-- **And on its own** (asked for, first every 5 seconds, then 10):
-  `drop.repeat: 10` drops it again 10s after each drop comes to rest
-  (`maybeRepeatDrop` in detail.js, through the same replay). Timed from the
-  rest, not the start: a drop takes 5-8s to land on screen, so a plain
-  clock would cut a short repeat off mid-fall. A project setting rather
-  than code, so another `drop` can repeat or not; "Drop again" resets the
-  wait.
-- **A close-up on an interlock between drops** (asked for, replacing the
-  10s repeat): `drop.closeUp: { hold: 5, after: 5 }`. `CLOSE_UP_AFTER` (1s,
-  the dots faded in) after the pile looks still, the camera moves in
-  (`CLOSE_UP_ZOOM` 0.3 of its distance, over `CLOSE_UP_MOVE` 1.6s - slower
-  than a double-click's zoom, to read as the piece presenting itself) on a
-  random marked crossing that will be on screen, holds `hold` seconds,
-  reframes out, and drops again `after` seconds later (`runCloseUp` in
-  detail.js). The pile keeps turning throughout - the turn wasn't to stop -
-  so the move aims where the crossing will be when the camera arrives
-  (`contactAhead`), and from then on the camera is translated with the
-  crossing each frame, keeping it centred while the pile turns round it.
-  That following stops if the visitor zooms out or orbits; "Drop again",
-  a drawer reframe or closing the project all end the close-up. No marked
-  crossing: it just waits and drops. The tap hint stays away while the
-  camera is in. Requires `contacts`; can't be combined with `repeat`
-  (`defineProject` throws).
-- **The turn slows to a stop before each new drop** (asked for - the
-  floor stopping dead looked abrupt). The model and its floor share one
-  turn (`modelTurn`), which froze the instant the pile restarted. Now
-  `pile.turnStop` ({ at, over }) lets its speed fall evenly to nothing:
-  the close-up starts it `TURN_STOP` (3s) before its drop, so it is still
-  by the time the old pile dissolves; "Drop again" (or `repeat`) starts it
-  at once, over the dissolve and wait (1.5s). The new drop takes the
-  stopped angle as before. The turn still starts at full speed when the
-  next pile settles.
-- **No double-click zoom here** (asked for): `doubleClick: 'none'` on the
-  project (first `zoom: false`) turns off double-click/double-tap zoom and
-  its hint (`detail.doubleClick`, `maybeShowTapHint`); the close-ups are
-  the zoom. The close-up's own
-  camera move doesn't go through `toggleZoom`, so it's unaffected.
-- **The fallen pile dissolves away** before each new drop rather than
-  vanishing (asked for - "less abruptly"): `pile.replay()` runs a
-  `PILE_FADE_OUT` (1.2s, eased) before `restart()`, keeping the turn going
-  meanwhile and taking the angle at the moment of the new drop. It's a
-  dissolve into a fine grain (`uFade` in `makeInkMaterial`: a fixed hash
-  over the mesh's own space, more of it discarded as it rises), not an
-  alpha fade: the aggregates are opaque, and three interlocked transparent
-  solids would need sorting and show it. A sin-free hash, since sin() of
-  large arguments loses precision on some mobile GPUs. A pile of points
-  (no `solid`) still restarts at once.
-- **Pulsing dots where they interlock** (`drop.contacts`, asked for): read
-  straight from cannon's own contacts between two aggregates (the ground's
-  left out), merged within `CONTACT_MERGE` of a size since two rods crossing
-  give a cluster, faded with the dissolve. Gathered over the settle rather
-  than replaced each step: cannon stops reporting a contact once both
-  bodies touching are asleep, and they sleep one by one. Shown only once
-  every aggregate is asleep (`pile.restedAt`), not when the pile first
-  looks still: in that last second a crossing could slide or part, and a
-  dot read as a fixed point was left hanging in the air ("false or in the
-  air", the user). So each crossing is kept in both bodies' own frames,
-  following them, and on sleep any whose two sides have drifted more than
-  `CONTACT_PARTED` (0.04 of a size) apart is dropped. The close-up waits
-  for them (`CLOSE_UP_AFTER` from `restedAt`). Blue, asked for (graphite at first, then cyan; not orange, which
-  means "click me"); the velocity arrows stay graphite. Each dot a solid centre with a ring
-  spreading on its own beat; drawn over the rods so a crossing at the back
-  isn't lost.
-- **Live velocity** (`drop.velocity`, asked for), the way the project's own
-  simulation plots clump velocity: an arrow from each aggregate's centre
-  along its motion, as long as it is fast, and its speed beside it in m/s -
-  physical speed with the aggregate taken as `PILE_REAL_SIZE` across, not
-  the 0.6x playback. Both fade out as it slows (`VELOCITY_GONE` to
-  `VELOCITY_FULL`), so the fall shows velocity and the settled pile shows
-  the interlocking dots. The numbers are HTML placed from the render loop
-  through refs (`detail.updateVelocityTags`), never React state.
-- **A trap this hit**: the point-cloud loader walks the whole model after
-  the pile is built and gives every `Points` the cloud's shader - including
-  the dots, whose own uniforms then vanished and threw every frame (which
-  also stopped the turn). A `Points` that brings its own look sets
-  `userData.ownMaterial`. Measured with a throwaway hook over two cycles:
-  each new drop 11.85s after the last settled (10 + the 1.2s dissolve + the
-  0.3s wait), up to six crossings marked, three arrows and live readings
-  while falling and none at rest, the turn continuous, no errors. The physics steps
-  with the frame time (capped like the flow), so a slow device plays it
-  slower rather than jumping.
-- **Framed** with `view: { elevation: 30, zoom: ... }` on the cube, like
-  Rock Print: the drop starts above the frame and lands in it. A phone gets
-  hardly any zoom (1.05): the pile lands up to a third of its size off
-  centre, and at 1.3 that cut it at the edge.
-
-Timed zooms on Rock Print (`autoZoom`), holding it, from inside
----------------------------------------------------------------
-
-Asked for: "zoom ins and outs on the model every 10 seconds". `autoZoom: 10`
-moves the camera in on a random point of the cloud (to `AUTO_ZOOM`, 0.4 of
-its distance - the double-click's), then 10s later back out to the frame,
-and so on, from once the points have gathered (`maybeAutoZoom` in
-detail.js). The same move as Emergent Space's close-up (`CLOSE_UP_MOVE`,
-1.6s) and the same following (`follow`): aimed where the point will be
-when the camera arrives, then translated with it as the model turns, so
-it stays put on screen. Postponed a second at a time while the camera is
-moving, the visitor orbits, or a phone's drawer covers the model; a
-visitor's own double-click restarts the wait, so it isn't undone straight
-away. Can't go with a `drop` (its close-ups are the zoom there). The
-sway carries on, nodding about the zoomed-in point. If a move runs long
-(a slow frame), the point ends a little off centre and is followed from
-there - not re-centred, since the centre beside a side drawer is offset.
-
-**A double-click holds it still instead** (asked for: "no zoom in, but
-the model stops rotating until the user double clicks again").
-`doubleClick: 'hold'` (the project setting that also gives 'zoom', the
-default, and 'none') toggles `model.userData.held` ({ total, at }), which
-`modelTurn` subtracts, so the turn picks up exactly where it stopped. The
-camera's nod holds with it (`updateSway`'s `held`), and the timed zoom
-waits while held and for a full round after. The hint still says
-"double-click".
-
-**From inside, at eye level** (asked for: "zoom ins from inside the
-pavilion as if you are at a person's height looking through the
-columns"). `eyeLevel: 0.4` makes every other timed zoom a walk in to a
-spot inside (`findInsideSpot`, `camera/inside.js`): the points within
-`SLAB` of that share of the height binned into a grid over the footprint,
-the most open cell (furthest from any column, by a breadth-first pass)
-that has columns on all four sides, among the best `CHOICES` at random;
-the gaze is the longest clear line from it that ends on a far column.
-There the camera is held in the model's own frame - turning with it, so
-it can't walk into a column as it turns - and the gaze drifts
-`INSIDE_PAN` either side over `INSIDE_PAN_PERIOD`; the nod holds off, to
-keep it at eye height. 0.4 of the height including the ground: the
-pavilion is 1.88 units tall in the scene, so about a person's eyes if its
-columns are ~4m. Three things had to change for it, measured in a
-throwaway build: the camera's near plane (1 unit) clipped ~6,000 points
-of the nearest columns, so it drops to `INSIDE_NEAR` (0.05) while inside
-and back once out (`rig.baseNear`); world-sized points 0.6 units away drew
-as blots, so `gl_PointSize` is capped at `uPointScale * 0.5` (only points
-within about a unit reach it, so every other view is unchanged); and the
-lens widens to `INSIDE_FOV` (65°), more on a tall phone so it's at least
-`INSIDE_WIDTH` (55°) across, up to 90° - at 30° a phone saw one column.
-The first try looked a random way and straight into a column.
-
-
-Point size, three sizes, three inks
------------------------------------
-
-`uPointScale` carries pixels-per-world-unit from JS (`uSizeAttenuation` for
-the projection), so points keep their size across pixel ratios. Each point
-is one of `POINT_SIZES` (0.6, 1, 1.6) and one of `POINT_INKS` (dark red,
-orange, warm grey), picked once at load (`aScale`, `aTone`) so the speckle
-turns with the model; no point lays down more than `POINT_OPACITY` (0.6).
-The shader takes exactly three inks (`uInks[3]`).
-
-
-Points gather out of a scattered cloud
---------------------------------------
-
-With `gather: true`, every open starts the cloud as a flattened ball around
-the model that condenses over `GATHER_DURATION` (5.4s; 3.6s felt rushed),
-each point
-spiralling home at its own moment - all in the vertex shader, one uniform a
-frame. `addGatherAttributes` gives each point a start (`aScatter`, in the
-cloud's own quantized space, where three.js's bounding box also lives) and
-a delay (`aGatherDelay`). `setGather` only touches clouds loaded to gather,
-or the shader would read a missing start as the origin. The gather's maths
-lives in `shaders/pointCloud/gather.glsl`, put in front of the points' and
-the tails' vertex shaders in script.js, so both place a point the same way.
-
-
-Tails behind moving points
---------------------------
-
-Asked for: tails on every point moving on screen, gone once the points
-have formed Rock Print or the ground. Two motions qualify - the gather and
-the clicked pebble's dissolve (flying apart, or falling into Emergent
-Space's ground) - and both are pure functions of one progress uniform, so a
-tail needs no history: its shader asks the same function where the point
-was a moment earlier (`GATHER_TRAIL`, `DISSOLVE_TRAIL`, in seconds) and
-draws a quad from there to the point, as wide as the point at its head and
-tapering to nothing, fading down its length (`shaders/trail/`,
-`addTrails`). Chosen over a trail of ghost points (beads, and many times
-the points to draw) and over line segments (WebGL lines are one device
-pixel wide, too faint at a phone's pixel ratio).
-
-- **One instanced quad per point**, its corner in `position` and the
-  cloud's own attributes as instance attributes (its place as `aHome`,
-  read out of the quantized cloud as floats). The material spreads in the
-  points' own uniform objects, so the gather, reveal, point scale and flux
-  drive the tails with no extra code; only `uResolution`
-  (`trailResolution`, set each frame), the lag and `TRAIL_OPACITY` are
-  theirs.
-- **Disappearing**: a point easing into place slows, so its tail shrinks to
-  nothing by itself (under ~2 pixels it's hidden); `setGather` and
-  `updateDissolve` switch the tails off once the motion is over, so they
-  cost nothing after.
-- The tails' geometry carries the cloud's bounding box, not the quad's:
-  `frameDetailCloseup` measures the model with `Box3.setFromObject`.
-
-
-Safari: defined GLSL, visible failures
---------------------------------------
-
-Reported: tapping Rock Print's pebble on Safari did nothing, with no error.
-Likely cause: selection listened for `click` on window, which iPhone/iPad
-Safari doesn't send for a tap on a plain canvas - now it's `pointerup` on
-the canvas. This couldn't be reproduced here (no WebKit in cloud sessions;
-its download is blocked). Three other fixes made blind stay, as they're
-correct anyway:
-
-- **No undefined GLSL.** A reversed `smoothstep(1.0, 0.01, x)` and a
-  `pow()` at 0 are undefined and Safari's Metal backend needn't do what
-  Chrome does (a NaN hides every point); both rewritten to identical,
-  defined forms. Keep shader code inside what GLSL ES defines.
-- **Stacking by z-index, never page order.** The fog is under the canvas
-  (0 and 1); the catalog's tags and string and the tap hint are over it (2).
-  At equal z-index Safari drew the canvas over later layers - the hint
-  showed behind the point cloud, the names behind the glass.
-- **Failures say so.** A failed model load or shader compile
-  (`renderer.debug.onShaderError`) puts a message in the project bar, with
-  the real error in the console.
-
-
-Page, colour and drawer
-=======================
-
-
-The whole site is paper
------------------------
-
-Dark ink (`--ink`) on a warm light ground (`--bg` #f0ede6), a deep teal
-accent, the orange invitation; the pebbles are shaded in graphite.
-The background is the page, not the scene: the renderer is transparent (an
-old `Sky` dome that painted it dark is gone). Nothing is additive - on
-paper, adding light draws nothing - so glass and points blend normally.
-Scene colours go through `screenColor()`. The loader's `palette.bg` must
-stay equal to `--bg`.
-
-
-Scene fog is off; the grey fog is a page layer
-----------------------------------------------
-
-`scene.fog` was `Fog(..., 15, 8)` - near beyond far, which fogged anything
-close to the camera; re-adding it needs near < far and a range for both
-views. The grey fog behind an open project is `#fog`, a CSS layer between
-the paper and the canvas (in over 3.2s, out over 1.2s): lighter in the
-middle, with two soft banks drifting. Scene fog would grey the model
-itself; a page layer touches nothing in the renderer.
-
-
-Faded faces don't write depth
------------------------------
-
-While a project is open the catalog's faces fade to 0 with
-`depthWrite = false`, restored on close with the reveal; otherwise an
-invisible face still hides what's behind it.
-
-
-No description, no drawer
--------------------------
-
-`hasDescription` (any of `year`, `role`, `context`, `body`, `credits`,
-`images`) gates the drawer's handle, so an unwritten project never offers
-an empty panel. Placeholder copy isn't published as if real, and a role is
-stated only when it can be stated accurately. Rock Print's text is still a
-labelled placeholder.
-
-
-The bar's title moves into the drawer on a phone
-------------------------------------------------
-
-On a small phone the bar's title and the open drawer squeezed the model to
-a stamp. Below 860px the open drawer's header carries the title and the
-bar's hides (`body.drawer-open`); it crossfades rather than toggling
-`display`, or both showed at once on closing. The title is one line at
-every width (`nowrap`, ellipsis if ever too long).
-
-
-Drawer pictures
----------------
-
-`images` entries (`{ src, alt, caption, ratio, wide }`) render as figures
-under the text (`imageFigure`): the first full width, the rest two to a row
-unless `wide`, lazy-loaded, framed at their `ratio` so nothing jumps; no
-`src` is an empty dashed frame. The panel is 98% opaque so the cloud
-doesn't muddy them. Rock Print's five are photos sized for the drawer -
-lead 1500px, others 900px, ~1 MB in all, metadata stripped (CLAUDE.md has
-the recipe). Emergent Space's five are mostly diagrams with small text,
-unreadable at half the drawer, so all are `wide`: the landscape diagrams
-1500px across, the two portrait photos 1000px (enough for the drawer at
-twice the pixel density), ~950 KB in all. Captions/credits are empty for
-both.
-
-
-Asset paths resolve against the Vite base URL
----------------------------------------------
-
-Paths have no leading slash and go through `assetUrl`: Vite's `base`
-rewrites the HTML and imports but not strings handed to loaders at runtime,
-so absolute paths 404 under GitHub Pages' sub-path. Works at a domain root
-too.
-
-
-Loading
-=======
-
-
-The start-up loader is inline and waits for real progress
----------------------------------------------------------
-
-`#loader` is markup, CSS and a classic script in index.html, so it's on
-screen before the ~180 KB (gzipped) bundle arrives. Particles stream along
-braided currents around the wordmark, in paper, gathering strength with
-progress. Progress is
-real: script.js registers each start-up asset (`bootAsset`), and calls
-`window.fluxLoader.finish()` when all are done (failures count as done; a
-30s cap). It stays at least `MIN_VISIBLE` (5s), the bar showing the lesser
-of real progress and elapsed time so a fast load fills it steadily rather
-than jumping to 100%. All its animation runs on elapsed time, not frames.
-On a fast load it's gone ~6s after the page opens.
-
-**The streams carry on among the pebbles.** Asked for: the loader's
-particles floating on around the pebbles - and then, not crossing them
-even seen from above, drawn on the plane through their middles. A first
-version kept the loader's 2D canvas running behind the WebGL canvas, the
-streams parting round the pebbles' circles on screen; they still read as
-passing through. Now, as the loader fades (`EXIT`, 2.6s, its own streams
-calming to `AMBIENT_*`), the same current carries on in the scene
-(`src/streams.js`, `createStreams`): `STREAM_COUNT` streams on the y = 0
-plane, each a fading line through its last `STREAM_HISTORY` points,
-shaded between the loader's two colours by the way it flows. They part
-round each pebble's circle in the scene (`PART_REACH`, `PART_TURN`: the
-part of the drift heading into one is turned aside, one inside is eased
-out), and they draw after the pebbles (`renderOrder` 3), depth-tested, so
-a pebble's top hides whatever passes under it. A pebble only writes depth
-once it has mostly arrived (`applyArrival`), or the arriving, still
-invisible ones would cut holes in the streams. They fill the plane the
-overhead camera sees, start with the arrival and fade out while a project
-is open. WebGL lines are one device pixel: thinner on a phone than the
-canvas's were.
-
-**They drift towards the pointer.** Asked for: while the mouse moves over
-the grid, or while a finger is down, the streams float slowly towards it,
-and go back to their own current once the mouse stops
-(`STREAM_POINTER_IDLE`, 0.35s) or the finger lifts. The pull eases in and
-out (`PULL_IN`, `PULL_OUT`), takes over most but not all of a stream's way
-(`PULL_SHARE`), at `PULL_SPEED` - slower than the current - and slows
-within `PULL_SLOW` of the pointer so they gather rather than swarm. The
-parting round the pebbles still applies on the way. script.js tracks the
-pointer on the streams' plane (`trackStreamPointer`), apart from the
-flow's own tracking, since a tap with no move must count too.
-
-
-`?cloudtest`, and why clouds load on click
-------------------------------------------
-
-`?cloudtest` fills every slot with a copy of the first project, each with
-its own `?copy=n` URLs so they download as ten projects would. Its first
-version loaded all ten clouds at start-up, measured here (phone viewport,
-cache off, gzipped):
-
-| Connection        | Normal: models done | Normal: total | Ten clouds at start-up | total   |
-|-------------------|--------------------:|--------------:|-----------------------:|--------:|
-| Wi-Fi, 30 Mbps    |               0.8s  |       0.48 MB |                   3.2s | 9.66 MB |
-| Fast 4G, 9 Mbps   |               1.0s  |       0.48 MB |                   9.2s | 9.66 MB |
-| Slow 4G, 1.6 Mbps |               2.5s  |       0.48 MB |                  49.2s | 9.66 MB |
-
-So clouds load only when a project is opened; ten rock thumbnails cost
-~2 MB. Remove the flag once real projects fill the grid.
-
-
-The catalog, continued
-======================
 
 
 A pebble's colour drifts with its shape
@@ -1111,6 +470,636 @@ at 0.20 moves its densest parts by around 22 counts over a wave. Judge it by
 eye on the live site; `TONE` and `AMOUNT` are the two dials.
 
 
+The project view: camera
+========================
+
+
+The detail camera looks along the catalog's screen-up; every move slerps
+------------------------------------------------------------------------
+
+Opening and closing used to roll the grid 90°: the detail camera looked
+along +X, so the two views disagreed about "sideways", and the roll landed
+in one frame at OrbitControls' overhead pole. The detail camera's default
+heading (azimuth 0 in `viewDirection`) now sits on +Z looking along -Z, the
+catalog's screen-up, so every transition is a pure tilt; the model is
+turned a quarter (`DETAIL_MODEL_YAW`) to show the face it was authored for.
+
+Every animated move goes through `moveCamera`, which tweens position and
+target and slerps the quaternion to exactly where `lookAt` would leave it,
+with `rig.orientationLocked` keeping `controls.update()` out until it
+lands. It and `animateFov` cancel any move in flight first. To verify: on a
+pure tilt the quaternion's Y and Z stay 0 (Rock Print: ~0.03, its 4°
+azimuth). If the catalog's axes ever change, azimuth 0 must follow its
+screen-up; keep a project's `view.azimuth` small.
+
+
+The default view, and a project's own `view`
+--------------------------------------------
+
+Without a `view`, the camera looks square-on along Z (one-point
+perspective; an oblique view and `DETAIL_PROJECTION = 'orthographic'` were
+tried and rejected). `DETAIL_FOV` is 45° side by side, 30° on a phone,
+where 45° reads as a tunnel. `controls.autoRotate` stays off; the model
+turns instead.
+
+A project's `view` sets its landing shot: `elevation`, `azimuth`, `turn`
+(the model's spin when it appears), and optionally `zoom` (closer than the
+cube's fit) and `lift` (higher on screen, a share of its height), each one
+number or `{ side, stacked }`. A `view` is framed on the cube, not the
+model's bounding box (which balloons with scattered points), with
+`VIEW_FRAME_MARGIN`; on a phone with the drawer parked, it centres on the
+whole screen if the cube's top clears the bar.
+
+Rock Print's `{ elevation: 58, azimuth: 4, turn: 94, zoom: { stacked: 1.75,
+side: 1.4 }, lift: { stacked: 0.14, side: 0 }, sway: 13 }` was fitted to the
+user's phone screenshot: a throwaway build (never committed) froze the turn
+and gather and exposed a hook to set the view; renders at the screenshot's
+viewport were scored by overlap (IoU) of their point masks, coarse then
+fine, which also showed the leftover error was placement - hence `lift`.
+The fitted phone zoom 1.9 was eased to 1.75 on request (it cropped the
+pavilion); desktop uses 1.4 and no lift. `turn` is the screenshot's 118°
+less the 24° the model turns during the gather, so the shot is on screen as
+the gather completes - it shifts if `GATHER_DURATION`, `DETAIL_ROTATE_SPEED`
+or `DETAIL_MODEL_YAW` change.
+
+Emergent Space's `view` is there for the framing as much as the angle:
+without one the fit is the model's box at the moment it opens, and on a
+phone (`DETAIL_MARGIN.stackedParked` crops in) a single aggregate's long
+arms ran off the screen as it turned. Framed on its cube, they stay in.
+
+
+Fitting allows for depth and for what else is on screen
+-------------------------------------------------------
+
+`frameDetail` adds the box's depth along the view axis (the near face
+projects larger), and fits into what's left once the drawer (width side by
+side, height on a phone) and the bar (height, phones only, measured live by
+`barFraction()`) have taken their share. `DETAIL_MARGIN` (default view
+only) crops in on a phone with the drawer parked - a width-limited fit
+would leave the model in a thin band - and backs off past 1 with it open,
+where height is the limit.
+
+
+The open drawer: the whole model beside it, or a close-up below it
+------------------------------------------------------------------
+
+`frameWithDrawerOpen` decides, for the drawer, resize, a late model load and
+zooming back out. On a wide screen the drawer sits beside the model, so
+`frameDetail` fits it into the space left (the project's `view` and side
+zoom kept); the hint and zoom work there, kept clear of the drawer. On a
+phone the drawer covers the lower half, so it's the close-up
+(`framing.frameCloseup`: `CLOSEUP_ELEVATION` 38° on the project's heading,
+`CLOSEUP_DISTANCE_FACTOR` of its radius) - an atmospheric crop, not the
+whole piece. Rock Print's steeper angle left only fragments of pillars
+there, hence the fixed elevation.
+
+A pile (Emergent Space) is framed on its aggregates instead, in both
+layouts - a zoom in on the three, asked for by the user: `pile.bounds()`
+gives their extent from their points (or, still falling, where a settled
+pile lies) as a box round the axis the pile turns about, and `frameDetail`
+fits that box (`fit`) into the space beside or above the drawer, closer on
+a phone (`PILE_DRAWER_ZOOM`), where the box's allowance for any turn and
+for depth left it small in the short strip. The plain close-up showed only
+a couple of rods; fitting the whole cube showed a small pile. On a phone
+1.6 kept the pile about the size it was with the drawer parked - the user
+asked again for a zoom there - so it is 2.2: the pile fills the strip
+above the drawer and its outer rods may run off the edges.
+
+
+The model turns; the camera nods (`view.sway`)
+----------------------------------------------
+
+The model turns inside the pebble's place, a full turn every 80s
+(`DETAIL_ROTATE_SPEED`; 40s read as too fast), computed from
+`detailRotateStartTime` (reset when the model appears, which the gather
+shares). The fit is computed once at the start angle; Rock Print stays in
+frame across a full turn.
+
+`view.sway` (Rock Print 13°) nods the camera that far above and below, over
+`SWAY_PERIOD` (22s, asked for "a bit slower" than 16s; 8° over 20s read as too subtle). `updateSway` applies
+it as a change from last frame's angle about the camera's right axis
+through the target, so it rides on whatever the camera is doing - landing
+view, drawer, zoom, the visitor's orbit. It holds while a move is in flight
+or the visitor orbits, and until the gather is done, then restarts from
+zero with a `SWAY_EASE_IN`, so it never jumps. Only elevation changes.
+Opt-in: it would break a square-on default view.
+
+
+Double-click / double-tap zoom, and the touch-point hint
+--------------------------------------------------------
+
+A double-click does what the project's `doubleClick` says (`detail.doubleClick`):
+`'zoom'`, the default, is `detail.toggleZoom`, which moves the camera to `DETAIL_ZOOM` (40%) of its distance
+towards the cloud's nearest point under the pointer, keeping the direction
+of view; again returns to the frame. A mouse uses `dblclick`; touch
+double-taps are timed by hand on `pointerup` by the events' own
+`timeStamp` (`DOUBLE_TAP_TIME`, `DOUBLE_TAP_DISTANCE`) - phones don't
+reliably send `dblclick`, and where they do it's ignored for touch, or it
+would zoom in and straight back out.
+
+The tap hint (`components/TapHint.jsx`) is a white disc with a black outline and rings that presses
+twice (2.2s CSS animation), readable over the cloud, the fog and the paper,
+and not competing with the orange. Its size (`--hint-size`) follows the
+screen's shorter side, 3vmin between 1.1rem (a phone, as before) and 2.6rem;
+it sits at `z-index` 2, over the canvas. `maybeShowTapHint` shows it once
+the gather is done, then every `TAP_HINT_GAP` (5s), on a random on-screen
+point of the cloud clear of the bar and any side drawer - zoomed in too,
+where it invites zooming back out. It skips while the camera moves or a
+phone's drawer is open, and not at all for a project with `doubleClick:
+'none'`.
+
+Hanging from the dot's bottom, asked for "similar to the string and text"
+of the catalog: the spotlight's string and lettering, with just
+"double-click" ("double-tap" on a touch screen, by `(hover: none)`), set
+by App's `showTapHint` when a hint appears. Both in the dot's black
+(`--hint-line`) - first orange with "Double-click to zoom in" (or "zoom
+out" while zoomed), until the user asked for the one word, in black. It
+is the same rope as the spotlight's (`createRope` and
+`drawRope` in `engine/tags.js`, the spotlight's unchanged) with the
+`HINT_*` settings: elastic and slack where the spotlight's is stiff, so it
+starts bunched up at the knot (`HINT_OPEN`), falls open, overshoots to
+about 1.5 times its length and bounces, and each of the dot's two presses
+tugs it again (`HINT_TAPS`, matching `tap-hint-press`). It lives and fades
+with the dot's 2.2s (`HINT_LIFE`, `hintOpacity` copying `tap-hint-life`),
+so the CSS animation and those constants must change together. Hints now
+stay above the lower quarter of the screen (y > -0.5), leaving room for
+the words below. The tags' engine module gets the hint through
+`index.js`, which wraps the `ui` handed to `detail.js` - the dot stays
+React's, the string the engine's.
+
+
+Timed zooms on Rock Print (`autoZoom`), holding it, from inside
+---------------------------------------------------------------
+
+Asked for: "zoom ins and outs on the model every 10 seconds". `autoZoom: 10`
+moves the camera in on a random point of the cloud (to `AUTO_ZOOM`, 0.4 of
+its distance - the double-click's), then 10s later back out to the frame,
+and so on, from once the points have gathered (`maybeAutoZoom` in
+detail.js). The same move as Emergent Space's close-up (`CLOSE_UP_MOVE`,
+1.6s) and the same following (`follow`): aimed where the point will be
+when the camera arrives, then translated with it as the model turns, so
+it stays put on screen. Postponed a second at a time while the camera is
+moving, the visitor orbits, or a phone's drawer covers the model; a
+visitor's own double-click restarts the wait, so it isn't undone straight
+away. Can't go with a `drop` (its close-ups are the zoom there). The
+sway carries on, nodding about the zoomed-in point. If a move runs long
+(a slow frame), the point ends a little off centre and is followed from
+there - not re-centred, since the centre beside a side drawer is offset.
+
+**A double-click holds it still instead** (asked for: "no zoom in, but
+the model stops rotating until the user double clicks again").
+`doubleClick: 'hold'` (the project setting that also gives 'zoom', the
+default, and 'none') toggles `model.userData.held` ({ total, at }), which
+`modelTurn` subtracts, so the turn picks up exactly where it stopped. The
+camera's nod holds with it (`updateSway`'s `held`), and the timed zoom
+waits while held and for a full round after. The hint still says
+"double-click".
+
+**From inside, at eye level** (asked for: "zoom ins from inside the
+pavilion as if you are at a person's height looking through the
+columns"). `eyeLevel: 0.4` makes every other timed zoom a walk in to a
+spot inside (`findInsideSpot`, `camera/inside.js`): the points within
+`SLAB` of that share of the height binned into a grid over the footprint,
+the most open cell (furthest from any column, by a breadth-first pass)
+that has columns on all four sides, among the best `CHOICES` at random;
+the gaze is the longest clear line from it that ends on a far column.
+There the camera is held in the model's own frame - turning with it, so
+it can't walk into a column as it turns - and the gaze drifts
+`INSIDE_PAN` either side over `INSIDE_PAN_PERIOD`; the nod holds off, to
+keep it at eye height. 0.4 of the height including the ground: the
+pavilion is 1.88 units tall in the scene, so about a person's eyes if its
+columns are ~4m. Three things had to change for it, measured in a
+throwaway build: the camera's near plane (1 unit) clipped ~6,000 points
+of the nearest columns, so it drops to `INSIDE_NEAR` (0.05) while inside
+and back once out (`rig.baseNear`); world-sized points 0.6 units away drew
+as blots, so `gl_PointSize` is capped at `uPointScale * 0.5` (only points
+within about a unit reach it, so every other view is unchanged); and the
+lens widens to `INSIDE_FOV` (65°), more on a tall phone so it's at least
+`INSIDE_WIDTH` (55°) across, up to 90° - at 30° a phone saw one column.
+The first try looked a random way and straight into a column.
+
+
+The project view: point cloud
+=============================
+
+
+Quantized, not Draco-compressed
+-------------------------------
+
+The original `.glb` declared Draco but nothing used it: 2.2 MB of raw
+float32, plus a 336 KB decoder downloaded for nothing. Draco doesn't apply
+to non-indexed POINTS at all. `KHR_mesh_quantization` does: int16 positions
+and uint8 colours, 28 -> 10 bytes a point, 2.2 MB -> 922 KB, about a
+millimetre of precision. COLOR_0 (the scan's colours) is still in the file
+but unread - dropping it would save ~315 KB. `static/draco/` keeps the
+decoder for any model that genuinely uses Draco.
+
+
+A mesh becomes points as it loads
+---------------------------------
+
+Emergent Space's `aggregate.glb` came as a plain triangle mesh from Blender
+(36 KB, ~1,250 vertices, ~115 units across), not a point cloud. Rather than
+convert it offline, `loadPointCloud` turns any `.glb` with
+no POINTS in it into a cloud (`pointsFromMeshes`): `MESH_SAMPLE_POINTS`
+(20,000; a project's `points` overrides it - Emergent Space uses 8,000, as
+60,000 and then 20,000 read as solid rods on the aggregate's thin arms)
+points scattered over the surface with three.js's `MeshSurfaceSampler`,
+shared between meshes by area, in world space (so the file's own rotation
+holds), then centred and scaled so the longest side is `MESH_FIT_SIZE`
+(`CUBE_SIZE`), since a mesh arrives in whatever units it was drawn in. From
+there it is an ordinary cloud: inks, sizes, gather. It downloads a fraction
+of what a sampled cloud would weigh (Rock Print's 78k quantized points are
+922 KB) and a mesh exported from Rhino or Blender works as it is. A real
+point cloud is left exactly as it is. Emergent Space's aggregates are now
+drawn as the mesh itself (`drop.solid`, below); its sampled points are no
+longer seen.
+
+
+Emergent Space: aggregates dropped with live physics
+----------------------------------------------------
+
+The user asked for three aggregates falling onto a surface and interlocking,
+and chose live physics - a fresh drop every time the project opens - over a
+drop simulated once and played back, or one exported from their own
+Blender/Rhino simulation. A project's `drop: { count, size, ground }` does it
+(`src/engine/pile.js`):
+
+- **The engine is cannon-es**, plain JavaScript, 36 KB gzipped. It's a
+  separate chunk loaded by `import()` only when a pile is built, and
+  `startDrop` starts that download as the pebble is clicked; the catalog
+  and Rock Print never load it.
+- **Collision shapes come from the mesh.** `findRods` finds the straight
+  rods a crossed-rod aggregate is made of (the furthest vertex gives a
+  direction, the vertices near that line refine it and give length and
+  radius) and each becomes a cylinder, `PILE_COLLISION_FATTEN` thicker than
+  drawn so the thin rods never pass through each other. The aggregate's
+  three rods are ~27 times longer than thick. A mesh that isn't made of
+  rods would need another shape.
+- **Drawn solid** (`drop.solid`, at the user's request - "not as point
+  clouds"): the mesh itself, merged into the fitted space (`userData.solid`
+  from `pointsFromMeshes`), each copy a THREE.Mesh in `makeInkMaterial` -
+  orange where it faces a fixed light, deepening to the dark red, the
+  points' inks laid on as shade rather than the scene's cyan lights. Without
+  `solid` each copy is the shared sampled cloud. Either way `pile.sync()`
+  moves each to its body every frame, and the ground stays points.
+- **The ground is the clicked pebble.** At the user's request the points the
+  pebble dissolves into swell out, then fall - each in turn, gathering speed
+  - to a place on a disc on the ground (`aGround`, `uGround` in the dissolve
+  shader; `PILE_SURFACE_RADIUS`), turn the grey ink, shrink and lighten, and
+  stay as the surface the aggregates land on: no crossfade and no end for a
+  project with a `drop` (`points.userData.ground` in `updateDissolve`). It's
+  laid by about 2.5s after the click, before the first aggregate lands, and
+  turns with the pile once it has settled (the dissolve is the pebble's
+  child, the pile the model's, so it's turned by hand; `startDrop` squares
+  it to the pebble again). A separate faint disc of grey points came first;
+  at full size the falling points read heavy and dark, hence the shrink.
+- **Tuned to interlock.** Dropped a few hundred times off screen (the same
+  cannon-es setup in Node, counting drops where all three end up
+  touching): a lively drop - more spin, bounce and spread - left them
+  apart about half the time. Low bounce, high friction, damped tumbling,
+  a small start spread and a gentle pull to the middle (`PILE_PULL`, as if
+  the surface were a shallow dish; it also keeps the pile centred in the
+  frame) got 58 in 60. It settles in about 4.5s.
+- **Watchable**: at first the drop was over before anything could be seen -
+  it started the moment the model loaded, under the camera's move in and
+  the points' fade-in. Now they're held, hidden, for `PILE_WAIT` (1.2s),
+  start above the frame (`PILE_FIRST_HEIGHT` 2 sizes up; still 58 in 60
+  interlocking) so each falls into view, and the whole thing plays at
+  `PILE_TIME_SCALE` (0.4; 0.6 until asked to fall slower) - slow motion,
+  which changes nothing about how they land.
+- **Settle, then turn**: the model's slow turn waits for `pile.settledAt`
+  - the moment the pile *looks* still: every body under `PILE_REST_SPEED`
+  (0.12 sizes/s) and `PILE_REST_SPIN` (0.35 rad/s) for `PILE_REST_TIME`
+  (0.2 simulated s), or `PILE_SETTLE_AFTER`. It used to wait for cannon to
+  put every body to sleep, and the turn visibly lagged the landing (asked
+  to fix): cannon's test lumps linear and angular speed together against
+  one size-scaled limit, then waits 0.6s more, and a long thin rod's last
+  rock decays slowly - measured over two drops, they stopped moving by sim
+  ~3.0s and fell asleep at ~3.95s, a 2.4-2.7s wait on screen. Now the turn
+  starts 0.45-0.5s after they look still (the 0.2s is deliberate, so a
+  pause mid-tumble can't start it). The physics keeps stepping until cannon
+  does sleep (`pile.asleep`), so nothing freezes mid-wobble; the model just
+  turns sooner. The bodies' own physics is unchanged, so the interlock rate
+  is too. Reopening calls `restart()` for a new drop.
+- **"Drop again"** (asked for): a small button in the project bar, on the
+  same line as "All projects" and in its style, shown for any project with
+  a `drop` once its model has loaded - so it's Emergent Space today, with no
+  per-project code. On its own line it would make the bar taller, and on a
+  phone the bar's height is reserved out of the model's framing, so the
+  shot would move. It calls `restart(PILE_REPLAY_WAIT)` - 0.3s rather than
+  `PILE_WAIT`'s 1.2s, since there's no camera move to wait for - and keeps
+  the angle the model had reached (`turnOffset`, read through `modelTurn`
+  in camera/framing.js) instead of snapping back to where it opened: the
+  new drop falls at that angle and the turn carries on from it once it
+  settles. The ground and the camera stay as they are.
+- **And on its own**: `drop.repeat` drops it again that many seconds after
+  each drop comes to rest (`maybeRepeatDrop` in detail.js, through the same
+  replay) - timed from the rest, since a drop takes 5-8s to land on screen.
+  Emergent Space used 5s, then 10s, and now uses `closeUp` instead (next).
+- **A close-up on an interlock between drops** (asked for, replacing the
+  10s repeat): `drop.closeUp: { hold: 5, after: 5 }`. `CLOSE_UP_AFTER` (1s,
+  the dots faded in) after the pile is asleep (`restedAt`), the camera moves in
+  (`CLOSE_UP_ZOOM` 0.3 of its distance, over `CLOSE_UP_MOVE` 1.6s - slower
+  than a double-click's zoom, to read as the piece presenting itself) on a
+  random marked crossing that will be on screen, holds `hold` seconds,
+  reframes out, and drops again `after` seconds later (`runCloseUp` in
+  detail.js). The pile keeps turning throughout - the turn wasn't to stop -
+  so the move aims where the crossing will be when the camera arrives
+  (`contactAhead`), and from then on the camera is translated with the
+  crossing each frame, keeping it centred while the pile turns round it.
+  That following stops if the visitor zooms out or orbits; "Drop again",
+  a drawer reframe or closing the project all end the close-up. No marked
+  crossing: it just waits and drops. The tap hint stays away while the
+  camera is in. Requires `contacts`; can't be combined with `repeat`
+  (`defineProject` throws).
+- **The turn slows to a stop before each new drop** (asked for - the
+  floor stopping dead looked abrupt). The model and its floor share one
+  turn (`modelTurn`), which froze the instant the pile restarted. Now
+  `pile.turnStop` ({ at, over }) lets its speed fall evenly to nothing:
+  the close-up starts it `TURN_STOP` (3s) before its drop, so it is still
+  by the time the old pile dissolves; "Drop again" (or `repeat`) starts it
+  at once, over the dissolve and wait (1.5s). The new drop takes the
+  stopped angle as before. The turn still starts at full speed when the
+  next pile settles.
+- **No double-click zoom here** (asked for): `doubleClick: 'none'` turns
+  off double-click/double-tap and its hint; the close-ups are the zoom, and
+  their camera move doesn't go through `toggleZoom`.
+- **The fallen pile dissolves away** before each new drop rather than
+  vanishing (asked for - "less abruptly"): `pile.replay()` runs a
+  `PILE_FADE_OUT` (1.2s, eased) before `restart()`, keeping the turn going
+  meanwhile and taking the angle at the moment of the new drop. It's a
+  dissolve into a fine grain (`uFade` in `makeInkMaterial`: a fixed hash
+  over the mesh's own space, more of it discarded as it rises), not an
+  alpha fade: the aggregates are opaque, and three interlocked transparent
+  solids would need sorting and show it. A sin-free hash, since sin() of
+  large arguments loses precision on some mobile GPUs. A pile of points
+  (no `solid`) still restarts at once.
+- **Pulsing dots where they interlock** (`drop.contacts`, asked for): read
+  straight from cannon's own contacts between two aggregates (the ground's
+  left out), merged within `CONTACT_MERGE` of a size since two rods crossing
+  give a cluster, faded with the dissolve. Gathered over the settle rather
+  than replaced each step: cannon stops reporting a contact once both
+  bodies touching are asleep, and they sleep one by one. Shown only once
+  every aggregate is asleep (`pile.restedAt`), not when the pile first
+  looks still: in that last second a crossing could slide or part, and a
+  dot read as a fixed point was left hanging in the air ("false or in the
+  air", the user). So each crossing is kept in both bodies' own frames,
+  following them, and on sleep any whose two sides have drifted more than
+  `CONTACT_PARTED` (0.04 of a size) apart is dropped. The close-up waits
+  for them (`CLOSE_UP_AFTER` from `restedAt`). Blue, asked for (graphite at
+  first, then cyan; not orange, which means "click me"); the velocity
+  arrows stay graphite. Each dot a solid centre with a ring spreading on
+  its own beat; drawn over the rods so a crossing at the back isn't lost.
+- **Live velocity** (`drop.velocity`, asked for), the way the project's own
+  simulation plots clump velocity: an arrow from each aggregate's centre
+  along its motion, as long as it is fast, and its speed beside it in m/s -
+  physical speed with the aggregate taken as `PILE_REAL_SIZE` across, not
+  the 0.4x playback, so the readings run faster than the motion looks. Both fade out as it slows (`VELOCITY_GONE` to
+  `VELOCITY_FULL`), so the fall shows velocity and the settled pile shows
+  the interlocking dots. The numbers are HTML placed from the render loop
+  through refs (`detail.updateVelocityTags`), never React state.
+- **A trap this hit**: the point-cloud loader walks the whole model after
+  the pile is built and gives every `Points` the cloud's shader - including
+  the dots, whose own uniforms then vanished and threw every frame (which
+  also stopped the turn). A `Points` that brings its own look sets
+  `userData.ownMaterial`.
+- **Frame time**: the physics steps with the frame time (capped like the
+  flow), so a slow device plays it slower rather than jumping.
+- **Framed** with `view: { elevation: 30, zoom: ... }` on the cube, like
+  Rock Print: the drop starts above the frame and lands in it. A phone gets
+  hardly any zoom (1.05): the pile lands up to a third of its size off
+  centre, and at 1.3 that cut it at the edge.
+
+Point size, three sizes, three inks
+-----------------------------------
+
+`uPointScale` carries pixels-per-world-unit from JS (`uSizeAttenuation` for
+the projection), so points keep their size across pixel ratios. Each point
+is one of `POINT_SIZES` (0.6, 1, 1.6) and one of `POINT_INKS` (dark red,
+orange, warm grey), picked once at load (`aScale`, `aTone`) so the speckle
+turns with the model; no point lays down more than `POINT_OPACITY` (0.6).
+The shader takes exactly three inks (`uInks[3]`).
+
+
+Points gather out of a scattered cloud
+--------------------------------------
+
+With `gather: true`, every open starts the cloud as a flattened ball around
+the model that condenses over `GATHER_DURATION` (5.4s; 3.6s felt rushed),
+each point
+spiralling home at its own moment - all in the vertex shader, one uniform a
+frame. `addGatherAttributes` gives each point a start (`aScatter`, in the
+cloud's own quantized space, where three.js's bounding box also lives) and
+a delay (`aGatherDelay`). `setGather` only touches clouds loaded to gather,
+or the shader would read a missing start as the origin. The gather's maths
+lives in `shaders/pointCloud/gather.glsl`, put in front of the points' and
+the tails' vertex shaders in `pointcloud/load.js`, so both place a point
+the same way.
+
+
+Tails behind moving points
+--------------------------
+
+Asked for: tails on every point moving on screen, gone once the points
+have formed Rock Print or the ground. Two motions qualify - the gather and
+the clicked pebble's dissolve (flying apart, or falling into Emergent
+Space's ground) - and both are pure functions of one progress uniform, so a
+tail needs no history: its shader asks the same function where the point
+was a moment earlier (`GATHER_TRAIL`, `DISSOLVE_TRAIL`, in seconds) and
+draws a quad from there to the point, as wide as the point at its head and
+tapering to nothing, fading down its length (`shaders/trail/`,
+`addTrails`). Chosen over a trail of ghost points (beads, and many times
+the points to draw) and over line segments (WebGL lines are one device
+pixel wide, too faint at a phone's pixel ratio).
+
+- **One instanced quad per point**, its corner in `position` and the
+  cloud's own attributes as instance attributes (its place as `aHome`,
+  read out of the quantized cloud as floats). The material spreads in the
+  points' own uniform objects, so the gather, reveal, point scale and flux
+  drive the tails with no extra code; only `uResolution`
+  (`trailResolution`, set each frame), the lag and `TRAIL_OPACITY` are
+  theirs.
+- **Disappearing**: a point easing into place slows, so its tail shrinks to
+  nothing by itself (under ~2 pixels it's hidden); `setGather` and
+  `updateDissolve` switch the tails off once the motion is over, so they
+  cost nothing after.
+- The tails' geometry carries the cloud's bounding box, not the quad's:
+  `framing.frameCloseup` measures the model with `Box3.setFromObject`.
+
+
+Safari: defined GLSL, visible failures
+--------------------------------------
+
+Reported: tapping Rock Print's pebble on Safari did nothing, with no error.
+Likely cause: selection listened for `click` on window, which iPhone/iPad
+Safari doesn't send for a tap on a plain canvas - now it's `pointerup` on
+the canvas. This couldn't be reproduced here (no WebKit in cloud sessions;
+its download is blocked). Three other fixes made blind stay, as they're
+correct anyway:
+
+- **No undefined GLSL.** A reversed `smoothstep(1.0, 0.01, x)` and a
+  `pow()` at 0 are undefined and Safari's Metal backend needn't do what
+  Chrome does (a NaN hides every point); both rewritten to identical,
+  defined forms. Keep shader code inside what GLSL ES defines.
+- **Stacking by z-index, never page order.** The fog is under the canvas
+  (0 and 1); the catalog's tags and string and the tap hint are over it (2).
+  At equal z-index Safari drew the canvas over later layers - the hint
+  showed behind the point cloud, the names behind the glass.
+- **Failures say so.** A failed model load or shader compile
+  (`renderer.debug.onShaderError`) puts a message in the project bar, with
+  the real error in the console.
+
+
+Page, colour and drawer
+=======================
+
+
+The whole site is paper
+-----------------------
+
+Dark ink (`--ink`) on a warm light ground (`--bg` #f0ede6), a deep teal
+accent, the orange invitation; the pebbles are shaded in graphite.
+The background is the page, not the scene: the renderer is transparent (an
+old `Sky` dome that painted it dark is gone). Nothing is additive - on
+paper, adding light draws nothing - so pebbles and points blend normally.
+Scene colours go through `screenColor()`. The loader's `palette.bg` must
+stay equal to `--bg`.
+
+
+Scene fog is off; the grey fog is a page layer
+----------------------------------------------
+
+`scene.fog` was `Fog(..., 15, 8)` - near beyond far, which fogged anything
+close to the camera; re-adding it needs near < far and a range for both
+views. The grey fog behind an open project is `.fog` (`components/Fog.jsx`), a CSS layer between
+the paper and the canvas (in over 3.2s, out over 1.2s): lighter in the
+middle, with two soft banks drifting. Scene fog would grey the model
+itself; a page layer touches nothing in the renderer.
+
+
+Faded faces don't write depth
+-----------------------------
+
+While a project is open the catalog's faces fade to 0 with
+`depthWrite = false`, restored on close with the reveal; otherwise an
+invisible face still hides what's behind it.
+
+
+No description, no drawer
+-------------------------
+
+`hasDescription` (any of `year`, `role`, `context`, `body`, `credits`,
+`images`) gates the drawer's handle, so an unwritten project never offers
+an empty panel. Placeholder copy isn't published as if real, and a role is
+stated only when it can be stated accurately. Rock Print's text is still a
+labelled placeholder.
+
+
+The bar's title moves into the drawer on a phone
+------------------------------------------------
+
+On a small phone the bar's title and the open drawer squeezed the model to
+a stamp. Below 860px the open drawer's header carries the title and the
+bar's hides (`body.drawer-open`); it crossfades rather than toggling
+`display`, or both showed at once on closing. The title is one line at
+every width (`nowrap`, ellipsis if ever too long).
+
+
+Drawer pictures
+---------------
+
+`images` entries (`{ src, alt, caption, ratio, wide }`) render as figures
+under the text (`components/ProjectImage.jsx`): the first full width, the rest two to a row
+unless `wide`, lazy-loaded, framed at their `ratio` so nothing jumps; no
+`src` is an empty dashed frame. The panel is 98% opaque so the cloud
+doesn't muddy them. Rock Print's five are photos sized for the drawer -
+lead 1500px, others 900px, ~1 MB in all, metadata stripped (CLAUDE.md has
+the recipe). Emergent Space's five are mostly diagrams with small text,
+unreadable at half the drawer, so all are `wide`: the landscape diagrams
+1500px across, the two portrait photos 1000px (enough for the drawer at
+twice the pixel density), ~950 KB in all. Captions/credits are empty for
+both.
+
+
+Asset paths resolve against the Vite base URL
+---------------------------------------------
+
+Paths have no leading slash and go through `assetUrl`: Vite's `base`
+rewrites the HTML and imports but not strings handed to loaders at runtime,
+so absolute paths 404 under GitHub Pages' sub-path. Works at a domain root
+too.
+
+
+Loading
+=======
+
+
+The start-up loader is inline and waits for real progress
+---------------------------------------------------------
+
+`#loader` is markup, CSS and a classic script in index.html, so it's on
+screen before the ~260 KB (gzipped) bundle arrives. Particles stream along
+braided currents around the wordmark, in paper, gathering strength with
+progress. Progress is
+real: each start-up asset registers with `engine/boot.js` (`createBoot`),
+which calls `window.fluxLoader.finish()` when all are done (failures count as done; a
+30s cap). It stays at least `MIN_VISIBLE` (5s), the bar showing the lesser
+of real progress and elapsed time so a fast load fills it steadily rather
+than jumping to 100%. All its animation runs on elapsed time, not frames.
+On a fast load it's gone ~6s after the page opens.
+
+**The streams carry on among the pebbles.** Asked for: the loader's
+particles floating on around the pebbles - and then, not crossing them
+even seen from above, drawn on the plane through their middles. A first
+version kept the loader's 2D canvas running behind the WebGL canvas, the
+streams parting round the pebbles' circles on screen; they still read as
+passing through. Now, as the loader fades (`EXIT`, 2.6s, its own streams
+calming to `AMBIENT_*`), the same current carries on in the scene
+(`src/engine/streams.js`, `createStreams`): `STREAM_COUNT` streams on the y = 0
+plane, each a fading line through its last `STREAM_HISTORY` points,
+shaded between the loader's two colours by the way it flows. They part
+round each pebble's circle in the scene (`PART_REACH`, `PART_TURN`: the
+part of the drift heading into one is turned aside, one inside is eased
+out), and they draw after the pebbles (`renderOrder` 3), depth-tested, so
+a pebble's top hides whatever passes under it. A pebble only writes depth
+once it has mostly arrived (`applyArrival`), or the arriving, still
+invisible ones would cut holes in the streams. They fill the plane the
+overhead camera sees, start with the arrival and fade out while a project
+is open. WebGL lines are one device pixel: thinner on a phone than the
+canvas's were.
+
+**They drift towards the pointer.** Asked for: while the mouse moves over
+the grid, or while a finger is down, the streams float slowly towards it,
+and go back to their own current once the mouse stops
+(`STREAM_POINTER_IDLE`, 0.35s) or the finger lifts. The pull eases in and
+out (`PULL_IN`, `PULL_OUT`), takes over most but not all of a stream's way
+(`PULL_SHARE`), at `PULL_SPEED` - slower than the current - and slows
+within `PULL_SLOW` of the pointer so they gather rather than swarm. The
+parting round the pebbles still applies on the way. `streams-view.js`
+tracks the pointer on the streams' plane (`trackPointer`, `setTouching`),
+apart from the flow's own tracking, since a tap with no move must count
+too.
+
+
+`?cloudtest`, and why clouds load on click
+------------------------------------------
+
+`?cloudtest` fills every slot with a copy of the first project, each with
+its own `?copy=n` URLs so they download as ten projects would. Its first
+version loaded all ten clouds at start-up, measured here (phone viewport,
+cache off, gzipped):
+
+| Connection        | Normal: models done | Normal: total | Ten clouds at start-up | total   |
+|-------------------|--------------------:|--------------:|-----------------------:|--------:|
+| Wi-Fi, 30 Mbps    |               0.8s  |       0.48 MB |                   3.2s | 9.66 MB |
+| Fast 4G, 9 Mbps   |               1.0s  |       0.48 MB |                   9.2s | 9.66 MB |
+| Slow 4G, 1.6 Mbps |               2.5s  |       0.48 MB |                  49.2s | 9.66 MB |
+
+So clouds load only when a project is opened; ten rock thumbnails cost
+~2 MB. Remove the flag once real projects fill the grid.
+
+
 How the code is laid out
 ========================
 
@@ -1150,8 +1139,9 @@ So the boundary is drawn at **how often a thing changes**:
 - The engine: everything per-frame.
 
 They meet at the `ui` object `createEngine` takes (callbacks out: a project
-opened, the status changed, roll the fog in) and the three methods it
-returns (`closeProject`, `setDrawerOpen`, `dispose`).
+opened, the status changed, roll the fog in) and the methods it
+returns (`start`, `closeProject`, `replayDrop`, `setDrawerOpen`,
+`dispose`).
 
 The per-frame HTML - the pebbles' names, the string, "Still empty...", the
 tap hint - is the one place this needs care. Those move every frame, so
@@ -1189,8 +1179,8 @@ silently hid one of them before).
 
 The point is that the behaviour is uniform: there is no per-project branch
 anywhere in the engine. A project that wants to behave differently says so
-in its own file through `view`, `gather`, `drop`, `points` or `thumbSize`,
-and the one code path reads it. Adding a project is: write the module, add
+in its own file through `view`, `gather`, `drop`, `points`, `thumbSize`,
+`doubleClick`, `autoZoom` or `eyeLevel`, and the one code path reads it. Adding a project is: write the module, add
 it to the list.
 
 The engine does not import `src/projects/` at all. It is handed

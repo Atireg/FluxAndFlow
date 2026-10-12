@@ -16,7 +16,9 @@ and any text field left empty is skipped rather than rendered blank. An
 optional `view` sets the camera angle the project opens on (and, with
 `sway`, a slow nod of the camera); `gather: true` makes its points gather
 out of a scattered cloud each time it opens; `drop` drops copies of a
-rod-built mesh onto a surface with physics; `images` fills the drawer's
+rod-built mesh onto a surface with physics; `doubleClick` says what a
+double-click does (zoom, hold the model still, or nothing); `autoZoom` and
+`eyeLevel` move the camera in by itself; `images` fills the drawer's
 picture frames. The fields are listed in CLAUDE.md and in
 `src/projects/schema.js`, which fills the defaults and rejects a
 half-declared project rather than letting it render wrong. There is no
@@ -63,7 +65,10 @@ Next up (waiting on content or a check from the user)
     [ ] Emergent Space's drop on a phone: confirm it runs smoothly on a real
         device (it was only checked with software rendering here)
     [ ] The catalog's streams on a phone: WebGL draws them one device pixel
-        wide - darker (`STREAM_ALPHA` in src/streams.js) if they're faint
+        wide - darker (`STREAM_ALPHA` in src/engine/streams.js) if they're faint
+    [ ] Rock Print's view from inside, on a phone: the lens widens to 90°
+        there so it sees between the columns - check it reads as standing
+        among them (`INSIDE_*` in src/engine/detail.js)
 
 Landing/welcome view
     [ ] Graphics (me as a figure?) + welcome text explaning the webside's concept
@@ -97,15 +102,12 @@ Performance and tech
         unread - the points are drawn in three inks. Use it, or drop it
         (~315 KB less per cloud)
     [ ] Remove `?cloudtest` once there are real projects to fill the grid
-    [x] src/loader/ was dead code - removed (an old, unused preloader; the
-        start-up loader lives inline in src/index.html). src/shaders/grid/
-        went with it, never imported by anything
     [ ] `lil-gui` is still a dependency but nothing imports it - the debug
         panel has been commented out since before Session 1. Drop it, or
         wire it back up for tuning
     [ ] src/engine/smoke.js is parked, not in the scene - it is the
         candidate for the "fog shader" idea below. Use it or delete it
-    [ ] The JS bundle is one 884 KB chunk (252 KB gzipped); Vite warns
+    [ ] The JS bundle is one 905 KB chunk (259 KB gzipped); Vite warns
         about it. cannon-es already splits out on demand - three.js could
         too
 
@@ -144,34 +146,32 @@ Catalog
 Project view
     [x] Rock Print lands on a view fitted to a phone screenshot; its points
         gather from a scattered cloud, in three inks and three sizes; it
-        turns slowly (a turn every 80s) while the camera nods (`view.sway`)
+        turns slowly (a turn every 80s) while the camera nods (`view.sway`,
+        22s a nod)
     [x] Emergent Space (slot 1): the clicked pebble's points fall into a
         ground, and three solid aggregates drop onto it with live physics
         (cannon-es, loaded only for it), tumbling into an interlocked pile -
         a new drop every time - then turning. Each from a plain mesh sampled
         into 8,000 points as it loads; the mesh itself, in the rock's ink,
         in its pebble; opening the About drawer zooms in on the three
-    [x] Emergent Space's turn starts as soon as the pile looks still (it
-        lagged the landing by ~2.5s, waiting on cannon's sleep), and a
-        "Drop again" button in the bar drops it again at the angle it had
-        reached; once each drop settles the camera moves in on one
-        interlock for 5s, back out, and 5s later it drops again by itself
-        (`drop.closeUp`; `drop.repeat` for a plain repeat), the fallen
-        pile dissolving away first; pulsing blue dots
-        mark where the aggregates interlock (`drop.contacts`), and an arrow
-        and a live m/s reading show each one's velocity as it falls
-        (`drop.velocity`)
+    [x] Emergent Space: the turn starts as soon as the pile looks still; a
+        "Drop again" button in the bar; an arrow and a live m/s reading
+        show each aggregate's velocity as it falls (`drop.velocity`);
+        pulsing blue dots mark where they interlock once fully at rest
+        (`drop.contacts`); then the camera moves in on one interlock for
+        5s, back out, the floor slows to a stop and 5s later it drops
+        again, the fallen pile dissolving away first (`drop.closeUp`)
     [x] Points on the move (the gather, the dissolve, the fall into
         Emergent Space's ground) draw tapering tails, gone once they settle
     [x] A grey fog rolls in behind the project
     [x] The About drawer: model moves left and stays whole on a wide screen,
         a close-up on a phone (Emergent Space: in on the pile in both);
         five pictures in each, Emergent Space's diagrams full width
-    [x] Double-click / double-tap zoom, hinted every 5s by a white touch
-        point that scales with the screen, "double-click" ("double-tap"
-        on a touch screen) hanging from it on a bouncing black string
-        like the catalog's; per project (`doubleClick`): off for Emergent
-        Space, and on Rock Print it holds the pavilion still until the next
+    [x] Double-click / double-tap, hinted every 5s by a white touch point
+        that scales with the screen, "double-click" ("double-tap" on a
+        touch screen) hanging from it on a bouncing black string like the
+        catalog's. Per project (`doubleClick`): zooms by default, holds
+        Rock Print still until the next, nothing on Emergent Space
     [x] Rock Print zooms in by itself every 10s and back out (`autoZoom`),
         alternately on a point of the pavilion (following it as it turns)
         and from inside, at eye height among the columns, looking between
