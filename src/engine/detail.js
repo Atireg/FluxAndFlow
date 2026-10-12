@@ -9,7 +9,7 @@ import { getDissolve } from './pebbles/dissolve.js';
 import { armDrop, DROP_BOOM_HANG, DROP_OPEN_AFTER } from './pebbles/drop.js';
 import { startArrival } from './pebbles/arrival.js';
 import { restingFaceColor, restingRimColor } from './pebbles/materials.js';
-import { modelStartYaw, modelTurn } from './camera/framing.js';
+import { DETAIL_ROTATE_SPEED, modelStartYaw, modelTurn } from './camera/framing.js';
 
 /**
  * Detail view: the project's model on the whole canvas, its description in a
@@ -52,6 +52,18 @@ const DETAIL_ZOOM_DURATION = 0.9; // seconds
 const TAP_HINT_AFTER_GATHER = 1.2; // seconds after the points have gathered before the first one
 const TAP_HINT_GAP = 5; // seconds from one hint to the next
 
+/**
+ * A project's `drop.closeUp`: once a drop is at rest, the camera moves in on
+ * one of the interlocks, holds there `hold` seconds while the pile turns -
+ * following the crossing, so it stays where it landed on screen - moves back
+ * out to the frame, and the pile drops again `after` seconds later. The
+ * crossing is picked at random among those on screen; with none marked, it
+ * just waits and drops again.
+ */
+const CLOSE_UP_AFTER = 1; // seconds after the pile looks still - the dots have faded in
+const CLOSE_UP_ZOOM = 0.3; // the camera ends up this fraction of its distance away
+const CLOSE_UP_MOVE = 1.6; // seconds each way - slower than a double-click's zoom
+
 export function createDetail({
     state, grid, rig, framing, screen, clock, visited, perlinTexture, ui,
 }) {
@@ -60,6 +72,70 @@ export function createDetail({
 
     const tapHintPoint = new THREE.Vector3();
     const velocityPoint = new THREE.Vector3();
+
+    // Where the close-up is: 'idle', 'in' (moving in or holding), 'out'
+    // (moving out or waiting to drop). `settledAt` says which drop it's for.
+    const closeUp = { phase: 'idle', pile: null, settledAt: null, at: 0, index: 0, last: null };
+    const closeUpPoint = new THREE.Vector3();
+
+    /**
+     * Move the camera in on `aim`, `zoom` of the way it is now, keeping the
+     * direction of view - in the space left of the drawer when it's open
+     * beside the model, not behind it
+     */
+    function zoomTo(aim, zoom, duration) {
+        const { camera, controls } = rig;
+        const offset = camera.position.clone().sub(controls.target).multiplyScalar(zoom);
+        const { mode, fraction } = getPanelLayout(state.drawerOpen);
+        const shift = new THREE.Vector3();
+        if (state.drawerOpen && mode === 'side' && camera.isPerspectiveCamera) {
+            const halfHeight = offset.length() * Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2);
+            shift.set(1, 0, 0).applyQuaternion(camera.quaternion)
+                .multiplyScalar(fraction * halfHeight * screen.aspect);
+        }
+        rig.moveCamera(aim.clone().add(offset).add(shift), aim.clone().add(shift), duration);
+        state.detailZoomed = true;
+
+        // Clear a hint that's mid-tap; the next one comes round as usual,
+        // zoomed in or not
+        ui.hideTapHint();
+    }
+
+    /**
+     * Where interlock `index` will be in the world `ahead` seconds from now,
+     * the model having turned on by then
+     */
+    function contactAhead(model, pile, index, ahead, target) {
+        const turned = model.rotation.y;
+        model.rotation.y += ahead * DETAIL_ROTATE_SPEED;
+        model.updateMatrixWorld(true);
+        pile.contactAt(index, target);
+        model.rotation.y = turned;
+        model.updateMatrixWorld(true);
+        return target;
+    }
+
+    // A crossing that will be on screen once the camera gets there, if any
+    function pickContact(model, pile) {
+        const count = pile.contactCount;
+        if (!count) return -1;
+
+        const start = Math.floor(Math.random() * count);
+        for (let k = 0; k < count; k++) {
+            const index = (start + k) % count;
+            contactAhead(model, pile, index, CLOSE_UP_MOVE, closeUpPoint).project(rig.camera);
+            if (Math.abs(closeUpPoint.x) < 0.8 && Math.abs(closeUpPoint.y) < 0.8) return index;
+        }
+        return start;
+    }
+
+    // Back out to the frame, if the close-up had moved in
+    function endCloseUp() {
+        if (closeUp.phase === 'in' && state.selected) {
+            framing.reframe(state.selected, { duration: CLOSE_UP_MOVE });
+        }
+        closeUp.phase = 'idle';
+    }
 
     function markVisited(pebble) {
         pebble.userData.visited = true;
@@ -243,6 +319,7 @@ export function createDetail({
 
             const pebble = state.selected;
             state.selected = null;
+            closeUp.phase = 'idle';
 
             /**
              * Not 'catalog' yet. 'returning' places the pebbles back home each
@@ -302,6 +379,8 @@ export function createDetail({
             const pile = model?.userData.pile;
             if (state.view !== 'detail' || !pile) return;
 
+            endCloseUp();
+
             // The old pile dissolves first and keeps turning meanwhile, so
             // the angle is taken when the new drop actually starts
             const pebble = state.selected;
@@ -320,10 +399,66 @@ export function createDetail({
          */
         maybeRepeatDrop(model, since) {
             const pile = model.userData.pile;
-            const repeat = state.selected?.userData.project?.drop?.repeat;
-            if (!pile || !repeat || pile.settledAt === Infinity) return;
+            const drop = state.selected?.userData.project?.drop;
+            if (!pile || pile.settledAt === Infinity) return;
 
-            if (since - pile.settledAt >= repeat) detail.replayDrop();
+            if (drop?.closeUp) {
+                detail.runCloseUp(model, pile, drop.closeUp, since);
+                return;
+            }
+
+            if (drop?.repeat && since - pile.settledAt >= drop.repeat) detail.replayDrop();
+        },
+
+        // A project's `drop.closeUp`, a step each frame once the pile is at rest
+        runCloseUp(model, pile, { hold, after }, since) {
+            // A new drop has come to rest
+            if (closeUp.pile !== pile || closeUp.settledAt !== pile.settledAt) {
+                Object.assign(closeUp, { phase: 'waiting', pile, settledAt: pile.settledAt });
+            }
+
+            if (closeUp.phase === 'waiting' && since - pile.settledAt >= CLOSE_UP_AFTER) {
+                closeUp.index = pickContact(model, pile);
+                closeUp.at = since;
+                closeUp.last = null;
+
+                if (closeUp.index < 0) {
+                    closeUp.phase = 'out'; // nothing to look at: wait, then drop
+                } else {
+                    // Aimed where the crossing will be once the camera is there
+                    zoomTo(contactAhead(model, pile, closeUp.index, CLOSE_UP_MOVE, closeUpPoint).clone(), CLOSE_UP_ZOOM, CLOSE_UP_MOVE);
+                    closeUp.phase = 'in';
+                }
+            }
+
+            if (closeUp.phase === 'in') {
+                /**
+                 * Once there, the camera follows the crossing as the pile
+                 * turns, so it stays put on screen - unless the visitor has
+                 * zoomed back out or is orbiting by hand
+                 */
+                if (!rig.orientationLocked && state.detailZoomed && !rig.visitorOrbiting) {
+                    pile.contactAt(closeUp.index, closeUpPoint);
+                    if (closeUp.last) {
+                        const moved = closeUpPoint.clone().sub(closeUp.last);
+                        rig.camera.position.add(moved);
+                        rig.controls.target.add(moved);
+                    }
+                    closeUp.last = (closeUp.last ?? new THREE.Vector3()).copy(closeUpPoint);
+                } else {
+                    closeUp.last = null;
+                }
+
+                if (since - closeUp.at >= CLOSE_UP_MOVE + hold) {
+                    endCloseUp();
+                    closeUp.phase = 'out';
+                    closeUp.at = since;
+                }
+            }
+
+            if (closeUp.phase === 'out' && since - closeUp.at >= CLOSE_UP_MOVE + after) {
+                detail.replayDrop();
+            }
         },
 
         /**
@@ -377,28 +512,14 @@ export function createDetail({
             const hits = model && model.visible ? zoomRaycaster.intersectObject(model, true) : [];
             const aim = hits.length ? hits[0].point.clone() : controls.target.clone();
 
-            // Same direction of view, closer in, centred on the spot - in the
-            // space left of the drawer when it's open beside the model, not
-            // behind it
-            const offset = camera.position.clone().sub(controls.target).multiplyScalar(DETAIL_ZOOM);
-            const { mode, fraction } = getPanelLayout(state.drawerOpen);
-            const shift = new THREE.Vector3();
-            if (state.drawerOpen && mode === 'side' && camera.isPerspectiveCamera) {
-                const halfHeight = offset.length() * Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2);
-                shift.set(1, 0, 0).applyQuaternion(camera.quaternion)
-                    .multiplyScalar(fraction * halfHeight * screen.aspect);
-            }
-            rig.moveCamera(aim.clone().add(offset).add(shift), aim.clone().add(shift), DETAIL_ZOOM_DURATION);
-            state.detailZoomed = true;
-
-            // Clear a hint that's mid-tap; the next one comes round as usual,
-            // zoomed in or not
-            ui.hideTapHint();
+            // Same direction of view, closer in, centred on the spot
+            zoomTo(aim, DETAIL_ZOOM, DETAIL_ZOOM_DURATION);
         },
 
         // `since` is seconds since the model was shown
         maybeShowTapHint(model, since) {
             if (since < state.tapHintNext) return;
+            if (closeUp.phase === 'in') return; // the close-up's camera is busy
 
             state.tapHintNext = since + TAP_HINT_GAP;
 

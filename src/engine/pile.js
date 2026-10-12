@@ -359,6 +359,15 @@ export async function createPile({
         onFaded: null,
         markedFor: 0, // seconds the interlocking dots have been showing
 
+        // How many interlocks have been marked so far, and where one is in
+        // the world - for the camera's close-up on one (detail.js)
+        get contactCount() {
+            return markers ? marked.length : 0;
+        },
+        contactAt(index, target) {
+            return markers.localToWorld(target.copy(marked[index].mean));
+        },
+
         /**
          * Drop again, but let the fallen pile dissolve away first rather than
          * vanish (PILE_FADE_OUT). It keeps turning meanwhile; `beforeRestart`

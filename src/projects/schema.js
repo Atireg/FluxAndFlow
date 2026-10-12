@@ -116,6 +116,24 @@ function normaliseDrop(drop, { id }) {
         throw new Error(`Project "${id}": drop.repeat should be a number of seconds above 0`);
     }
 
+    /**
+     * `closeUp`: once each drop is at rest, the camera moves in on one of the
+     * interlocks (so it needs `contacts`), stays `hold` seconds, moves back
+     * out, and drops again `after` seconds later - in place of `repeat`
+     */
+    if (drop.closeUp !== undefined) {
+        const { hold, after } = drop.closeUp ?? {};
+        if (!drop.contacts) {
+            throw new Error(`Project "${id}": drop.closeUp needs drop.contacts`);
+        }
+        if (drop.repeat !== undefined) {
+            throw new Error(`Project "${id}": drop.closeUp sets when it drops again, so leave out drop.repeat`);
+        }
+        if (!(hold > 0) || !(after >= 0)) {
+            throw new Error(`Project "${id}": drop.closeUp should be { hold, after } in seconds, hold above 0`);
+        }
+    }
+
     return { ...drop };
 }
 

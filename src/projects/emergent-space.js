@@ -80,9 +80,10 @@ export default defineProject({
     // it opens, tumbling into one another until they settle - then the
     // pile turns. `size` is each aggregate's longest side and `ground`
     // the surface's height, both in the pebble's units (5 across, centred
-    // on 0). `repeat`: and again, 10 seconds after each drop comes to rest.
-    // `contacts`: pulsing dots where the aggregates interlock, once at rest.
+    // on 0). `contacts`: pulsing dots where the aggregates interlock, once
+    // at rest. `closeUp`: then the camera moves in on one of them for 5
+    // seconds, back out, and 5 seconds later they drop again.
     // `velocity`: each one's velocity, live, as an arrow and m/s, while it moves.
     // See src/engine/pile.js.
-    drop: { count: 3, size: 3, ground: -1.2, solid: true, repeat: 10, contacts: true, velocity: true },
+    drop: { count: 3, size: 3, ground: -1.2, solid: true, contacts: true, closeUp: { hold: 5, after: 5 }, velocity: true },
 });

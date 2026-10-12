@@ -331,6 +331,13 @@ only.
   so the words fit below. Checked in both layouts (the text, the fade, no
   errors) and the rope's motion run in Node at 60 fps, since software
   WebGL draws about a frame a second.
+- **A close-up between drops.** Once the pile is still, the camera moves
+  in on one of the interlocks (a random one on screen), stays 5s - keeping
+  that crossing centred while the pile turns round it - moves back out,
+  and 5s later the aggregates drop again (`drop.closeUp: { hold: 5, after:
+  5 }`, replacing `repeat: 10`). Still project settings only. Verified with
+  a throwaway hook (removed) over three cycles at 1280x800 and two at
+  390x844: the crossing held at the centre throughout each hold, no errors.
 
 Open at end of session (see README, "Next up"): unchanged by this session —
 Safari still to confirm, both projects' real copy and picture credits still

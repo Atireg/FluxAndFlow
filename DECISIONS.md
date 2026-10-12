@@ -631,6 +631,22 @@ Blender/Rhino simulation. A project's `drop: { count, size, ground }` does it
   clock would cut a short repeat off mid-fall. A project setting rather
   than code, so another `drop` can repeat or not; "Drop again" resets the
   wait.
+- **A close-up on an interlock between drops** (asked for, replacing the
+  10s repeat): `drop.closeUp: { hold: 5, after: 5 }`. `CLOSE_UP_AFTER` (1s,
+  the dots faded in) after the pile looks still, the camera moves in
+  (`CLOSE_UP_ZOOM` 0.3 of its distance, over `CLOSE_UP_MOVE` 1.6s - slower
+  than a double-click's zoom, to read as the piece presenting itself) on a
+  random marked crossing that will be on screen, holds `hold` seconds,
+  reframes out, and drops again `after` seconds later (`runCloseUp` in
+  detail.js). The pile keeps turning throughout - the turn wasn't to stop -
+  so the move aims where the crossing will be when the camera arrives
+  (`contactAhead`), and from then on the camera is translated with the
+  crossing each frame, keeping it centred while the pile turns round it.
+  That following stops if the visitor zooms out or orbits; "Drop again",
+  a drawer reframe or closing the project all end the close-up. No marked
+  crossing: it just waits and drops. The tap hint stays away while the
+  camera is in. Requires `contacts`; can't be combined with `repeat`
+  (`defineProject` throws).
 - **The fallen pile dissolves away** before each new drop rather than
   vanishing (asked for - "less abruptly"): `pile.replay()` runs a
   `PILE_FADE_OUT` (1.2s, eased) before `restart()`, keeping the turn going

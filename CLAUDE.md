@@ -156,7 +156,8 @@ defineProject({
     gather: true,                                 // optional: points gather from a scattered cloud on open
     // points: 20000,                             // optional, a mesh detailModel only: how many points to sample
     // drop: { count: 3, size: 3, ground: -1.2, solid: true,   // optional, a crossed-rod mesh only (Emergent Space)
-    //         repeat: 10, contacts: true, velocity: true },      // again 10s after rest; interlock dots; live velocity
+    //         contacts: true, closeUp: { hold: 5, after: 5 },   // interlock dots; camera in on one 5s, out, drop 5s later
+    //         velocity: true },                                  // live velocity (or `repeat: 10`: drop again 10s after rest)
     images: [{ src: 'images/x.jpg', alt: '', caption: '', ratio: '3 / 2', wide: false }],  // drawer pictures; no src = empty frame
 })
 ```
@@ -199,9 +200,12 @@ defineProject({
   once they look still (`PILE_REST_*` - not cannon's sleep, which lags by a
   second; the physics runs on until it does sleep). The bar's "Drop again"
   (any project with a `drop`) restarts it at the angle it had reached
-  (`turnOffset`, `modelTurn`), and `drop.repeat` (Emergent Space: 10) does
-  the same that many seconds after each drop comes to rest - the old pile
-  dissolving away first (`pile.replay`, `uFade` in `makeInkMaterial`).
+  (`turnOffset`, `modelTurn`), and `drop.repeat` does the same that many
+  seconds after each drop comes to rest - the old pile dissolving away
+  first (`pile.replay`, `uFade` in `makeInkMaterial`). Emergent Space uses
+  `drop.closeUp` instead: the camera moves in on one interlock, follows it
+  as the pile turns for `hold` s, moves out, and drops again `after` s
+  later (`runCloseUp` in `detail.js`).
   `drop.contacts` pulses dots at the crossings (cannon's own contacts);
   `drop.velocity` shows each aggregate's velocity as an arrow and a live
   m/s tag (HTML via refs, `detail.updateVelocityTags`). Read "Emergent Space: aggregates dropped with live physics"
