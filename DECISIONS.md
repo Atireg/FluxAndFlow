@@ -36,7 +36,7 @@ The project view: point cloud
 - Quantized, not Draco-compressed
 - A mesh becomes points as it loads
 - Emergent Space: aggregates dropped with live physics
-- Timed zooms on Rock Print (`autoZoom`)
+- Timed zooms on Rock Print (`autoZoom`), holding it, from inside
 - Point size, three sizes, three inks
 - Points gather out of a scattered cloud
 - Tails behind moving points
@@ -658,9 +658,10 @@ Blender/Rhino simulation. A project's `drop: { count, size, ground }` does it
   at once, over the dissolve and wait (1.5s). The new drop takes the
   stopped angle as before. The turn still starts at full speed when the
   next pile settles.
-- **No double-click zoom here** (asked for): `zoom: false` on the project
-  turns off double-click/double-tap zoom and its hint (`toggleZoom`,
-  `maybeShowTapHint`); the close-ups are the zoom. The close-up's own
+- **No double-click zoom here** (asked for): `doubleClick: 'none'` on the
+  project (first `zoom: false`) turns off double-click/double-tap zoom and
+  its hint (`detail.doubleClick`, `maybeShowTapHint`); the close-ups are
+  the zoom. The close-up's own
   camera move doesn't go through `toggleZoom`, so it's unaffected.
 - **The fallen pile dissolves away** before each new drop rather than
   vanishing (asked for - "less abruptly"): `pile.replay()` runs a
@@ -711,8 +712,8 @@ Blender/Rhino simulation. A project's `drop: { count, size, ground }` does it
   hardly any zoom (1.05): the pile lands up to a third of its size off
   centre, and at 1.3 that cut it at the edge.
 
-Timed zooms on Rock Print (`autoZoom`)
---------------------------------------
+Timed zooms on Rock Print (`autoZoom`), holding it, from inside
+---------------------------------------------------------------
 
 Asked for: "zoom ins and outs on the model every 10 seconds". `autoZoom: 10`
 moves the camera in on a random point of the cloud (to `AUTO_ZOOM`, 0.4 of
@@ -728,6 +729,38 @@ away. Can't go with a `drop` (its close-ups are the zoom there). The
 sway carries on, nodding about the zoomed-in point. If a move runs long
 (a slow frame), the point ends a little off centre and is followed from
 there - not re-centred, since the centre beside a side drawer is offset.
+
+**A double-click holds it still instead** (asked for: "no zoom in, but
+the model stops rotating until the user double clicks again").
+`doubleClick: 'hold'` (the project setting that also gives 'zoom', the
+default, and 'none') toggles `model.userData.held` ({ total, at }), which
+`modelTurn` subtracts, so the turn picks up exactly where it stopped. The
+camera's nod holds with it (`updateSway`'s `held`), and the timed zoom
+waits while held and for a full round after. The hint still says
+"double-click".
+
+**From inside, at eye level** (asked for: "zoom ins from inside the
+pavilion as if you are at a person's height looking through the
+columns"). `eyeLevel: 0.4` makes every other timed zoom a walk in to a
+spot inside (`findInsideSpot`, `camera/inside.js`): the points within
+`SLAB` of that share of the height binned into a grid over the footprint,
+the most open cell (furthest from any column, by a breadth-first pass)
+that has columns on all four sides, among the best `CHOICES` at random;
+the gaze is the longest clear line from it that ends on a far column.
+There the camera is held in the model's own frame - turning with it, so
+it can't walk into a column as it turns - and the gaze drifts
+`INSIDE_PAN` either side over `INSIDE_PAN_PERIOD`; the nod holds off, to
+keep it at eye height. 0.4 of the height including the ground: the
+pavilion is 1.88 units tall in the scene, so about a person's eyes if its
+columns are ~4m. Three things had to change for it, measured in a
+throwaway build: the camera's near plane (1 unit) clipped ~6,000 points
+of the nearest columns, so it drops to `INSIDE_NEAR` (0.05) while inside
+and back once out (`rig.baseNear`); world-sized points 0.6 units away drew
+as blots, so `gl_PointSize` is capped at `uPointScale * 0.5` (only points
+within about a unit reach it, so every other view is unchanged); and the
+lens widens to `INSIDE_FOV` (65°), more on a tall phone so it's at least
+`INSIDE_WIDTH` (55°) across, up to 90° - at 30° a phone saw one column.
+The first try looked a random way and straight into a column.
 
 
 Point size, three sizes, three inks

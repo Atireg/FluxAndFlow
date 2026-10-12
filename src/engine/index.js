@@ -4,7 +4,7 @@ import { createBoot } from './boot.js';
 import { createState } from './state.js';
 import { createVisited } from './visited.js';
 import { createCameraRig } from './camera/rig.js';
-import { createFraming, DETAIL_ROTATE_SPEED, modelStartYaw, modelTurn } from './camera/framing.js';
+import { createFraming, DETAIL_ROTATE_SPEED, isHeld, modelStartYaw, modelTurn } from './camera/framing.js';
 import { createCatalog, findPebble } from './catalog.js';
 import { createDetail } from './detail.js';
 import { createTags } from './tags.js';
@@ -228,7 +228,7 @@ export function createEngine({ canvas, source, ui }) {
                 detail.maybeRepeatDrop(model, since);
                 detail.maybeAutoZoom(model, since);
                 detail.updateVelocityTags(model);
-                framing.updateSway(project, since, elapsedTime);
+                framing.updateSway(project, since, elapsedTime, isHeld(model) || detail.standingInside);
             }
         }
 
@@ -328,7 +328,7 @@ export function createEngine({ canvas, source, ui }) {
          * mouse.
          */
         on(canvas, 'dblclick', (event) => {
-            if (lastPointerType === 'mouse') detail.toggleZoom(event.clientX, event.clientY);
+            if (lastPointerType === 'mouse') detail.doubleClick(event.clientX, event.clientY);
         });
 
         on(canvas, 'pointerup', (event) => {
@@ -343,7 +343,7 @@ export function createEngine({ canvas, source, ui }) {
 
                 if (isDouble) {
                     lastTap = null;
-                    detail.toggleZoom(event.clientX, event.clientY);
+                    detail.doubleClick(event.clientX, event.clientY);
                 } else {
                     lastTap = { time: now, x: event.clientX, y: event.clientY };
                 }

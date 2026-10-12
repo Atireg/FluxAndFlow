@@ -107,7 +107,8 @@ Inside `src/engine/`:
     pebbles/             geometry, materials, wander, flow, arrival, spotlight,
                          dissolve, drop, gradient (the face's drifting warmth)
     pointcloud/          load, mesh sampling, gather, trails
-    camera/              rig (cameras, controls, renderer), framing (where it goes)
+    camera/              rig (cameras, controls, renderer), framing (where it goes),
+                         inside (a spot at eye level inside a model)
     shaders/             point cloud, gather, tails, smoke
 
 ## Repository and deployment
@@ -132,7 +133,7 @@ Two steps, and nothing else:
 
 There is **no per-project branch anywhere in the engine**: a project that
 wants to behave differently says so through `view`, `gather`, `drop`,
-`points`, `thumbSize`, `zoom` or `autoZoom`, and the one code path reads it. `defineProject`
+`points`, `thumbSize`, `doubleClick`, `autoZoom` or `eyeLevel`, and the one code path reads it. `defineProject`
 (in `src/projects/schema.js`) fills the defaults, normalises the pictures
 and throws on a missing `detailModel`, a slot outside `SLOT_COUNT`, a
 `body` that isn't an array, or two projects claiming one slot. Copy
@@ -155,8 +156,9 @@ defineProject({
             sway: 13 },                                    // camera nods ± degrees, slowly
     gather: true,                                 // optional: points gather from a scattered cloud on open
     // points: 20000,                             // optional, a mesh detailModel only: how many points to sample
-    // zoom: false,                               // optional: no double-click zoom or its hint (Emergent Space)
+    doubleClick: 'hold',                          // optional: 'zoom' (default), 'hold' (stop the turn till the next), 'none'
     autoZoom: 10,                                 // optional: camera moves in on a point / back out every 10s (not with `drop`)
+    eyeLevel: 0.4,                                // optional, with autoZoom: every other move in is from inside, at this share of the height
     // drop: { count: 3, size: 3, ground: -1.2, solid: true,   // optional, a crossed-rod mesh only (Emergent Space)
     //         contacts: true, closeUp: { hold: 5, after: 5 },   // interlock dots; camera in on one 5s, out, drop 5s later
     //         velocity: true },                                  // live velocity (or `repeat: 10`: drop again 10s after rest)

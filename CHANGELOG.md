@@ -362,6 +362,18 @@ only.
   close-up's drop (over the 1.5s dissolve for "Drop again"), and the new
   drop starts from the angle they stopped at (`pile.turnStop`,
   `modelTurn`).
+- **Rock Print: double-click holds it, and views from inside.** A
+  double-click (or double-tap) no longer zooms in Rock Print: it stops the
+  pavilion turning, and the camera's nod, until the next one, carrying on
+  from the same angle (`doubleClick: 'hold'`, replacing `zoom: false` -
+  Emergent Space now says `doubleClick: 'none'`). And every other timed
+  zoom now walks in among the columns at eye height (`eyeLevel: 0.4`): a
+  spot inside found from the points at that height, looking along the
+  clearest line between the columns to a far one, gaze drifting slowly,
+  with a wider lens (more on a phone), the near plane pulled in, and a cap
+  on how big a point next to the camera can draw. Checked headless on both
+  layouts (frames looked at, not kept), the hold measured still and the
+  turn resuming without a jump; no errors.
 
 Open at end of session (see README, "Next up"): unchanged by this session —
 Safari still to confirm, both projects' real copy and picture credits still

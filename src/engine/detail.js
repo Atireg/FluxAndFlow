@@ -9,7 +9,9 @@ import { getDissolve } from './pebbles/dissolve.js';
 import { armDrop, DROP_BOOM_HANG, DROP_OPEN_AFTER } from './pebbles/drop.js';
 import { startArrival } from './pebbles/arrival.js';
 import { restingFaceColor, restingRimColor } from './pebbles/materials.js';
-import { DETAIL_ROTATE_SPEED, modelStartYaw, modelTurn } from './camera/framing.js';
+import { DETAIL_ROTATE_SPEED, isHeld, modelStartYaw, modelTurn } from './camera/framing.js';
+import { findInsideSpot } from './camera/inside.js';
+import { DETAIL_FOV } from './camera/rig.js';
 
 /**
  * Detail view: the project's model on the whole canvas, its description in a
@@ -73,6 +75,21 @@ const TURN_STOP = 3; // seconds the turn (and its floor) takes to slow to a stop
  */
 const AUTO_ZOOM = 0.4; // the camera ends up this fraction of its distance away
 
+/**
+ * With `eyeLevel` too, every other move in is from inside the model instead,
+ * standing at that share of its height among its columns (findInsideSpot)
+ * and looking out level across it. The camera stays on its spot as the model
+ * turns but keeps facing the same way, so the columns pass across the view.
+ */
+const INSIDE_LOOK = 0.3; // how far ahead it looks, as a share of the model's footprint
+const INSIDE_MOVE = 2.4; // seconds to walk in - a longer way than to a point
+const INSIDE_FOV = 65; // degrees - a wider lens than outside, the way eyes take in a room
+const INSIDE_WIDTH = 55; // degrees across at least, so a tall phone screen still sees between the columns
+const INSIDE_FOV_MAX = 90; // degrees - the most the lens widens for that
+const INSIDE_NEAR = 0.05; // the camera's near plane while standing among the points (1 otherwise clips the nearest columns)
+const INSIDE_PAN = 0.35; // radians the gaze drifts either side of its line, slowly
+const INSIDE_PAN_PERIOD = 18; // seconds for one look left, right and back
+
 export function createDetail({
     state, grid, rig, framing, screen, clock, visited, perlinTexture, ui,
 }) {
@@ -82,9 +99,14 @@ export function createDetail({
     const tapHintPoint = new THREE.Vector3();
     const velocityPoint = new THREE.Vector3();
 
-    // The timed zoom: when it next moves (in `since` seconds), and the point
-    // of the cloud it's on while in
-    const autoZoom = { next: Infinity, since: 0, index: -1, last: null };
+    // The timed zoom: when it next moves (in `since` seconds), the point it's
+    // on while in (in the cloud's own space; null while out), whether that's
+    // a spot inside, and how many times it has moved in
+    const autoZoom = {
+        next: Infinity, since: 0, local: null, inside: false, count: 0, last: null,
+        spot: null, reach: 0, arrived: null, // standing inside: where, how far it looks, since when
+    };
+    const UP = new THREE.Vector3(0, 1, 0);
     const autoZoomPoint = new THREE.Vector3();
 
     // Where the close-up is: 'idle', 'in' (moving in or holding), 'out'
@@ -274,7 +296,9 @@ export function createDetail({
             // ...and so does the first timed zoom
             const every = pebble.userData.project?.autoZoom;
             autoZoom.next = every ? (pebble.userData.project.gather ? GATHER_DURATION : 0) + every : Infinity;
-            autoZoom.index = -1;
+            autoZoom.local = null;
+            autoZoom.inside = false;
+            autoZoom.count = 0;
 
             rig.enterDetailProjection();
 
@@ -291,6 +315,7 @@ export function createDetail({
                 pebble.userData.detail.rotation.y = modelStartYaw(project);
                 pebble.userData.detail.userData.pile?.restart();
                 pebble.userData.detail.userData.turnOffset = 0;
+                pebble.userData.detail.userData.held = null;
                 pebble.userData.detailRotateStartTime = clock.getElapsedTime();
                 ui.onStatus(null);
                 framing.frameDetail(pebble, { ease });
@@ -363,6 +388,10 @@ export function createDetail({
             const pebble = state.selected;
             state.selected = null;
             closeUp.phase = 'idle';
+            autoZoom.inside = false;
+            autoZoom.local = null;
+            rig.perspectiveCamera.near = rig.baseNear;
+            rig.perspectiveCamera.updateProjectionMatrix();
 
             /**
              * Not 'catalog' yet. 'returning' places the pebbles back home each
@@ -460,33 +489,92 @@ export function createDetail({
 
         // A project's `autoZoom`, a step each frame
         maybeAutoZoom(model, since) {
-            const every = state.selected?.userData.project?.autoZoom;
+            const project = state.selected?.userData.project;
+            const every = project?.autoZoom;
             autoZoom.since = since;
             if (!every) return;
 
             const points = model.userData.points;
-            const toWorld = (target) => points.localToWorld(target.fromBufferAttribute(points.geometry.attributes.position, autoZoom.index));
+            const toWorld = (local) => (target) => points.localToWorld(target.copy(local));
 
             // While in, the camera follows its point as the model turns
-            if (autoZoom.index >= 0 && points) follow(autoZoom, toWorld(autoZoomPoint));
+            if (autoZoom.local && points) follow(autoZoom, toWorld(autoZoom.local)(autoZoomPoint));
+
+            /**
+             * Standing inside, the camera keeps its place and gaze in the
+             * model's own frame - turning with it, so it never walks into a
+             * column - and its gaze drifts slowly side to side. Once there;
+             * left to the visitor if they orbit or zoom out.
+             */
+            if (autoZoom.inside && points && !rig.orientationLocked) {
+                if (!state.detailZoomed || rig.visitorOrbiting) {
+                    // Whatever took the camera out (the drawer, the visitor)
+                    // may not have set the lens back
+                    autoZoom.inside = false;
+                    if (!state.detailZoomed) rig.animateFov(DETAIL_FOV[getPanelLayout(state.drawerOpen).mode], CLOSE_UP_MOVE);
+                } else {
+                    autoZoom.arrived ??= since;
+                    const pan = INSIDE_PAN * Math.sin(((since - autoZoom.arrived) / INSIDE_PAN_PERIOD) * Math.PI * 2);
+                    const { position, direction } = autoZoom.spot;
+                    const gaze = direction.clone().applyAxisAngle(UP, pan);
+                    points.localToWorld(rig.camera.position.copy(position));
+                    points.localToWorld(rig.controls.target.copy(position).addScaledVector(gaze, autoZoom.reach));
+                }
+            }
+
+            // Back to the usual near plane once it has walked out
+            if (!autoZoom.inside && !rig.orientationLocked && rig.perspectiveCamera.near !== rig.baseNear) {
+                rig.perspectiveCamera.near = rig.baseNear;
+                rig.perspectiveCamera.updateProjectionMatrix();
+            }
 
             if (since < autoZoom.next) return;
 
             /**
              * Not while the camera is already moving, or the visitor is
-             * orbiting, or a narrow screen's drawer covers the model - try
-             * again shortly
+             * orbiting or has held the model still, or a narrow screen's
+             * drawer covers the model - try again shortly
              */
             const { mode } = getPanelLayout(state.drawerOpen);
-            if (rig.orientationLocked || rig.visitorOrbiting || (state.drawerOpen && mode !== 'side') || !points) {
+            if (rig.orientationLocked || rig.visitorOrbiting || isHeld(model) || (state.drawerOpen && mode !== 'side') || !points) {
                 autoZoom.next = since + 1;
                 return;
             }
             autoZoom.next = since + every;
 
             if (state.detailZoomed) {
-                framing.reframe(state.selected, { duration: CLOSE_UP_MOVE });
-                autoZoom.index = -1;
+                framing.reframe(state.selected, { duration: autoZoom.inside ? INSIDE_MOVE : CLOSE_UP_MOVE });
+                autoZoom.local = null;
+                autoZoom.inside = false;
+                return;
+            }
+
+            autoZoom.count += 1;
+            autoZoom.last = null;
+
+            // Every other time, from inside at eye level
+            const spot = project.eyeLevel && autoZoom.count % 2 === 0 ? findInsideSpot(points, project.eyeLevel) : null;
+            if (spot) {
+                const box = points.geometry.boundingBox;
+                autoZoom.reach = INSIDE_LOOK * Math.max(box.max.x - box.min.x, box.max.z - box.min.z);
+                autoZoom.spot = spot;
+                autoZoom.arrived = null;
+
+                const ahead = spot.position.clone().addScaledVector(spot.direction, autoZoom.reach);
+                const eye = worldAhead(model, INSIDE_MOVE, toWorld(spot.position), new THREE.Vector3());
+                const look = worldAhead(model, INSIDE_MOVE, toWorld(ahead), new THREE.Vector3());
+                rig.perspectiveCamera.near = INSIDE_NEAR;
+                rig.perspectiveCamera.updateProjectionMatrix();
+                rig.moveCamera(eye, look, INSIDE_MOVE);
+                // A lens's fov is its height; on a tall screen that leaves
+                // little across, so widen it until it's INSIDE_WIDTH across
+                const across = THREE.MathUtils.radToDeg(2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(INSIDE_WIDTH) / 2) / screen.aspect));
+                rig.animateFov(Math.min(Math.max(INSIDE_FOV, across), INSIDE_FOV_MAX), INSIDE_MOVE);
+                state.detailZoomed = true;
+                ui.hideTapHint();
+
+                autoZoom.inside = true;
+                autoZoom.local = null;
                 return;
             }
 
@@ -495,19 +583,25 @@ export function createDetail({
              * frame once the camera gets there, aimed where it will be by
              * then
              */
-            const count = points.geometry.attributes.position.count;
+            const position = points.geometry.attributes.position;
             for (let tries = 0; tries < 40; tries++) {
-                autoZoom.index = Math.floor(Math.random() * count);
-                worldAhead(model, CLOSE_UP_MOVE, toWorld, autoZoomPoint);
+                const local = new THREE.Vector3().fromBufferAttribute(position, Math.floor(Math.random() * position.count));
+                worldAhead(model, CLOSE_UP_MOVE, toWorld(local), autoZoomPoint);
                 const aim = autoZoomPoint.clone();
                 autoZoomPoint.project(rig.camera);
                 if (Math.abs(autoZoomPoint.x) < 0.5 && Math.abs(autoZoomPoint.y) < 0.5) {
-                    autoZoom.last = null;
                     zoomTo(aim, AUTO_ZOOM, CLOSE_UP_MOVE);
+                    autoZoom.local = local;
+                    autoZoom.inside = false;
                     return;
                 }
             }
-            autoZoom.index = -1;
+        },
+
+        // Whether the timed zoom has the camera standing inside the model -
+        // the camera's nod holds off meanwhile, so it stays at eye level
+        get standingInside() {
+            return autoZoom.inside && state.detailZoomed;
         },
 
         // A project's `drop.closeUp`, a step each frame once the pile is at rest
@@ -583,15 +677,50 @@ export function createDetail({
             (ui.overlays.velocityTags ?? []).forEach((tag) => { tag.style.opacity = 0; });
         },
 
+        // A double-click or double-tap on the model: whatever the project's
+        // `doubleClick` says
+        doubleClick(clientX, clientY) {
+            if (state.view !== 'detail' || !state.selected) return;
+
+            const action = state.selected.userData.project?.doubleClick ?? 'zoom';
+            if (action === 'zoom') detail.toggleZoom(clientX, clientY);
+            else if (action === 'hold') detail.toggleHold();
+        },
+
+        /**
+         * `doubleClick: 'hold'`: stop the model's turn where it is - and the
+         * camera's nod with it - or start it again from there
+         */
+        toggleHold() {
+            const model = state.selected?.userData.detail;
+            if (!model) return;
+
+            const since = clock.getElapsedTime() - state.selected.userData.detailRotateStartTime;
+            const held = (model.userData.held ??= { total: 0, at: null });
+            if (held.at === null) {
+                held.at = since;
+            } else {
+                held.total += since - held.at;
+                held.at = null;
+
+                // The timed zoom waits a full round after it turns again
+                const every = state.selected.userData.project?.autoZoom;
+                if (every) autoZoom.next = since + every;
+            }
+
+            // Clear a hint that's mid-tap
+            ui.hideTapHint();
+        },
+
         toggleZoom(clientX, clientY) {
             if (state.view !== 'detail' || !state.selected) return;
-            if (state.selected.userData.project?.zoom === false) return; // a project can turn it off
 
             // A visitor's own zoom isn't undone by the timed one straight after
             const every = state.selected.userData.project?.autoZoom;
             if (every) {
                 autoZoom.next = autoZoom.since + every;
-                autoZoom.index = -1;
+                autoZoom.local = null;
+                autoZoom.inside = false;
             }
 
             const { camera, controls } = rig;
@@ -619,7 +748,7 @@ export function createDetail({
         maybeShowTapHint(model, since) {
             if (since < state.tapHintNext) return;
             if (closeUp.phase === 'in') return; // the close-up's camera is busy
-            if (state.selected?.userData.project?.zoom === false) return; // nothing to hint at
+            if (state.selected?.userData.project?.doubleClick === 'none') return; // nothing to hint at
 
             state.tapHintNext = since + TAP_HINT_GAP;
 

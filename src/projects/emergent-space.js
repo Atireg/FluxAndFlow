@@ -87,6 +87,6 @@ export default defineProject({
     // See src/engine/pile.js.
     // No double-click zoom (or its hint): the camera's own close-ups on the
     // interlocks do the zooming here.
-    zoom: false,
+    doubleClick: 'none',
     drop: { count: 3, size: 3, ground: -1.2, solid: true, contacts: true, closeUp: { hold: 5, after: 5 }, velocity: true },
 });

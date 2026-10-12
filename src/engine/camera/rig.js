@@ -87,6 +87,7 @@ export function createCameraRig({ canvas, scene, screen, onShaderError }) {
 
     const rig = {
         renderer,
+        baseNear: perspectiveCamera.near, // detail.js lowers it while standing inside a model
         controls,
         perspectiveCamera,
         orthographicCamera,

@@ -32,7 +32,10 @@ void main() {
         // under perspective that has to be divided by depth, under
         // orthographic it does not.
         float depth = mix(1.0, max(-viewPosition.z, 0.001), uSizeAttenuation);
-        gl_PointSize = (uPointScale * aScale) / depth;
+        // Never bigger than a mid-sized point half a unit away: only points
+        // right by the camera reach it - standing inside a model (eyeLevel),
+        // where they'd otherwise swell into blots across the screen
+        gl_PointSize = min((uPointScale * aScale) / depth, uPointScale * 0.5);
         
         // Varying
         vUv = uv;

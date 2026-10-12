@@ -108,6 +108,21 @@ export function viewDirection(project, { elevation: elevationDeg = project?.view
     );
 }
 
+/**
+ * How long a model's turn has been held still (a project's `doubleClick:
+ * 'hold'`), by `since`: `model.userData.held` is { total, at } - the time
+ * held before, and when the current hold began, or null while turning
+ */
+export function heldFor(model, since) {
+    const held = model.userData.held;
+    if (!held) return 0;
+    return held.total + (held.at === null ? 0 : since - held.at);
+}
+
+export function isHeld(model) {
+    return model.userData.held?.at != null;
+}
+
 // Where a project's model starts its slow rotation: the quarter turn above,
 // plus the project's own `view.turn`
 export function modelStartYaw(project) {
@@ -126,7 +141,7 @@ export function modelStartYaw(project) {
  */
 export function modelTurn(model, since) {
     const pile = model.userData.pile;
-    if (!pile) return since;
+    if (!pile) return since - heldFor(model, since);
 
     const offset = model.userData.turnOffset ?? 0;
     const turning = Math.max(since - pile.settledAt, 0);
@@ -392,12 +407,13 @@ export function createFraming({ rig, screen, state, grid, ui }) {
             }
         },
 
-        updateSway(project, since, elapsedTime) {
+        // `held`: the model's turn is held still, and the nod holds with it
+        updateSway(project, since, elapsedTime, held = false) {
             const { camera, controls } = rig;
             const amplitude = THREE.MathUtils.degToRad(project?.view?.sway ?? 0);
             const gathering = project?.gather && since < GATHER_DURATION;
 
-            if (!amplitude || gathering || rig.orientationLocked || rig.visitorOrbiting || state.view !== 'detail') {
+            if (!amplitude || gathering || held || rig.orientationLocked || rig.visitorOrbiting || state.view !== 'detail') {
                 swayStartedAt = null;
                 return;
             }

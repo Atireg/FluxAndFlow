@@ -170,10 +170,12 @@ Project view
     [x] Double-click / double-tap zoom, hinted every 5s by a white touch
         point that scales with the screen, "double-click" ("double-tap"
         on a touch screen) hanging from it on a bouncing black string
-        like the catalog's; off for Emergent Space (`zoom: false`)
-    [x] Rock Print zooms in on a point of the pavilion and back out every
-        10s by itself (`autoZoom`), following the point as it turns; its
-        camera nods more slowly (22s)
+        like the catalog's; per project (`doubleClick`): off for Emergent
+        Space, and on Rock Print it holds the pavilion still until the next
+    [x] Rock Print zooms in by itself every 10s and back out (`autoZoom`),
+        alternately on a point of the pavilion (following it as it turns)
+        and from inside, at eye height among the columns, looking between
+        them (`eyeLevel`); its camera nods more slowly (22s)
     [x] Camera moves only tilt, never roll
 
 Site

@@ -26,8 +26,12 @@
  *   view          camera angle in degrees - see normaliseView
  *   gather        points gather from a scattered cloud on open
  *   points        a mesh detailModel only: how many points to sample
- *   zoom          false: no double-click/double-tap zoom, and no hint for it
+ *   doubleClick   what a double-click/double-tap on the model does: 'zoom'
+ *                 (the default) in and back out, 'hold' stops its turn until
+ *                 the next, 'none' nothing (and no hint for it)
  *   autoZoom      seconds: the camera moves in on the model, or back out, this often
+ *   eyeLevel      with autoZoom: every other move in is from inside, at this
+ *                 share of the model's height
  *   drop          a crossed-rod mesh only: copies dropped with live physics
  *   images        drawer pictures - see normaliseImage
  *
@@ -139,12 +143,26 @@ function normaliseDrop(drop, { id }) {
     return { ...drop };
 }
 
+function normaliseDoubleClick({ id, doubleClick = 'zoom' }) {
+    if (!['zoom', 'hold', 'none'].includes(doubleClick)) {
+        throw new Error(`Project "${id}": doubleClick should be 'zoom', 'hold' or 'none'`);
+    }
+    return doubleClick;
+}
+
 // Not with a `drop`, whose own close-ups (`drop.closeUp`) move the camera
 function normaliseAutoZoom(autoZoom, { id, drop }) {
     if (autoZoom === undefined) return undefined;
     if (!(autoZoom > 0)) throw new Error(`Project "${id}": autoZoom should be a number of seconds above 0`);
     if (drop) throw new Error(`Project "${id}": autoZoom can't go with a drop`);
     return autoZoom;
+}
+
+function normaliseEyeLevel({ id, eyeLevel, autoZoom }) {
+    if (eyeLevel === undefined) return undefined;
+    if (!(eyeLevel > 0 && eyeLevel < 1)) throw new Error(`Project "${id}": eyeLevel should be a share of the height, between 0 and 1`);
+    if (!autoZoom) throw new Error(`Project "${id}": eyeLevel needs autoZoom`);
+    return eyeLevel;
 }
 
 export function defineProject(project) {
@@ -201,8 +219,9 @@ export function defineProject(project) {
         view: normaliseView(project.view, { id }),
         gather: Boolean(project.gather),
         points: project.points,
-        zoom: project.zoom !== false,
+        doubleClick: normaliseDoubleClick(project),
         autoZoom: normaliseAutoZoom(project.autoZoom, project),
+        eyeLevel: normaliseEyeLevel(project),
         drop: normaliseDrop(project.drop, { id }),
 
         images: images.map((image, index) => normaliseImage(image, { id, index })),
