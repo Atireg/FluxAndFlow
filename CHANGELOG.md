@@ -196,9 +196,10 @@ another kind settles as soon as the choice changes), and a click on a sunk
 pebble brings its kind forward.
 
 **Landing page.** The first thing on opening: the concept in a short
-paragraph over the loader's floating particles, and "Welcome to the Flux
-and Flow playground", which turns it into the loader on the way to the catalog (its minimum time now
-counted from that click). The back link in a project reads "My playground"
+paragraph over the loader's floating particles, and "Welcome to the F&F
+playground" (worded three ways before it), which turns it into the loader
+on the way to the catalog (its minimum time now counted from that click).
+The back link in a project reads "F&F playground" (first "My playground")
 instead of "All projects". Then rewritten with the user into three short,
 more business-like paragraphs: hidden currents, their background, the
 services; the landing page scrolls if it outgrows a small phone.

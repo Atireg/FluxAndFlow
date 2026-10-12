@@ -73,7 +73,7 @@ Next up (waiting on content or a check from the user)
 
 Landing/welcome view
     [x] Welcome text explaining the website's concept, over the loader's
-        floating particles, first thing on opening; "Welcome to the Flux and Flow playground" leads
+        floating particles, first thing on opening; "Welcome to the F&F playground" leads
         on to the loader and the catalog (src/index.html)
     [ ] Graphics (me as a figure?) on the landing page
     [ ] A way back to the landing page from the catalog
@@ -190,8 +190,8 @@ Project view
 
 Site
     [x] A landing page: the concept, background and services in three short paragraphs over the floating
-        particles, and "Welcome to the Flux and Flow playground" on to the projects (the back link in
-        a project reads "My playground" too)
+        particles, and "Welcome to the F&F playground" on to the projects (the back link in
+        a project reads "F&F playground")
     [x] React structure: the page in components (`src/app/`,
         `src/components/`), the canvas in an engine of focused modules
         (`src/engine/`), one module per project behind one schema

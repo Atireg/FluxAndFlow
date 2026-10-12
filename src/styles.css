@@ -269,8 +269,8 @@ canvas.webgl {
 }
 
 /* The landing page's words and the loader's progress share one place under
-   the title: the welcome first, then the line and count once "My
-   playground" is followed */
+   the title: the welcome first, then the line and count once "Welcome to
+   the F&F playground" is followed */
 .loader__stage {
     display: grid;
     justify-items: center;

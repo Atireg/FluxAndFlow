@@ -53,9 +53,9 @@ and README's "Next up". As of the end of Session 3:
 - **Landing page**: the first thing on opening is three short paragraphs -
   hidden currents, the user's background, the services (the user's own
   words, worked out line by line: change them only on request) - over the loader's floating
-  particles (it scrolls on a small phone), with "Welcome to the Flux
-  and Flow playground" - which turns it into the loader and on to the catalog. The back link in a
-  project also reads "My playground".
+  particles (it scrolls on a small phone), with "Welcome to the F&F
+  playground" - which turns it into the loader and on to the catalog. The back link in a
+  project reads "F&F playground".
 - **Not started**: per-project URLs, a way back to the landing page;
   README lists the rest.
 
@@ -395,7 +395,7 @@ combination of layout × drawer × view. Keep it proportionate (see
 
 Testing tips learnt the hard way:
 
-- **Click `#loader-enter` ("Welcome to the Flux and Flow playground"), then wait for `#loader` to
+- **Click `#loader-enter` ("Welcome to the F&F playground"), then wait for `#loader` to
   be removed** before clicking anything else - the landing page waits for
   that click, then at least 5s (`MIN_VISIBLE`, counted from the click) plus
   its 2.6s exit. Without the click the loader never leaves.
