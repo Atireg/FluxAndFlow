@@ -39,6 +39,8 @@ export function createState() {
             pebble: null,
             last: null, // excluded from the next pick, so it moves on
             startedAt: 0,
+            dwell: 0, // seconds this one lasts - cut short if the filter moves off its kind
+            cut: false,
             rotatePeriodX: 0,
             rotatePeriodZ: 0,
             nextAt: 0,

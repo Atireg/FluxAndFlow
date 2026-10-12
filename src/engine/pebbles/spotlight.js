@@ -36,12 +36,15 @@ export const SPOTLIGHT_TAG_MIN = 0.65;
  * this is what makes it settle rather than just stop. Eased at both ends
  * (smoothstep), so it neither starts nor lands with a jolt.
  */
-export function spotlightIntensity(state, elapsedTime) {
+function spotlightRamp(state, elapsedTime) {
     const since = elapsedTime - state.spotlight.startedAt;
     const fadeIn = Math.min(since / SPOTLIGHT_FADE_IN, 1);
-    const fadeOut = Math.min((SPOTLIGHT_DWELL - since) / SPOTLIGHT_FADE_OUT, 1);
-    const ramp = Math.max(0, Math.min(fadeIn, fadeOut));
+    const fadeOut = Math.min((state.spotlight.dwell - since) / SPOTLIGHT_FADE_OUT, 1);
+    return Math.max(0, Math.min(fadeIn, fadeOut));
+}
 
+export function spotlightIntensity(state, elapsedTime) {
+    const ramp = spotlightRamp(state, elapsedTime);
     return ramp * ramp * (3 - 2 * ramp);
 }
 
@@ -127,8 +130,20 @@ export function updateSpotlightCycle(state, pebbles, elapsedTime) {
     const spotlight = state.spotlight;
 
     if (spotlight.pebble) {
-        // Runs its whole dwell, hovered or not - hover changes nothing
-        if (elapsedTime - spotlight.startedAt > SPOTLIGHT_DWELL) {
+        /**
+         * Runs its whole dwell, hovered or not - hover changes nothing. But
+         * once the filter has brought another kind forward, only that kind
+         * jumps: a pebble of any other settles now, easing out from wherever
+         * its glow had got to (its dwell shortened so the fade-out picks up
+         * at the same strength) rather than snapping off
+         */
+        if (!inFocus(state, spotlight.pebble) && !spotlight.cut) {
+            spotlight.cut = true;
+            const since = elapsedTime - spotlight.startedAt;
+            spotlight.dwell = Math.min(spotlight.dwell, since + spotlightRamp(state, elapsedTime) * SPOTLIGHT_FADE_OUT);
+        }
+
+        if (elapsedTime - spotlight.startedAt > spotlight.dwell) {
             spotlight.last = spotlight.pebble;
             spotlight.pebble = null;
             spotlight.nextAt = elapsedTime + randomBetween(...SPOTLIGHT_GAP);
@@ -150,6 +165,8 @@ export function updateSpotlightCycle(state, pebbles, elapsedTime) {
 
     spotlight.pebble = pebble;
     spotlight.startedAt = elapsedTime;
+    spotlight.dwell = SPOTLIGHT_DWELL;
+    spotlight.cut = false;
     spotlight.rotatePeriodX = randomBetween(...SPOTLIGHT_ROTATE_PERIOD);
     spotlight.rotatePeriodZ = randomBetween(...SPOTLIGHT_ROTATE_PERIOD);
 }

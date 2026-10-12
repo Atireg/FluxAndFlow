@@ -497,7 +497,11 @@ after the arrival, like it; the depth comes from the camera's height,
 straight down: straight down, the perspective drew every sunk pebble in
 towards the middle, into a clump behind the chosen ones; along the camera's
 line each stays where it was, only smaller. No colour change - one orange
-means "click me". While a kind is chosen the spotlight only lands on it.
+means "click me". While a kind is chosen only that kind jumps (asked for):
+the spotlight only lands on it, and one already glowing on another kind
+when the choice changes settles at once - its dwell shortened so the
+fade-out starts at the strength the glow had reached, rather than
+snapping off (`spotlight.dwell`, `cut`).
 
 A click on a sunk pebble brings its kind forward rather than opening it: a
 project opens on its own pebble, which has to be up in its place for the

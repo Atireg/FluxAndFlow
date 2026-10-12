@@ -190,8 +190,9 @@ in DECISIONS.md.
 research; the empty slots stand in for four of each other kind. A filter
 top left in the catalog brings one kind forward and pushes the other
 pebbles back along the camera's line to half their size (straight down
-clumped them in the middle); the spotlight stays on the chosen kind, and a
-click on a sunk pebble brings its kind forward.
+clumped them in the middle); only the chosen kind jumps (one glowing on
+another kind settles as soon as the choice changes), and a click on a sunk
+pebble brings its kind forward.
 
 **Landing page.** The first thing on opening: the concept in a short
 paragraph over the loader's floating particles, and "Welcome to my

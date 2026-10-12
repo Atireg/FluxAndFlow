@@ -27,7 +27,8 @@ and README's "Next up". As of the end of Session 3:
   anything not yet merged.
 - **Categories**: every project is research, teaching or the real world
   (`category`, a tag in its bar); a filter top left in the catalog brings
-  one kind forward and pushes the rest back to half size. Both projects are
+  one kind forward and pushes the rest back to half size; only that kind
+  jumps orange while it's chosen. Both projects are
   research; the empty slots stand in for 4 teaching, 4 real world.
 - **Catalog**: ten pebbles shaded in graphite, each a random size on every
   visit, slowly changing shape and warmth, pushing apart where they touch;
