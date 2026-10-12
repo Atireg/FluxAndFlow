@@ -664,7 +664,7 @@ Blender/Rhino simulation. A project's `drop: { count, size, ground }` does it
   give a cluster, shown once the pile looks still and faded with the
   dissolve. Gathered over the settle rather than replaced each step: cannon
   stops reporting a contact once both bodies touching are asleep, and they
-  sleep one by one. Cyan, asked for (graphite at first; not orange, which
+  sleep one by one. Blue, asked for (graphite at first, then cyan; not orange, which
   means "click me"); the velocity arrows stay graphite. Each dot a solid centre with a ring
   spreading on its own beat; drawn over the rods so a crossing at the back
   isn't lost.

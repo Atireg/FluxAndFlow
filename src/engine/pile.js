@@ -60,17 +60,17 @@ const PILE_REST_TIME = 0.2; // simulated seconds both must hold
  * come to rest (a project's `drop.contacts`). The points are cannon's own
  * contacts between two aggregates - the ground's are left out - merged where
  * several sit together, since two rods crossing give a small cluster.
- * Cyan, by request - it reads against the graphite rods and the paper, and
- * isn't the orange that means "click me" (it was graphite at first). Drawn
- * over the rods (no depth test), so a crossing on
- * the far side isn't lost behind them.
+ * Blue, by request (graphite at first, then cyan) - it reads against the
+ * graphite rods and the paper, and isn't the orange that means "click me".
+ * Drawn over the rods (no depth test), so a crossing on the far side isn't
+ * lost behind them.
  */
 const CONTACT_MAX = 24; // dots at most
 const CONTACT_MERGE = 0.12; // contacts closer than this, in aggregate sizes, are one dot
 const CONTACT_PX = 30; // the dot's sprite across, CSS px - room for its ring to spread
 const CONTACT_PULSE = 1.6; // seconds per pulse
 const CONTACT_FADE_IN = 0.6; // seconds to appear once the pile is still
-const CONTACT_INK = new THREE.Color().setRGB(0 / 255, 175 / 255, 205 / 255, THREE.LinearSRGBColorSpace);
+const CONTACT_INK = new THREE.Color().setRGB(30 / 255, 90 / 255, 225 / 255, THREE.LinearSRGBColorSpace);
 // The velocity arrows stay graphite
 const VELOCITY_INK = new THREE.Color().setRGB(28 / 255, 28 / 255, 30 / 255, THREE.LinearSRGBColorSpace);
 

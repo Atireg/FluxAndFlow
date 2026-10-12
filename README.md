@@ -157,7 +157,7 @@ Project view
         reached; once each drop settles the camera moves in on one
         interlock for 5s, back out, and 5s later it drops again by itself
         (`drop.closeUp`; `drop.repeat` for a plain repeat), the fallen
-        pile dissolving away first; pulsing cyan dots
+        pile dissolving away first; pulsing blue dots
         mark where the aggregates interlock (`drop.contacts`), and an arrow
         and a live m/s reading show each one's velocity as it falls
         (`drop.velocity`)

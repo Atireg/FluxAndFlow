@@ -341,6 +341,7 @@ only.
 - **The tap hint says just "double-click"** ("double-tap" on a touch
   screen), and its word, string and knot are black like the dot's outline
   rather than orange.
+- **The interlock dots are blue** (they were cyan).
 
 Open at end of session (see README, "Next up"): unchanged by this session —
 Safari still to confirm, both projects' real copy and picture credits still
