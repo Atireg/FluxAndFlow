@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { CUBE_SIZE, PEBBLE_RADIUS, PEBBLE_SQUASH } from './constants.js';
 import { SPOTLIGHT_TAG_MIN, spotlightGlow, spotlightIntensity } from './pebbles/spotlight.js';
+import { clamp01 } from './ease.js';
 
 /**
  * The catalog's words on its pebbles: "Still empty..." for a moment on an
@@ -269,12 +270,6 @@ export function createTags({ screen, rig, state, overlays }) {
     });
     const hint = { shownAt: null, x: 0, y: 0, taps: 0 };
 
-    // Where a point on a pebble lands on screen, in pixels
-    function screenPoint(vector) {
-        vector.project(rig.camera);
-        return [(vector.x + 1) / 2 * screen.width, (1 - vector.y) / 2 * screen.height];
-    }
-
     /**
      * Pins a tag over the lower part of a pebble's top face, on screen. On
      * the face rather than above it, since a top-row pebble has no room above
@@ -284,10 +279,7 @@ export function createTags({ screen, rig, state, overlays }) {
         // Down the screen is world +Z from the overhead catalog camera
         pebble.updateMatrixWorld();
         anchor.set(0, PEBBLE_RADIUS * PEBBLE_SQUASH, CUBE_SIZE * 0.36).multiplyScalar(pebble.userData.size);
-        pebble.localToWorld(anchor).project(rig.camera);
-
-        const x = (anchor.x + 1) / 2 * screen.width;
-        const y = (1 - anchor.y) / 2 * screen.height;
+        const [x, y] = rig.toScreen(pebble.localToWorld(anchor));
         tag.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
     }
 
@@ -297,8 +289,8 @@ export function createTags({ screen, rig, state, overlays }) {
         // Tied to the pebble's lower edge as seen from above - down the
         // screen is world +Z - just inside its rim
         pebble.updateMatrixWorld();
-        const [ax, ay] = screenPoint(pebble.localToWorld(tagPivot.set(0, 0, PEBBLE_RADIUS * pebble.userData.size * 0.9)));
-        const [cx, cy] = screenPoint(pebble.localToWorld(tagCentre.set(0, 0, 0)));
+        const [ax, ay] = rig.toScreen(pebble.localToWorld(tagPivot.set(0, 0, PEBBLE_RADIUS * pebble.userData.size * 0.9)));
+        const [cx, cy] = rig.toScreen(pebble.localToWorld(tagCentre.set(0, 0, 0)));
         const pebbleRadius = Math.hypot(ax - cx, ay - cy) / 0.9;
         const length = Math.max(TAG_STRING_MIN, pebbleRadius * TAG_STRING_LENGTH);
         const link = length / ROPE_SEGMENTS;
@@ -391,7 +383,7 @@ export function createTags({ screen, rig, state, overlays }) {
 
             const emptySince = elapsedTime - state.emptyTag.shownAt;
             const emptyOpacity = inCatalog && state.emptyTag.pebble
-                ? Math.max(0, Math.min(1, (EMPTY_TAG_DURATION - emptySince) / EMPTY_TAG_FADE))
+                ? clamp01((EMPTY_TAG_DURATION - emptySince) / EMPTY_TAG_FADE)
                 : 0;
 
             if (emptyOpacity > 0) {

@@ -1,3 +1,5 @@
+import TagString from './TagString.jsx';
+
 /**
  * The tap hint's string and its words - "double-click", "pause" or "drop
  * again", by the project's `doubleClick` - drawn like the
@@ -9,13 +11,7 @@
 export default function HintTag({ stringRef, tagRef }) {
     return (
         <>
-            {/* The engine writes both paths' `d` and both circles' position, in this order */}
-            <svg className="tag-string tag-string--hint" ref={stringRef} aria-hidden="true">
-                <path className="tag-string__glow" />
-                <path className="tag-string__line" />
-                <circle className="tag-string__knot-glow" />
-                <circle className="tag-string__knot" />
-            </svg>
+            <TagString className="tag-string--hint" ref={stringRef} />
 
             <div className="cube-tag cube-tag--spotlight cube-tag--hint" ref={tagRef} aria-hidden="true" />
         </>

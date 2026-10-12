@@ -4,7 +4,7 @@ import { createBoot } from './boot.js';
 import { createState } from './state.js';
 import { createVisited } from './visited.js';
 import { createCameraRig } from './camera/rig.js';
-import { createFraming, DETAIL_ROTATE_SPEED, isHeld, modelStartYaw, modelTurn } from './camera/framing.js';
+import { createFraming, detailSince, DETAIL_ROTATE_SPEED, isHeld, modelStartYaw, modelTurn } from './camera/framing.js';
 import { createCatalog, findPebble } from './catalog.js';
 import { createDetail } from './detail.js';
 import { createTags } from './tags.js';
@@ -132,17 +132,13 @@ export function createEngine({ canvas, source, ui }) {
     // Where a pointer event lands on the pebbles' plane - one raycast read by
     // both the flow and the streams
     function pointerToGround(event) {
-        pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
-        pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
-        raycaster.setFromCamera(pointer, rig.camera);
+        raycaster.setFromCamera(rig.pointerToNdc(event.clientX, event.clientY, pointer), rig.camera);
 
         return raycaster.ray.intersectPlane(groundPlane, groundHit) ? groundHit : null;
     }
 
     function pebbleAt(event) {
-        pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
-        pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
-        raycaster.setFromCamera(pointer, rig.camera);
+        raycaster.setFromCamera(rig.pointerToNdc(event.clientX, event.clientY, pointer), rig.camera);
 
         const intersects = raycaster.intersectObjects(grid.pebbles);
         return intersects.length ? findPebble(intersects[0].object) : null;
@@ -217,7 +213,7 @@ export function createEngine({ canvas, source, ui }) {
 
                 // Turns the model itself, not the camera, so the pebble's
                 // edges stay square to the canvas - see DETAIL_ROTATE_SPEED
-                const since = elapsedTime - selected.userData.detailRotateStartTime;
+                const since = detailSince(selected, elapsedTime);
 
                 // A pile falls first and only starts turning once it has settled
                 const pile = model.userData.pile;

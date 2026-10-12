@@ -9,9 +9,9 @@ import { getDissolve } from './pebbles/dissolve.js';
 import { armDrop, DROP_BOOM_HANG, DROP_OPEN_AFTER } from './pebbles/drop.js';
 import { startArrival } from './pebbles/arrival.js';
 import { restingFaceColor, restingRimColor } from './pebbles/materials.js';
-import { DETAIL_ROTATE_SPEED, isHeld, modelStartYaw, modelTurn } from './camera/framing.js';
+import { detailSince, DETAIL_ROTATE_SPEED, isHeld, modelStartYaw, modelTurn } from './camera/framing.js';
 import { findInsideSpot } from './camera/inside.js';
-import { DETAIL_FOV } from './camera/rig.js';
+import { DETAIL_FOV, halfHeightAt } from './camera/rig.js';
 
 /**
  * Detail view: the project's model on the whole canvas, its description in a
@@ -127,7 +127,7 @@ export function createDetail({
         const { mode, fraction } = getPanelLayout(state.drawerOpen);
         const shift = new THREE.Vector3();
         if (state.drawerOpen && mode === 'side' && camera.isPerspectiveCamera) {
-            const halfHeight = offset.length() * Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2);
+            const halfHeight = halfHeightAt(camera.fov, offset.length());
             shift.set(1, 0, 0).applyQuaternion(camera.quaternion)
                 .multiplyScalar(fraction * halfHeight * screen.aspect);
         }
@@ -262,8 +262,7 @@ export function createDetail({
                  * so it goes entirely - the clicked pebble included: it has
                  * dissolved, and the project stands on its own in the fog.
                  */
-                gsap.to(other.material, { opacity: 0, duration: 0.8, ease: 'power2.out' });
-                gsap.to(other.userData.edges.material, { opacity: 0, duration: 0.8, ease: 'power2.out' });
+                gsap.to([other.material, other.userData.edges.material], { opacity: 0, duration: 0.8, ease: 'power2.out' });
 
                 if (other.userData.content) other.userData.content.visible = false;
             });
@@ -460,12 +459,12 @@ export function createDetail({
             // (the close-up starts it sooner); the old pile dissolves
             // meanwhile, and the angle is taken when the new drop starts
             const pebble = state.selected;
-            const since = clock.getElapsedTime() - pebble.userData.detailRotateStartTime;
+            const since = detailSince(pebble, clock.getElapsedTime());
             if (!pile.turnStop && pile.settledAt !== Infinity) {
                 pile.turnStop = { at: since, over: PILE_FADE_OUT + PILE_REPLAY_WAIT };
             }
             pile.replay(PILE_REPLAY_WAIT, () => {
-                const since = clock.getElapsedTime() - pebble.userData.detailRotateStartTime;
+                const since = detailSince(pebble, clock.getElapsedTime());
                 model.userData.turnOffset = modelTurn(model, since);
             });
         },
@@ -666,9 +665,7 @@ export function createDetail({
                 }
 
                 velocityPoint.set(reading.position.x, reading.position.y, reading.position.z);
-                model.localToWorld(velocityPoint).project(rig.camera);
-                const x = (velocityPoint.x + 1) / 2 * screen.width;
-                const y = (1 - velocityPoint.y) / 2 * screen.height;
+                const [x, y] = rig.toScreen(model.localToWorld(velocityPoint));
                 const text = `${reading.mps.toFixed(2)} m/s`;
                 if (tag.textContent !== text) tag.textContent = text;
                 tag.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(0.9rem, -50%)`;
@@ -702,7 +699,7 @@ export function createDetail({
             const model = state.selected?.userData.detail;
             if (!model) return;
 
-            const since = clock.getElapsedTime() - state.selected.userData.detailRotateStartTime;
+            const since = detailSince(state.selected, clock.getElapsedTime());
             const held = (model.userData.held ??= { total: 0, at: null });
             if (held.at === null) {
                 held.at = since;
@@ -737,10 +734,7 @@ export function createDetail({
                 return;
             }
 
-            const pointer = new THREE.Vector2(
-                (clientX / window.innerWidth) * 2 - 1,
-                -(clientY / window.innerHeight) * 2 + 1,
-            );
+            const pointer = rig.pointerToNdc(clientX, clientY, new THREE.Vector2());
             zoomRaycaster.setFromCamera(pointer, camera);
 
             const model = state.selected.userData.detail;
@@ -789,11 +783,7 @@ export function createDetail({
                 points.localToWorld(tapHintPoint).project(rig.camera);
 
                 if (tapHintPoint.x > -0.7 && tapHintPoint.x < maxX && tapHintPoint.y > -0.5 && tapHintPoint.y < 0.5) {
-                    ui.showTapHint(
-                        (tapHintPoint.x + 1) / 2 * screen.width,
-                        (1 - tapHintPoint.y) / 2 * screen.height,
-                        action,
-                    );
+                    ui.showTapHint(...rig.toScreen(tapHintPoint), action);
                     return;
                 }
             }

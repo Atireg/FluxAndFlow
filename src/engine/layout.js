@@ -3,10 +3,10 @@
  * mirror --panel-fraction in styles.css and the 859px breakpoint there; the
  * detail camera frames the model into whatever space the drawer leaves free.
  */
-export const PANEL_FRACTION = { side: 0.42, stacked: 0.58 };
-export const SIDE_PANEL_QUERY = '(min-width: 860px)';
+const PANEL_FRACTION = { side: 0.42, stacked: 0.58 };
+const SIDE_PANEL_QUERY = '(min-width: 860px)';
 
-export function layoutMode() {
+function layoutMode() {
     return window.matchMedia(SIDE_PANEL_QUERY).matches ? 'side' : 'stacked';
 }
 

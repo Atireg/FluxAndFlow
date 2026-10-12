@@ -1,3 +1,4 @@
+import { easeOutBack, easeOutCubic } from '../ease.js';
 /**
  * The arrival: whenever the grid comes into view - as the start-up loader
  * leaves, and on the way back from a project - each pebble surfaces out of
@@ -40,18 +41,12 @@ export function startArrival(state, pebbles, at) {
 
 // How far a pebble's content has grown in, 0..1, overshooting a touch
 function contentArrivalOf(pebble, startedAt, elapsedTime) {
-    const t = (elapsedTime - startedAt - (pebble.userData.contentArrivalDelay ?? 0)) / CONTENT_ARRIVAL_DURATION;
-    const k = Math.min(Math.max(t, 0), 1);
-    const back = 1.7;
-    return 1 + (back + 1) * (k - 1) ** 3 + back * (k - 1) ** 2;
+    return easeOutBack((elapsedTime - startedAt - (pebble.userData.contentArrivalDelay ?? 0)) / CONTENT_ARRIVAL_DURATION);
 }
 
 // How far a pebble has arrived, 0..1, eased to settle rather than stop
 function arrivalOf(pebble, startedAt, elapsedTime) {
-    const t = (elapsedTime - startedAt - (pebble.userData.arrivalDelay ?? 0)) / ARRIVAL_DURATION;
-    const k = Math.min(Math.max(t, 0), 1);
-    const rest = 1 - k;
-    return 1 - rest * rest * rest;
+    return easeOutCubic((elapsedTime - startedAt - (pebble.userData.arrivalDelay ?? 0)) / ARRIVAL_DURATION);
 }
 
 // On top of the pebble's mode: smaller, lower and fainter until it's here

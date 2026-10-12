@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { smooth01 } from './ease.js';
 
 /**
  * Streams: the start-up loader's flowing particles, carried on into the
@@ -126,7 +127,7 @@ export function createStreams(scene) {
                 pullTo.z = pointer.z;
             }
             pull = pointer ? Math.min(pull + dt / PULL_IN, 1) : Math.max(pull - dt / PULL_OUT, 0);
-            const pulling = pull * pull * (3 - 2 * pull) * PULL_SHARE;
+            const pulling = smooth01(pull) * PULL_SHARE;
             if (!started) {
                 for (let i = 0; i < STREAM_COUNT; i++) spawn(i, true);
                 started = true;

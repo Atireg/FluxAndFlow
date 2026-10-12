@@ -24,7 +24,7 @@ const PEBBLE_DETAIL = 16; // icosphere subdivisions - smooth, still cheap to ray
  * Any new pebble material needs addPebbleFlux too, or it will sit still
  * while the rest breathe.
  */
-export const PEBBLE_FLUX = 0.3; // how far the surface moves, as a share of the radius - 0.09 and 0.15 read as too subtle
+const PEBBLE_FLUX = 0.3; // how far the surface moves, as a share of the radius - 0.09 and 0.15 read as too subtle
 export const PEBBLE_FLUX_SPEED = 0.5; // radians a second, roughly - a wave every ~12s
 
 // Shared by every pebble's materials, and by a dissolve's points, set each frame

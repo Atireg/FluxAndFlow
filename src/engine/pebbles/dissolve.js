@@ -1,10 +1,12 @@
 import * as THREE from 'three';
-import { PEBBLE_RIM_COLOR, POINT_INKS, POINT_OPACITY } from '../colors.js';
+import { PEBBLE_RIM_COLOR, pointInkUniforms, POINT_OPACITY } from '../colors.js';
 import { PILE_SURFACE_RADIUS } from '../pile.js';
 import { addTrails } from '../pointcloud/trails.js';
 import { revealAt } from '../pointcloud/gather.js';
+import { detailSince } from '../camera/framing.js';
 import { PEBBLE_FLUX_GLSL, PEBBLE_FLUX_SPEED, fluxAmount } from './geometry.js';
 import trailCornerGlsl from '../shaders/trail/corner.glsl';
+import inkGlsl from '../shaders/pointCloud/ink.glsl';
 
 /**
  * The dissolve: a clicked pebble gives way to a cloud of points. Its face
@@ -114,32 +116,26 @@ void main() {
     vTone = aTone;
 }`;
 
-const dissolveTrailFragmentShader = `
+const dissolveTrailFragmentShader = `${inkGlsl}
 uniform vec3 uRim;
-uniform vec3 uInks[3];
-uniform float uOpacity;
 uniform float uTrailOpacity;
 varying float vAlpha;
 varying float vInk;
 varying float vTone;
 
 void main() {
-    vec3 ink = vTone < 0.5 ? uInks[0] : (vTone < 1.5 ? uInks[1] : uInks[2]);
-    gl_FragColor = vec4(mix(uRim, ink, vInk), vAlpha * uOpacity * uTrailOpacity);
+    gl_FragColor = vec4(mix(uRim, pickInk(vTone), vInk), vAlpha * uOpacity * uTrailOpacity);
 }`;
 
-const dissolveFragmentShader = `
+const dissolveFragmentShader = `${inkGlsl}
 uniform vec3 uRim;
-uniform vec3 uInks[3];
-uniform float uOpacity;
 varying float vAlpha;
 varying float vInk;
 varying float vTone;
 
 void main() {
     float disc = 1.0 - step(0.5, distance(gl_PointCoord, vec2(0.5)));
-    vec3 ink = vTone < 0.5 ? uInks[0] : (vTone < 1.5 ? uInks[1] : uInks[2]);
-    gl_FragColor = vec4(mix(uRim, ink, vInk), disc * vAlpha * uOpacity);
+    gl_FragColor = vec4(mix(uRim, pickInk(vTone), vInk), disc * vAlpha * uOpacity);
 }`;
 
 // Built the first time a pebble is clicked, then kept for later opens
@@ -204,8 +200,7 @@ export function getDissolve(pebble) {
             uPixelsPerUnit: { value: 1 },
             uSize: { value: DISSOLVE_POINT_SIZE },
             uRim: { value: PEBBLE_RIM_COLOR },
-            uInks: { value: POINT_INKS.map((ink) => ink.color) },
-            uOpacity: { value: POINT_OPACITY },
+            ...pointInkUniforms(),
             uGround: { value: drop ? 1 : 0 },
             // The pebble's flux, held where it was at the click (see updateDissolve)
             uFluxTime: { value: 0 },
@@ -249,7 +244,7 @@ export function updateDissolve({ state, renderer, camera, elapsedTime }) {
     const detail = state.droppingFrom.userData.detail;
     const shown = state.view === 'detail' && state.selected === state.droppingFrom && detail?.visible;
     const reveal = shown && !ground
-        ? revealAt(elapsedTime - state.droppingFrom.userData.detailRotateStartTime)
+        ? revealAt(detailSince(state.droppingFrom, elapsedTime))
         : 0;
 
     // Tails until everything has landed or gone

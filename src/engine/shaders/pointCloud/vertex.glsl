@@ -1,5 +1,3 @@
-// uniform float uTime;
-uniform sampler2D uPerlinTexture;
 uniform float uPointScale;
 uniform float uSizeAttenuation; // 1.0 perspective, 0.0 orthographic
 
@@ -8,10 +6,8 @@ uniform float uSizeAttenuation; // 1.0 perspective, 0.0 orthographic
 
 attribute float aScale;
 attribute float aTone; // which of the inks this point is drawn in: 0, 1 or 2
-// attribute vec3 color;
 
 varying vec2 vUv;
-// varying vec3 vColor;
 varying float vArrived;
 varying float vTone;
 
@@ -36,5 +32,4 @@ void main() {
         
         // Varying
         vUv = uv;
-        // vColor = color;
     }

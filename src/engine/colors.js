@@ -41,7 +41,7 @@ export const SPOTLIGHT_GLOW_COLOR = screenColor(255, 140, 50);
  */
 export const POINT_INKS = [
     { color: screenColor(128, 24, 36), share: 1 / 3 }, // dark red
-    { color: screenColor(255, 140, 50), share: 1 / 3 }, // orange - the invitation's
+    { color: SPOTLIGHT_GLOW_COLOR.clone(), share: 1 / 3 }, // orange - the invitation's
     { color: screenColor(120, 116, 110), share: 1 / 3 }, // warm grey
 ];
 
@@ -52,6 +52,14 @@ export const POINT_SIZES = [0.6, 1, 1.6];
 // How much ink a point lays down at most: semi-transparent, so overlapping
 // points build up depth instead of a solid surface
 export const POINT_OPACITY = 0.6;
+
+// The uniforms shaders/pointCloud/ink.glsl declares, fresh for each material
+export function pointInkUniforms() {
+    return {
+        uInks: { value: POINT_INKS.map((ink) => ink.color) },
+        uOpacity: { value: POINT_OPACITY },
+    };
+}
 
 // Graphite, like the pebbles: every thumbnail is drawn in this, whatever
 // the file's own material, so the grid reads as one set

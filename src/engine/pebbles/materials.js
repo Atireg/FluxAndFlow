@@ -77,7 +77,7 @@ export function addGraphite(material) {
  * weighted towards the silhouette. Kept off pow(0, y), undefined in GLSL
  * (see "Safari" in DECISIONS.md).
  */
-export function makeRimMaterial(color) {
+function makeRimMaterial(color) {
     const material = new THREE.MeshBasicMaterial({ color, transparent: true, depthWrite: false });
 
     material.onBeforeCompile = (shader) => {

@@ -3,6 +3,7 @@ import { gsap } from 'gsap';
 import { CUBE_SIZE, PEBBLE_RADIUS, SPACING } from '../constants.js';
 import { getPanelLayout } from '../layout.js';
 import { GATHER_DURATION } from '../pointcloud/gather.js';
+import { smooth01 } from '../ease.js';
 import {
     CATALOG_FOV,
     DETAIL_FOV,
@@ -97,7 +98,7 @@ const PILE_DRAWER_ZOOM = { side: 1, stacked: 2.2 };
  * with no roll. Azimuth turns the grid by that much on the way in and out,
  * so keep it small - see DECISIONS.md.
  */
-export function viewDirection(project, { elevation: elevationDeg = project?.view?.elevation ?? 0 } = {}) {
+function viewDirection(project, { elevation: elevationDeg = project?.view?.elevation ?? 0 } = {}) {
     const elevation = THREE.MathUtils.degToRad(elevationDeg);
     const azimuth = THREE.MathUtils.degToRad(project?.view?.azimuth ?? 0);
 
@@ -108,12 +109,18 @@ export function viewDirection(project, { elevation: elevationDeg = project?.view
     );
 }
 
+// Seconds since a project's model was shown (its pebble's
+// `detailRotateStartTime`) - the clock its turn, gather and timings run on
+export function detailSince(pebble, elapsedTime) {
+    return elapsedTime - pebble.userData.detailRotateStartTime;
+}
+
 /**
  * How long a model's turn has been held still (a project's `doubleClick:
  * 'hold'`), by `since`: `model.userData.held` is { total, at } - the time
  * held before, and when the current hold began, or null while turning
  */
-export function heldFor(model, since) {
+function heldFor(model, since) {
     const held = model.userData.held;
     if (!held) return 0;
     return held.total + (held.at === null ? 0 : since - held.at);
@@ -427,8 +434,7 @@ export function createFraming({ rig, screen, state, grid, ui }) {
             }
 
             const t = elapsedTime - swayStartedAt;
-            const ramp = Math.min(t / SWAY_EASE_IN, 1);
-            const angle = amplitude * ramp * ramp * (3 - 2 * ramp) * Math.sin((t / SWAY_PERIOD) * Math.PI * 2);
+            const angle = amplitude * smooth01(t / SWAY_EASE_IN) * Math.sin((t / SWAY_PERIOD) * Math.PI * 2);
 
             // Turn the camera about its own screen-right axis through the
             // target (negative raises it); controls.update() then re-aims it

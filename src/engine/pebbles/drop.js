@@ -1,5 +1,6 @@
 import { paintResting, restingFaceOpacity } from './materials.js';
 import { DISSOLVE_FADE } from './dissolve.js';
+import { clamp01 } from '../ease.js';
 
 /**
  * The send-off after a project is clicked: a boom - one shockwave out from
@@ -64,7 +65,7 @@ export function placeDroppingPebble(pebble, state, elapsedTime) {
     // Gravity: distance grows with the square of time since letting go.
     // Down the screen is world +Z from the catalog's overhead camera; the
     // slight sink away from it also keeps falling pebbles behind the chosen one
-    const fall = Math.min(Math.max((t - BOOM_HANG - delay) / DROP_FALL, 0), 1);
+    const fall = clamp01((t - BOOM_HANG - delay) / DROP_FALL);
     const drop = fall ** 2;
 
     // The boom: a single knock out from the chosen pebble and up towards the

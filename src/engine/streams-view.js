@@ -1,5 +1,5 @@
-import * as THREE from 'three';
 import { PEBBLE_RADIUS } from './constants.js';
+import { halfHeightAt } from './camera/rig.js';
 import { createStreams } from './streams.js';
 
 /**
@@ -45,8 +45,7 @@ export function createStreamsView({ scene, grid, state, rig }) {
             // The plane the overhead camera sees, so streams fill the screen
             let seen = null;
             if (show && rig.camera === rig.perspectiveCamera) {
-                const halfZ = Math.abs(rig.perspectiveCamera.position.y)
-                    * Math.tan(THREE.MathUtils.degToRad(rig.perspectiveCamera.fov) / 2);
+                const halfZ = halfHeightAt(rig.perspectiveCamera.fov, Math.abs(rig.perspectiveCamera.position.y));
                 view.z = halfZ;
                 view.x = halfZ * rig.perspectiveCamera.aspect;
                 seen = view;

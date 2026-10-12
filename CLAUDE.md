@@ -100,7 +100,8 @@ that line.
     src/main.jsx            mounts <App/> (no StrictMode - see the file)
     src/app/App.jsx         the page: React state, the refs, the `ui` bridge
     src/components/         ProjectBar, ProjectDrawer, ProjectImage,
-                            CatalogTags, CategoryFilter, HintTag, TapHint, Fog
+                            CatalogTags, CategoryFilter, HintTag, TagString
+                            (the string both hang on), TapHint, Fog, clickOnly.js
     src/projects/           the content: one module per project + schema.js
     src/engine/             the canvas - index.js assembles and runs it
     src/styles.css          all of it, unchanged
@@ -110,7 +111,8 @@ Inside `src/engine/`:
     index.js             createEngine(): builds everything, the render loop, input
     state.js             the shared mutable state (what were top-level `let`s)
     constants.js         the few cross-cutting numbers; its header maps the rest
-    colors.js            screenColor() and every scene colour
+    ease.js              clamp01, smooth01, easeOutCubic, easeOutBack - use these
+    colors.js            screenColor() and every scene colour, pointInkUniforms()
     assets.js            assetUrl() and the gltf/texture loaders
     boot.js              start-up progress, reported to the inline loader
     visited.js           which projects have been opened (localStorage)
@@ -129,7 +131,8 @@ Inside `src/engine/`:
     pointcloud/          load, mesh sampling, gather, trails
     camera/              rig (cameras, controls, renderer), framing (where it goes),
                          inside (a spot at eye level inside a model)
-    shaders/             point cloud, gather, tails, smoke
+    shaders/             point cloud (ink.glsl: the inks, put in front of every
+                         points fragment shader), gather, tails, smoke
 
 ## Repository and deployment
 
@@ -370,6 +373,12 @@ defineProject({
   tags, string and tap hint 2); and use `pointerup` on the canvas, not
   `click` - iPhone/iPad Safari doesn't send it there.
 - **No per-project URLs yet** - don't assume a project is linkable.
+- **Shared helpers - reach for them rather than spelling it out again**:
+  `engine/ease.js` for any 0..1 ramp; `rig.toScreen(vector)` for a world
+  point in screen pixels and `rig.pointerToNdc` for a pointer;
+  `detailSince(pebble, t)` for the clock a project's model runs on;
+  `halfHeightAt(fov, distance)` for what a lens sees; `pickInk(tone)` in a
+  points shader; `clickOnly(fn)` for a button over the canvas.
 
 ## After every fixed issue
 

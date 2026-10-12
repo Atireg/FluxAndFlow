@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { smooth01 } from './ease.js';
 
 /**
  * A pile: several copies of one crossed-rod aggregate dropped onto a
@@ -90,8 +91,7 @@ const VELOCITY_GONE = 0.04; // m/s - slower than this shows nothing
 const VELOCITY_FULL = 0.25; // m/s - and fully shown from this
 
 function velocityShow(mps) {
-    const k = Math.min(Math.max((mps - VELOCITY_GONE) / (VELOCITY_FULL - VELOCITY_GONE), 0), 1);
-    return k * k * (3 - 2 * k);
+    return smooth01((mps - VELOCITY_GONE) / (VELOCITY_FULL - VELOCITY_GONE));
 }
 
 function makeContactMaterial() {
@@ -586,8 +586,7 @@ export async function createPile({
             // Dissolving before a replay, eased so it starts and ends softly
             if (this.fadeOut > 0) {
                 this.fadeOut = Math.max(this.fadeOut - dt, 0);
-                const k = 1 - this.fadeOut / PILE_FADE_OUT;
-                solidMaterial.uniforms.uFade.value = k * k * (3 - 2 * k);
+                solidMaterial.uniforms.uFade.value = smooth01(1 - this.fadeOut / PILE_FADE_OUT);
                 if (this.fadeOut === 0) {
                     const done = this.onFaded;
                     this.onFaded = null;

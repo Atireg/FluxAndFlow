@@ -1,4 +1,5 @@
 import { PAPER_COLOR, THUMB_INK_COLOR } from '../colors.js';
+import { smooth01 } from '../ease.js';
 
 /**
  * The catalog's filter: bring one kind of project forward and sink the rest.
@@ -21,17 +22,12 @@ const FOCUS_SCALE = 0.5; // a sunk pebble looks this share of its size
 const FOCUS_TIME = 1.4; // seconds to sink or rise
 const FOCUS_INK = 0.35; // a sunk pebble keeps this share of its ink
 
-function eased(t) {
-    return t * t * (3 - 2 * t);
-}
-
 // How far sunk a pebble is now, 0 (in focus) to 1 (fully sunk)
 function sunk(pebble, elapsedTime) {
     const focus = pebble.userData.focus;
     if (!focus) return 0;
 
-    const t = Math.min(Math.max((elapsedTime - focus.at) / FOCUS_TIME, 0), 1);
-    return focus.from + (focus.to - focus.from) * eased(t);
+    return focus.from + (focus.to - focus.from) * smooth01((elapsedTime - focus.at) / FOCUS_TIME);
 }
 
 /**

@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { smooth01 } from '../ease.js';
 
 /**
  * The gather (a project's `gather: true`): every point starts somewhere in a
@@ -23,8 +24,7 @@ export const GATHER_TRAIL = 0.15; // seconds back a gathering point's tail reach
 const REVEAL_DURATION = 1; // seconds
 
 export function revealAt(since) {
-    const t = Math.min(Math.max(since / REVEAL_DURATION, 0), 1);
-    return t * t * (3 - 2 * t);
+    return smooth01(since / REVEAL_DURATION);
 }
 
 export function setReveal(model, reveal) {

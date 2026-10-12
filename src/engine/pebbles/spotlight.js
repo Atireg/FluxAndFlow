@@ -2,6 +2,7 @@ import { randomBetween } from '../constants.js';
 import { inFocus } from './focus.js';
 import { paintGlow } from './materials.js';
 import { wanderOffset } from './wander.js';
+import { smooth01 } from '../ease.js';
 
 /**
  * The spotlight.
@@ -36,30 +37,38 @@ export const SPOTLIGHT_TAG_MIN = 0.65;
  * this is what makes it settle rather than just stop. Eased at both ends
  * (smoothstep), so it neither starts nor lands with a jolt.
  */
+// Seconds since the current spotlight began
+function spotlightSince(state, elapsedTime) {
+    return elapsedTime - state.spotlight.startedAt;
+}
+
+// The jump's beat, -1..1
+function spotlightPulse(state, elapsedTime) {
+    return Math.sin((spotlightSince(state, elapsedTime) / SPOTLIGHT_PULSE_PERIOD) * Math.PI * 2);
+}
+
 function spotlightRamp(state, elapsedTime) {
-    const since = elapsedTime - state.spotlight.startedAt;
+    const since = spotlightSince(state, elapsedTime);
     const fadeIn = Math.min(since / SPOTLIGHT_FADE_IN, 1);
     const fadeOut = Math.min((state.spotlight.dwell - since) / SPOTLIGHT_FADE_OUT, 1);
     return Math.max(0, Math.min(fadeIn, fadeOut));
 }
 
 export function spotlightIntensity(state, elapsedTime) {
-    const ramp = spotlightRamp(state, elapsedTime);
-    return ramp * ramp * (3 - 2 * ramp);
+    return smooth01(spotlightRamp(state, elapsedTime));
 }
 
 // How far through the current jump the spotlight is, 0..1 - the beat the
 // pebble's glow and its name both blink on
 export function spotlightGlow(state, elapsedTime) {
-    const since = elapsedTime - state.spotlight.startedAt;
-    return (Math.sin((since / SPOTLIGHT_PULSE_PERIOD) * Math.PI * 2) + 1) / 2;
+    return (spotlightPulse(state, elapsedTime) + 1) / 2;
 }
 
 export function poseSpotlightPebble(pebble, state, elapsedTime) {
-    const since = elapsedTime - state.spotlight.startedAt;
+    const since = spotlightSince(state, elapsedTime);
     const intensity = spotlightIntensity(state, elapsedTime);
 
-    const pulse = Math.sin((since / SPOTLIGHT_PULSE_PERIOD) * Math.PI * 2); // -1..1
+    const pulse = spotlightPulse(state, elapsedTime);
     const glow = (pulse + 1) / 2; // 0..1
     const lift = Math.max(0, pulse); // only the upward half of each beat
 
@@ -139,11 +148,11 @@ export function updateSpotlightCycle(state, pebbles, elapsedTime) {
          */
         if (!inFocus(state, spotlight.pebble) && !spotlight.cut) {
             spotlight.cut = true;
-            const since = elapsedTime - spotlight.startedAt;
+            const since = spotlightSince(state, elapsedTime);
             spotlight.dwell = Math.min(spotlight.dwell, since + spotlightRamp(state, elapsedTime) * SPOTLIGHT_FADE_OUT);
         }
 
-        if (elapsedTime - spotlight.startedAt > spotlight.dwell) {
+        if (spotlightSince(state, elapsedTime) > spotlight.dwell) {
             spotlight.last = spotlight.pebble;
             spotlight.pebble = null;
             spotlight.nextAt = elapsedTime + randomBetween(...SPOTLIGHT_GAP);

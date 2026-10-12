@@ -213,12 +213,23 @@ a black, bouncing string - the catalog's rope, shared (`createRope`).
 the single-file days replaced, misfiled DECISIONS entries moved, this
 entry condensed.
 
+**Cleanup** (asked for, no change on screen): repeated pieces pulled out
+into shared ones - the easing curves (`engine/ease.js`), a world point to
+screen pixels and a pointer to the camera's coordinates (`rig.toScreen`,
+`rig.pointerToNdc`), the seconds since a model was shown (`detailSince`),
+a lens's visible height (`halfHeightAt`), the points' ink choice
+(`shaders/pointCloud/ink.glsl` with `pointInkUniforms()`), the tag's
+string (`components/TagString.jsx`), a click kept off the canvas
+(`components/clickOnly.js`) and the loader's paper halo (`--loader-halo`).
+Dead code out: `lil-gui`, unused exports, leftover shader lines and a
+stale file map.
+
 Checks were headless (software WebGL, both layouts) with throwaway hooks,
 removed before each merge; no console errors in any run.
 
 Open at end of session (see README, "Next up"): Safari still to confirm;
 both projects' real copy and picture credits still wanted; Emergent Space's
 drop, the streams and Rock Print's inside view unchecked on a real phone;
-model licensing unchecked; no per-project URLs. Small: `lil-gui` is a
-dependency nothing imports, `smoke.js` is parked, and the JS bundle is one
-905 KB chunk Vite warns about.
+model licensing unchecked; no per-project URLs. Small: `smoke.js` is
+parked, the points' ink grain does nothing (no UVs - README), and the JS
+bundle is one 905 KB chunk Vite warns about.

@@ -15,6 +15,11 @@ import { gsap } from 'gsap';
  * box, so it gets a longer lens than the desktop layout does.
  */
 export const CATALOG_FOV = 45;
+
+// Half the height a perspective lens of `fov` degrees sees, `distance` away
+export function halfHeightAt(fov, distance) {
+    return distance * Math.tan(THREE.MathUtils.degToRad(fov) / 2);
+}
 export const DETAIL_FOV = { side: 45, stacked: 30 };
 
 /**
@@ -113,6 +118,18 @@ export function createCameraRig({ canvas, scene, screen, onShaderError }) {
 
         framebufferHeight() {
             return screen.height * renderer.getPixelRatio();
+        },
+
+        // Where a world point lands on screen, in pixels from the top left.
+        // Projects `vector` in place.
+        toScreen(vector) {
+            vector.project(rig.camera);
+            return [(vector.x + 1) / 2 * screen.width, (1 - vector.y) / 2 * screen.height];
+        },
+
+        // A pointer's position as the camera's -1..1 coordinates, into `out`
+        pointerToNdc(clientX, clientY, out) {
+            return out.set((clientX / screen.width) * 2 - 1, -(clientY / screen.height) * 2 + 1);
         },
 
         /**
@@ -254,7 +271,7 @@ export function createCameraRig({ canvas, scene, screen, onShaderError }) {
      */
     function swapToOrthographic() {
         const distance = perspectiveCamera.position.distanceTo(controls.target);
-        const halfHeight = distance * Math.tan(THREE.MathUtils.degToRad(perspectiveCamera.fov) / 2);
+        const halfHeight = halfHeightAt(perspectiveCamera.fov, distance);
 
         orthographicCamera.position.copy(perspectiveCamera.position);
         orthographicCamera.quaternion.copy(perspectiveCamera.quaternion);
@@ -267,7 +284,7 @@ export function createCameraRig({ canvas, scene, screen, onShaderError }) {
         perspectiveCamera.updateProjectionMatrix();
 
         const direction = orthographicCamera.position.clone().sub(controls.target);
-        const distance = orthoHalfHeight / Math.tan(THREE.MathUtils.degToRad(CATALOG_FOV) / 2);
+        const distance = orthoHalfHeight / halfHeightAt(CATALOG_FOV, 1);
 
         if (direction.lengthSq() > 0) {
             perspectiveCamera.position.copy(controls.target).addScaledVector(direction.normalize(), distance);

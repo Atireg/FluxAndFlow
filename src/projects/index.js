@@ -22,7 +22,7 @@ import { EMPTY_SLOT_CATEGORIES, EMPTY_SLOT_THUMB, SLOT_COUNT, defineProject, peb
 import rockPrint from './rock-print.js';
 import emergentSpace from './emergent-space.js';
 
-export { SLOT_COUNT, EMPTY_SLOT_THUMB, CATEGORIES, categoryLabel, hasDescription, metaRows, pebbleLabel } from './schema.js';
+export { CATEGORIES, categoryLabel, hasDescription, metaRows } from './schema.js';
 
 const catalog = [
     rockPrint,
@@ -74,11 +74,11 @@ function bySlot(list) {
     return map;
 }
 
-export const projects = isCloudTest() && catalog.length
+const projects = isCloudTest() && catalog.length
     ? cloudTestCopies(catalog[0])
     : catalog;
 
-export const projectBySlot = bySlot(projects);
+const projectBySlot = bySlot(projects);
 
 /**
  * What the engine needs to build the grid: how many pebbles, and what (if

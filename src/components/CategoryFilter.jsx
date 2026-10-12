@@ -1,4 +1,5 @@
 import { CATEGORIES } from '../projects/index.js';
+import clickOnly from './clickOnly.js';
 
 /**
  * The catalog's filter: bring one kind of project forward - research,
@@ -10,11 +11,7 @@ import { CATEGORIES } from '../projects/index.js';
  * `onChoose`, and tells it back when a sunk pebble is clicked (`ui.onFocus`).
  */
 export default function CategoryFilter({ focus, hidden, onChoose }) {
-    const choose = (category) => (event) => {
-        // Keep this click off the canvas
-        event.stopPropagation();
-        onChoose(category === focus ? null : category);
-    };
+    const choose = (category) => clickOnly(() => onChoose(category === focus ? null : category));
 
     return (
         <nav className={`filter${hidden ? ' is-hidden' : ''}`} aria-label="Kinds of project" aria-hidden={hidden ? 'true' : 'false'}>

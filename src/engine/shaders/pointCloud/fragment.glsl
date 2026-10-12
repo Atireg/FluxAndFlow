@@ -1,6 +1,4 @@
 uniform sampler2D uPerlinTexture;
-uniform vec3 uInks[3]; // dark red, orange, grey - POINT_INKS in engine/colors.js
-uniform float uOpacity; // the most ink a point lays down - POINT_OPACITY
 uniform float uReveal; // 0..1, the cloud fading in as the dissolve gives way - REVEAL_DURATION
 
 varying vec2 vUv;
@@ -25,7 +23,5 @@ void main() {
         // as they arrive.
         float weight = mix(0.55, 0.9, grain) * mix(0.35, 1.0, vArrived) * uOpacity;
 
-        vec3 ink = vTone < 0.5 ? uInks[0] : (vTone < 1.5 ? uInks[1] : uInks[2]);
-
-        gl_FragColor = vec4(ink, strength * weight * uReveal);
+        gl_FragColor = vec4(pickInk(vTone), strength * weight * uReveal);
     }

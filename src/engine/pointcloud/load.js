@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { gltfLoader } from '../assets.js';
 import { MESH_FIT_SIZE } from '../constants.js';
-import { POINT_INKS, POINT_OPACITY, POINT_SIZES } from '../colors.js';
+import { POINT_INKS, POINT_SIZES, pointInkUniforms } from '../colors.js';
 import { createPile, findRods } from '../pile.js';
 import { addGatherAttributes, GATHER_DURATION, GATHER_SPREAD, GATHER_SWIRL, GATHER_TRAIL } from './gather.js';
 import { addTrails } from './trails.js';
@@ -14,6 +14,7 @@ import pointCloudFragmentShader from '../shaders/pointCloud/fragment.glsl';
 import trailCornerGlsl from '../shaders/trail/corner.glsl';
 import trailGatherVertexShader from '../shaders/trail/gatherVertex.glsl';
 import trailGatherFragmentShader from '../shaders/trail/gatherFragment.glsl';
+import inkGlsl from '../shaders/pointCloud/ink.glsl';
 
 /**
  * Load a project's detail model as a cloud of points.
@@ -113,12 +114,10 @@ export function loadPointCloud({
                 depthWrite: false,
                 depthTest: false,
                 transparent: true,
-                vertexColors: true,
                 vertexShader: gatherGlsl + pointCloudVertexShader,
-                fragmentShader: pointCloudFragmentShader,
+                fragmentShader: inkGlsl + pointCloudFragmentShader,
                 uniforms: {
-                    uInks: { value: POINT_INKS.map((ink) => ink.color) },
-                    uOpacity: { value: POINT_OPACITY },
+                    ...pointInkUniforms(),
                     uPerlinTexture: new THREE.Uniform(perlinTexture),
                     uPointScale: { value: 1 },
                     uSizeAttenuation: { value: 1 },
@@ -138,7 +137,7 @@ export function loadPointCloud({
             if (gather) {
                 trails.push(addTrails(child, {
                     vertexShader: gatherGlsl + trailCornerGlsl + trailGatherVertexShader,
-                    fragmentShader: trailGatherFragmentShader,
+                    fragmentShader: inkGlsl + trailGatherFragmentShader,
                     names: ['aScatter', 'aGatherDelay', 'aScale', 'aTone'],
                     lag: GATHER_TRAIL / GATHER_DURATION,
                 }));

@@ -2,7 +2,11 @@
  * The grid's own dimensions - the few numbers that more than one part of the
  * engine has to agree on. Everything else lives next to the code it tunes:
  *
- *   pebbles/motion.js    the float, the flow, the bumps, the arrival, the spotlight
+ *   pebbles/wander.js    the float
+ *   pebbles/flow.js      the pointer's stir, and the bumps
+ *   pebbles/arrival.js   the grid surfacing as the loader clears
+ *   pebbles/spotlight.js the orange glow and jump
+ *   pebbles/focus.js     the filter's sinking of the other kinds
  *   pebbles/materials.js how heavily a pebble is shaded, and how it glows
  *   pebbles/geometry.js  a pebble's shape, and its flux
  *   pebbles/dissolve.js  the clicked pebble giving way to points

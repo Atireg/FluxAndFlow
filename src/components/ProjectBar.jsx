@@ -1,5 +1,6 @@
 import { forwardRef } from 'react';
 import { categoryLabel } from '../projects/index.js';
+import clickOnly from './clickOnly.js';
 
 /**
  * Always on screen while a project is open: just enough to say what you are
@@ -17,11 +18,7 @@ const ProjectBar = forwardRef(function ProjectBar({ project, status, onClose }, 
             <button
                 className="bar__back"
                 type="button"
-                onClick={(event) => {
-                    // Keep this click to the button itself
-                    event.stopPropagation();
-                    onClose();
-                }}
+                onClick={clickOnly(onClose)}
             >
                 <span className="bar__back-arrow" aria-hidden="true">&larr;</span> F&amp;F playground
             </button>

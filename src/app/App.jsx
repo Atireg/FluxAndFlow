@@ -24,6 +24,9 @@ import VelocityTags from '../components/VelocityTags.jsx';
  * round. The start-up loader stays inline in index.html, ahead of this
  * module, so it is on screen before React has even downloaded.
  */
+// The elements matching `selector` inside a ref's node, as an array
+const nodesIn = (ref, selector) => [...(ref.current?.querySelectorAll(selector) ?? [])];
+
 // The tap hint's words, by the project's `doubleClick` ('zoom' says the gesture)
 const HINT_WORDS = { hold: 'pause', drop: 'drop again' };
 
@@ -126,13 +129,13 @@ export default function App() {
                     emptyTag: emptyTagRef.current,
                     spotlightTag: spotlightTagRef.current,
                     spotlightString: stringRef.current,
-                    stringPaths: stringRef.current?.querySelectorAll('path') ?? [],
-                    knots: [...(stringRef.current?.querySelectorAll('circle') ?? [])],
+                    stringPaths: nodesIn(stringRef, 'path'),
+                    knots: nodesIn(stringRef, 'circle'),
                     hintTag: hintTagRef.current,
                     hintString: hintStringRef.current,
-                    hintStringPaths: hintStringRef.current?.querySelectorAll('path') ?? [],
-                    hintKnots: [...(hintStringRef.current?.querySelectorAll('circle') ?? [])],
-                    velocityTags: [...(velocityRef.current?.querySelectorAll('.velocity-tag') ?? [])],
+                    hintStringPaths: nodesIn(hintStringRef, 'path'),
+                    hintKnots: nodesIn(hintStringRef, 'circle'),
+                    velocityTags: nodesIn(velocityRef, '.velocity-tag'),
                 },
             },
         });

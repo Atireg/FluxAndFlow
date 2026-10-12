@@ -109,9 +109,12 @@ Performance and tech
         unread - the points are drawn in three inks. Use it, or drop it
         (~315 KB less per cloud)
     [ ] Remove `?cloudtest` once there are real projects to fill the grid
-    [ ] `lil-gui` is still a dependency but nothing imports it - the debug
-        panel has been commented out since before Session 1. Drop it, or
-        wire it back up for tuning
+    [x] `lil-gui` dropped - nothing imported it (the debug panel was
+        commented out since before Session 1)
+    [ ] The points' ink grain does nothing: the cloud's fragment shader
+        reads a perlin texture at `uv`, but neither cloud has texture
+        coordinates, so every point gets the same grain. Give each point its
+        own (by index, say) - that would change the look - or drop it
     [ ] src/engine/smoke.js is parked, not in the scene - it is the
         candidate for the "fog shader" idea below. Use it or delete it
     [ ] The JS bundle is one 905 KB chunk (259 KB gzipped); Vite warns

@@ -1,5 +1,6 @@
 import { forwardRef } from 'react';
 import { hasDescription, metaRows } from '../projects/index.js';
+import clickOnly from './clickOnly.js';
 import ProjectImage from './ProjectImage.jsx';
 
 /**
@@ -30,11 +31,7 @@ const ProjectDrawer = forwardRef(function ProjectDrawer({ project, open, onToggl
                 type="button"
                 aria-expanded={String(open)}
                 aria-controls="drawer-content"
-                onClick={(event) => {
-                    // Keep this click to the handle itself
-                    event.stopPropagation();
-                    onToggle();
-                }}
+                onClick={clickOnly(onToggle)}
             >
                 <span className="drawer__pulse" aria-hidden="true" />
                 <span className="drawer__label">About</span>
