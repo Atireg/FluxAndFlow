@@ -649,6 +649,15 @@ Blender/Rhino simulation. A project's `drop: { count, size, ground }` does it
   crossing: it just waits and drops. The tap hint stays away while the
   camera is in. Requires `contacts`; can't be combined with `repeat`
   (`defineProject` throws).
+- **The turn slows to a stop before each new drop** (asked for - the
+  floor stopping dead looked abrupt). The model and its floor share one
+  turn (`modelTurn`), which froze the instant the pile restarted. Now
+  `pile.turnStop` ({ at, over }) lets its speed fall evenly to nothing:
+  the close-up starts it `TURN_STOP` (3s) before its drop, so it is still
+  by the time the old pile dissolves; "Drop again" (or `repeat`) starts it
+  at once, over the dissolve and wait (1.5s). The new drop takes the
+  stopped angle as before. The turn still starts at full speed when the
+  next pile settles.
 - **No double-click zoom here** (asked for): `zoom: false` on the project
   turns off double-click/double-tap zoom and its hint (`toggleZoom`,
   `maybeShowTapHint`); the close-ups are the zoom. The close-up's own

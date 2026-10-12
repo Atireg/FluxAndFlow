@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { gsap } from 'gsap';
 import { assetUrl } from './assets.js';
 import { getPanelLayout } from './layout.js';
-import { loadPhysics, PILE_REPLAY_WAIT } from './pile.js';
+import { loadPhysics, PILE_FADE_OUT, PILE_REPLAY_WAIT } from './pile.js';
 import { loadPointCloud } from './pointcloud/load.js';
 import { GATHER_DURATION } from './pointcloud/gather.js';
 import { getDissolve } from './pebbles/dissolve.js';
@@ -63,6 +63,7 @@ const TAP_HINT_GAP = 5; // seconds from one hint to the next
 const CLOSE_UP_AFTER = 1; // seconds after the pile is asleep - the dots have faded in
 const CLOSE_UP_ZOOM = 0.3; // the camera ends up this fraction of its distance away
 const CLOSE_UP_MOVE = 1.6; // seconds each way - slower than a double-click's zoom
+const TURN_STOP = 3; // seconds the turn (and its floor) takes to slow to a stop before the next drop
 
 /**
  * A project's `autoZoom`: every that many seconds the camera moves in on a
@@ -423,9 +424,14 @@ export function createDetail({
 
             endCloseUp();
 
-            // The old pile dissolves first and keeps turning meanwhile, so
-            // the angle is taken when the new drop actually starts
+            // The turn slows to a stop by the new drop, if it isn't already
+            // (the close-up starts it sooner); the old pile dissolves
+            // meanwhile, and the angle is taken when the new drop starts
             const pebble = state.selected;
+            const since = clock.getElapsedTime() - pebble.userData.detailRotateStartTime;
+            if (!pile.turnStop && pile.settledAt !== Infinity) {
+                pile.turnStop = { at: since, over: PILE_FADE_OUT + PILE_REPLAY_WAIT };
+            }
             pile.replay(PILE_REPLAY_WAIT, () => {
                 const since = clock.getElapsedTime() - pebble.userData.detailRotateStartTime;
                 model.userData.turnOffset = modelTurn(model, since);
@@ -536,8 +542,13 @@ export function createDetail({
                 }
             }
 
-            if (closeUp.phase === 'out' && since - closeUp.at >= CLOSE_UP_MOVE + after) {
-                detail.replayDrop();
+            if (closeUp.phase === 'out') {
+                // The turn and its floor slow to a stop by the time it drops
+                const dropAt = closeUp.at + CLOSE_UP_MOVE + after;
+                if (!pile.turnStop && since >= dropAt - TURN_STOP) {
+                    pile.turnStop = { at: since, over: Math.max(dropAt - since, 0.5) };
+                }
+                if (since >= dropAt) detail.replayDrop();
             }
         },
 

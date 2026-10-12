@@ -119,13 +119,23 @@ export function modelStartYaw(project) {
  * `since` it was shown. A pile only turns once it looks still; dropped
  * again by hand, it keeps the angle it had reached (`turnOffset`) and
  * carries on from there once the new drop settles, rather than snapping
- * back to where it opened.
+ * back to where it opened. Before a new drop it slows to a stop
+ * (`pile.turnStop`, { at, over } in the same seconds as `since`): its speed
+ * falls evenly to nothing over `over`, so it comes to rest smoothly
+ * instead of halting the moment the pile restarts.
  */
 export function modelTurn(model, since) {
     const pile = model.userData.pile;
     if (!pile) return since;
 
-    return (model.userData.turnOffset ?? 0) + Math.max(since - pile.settledAt, 0);
+    const offset = model.userData.turnOffset ?? 0;
+    const turning = Math.max(since - pile.settledAt, 0);
+    const stop = pile.turnStop;
+    if (!stop || since <= stop.at) return offset + turning;
+
+    const before = Math.max(stop.at - pile.settledAt, 0);
+    const slowing = Math.min(since - stop.at, stop.over);
+    return offset + before + slowing - (slowing * slowing) / (2 * stop.over);
 }
 
 export function createFraming({ rig, screen, state, grid, ui }) {

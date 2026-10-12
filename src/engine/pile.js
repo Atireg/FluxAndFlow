@@ -24,7 +24,7 @@ const PILE_MAX_STEPS = 30; // per frame, so a slow frame plays slower rather tha
 const PILE_SETTLE_AFTER = 9; // simulated seconds - stop by then even if something still twitches
 const PILE_WAIT = 1.2; // seconds after the project appears before they're let go - the camera has arrived, the points faded in
 export const PILE_REPLAY_WAIT = 0.3; // the same, when dropped again - nothing to wait for but the pile clearing
-const PILE_FADE_OUT = 1.2; // seconds the fallen pile takes to dissolve away before the next drop - hiding it at once read as abrupt
+export const PILE_FADE_OUT = 1.2; // seconds the fallen pile takes to dissolve away before the next drop - hiding it at once read as abrupt
 const PILE_TIME_SCALE = 0.4; // the fall plays at this speed - slower to watch, and the same physics, so they land just as they would (0.6 was asked to be slower)
 const PILE_COLLISION_FATTEN = 1.4; // rods collide a little thicker than drawn, so they never pass through
 // Tuned by dropping them a few hundred times off screen (cannon-es in
@@ -404,6 +404,7 @@ export async function createPile({
         settledAt: Infinity, // when the turn starts - see PILE_REST_*
         asleep: false, // when the physics stops costing anything
         restedAt: Infinity, // when it did, as settledAt - the dots show from here
+        turnStop: null, // the turn slowing to a stop before a new drop - see modelTurn
         time: 0,
         wait: 0,
         restFor: 0,
@@ -461,6 +462,7 @@ export async function createPile({
             this.settledAt = Infinity;
             this.asleep = false;
             this.restedAt = Infinity;
+            this.turnStop = null;
             shownContacts = 0;
             this.restFor = 0;
             const random = new THREE.Quaternion();

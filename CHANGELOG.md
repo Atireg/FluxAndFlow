@@ -357,6 +357,11 @@ only.
   10`, a new project setting) - and its camera nods more slowly
   (`SWAY_PERIOD` 16s → 22s). Checked headless over three cycles: the
   point held at the centre each time once the move arrived, no errors.
+- **Emergent Space's floor slows to a stop before the next drop** instead
+  of halting dead: the pile and its floor ease out over 3s ahead of the
+  close-up's drop (over the 1.5s dissolve for "Drop again"), and the new
+  drop starts from the angle they stopped at (`pile.turnStop`,
+  `modelTurn`).
 
 Open at end of session (see README, "Next up"): unchanged by this session —
 Safari still to confirm, both projects' real copy and picture credits still
