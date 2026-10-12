@@ -298,7 +298,7 @@ defineProject({
   lives in that file's `TAG_*` constants. Its font size follows
   `--pebble-px` (set by `framing.fitToGrid`), not a fixed rem. The rope
   itself is `createRope`/`drawRope`, shared with the tap hint's elastic
-  string and "Double-click to zoom in" (`HINT_*`, `HintTag.jsx`), which
+  string and "double-click" (`HINT_*`, `HintTag.jsx`), which
   times itself to the dot's CSS animation - change `tap-hint-life`/
   `-press` and `HINT_LIFE`/`HINT_TAPS` together. The hint's tag also
   carries `.cube-tag--spotlight` (for its look), so it's rendered after

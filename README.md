@@ -168,9 +168,9 @@ Project view
         a close-up on a phone (Emergent Space: in on the pile in both);
         five pictures in each, Emergent Space's diagrams full width
     [x] Double-click / double-tap zoom, hinted every 5s by a white touch
-        point that scales with the screen, "Double-click to zoom in" (or
-        "Double-tap", or "zoom out" when zoomed) hanging from it on a
-        bouncing orange string like the catalog's
+        point that scales with the screen, "double-click" ("double-tap"
+        on a touch screen) hanging from it on a bouncing black string
+        like the catalog's
     [x] Camera moves only tilt, never roll
 
 Site

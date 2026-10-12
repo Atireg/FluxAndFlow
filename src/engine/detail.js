@@ -553,7 +553,6 @@ export function createDetail({
                     ui.showTapHint(
                         (tapHintPoint.x + 1) / 2 * screen.width,
                         (1 - tapHintPoint.y) / 2 * screen.height,
-                        state.detailZoomed,
                     );
                     return;
                 }

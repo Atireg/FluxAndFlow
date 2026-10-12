@@ -338,6 +338,9 @@ only.
   5 }`, replacing `repeat: 10`). Still project settings only. Verified with
   a throwaway hook (removed) over three cycles at 1280x800 and two at
   390x844: the crossing held at the centre throughout each hold, no errors.
+- **The tap hint says just "double-click"** ("double-tap" on a touch
+  screen), and its word, string and knot are black like the dot's outline
+  rather than orange.
 
 Open at end of session (see README, "Next up"): unchanged by this session —
 Safari still to confirm, both projects' real copy and picture credits still

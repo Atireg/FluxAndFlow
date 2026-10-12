@@ -87,16 +87,15 @@ export default function App() {
                     return Math.min(bar.offsetHeight / window.innerHeight, 0.5);
                 },
 
-                showTapHint: (x, y, zoomed) => {
+                showTapHint: (x, y) => {
                     const hint = tapHintRef.current;
                     if (!hint) return;
 
-                    // What the string's tag says: a touch screen taps, and
-                    // zoomed in, the same gesture zooms back out
+                    // What the string's tag says - just the gesture; a
+                    // touch screen taps
                     const tag = hintTagRef.current;
                     if (tag) {
-                        const gesture = window.matchMedia('(hover: none)').matches ? 'Double-tap' : 'Double-click';
-                        tag.textContent = `${gesture} to zoom ${zoomed ? 'out' : 'in'}`;
+                        tag.textContent = window.matchMedia('(hover: none)').matches ? 'double-tap' : 'double-click';
                     }
 
                     hint.style.left = `${x}px`;

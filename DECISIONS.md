@@ -493,10 +493,11 @@ where it invites zooming back out. It skips while the camera moves or a
 phone's drawer is open.
 
 Hanging from the dot's bottom, asked for "similar to the string and text"
-of the catalog: the spotlight's orange string and its orange words,
-"Double-click to zoom in" ("Double-tap" on a touch screen, by `(hover:
-none)`; "zoom out" while zoomed), set by App's `showTapHint` when a hint
-appears. It is the same rope as the spotlight's (`createRope` and
+of the catalog: the spotlight's string and lettering, with just
+"double-click" ("double-tap" on a touch screen, by `(hover: none)`), set
+by App's `showTapHint` when a hint appears. Both in the dot's black
+(`--hint-line`) - first orange with "Double-click to zoom in" (or "zoom
+out" while zoomed), until the user asked for the one word, in black. It is the same rope as the spotlight's (`createRope` and
 `drawRope` in `engine/tags.js`, the spotlight's unchanged) with the
 `HINT_*` settings: elastic and slack where the spotlight's is stiff, so it
 starts bunched up at the knot (`HINT_OPEN`), falls open, overshoots to

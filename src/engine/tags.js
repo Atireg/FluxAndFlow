@@ -222,8 +222,8 @@ function drawRope(points, tagElement, paths, knots, knot) {
 
 /**
  * The tap hint's string: the same rope and look as the spotlight's, hung from
- * the bottom of the hint's dot (styles.css, .tap-hint) with "Double-click to
- * zoom in" on its end. It drops bunched up as the dot appears and bounces on
+ * the bottom of the hint's dot (styles.css, .tap-hint) with "double-click"
+ * on its end. It drops bunched up as the dot appears and bounces on
  * an elastic string, and each of the dot's two taps tugs it again. It lives
  * and fades with the dot (tap-hint-life in styles.css: in by 12% of
  * HINT_LIFE, out from 80%).
