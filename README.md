@@ -17,7 +17,7 @@ optional `view` sets the camera angle the project opens on (and, with
 `sway`, a slow nod of the camera); `gather: true` makes its points gather
 out of a scattered cloud each time it opens; `drop` drops copies of a
 rod-built mesh onto a surface with physics; `doubleClick` says what a
-double-click does (zoom, hold the model still, or nothing); `autoZoom` and
+double-click does (zoom, hold the model still, drop again, or nothing); `autoZoom` and
 `eyeLevel` move the camera in by itself; `category` says which kind of
 project it is; `images` fills the drawer's
 picture frames. The fields are listed in CLAUDE.md and in
@@ -165,7 +165,7 @@ Project view
         into 8,000 points as it loads; the mesh itself, in the rock's ink,
         in its pebble; opening the About drawer zooms in on the three
     [x] Emergent Space: the turn starts as soon as the pile looks still; a
-        "Drop again" button in the bar; an arrow and a live m/s reading
+        double-click drops it again (hinted "drop again" on the dot's string); an arrow and a live m/s reading
         show each aggregate's velocity as it falls (`drop.velocity`);
         pulsing blue dots mark where they interlock once fully at rest
         (`drop.contacts`); then the camera moves in on one interlock for
@@ -181,7 +181,8 @@ Project view
         that scales with the screen, "double-click" ("double-tap" on a
         touch screen) hanging from it on a bouncing black string like the
         catalog's. Per project (`doubleClick`): zooms by default, holds
-        Rock Print still until the next, nothing on Emergent Space
+        Rock Print still until the next (hinted "pause"), drops Emergent
+        Space again (hinted "drop again")
     [x] Rock Print zooms in by itself every 10s and back out (`autoZoom`),
         alternately on a point of the pavilion (following it as it turns)
         and from inside, at eye height among the columns, looking between

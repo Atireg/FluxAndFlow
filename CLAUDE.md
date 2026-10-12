@@ -39,13 +39,15 @@ and README's "Next up". As of the end of Session 3:
   of a scattered cloud, turns, and nods. Every 10s the camera moves in by
   itself, then out - alternately on a point of the pavilion and from
   inside, at eye height among the columns (`autoZoom`, `eyeLevel`). A
-  double-click holds it still until the next (`doubleClick: 'hold'`).
+  double-click holds it still until the next (`doubleClick: 'hold'`),
+  hinted "pause".
 - **Emergent Space** (slot 1): three solid aggregates dropped with live
   physics onto a ground of the clicked pebble's points, a new drop each
   time; velocity arrows while they fall, blue dots where they interlock
   once at rest, then the camera closes in on one interlock, backs out, the
-  floor slows to a stop and it drops again (`drop.closeUp`). No
-  double-click (`doubleClick: 'none'`).
+  floor slows to a stop and it drops again (`drop.closeUp`). A
+  double-click drops it again at once, hinted "drop again" on the dot's
+  string (`doubleClick: 'drop'`); there's no button for it.
 - **Waiting on the user**: the real copy for both projects (the live drawer
   text is `[PLACEHOLDER ...]`), captions/credits for the pictures, model
   licensing, and checks on real devices (the blind Safari fixes, the
@@ -175,7 +177,7 @@ defineProject({
             sway: 13 },                                    // camera nods ± degrees, slowly
     gather: true,                                 // optional: points gather from a scattered cloud on open
     // points: 20000,                             // optional, a mesh detailModel only: how many points to sample
-    doubleClick: 'hold',                          // optional: 'zoom' (default), 'hold' (stop the turn till the next), 'none'
+    doubleClick: 'hold',                          // optional: 'zoom' (default), 'hold' (stop the turn till the next), 'drop' (drop again), 'none'
     autoZoom: 10,                                 // optional: camera moves in on a point / back out every 10s (not with `drop`)
     eyeLevel: 0.4,                                // optional, with autoZoom: every other move in is from inside, at this share of the height
     // drop: { count: 3, size: 3, ground: -1.2, solid: true,   // optional, a crossed-rod mesh only (Emergent Space)
@@ -225,8 +227,8 @@ defineProject({
   dissolve falling into a disc (`uGround`). They're held hidden for
   `PILE_WAIT`, fall in slow motion (`PILE_TIME_SCALE`), and the model turns
   once they look still (`PILE_REST_*` - not cannon's sleep, which lags by a
-  second; the physics runs on until it does sleep). The bar's "Drop again"
-  (any project with a `drop`) restarts it at the angle it had reached
+  second; the physics runs on until it does sleep). A double-click with
+  `doubleClick: 'drop'` restarts it at the angle it had reached
   (`turnOffset`, `modelTurn`), and `drop.repeat` does the same that many
   seconds after each drop comes to rest - the old pile dissolving away
   first (`pile.replay`, `uFade` in `makeInkMaterial`). Emergent Space uses
@@ -329,7 +331,8 @@ defineProject({
   lives in that file's `TAG_*` constants. Its font size follows
   `--pebble-px` (set by `framing.fitToGrid`), not a fixed rem. The rope
   itself is `createRope`/`drawRope`, shared with the tap hint's elastic
-  string and "double-click" (`HINT_*`, `HintTag.jsx`), which
+  string and its words - "double-click", or "pause" / "drop again" by the
+  project's `doubleClick` (`HINT_WORDS` in App) - (`HINT_*`, `HintTag.jsx`), which
   times itself to the dot's CSS animation - change `tap-hint-life`/
   `-press` and `HINT_LIFE`/`HINT_TAPS` together. The hint's tag also
   carries `.cube-tag--spotlight` (for its look), so it's rendered after

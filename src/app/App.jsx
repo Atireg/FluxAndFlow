@@ -24,6 +24,9 @@ import VelocityTags from '../components/VelocityTags.jsx';
  * round. The start-up loader stays inline in index.html, ahead of this
  * module, so it is on screen before React has even downloaded.
  */
+// The tap hint's words, by the project's `doubleClick` ('zoom' says the gesture)
+const HINT_WORDS = { hold: 'pause', drop: 'drop again' };
+
 export default function App() {
     const [project, setProject] = useState(null);
     const [status, setStatus] = useState(null);
@@ -93,15 +96,17 @@ export default function App() {
                     return Math.min(bar.offsetHeight / window.innerHeight, 0.5);
                 },
 
-                showTapHint: (x, y) => {
+                showTapHint: (x, y, action) => {
                     const hint = tapHintRef.current;
                     if (!hint) return;
 
-                    // What the string's tag says - just the gesture; a
-                    // touch screen taps
+                    // What the string's tag says: what a double-click does
+                    // there (the project's `doubleClick`), or for a zoom just
+                    // the gesture - a touch screen taps
                     const tag = hintTagRef.current;
                     if (tag) {
-                        tag.textContent = window.matchMedia('(hover: none)').matches ? 'double-tap' : 'double-click';
+                        const gesture = window.matchMedia('(hover: none)').matches ? 'double-tap' : 'double-click';
+                        tag.textContent = HINT_WORDS[action] ?? gesture;
                     }
 
                     hint.style.left = `${x}px`;
@@ -151,10 +156,6 @@ export default function App() {
 
     const closeProject = useCallback(() => {
         engineRef.current?.closeProject();
-    }, []);
-
-    const replayDrop = useCallback(() => {
-        engineRef.current?.replayDrop();
     }, []);
 
     const chooseFocus = useCallback((category) => {
@@ -207,7 +208,6 @@ export default function App() {
                 project={project}
                 status={status}
                 onClose={closeProject}
-                onReplay={replayDrop}
             />
 
             <ProjectDrawer

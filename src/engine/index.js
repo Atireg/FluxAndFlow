@@ -38,7 +38,7 @@ import { trailResolution } from './pointcloud/trails.js';
  *   onStatus(message|null)  what to say in the project bar
  *   onFog(boolean)          roll the grey fog in or out
  *   barFraction()           how much viewport height the bar takes, 0..0.5
- *   showTapHint(x, y) / hideTapHint()
+ *   showTapHint(x, y, action) / hideTapHint()   action: the project's doubleClick
  *   onFocus(category)       the filter changed from the canvas (a sunk pebble clicked)
  *   overlays                the DOM nodes the tags are drawn into
  */
@@ -112,8 +112,8 @@ export function createEngine({ canvas, source, ui }) {
             resetFlow: () => flow.reset(),
 
             // The hint's dot is React's; the string hanging from it is the tags'
-            showTapHint: (x, y) => {
-                ui.showTapHint(x, y);
+            showTapHint: (x, y, action) => {
+                ui.showTapHint(x, y, action);
                 tags.showHint(x, y, clock.getElapsedTime());
             },
             hideTapHint: () => {
@@ -454,11 +454,6 @@ export function createEngine({ canvas, source, ui }) {
          */
         setFocus(category) {
             setFocus(state, grid.pebbles, category, clock.getElapsedTime());
-        },
-
-        // A project with a `drop`: let the pile fall again
-        replayDrop() {
-            detail.replayDrop();
         },
 
         /**

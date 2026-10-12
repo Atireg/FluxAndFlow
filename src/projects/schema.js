@@ -29,7 +29,8 @@
  *   points        a mesh detailModel only: how many points to sample
  *   doubleClick   what a double-click/double-tap on the model does: 'zoom'
  *                 (the default) in and back out, 'hold' stops its turn until
- *                 the next, 'none' nothing (and no hint for it)
+ *                 the next, 'drop' drops it again (with a `drop`), 'none'
+ *                 nothing (and no hint for it)
  *   autoZoom      seconds: the camera moves in on the model, or back out, this often
  *   eyeLevel      with autoZoom: every other move in is from inside, at this
  *                 share of the model's height
@@ -169,10 +170,11 @@ function normaliseDrop(drop, { id }) {
     return { ...drop };
 }
 
-function normaliseDoubleClick({ id, doubleClick = 'zoom' }) {
-    if (!['zoom', 'hold', 'none'].includes(doubleClick)) {
-        throw new Error(`Project "${id}": doubleClick should be 'zoom', 'hold' or 'none'`);
+function normaliseDoubleClick({ id, doubleClick = 'zoom', drop }) {
+    if (!['zoom', 'hold', 'drop', 'none'].includes(doubleClick)) {
+        throw new Error(`Project "${id}": doubleClick should be 'zoom', 'hold', 'drop' or 'none'`);
     }
+    if (doubleClick === 'drop' && !drop) throw new Error(`Project "${id}": doubleClick 'drop' needs a drop`);
     return doubleClick;
 }
 

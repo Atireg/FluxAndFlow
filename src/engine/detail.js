@@ -443,7 +443,8 @@ export function createDetail({
         },
 
         /**
-         * Drop the pile again, from the bar's "Drop again". The new drop
+         * Drop the pile again, from a double-click (`doubleClick: 'drop'`) or
+         * between close-ups. The new drop
          * falls at the angle the model has reached rather than snapping back
          * to where it opened, and the turn picks up from there once it has
          * settled; the ground stays, and so does the camera.
@@ -474,7 +475,7 @@ export function createDetail({
          * after it has come to rest - after it LOOKS still (pile.settledAt),
          * so each drop lands and turns a while before the next. Timed from
          * the rest rather than the start, since a drop takes longer than a
-         * short repeat to land. "Drop again" resets the wait.
+         * short repeat to land. A double-click's drop resets the wait.
          */
         maybeRepeatDrop(model, since) {
             const pile = model.userData.pile;
@@ -687,6 +688,10 @@ export function createDetail({
             const action = state.selected.userData.project?.doubleClick ?? 'zoom';
             if (action === 'zoom') detail.toggleZoom(clientX, clientY);
             else if (action === 'hold') detail.toggleHold();
+            else if (action === 'drop') {
+                detail.replayDrop();
+                ui.hideTapHint();
+            }
         },
 
         /**
@@ -750,7 +755,9 @@ export function createDetail({
         maybeShowTapHint(model, since) {
             if (since < state.tapHintNext) return;
             if (closeUp.phase === 'in') return; // the close-up's camera is busy
-            if (state.selected?.userData.project?.doubleClick === 'none') return; // nothing to hint at
+            const action = state.selected?.userData.project?.doubleClick ?? 'zoom';
+            if (action === 'none') return; // nothing to hint at
+            if (action === 'hold' && isHeld(model)) return; // already still: nothing to pause
 
             state.tapHintNext = since + TAP_HINT_GAP;
 
@@ -766,8 +773,9 @@ export function createDetail({
             // Clear of the drawer on the right, when it's open beside the model
             const maxX = Math.min(0.7, 1 - 2 * fraction - 0.15);
 
+            // (a pile's aggregates are hidden while they wait to drop)
             const points = model.userData.points;
-            if (!points || !model.visible) return;
+            if (!points || !model.visible || !points.visible) return;
 
             /**
              * A random point of the cloud that's comfortably on screen, clear
@@ -784,6 +792,7 @@ export function createDetail({
                     ui.showTapHint(
                         (tapHintPoint.x + 1) / 2 * screen.width,
                         (1 - tapHintPoint.y) / 2 * screen.height,
+                        action,
                     );
                     return;
                 }

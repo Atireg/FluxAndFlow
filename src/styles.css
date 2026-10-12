@@ -586,22 +586,6 @@ canvas.webgl {
     will-change: transform, opacity;
 }
 
-/* "Drop again", for a project dropped with physics: the way back's look, on
-   its line, so the bar doesn't grow taller and move the model's framing */
-.bar__replay {
-    margin-left: 1.5rem;
-}
-
-.bar__replay-icon {
-    display: inline-block;
-    transition: transform 0.4s ease;
-}
-
-.bar__replay:hover .bar__replay-icon,
-.bar__replay:focus-visible .bar__replay-icon {
-    transform: rotate(180deg);
-}
-
 /* The catalog's filter, where the bar sits in a project: the bar's small
    capitals, the chosen kind in ink and underlined, the rest dim. Clear of
    the canvas's clicks; gone while a project is open */

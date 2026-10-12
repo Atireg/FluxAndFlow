@@ -165,7 +165,9 @@ in DECISIONS.md.
 
 **Emergent Space.**
 - The turn starts when the pile looks still, not when cannon sleeps.
-- "Drop again" in the bar; drops slow to 40% playback.
+- "Drop again" in the bar, later a double-click instead (hinted "drop
+  again" on the tap hint's string, `doubleClick: 'drop'`); drops slow to
+  40% playback.
 - Velocity arrows and live m/s while falling (`drop.velocity`); pulsing
   dots where the aggregates interlock (`drop.contacts`) - graphite, then
   cyan, then blue - shown only once every aggregate is asleep and dropped
@@ -174,7 +176,6 @@ in DECISIONS.md.
   following it as the pile turns, for 5s, backs out, the floor slows to a
   stop, and 5s later it drops again, the old pile dissolving away. (First
   a plain repeat every 5s, then 10s.)
-- No double-click (`doubleClick: 'none'`).
 
 **Rock Print.**
 - Every 10s the camera moves in by itself and back out (`autoZoom`),
@@ -204,7 +205,8 @@ instead of "All projects". Then rewritten with the user into three short,
 more business-like paragraphs: hidden currents, their background, the
 services; the landing page scrolls if it outgrows a small phone.
 
-**Tap hint.** "double-click" ("double-tap" on touch) hangs from the dot on
+**Tap hint.** "double-click" ("double-tap" on touch; "pause" on Rock Print,
+"drop again" on Emergent Space) hangs from the dot on
 a black, bouncing string - the catalog's rope, shared (`createRope`).
 
 **Docs.** All four brought up to date at the end of the session: names from

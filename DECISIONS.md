@@ -650,12 +650,15 @@ the gather is done, then every `TAP_HINT_GAP` (5s), on a random on-screen
 point of the cloud clear of the bar and any side drawer - zoomed in too,
 where it invites zooming back out. It skips while the camera moves or a
 phone's drawer is open, and not at all for a project with `doubleClick:
-'none'`.
+'none'` (nor for a held model, with nothing to pause).
 
 Hanging from the dot's bottom, asked for "similar to the string and text"
 of the catalog: the spotlight's string and lettering, with just
 "double-click" ("double-tap" on a touch screen, by `(hover: none)`), set
-by App's `showTapHint` when a hint appears. Both in the dot's black
+by App's `showTapHint` when a hint appears - or, asked for, what the
+double-click does where it does something else: "pause" for `'hold'`,
+"drop again" for `'drop'` (`HINT_WORDS` in App; the engine passes the
+project's `doubleClick`, the page picks the words). Both in the dot's black
 (`--hint-line`) - first orange with "Double-click to zoom in" (or "zoom
 out" while zoomed), until the user asked for the one word, in black. It
 is the same rope as the spotlight's (`createRope` and
@@ -695,7 +698,7 @@ there - not re-centred, since the centre beside a side drawer is offset.
 **A double-click holds it still instead** (asked for: "no zoom in, but
 the model stops rotating until the user double clicks again").
 `doubleClick: 'hold'` (the project setting that also gives 'zoom', the
-default, and 'none') toggles `model.userData.held` ({ total, at }), which
+default, 'drop' and 'none') toggles `model.userData.held` ({ total, at }), which
 `modelTurn` subtracts, so the turn picks up exactly where it stopped. The
 camera's nod holds with it (`updateSway`'s `held`), and the timed zoom
 waits while held and for a full round after. The hint still says
@@ -826,12 +829,11 @@ Blender/Rhino simulation. A project's `drop: { count, size, ground }` does it
   does sleep (`pile.asleep`), so nothing freezes mid-wobble; the model just
   turns sooner. The bodies' own physics is unchanged, so the interlock rate
   is too. Reopening calls `restart()` for a new drop.
-- **"Drop again"** (asked for): a small button in the project bar, on the
-  same line as "F&F playground" (the back link) and in its style, shown for any project with
-  a `drop` once its model has loaded - so it's Emergent Space today, with no
-  per-project code. On its own line it would make the bar taller, and on a
-  phone the bar's height is reserved out of the model's framing, so the
-  shot would move. It calls `restart(PILE_REPLAY_WAIT)` - 0.3s rather than
+- **Drop again on a double-click** (asked for: the tap hint's dot and
+  string reading "drop again", instead of a button in the bar).
+  `doubleClick: 'drop'` (needs a `drop`) makes a double-click or
+  double-tap call `detail.replayDrop`; the hint shows once the
+  aggregates are in view (not while they wait hidden), on one of them. It calls `restart(PILE_REPLAY_WAIT)` - 0.3s rather than
   `PILE_WAIT`'s 1.2s, since there's no camera move to wait for - and keeps
   the angle the model had reached (`turnOffset`, read through `modelTurn`
   in camera/framing.js) instead of snapping back to where it opened: the
@@ -852,8 +854,8 @@ Blender/Rhino simulation. A project's `drop: { count, size, ground }` does it
   so the move aims where the crossing will be when the camera arrives
   (`contactAhead`), and from then on the camera is translated with the
   crossing each frame, keeping it centred while the pile turns round it.
-  That following stops if the visitor zooms out or orbits; "Drop again",
-  a drawer reframe or closing the project all end the close-up. No marked
+  That following stops if the visitor zooms out or orbits; a double-click's
+  drop, a drawer reframe or closing the project all end the close-up. No marked
   crossing: it just waits and drops. The tap hint stays away while the
   camera is in. Requires `contacts`; can't be combined with `repeat`
   (`defineProject` throws).
@@ -862,13 +864,13 @@ Blender/Rhino simulation. A project's `drop: { count, size, ground }` does it
   turn (`modelTurn`), which froze the instant the pile restarted. Now
   `pile.turnStop` ({ at, over }) lets its speed fall evenly to nothing:
   the close-up starts it `TURN_STOP` (3s) before its drop, so it is still
-  by the time the old pile dissolves; "Drop again" (or `repeat`) starts it
+  by the time the old pile dissolves; a double-click's drop (or `repeat`) starts it
   at once, over the dissolve and wait (1.5s). The new drop takes the
   stopped angle as before. The turn still starts at full speed when the
   next pile settles.
-- **No double-click zoom here** (asked for): `doubleClick: 'none'` turns
-  off double-click/double-tap and its hint; the close-ups are the zoom, and
-  their camera move doesn't go through `toggleZoom`.
+- **No double-click zoom here** (asked for): the close-ups are the zoom,
+  and their camera move doesn't go through `toggleZoom`. First
+  `doubleClick: 'none'`, now `'drop'` (above).
 - **The fallen pile dissolves away** before each new drop rather than
   vanishing (asked for - "less abruptly"): `pile.replay()` runs a
   `PILE_FADE_OUT` (1.2s, eased) before `restart()`, keeping the turn going
@@ -1366,6 +1368,8 @@ Catalog
   waiting for the last cube before the camera moved.
 
 Project view
+- **"Drop again" as a button in the bar**, beside the way back - replaced
+  by a double-click, hinted on the pile.
 - **An orthographic detail view** (`DETAIL_PROJECTION`, still switchable),
   an oblique default, and **`controls.autoRotate`**.
 - **Rock Print's first landing view** (`{ elevation: 49, turn: 145 }`).
