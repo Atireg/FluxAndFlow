@@ -678,8 +678,10 @@ Timed zooms on Rock Print (`autoZoom`), holding it, from inside
 Asked for: "zoom ins and outs on the model every 10 seconds". `autoZoom: 10`
 moves the camera in on a random point of the cloud (to `AUTO_ZOOM`, 0.4 of
 its distance - the double-click's), then 10s later back out to the frame,
-and so on, from once the points have gathered (`maybeAutoZoom` in
-detail.js). The same move as Emergent Space's close-up (`CLOSE_UP_MOVE`,
+and so on (`maybeAutoZoom` in detail.js). The first comes
+`AUTO_ZOOM_FIRST` (3.5s) after the points have gathered, just after the
+double-click hint has gone - a whole 10s after the gather felt too long a
+wait (asked for). The same move as Emergent Space's close-up (`CLOSE_UP_MOVE`,
 1.6s) and the same following (`follow`): aimed where the point will be
 when the camera arrives, then translated with it as the model turns, so
 it stays put on screen. Postponed a second at a time while the camera is

@@ -70,10 +70,12 @@ const TURN_STOP = 3; // seconds the turn (and its floor) takes to slow to a stop
 /**
  * A project's `autoZoom`: every that many seconds the camera moves in on a
  * random point of the model, or back out - the same move and following as
- * the close-up above. From once the points have gathered; a visitor's own
- * double-click restarts the wait.
+ * the close-up above. The first comes soon after the points have gathered,
+ * once the double-click hint has been and gone, not a whole wait later; a
+ * visitor's own double-click restarts the wait.
  */
 const AUTO_ZOOM = 0.4; // the camera ends up this fraction of its distance away
+const AUTO_ZOOM_FIRST = 3.5; // seconds after the gather (or the opening) to the first - just after the hint
 
 /**
  * With `eyeLevel` too, every other move in is from inside the model instead,
@@ -295,7 +297,7 @@ export function createDetail({
 
             // ...and so does the first timed zoom
             const every = pebble.userData.project?.autoZoom;
-            autoZoom.next = every ? (pebble.userData.project.gather ? GATHER_DURATION : 0) + every : Infinity;
+            autoZoom.next = every ? (pebble.userData.project.gather ? GATHER_DURATION : 0) + AUTO_ZOOM_FIRST : Infinity;
             autoZoom.local = null;
             autoZoom.inside = false;
             autoZoom.count = 0;
