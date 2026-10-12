@@ -1087,8 +1087,7 @@ floating particles behind it, the first thing on opening, with a link to
 "my playground" - and the loader next, on the way to the projects. So the
 landing page is the inline loader's first state (`.loader.is-welcome`):
 the same particle field drifting calmly, the wordmark, one line ("Where
-ideas take shape in motion.") and a paragraph drawn from the user's notes
-on self-organised criticality and the site as a playground, then "Welcome
+ideas take shape in motion.") and three short paragraphs, then "Welcome
 to my playground" in the one orange (it's the invitation; first "My
 playground"). Following it swaps the
 words for the progress line and count in the same place under the title,
@@ -1096,6 +1095,19 @@ and the loader carries on as before - its `MIN_VISIBLE` counted from that
 click, and it leaves only once the catalog is in *and* the visitor has
 come through (`scheduleExit`). The catalog loads underneath while the
 welcome is read, so the count usually runs straight to 100%.
+
+The words were first one paragraph from the user's notes on self-organised
+criticality; asked to be split up and made more business-like, they're
+now what the user offers (the user's own list of services: strategy,
+custom software and automation, training, websites for practices,
+academic supervision - and, kept on request, generative art on commission
+and yoga in English), then the research and the playground in one closing
+paragraph. That runs taller than a small phone (375x667), so the loader
+scrolls: `place-items: start center` with the mark's `margin-block: auto`
+centres it when it fits and starts it at the top when it doesn't (plain
+centring would cut its head off, out of reach), the particle field is
+`position: fixed` so it stays put, and following the button scrolls back
+up to the title, where the progress line shows.
 
 Inline rather than a React page for the reason the loader is: it's on
 screen before the bundle arrives, and the particles are already there for

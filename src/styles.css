@@ -230,7 +230,10 @@ canvas.webgl {
     inset: 0;
     z-index: 20;
     display: grid;
-    place-items: center;
+    /* Centred (the mark's auto margins), but a landing page taller than a
+       small phone starts at the top and scrolls rather than losing its head */
+    place-items: start center;
+    overflow-y: auto;
     /* The --loader-* colours are set from the palette in index.html - the
        same paper as the site's own --bg */
     background: var(--loader-bg, var(--bg));
@@ -243,7 +246,7 @@ canvas.webgl {
 }
 
 .loader__field {
-    position: absolute;
+    position: fixed; /* stays put if the landing page scrolls */
     inset: 0;
     width: 100%;
     height: 100%;
@@ -254,6 +257,7 @@ canvas.webgl {
     display: grid;
     justify-items: center;
     gap: 0.9rem;
+    margin-block: auto;
     padding: 1.5rem 2rem;
     text-align: center;
     transition: transform 2.6s ease, opacity 1.4s ease 0.8s; /* lingers as the pebbles surface */
@@ -308,13 +312,18 @@ canvas.webgl {
 }
 
 .loader__about {
-    margin: 0;
+    display: grid;
+    gap: 0.8em;
     font-size: clamp(0.95rem, 1.6vw, 1.1rem);
     font-weight: 300;
     line-height: 1.6;
     color: var(--loader-ink, var(--ink));
     /* lifts it off the streams, like the title */
     text-shadow: 0 0 1rem var(--loader-bg, var(--bg)), 0 0 0.35rem var(--loader-bg, var(--bg)), 0 0 0.15rem var(--loader-bg, var(--bg));
+}
+
+.loader__about p {
+    margin: 0;
 }
 
 .loader__enter {

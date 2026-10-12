@@ -189,7 +189,7 @@ Project view
     [x] Camera moves only tilt, never roll
 
 Site
-    [x] A landing page: the concept in a short paragraph over the floating
+    [x] A landing page: the services and the concept in three short paragraphs over the floating
         particles, and "Welcome to my playground" on to the projects (the back link in
         a project reads "My playground" too)
     [x] React structure: the page in components (`src/app/`,

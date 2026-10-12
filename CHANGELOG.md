@@ -199,7 +199,9 @@ pebble brings its kind forward.
 paragraph over the loader's floating particles, and "Welcome to my
 playground", which turns it into the loader on the way to the catalog (its minimum time now
 counted from that click). The back link in a project reads "My playground"
-instead of "All projects".
+instead of "All projects". Then split into three paragraphs and made more
+business-like: the user's services first, the playground last; it scrolls
+on a small phone.
 
 **Tap hint.** "double-click" ("double-tap" on touch) hangs from the dot on
 a black, bouncing string - the catalog's rope, shared (`createRope`).

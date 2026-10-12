@@ -33,14 +33,28 @@
       <div class="loader__stage">
         <div class="loader__welcome" id="loader-welcome">
           <p class="loader__tagline">Where ideas take shape in motion.</p>
-          <p class="loader__about">
-            Some systems organise themselves to the edge of change, where one
-            small nudge can set off something large and unforeseen. My work
-            moves like that &ndash; between architecture, programming, digital
-            fabrication and interactive design. This is its playground:
-            research, teaching and work out in the world, added as it happens.
-            It may never be finished. It lives between flux and flow.
-          </p>
+          <div class="loader__about">
+            <p>
+              I help businesses, and design and construction practices in
+              particular, put technology to work: what to adopt, in what order
+              and what to skip; tools built for how a team actually works; and
+              the skills to keep going without me.
+            </p>
+            <p>
+              That means digital strategy, custom software and automation
+              &ndash; parametric and BIM workflows, internal tools, data
+              pipelines &ndash; websites for design practices, and training and
+              academic supervision in computational design, digital fabrication
+              and sustainable materials. Alongside: generative and
+              computational art on commission, and yoga in English.
+            </p>
+            <p>
+              Behind it is research between architecture, programming and
+              fabrication, where one small nudge can set off something large.
+              This is its playground: research, teaching and work out in the
+              world, added as it happens, between flux and flow.
+            </p>
+          </div>
           <button class="loader__enter" id="loader-enter" type="button">Welcome to my playground <span aria-hidden="true">&rarr;</span></button>
         </div>
         <div class="loader__progress">
@@ -275,6 +289,9 @@
         startedAt = performance.now();
         root.classList.remove('is-welcome');
         root.setAttribute('aria-busy', 'true');
+        // Back up to the title, where the progress line shows, if a small
+        // screen had scrolled down to the button
+        root.scrollTo({ top: 0, behavior: 'smooth' });
         scheduleExit();
       });
 

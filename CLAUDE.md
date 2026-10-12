@@ -50,8 +50,9 @@ and README's "Next up". As of the end of Session 3:
   text is `[PLACEHOLDER ...]`), captions/credits for the pictures, model
   licensing, and checks on real devices (the blind Safari fixes, the
   physics drop, the streams on a phone, the inside view on a phone).
-- **Landing page**: the first thing on opening is the concept in a short
-  paragraph over the loader's floating particles, with "Welcome to my
+- **Landing page**: the first thing on opening is three short paragraphs -
+  the user's services, then the concept - over the loader's floating
+  particles (it scrolls on a small phone), with "Welcome to my
   playground" - which turns it into the loader and on to the catalog. The back link in a
   project also reads "My playground".
 - **Not started**: per-project URLs, a way back to the landing page;
