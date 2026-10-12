@@ -206,8 +206,11 @@ more business-like paragraphs: hidden currents, their background, the
 services; the landing page scrolls if it outgrows a small phone.
 
 **Tap hint.** "double-click" ("double-tap" on touch; "pause" on Rock Print,
-"drop again" on Emergent Space) hangs from the dot on
-a black, bouncing string - the catalog's rope, shared (`createRope`).
+"drop again" on Emergent Space - then "double-tap to" over it, on two
+lines) hangs from the dot on
+a black, bouncing string - the catalog's rope, shared (`createRope`). It stays 3s, then falls like a leaf - drifting and
+tilting, the string trailing - until it's off the screen; hints come every
+8s.
 
 **Docs.** All four brought up to date at the end of the session: names from
 the single-file days replaced, misfiled DECISIONS entries moved, this

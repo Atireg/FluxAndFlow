@@ -223,14 +223,23 @@ function drawRope(points, tagElement, paths, knots, knot) {
 
 /**
  * The tap hint's string: the same rope and look as the spotlight's, hung from
- * the bottom of the hint's dot (styles.css, .tap-hint) with "double-click"
- * on its end. It drops bunched up as the dot appears and bounces on
- * an elastic string, and each of the dot's two taps tugs it again. It lives
- * and fades with the dot (tap-hint-life in styles.css: in by 12% of
- * HINT_LIFE, out from 80%).
+ * the bottom of the hint's dot (styles.css, .tap-hint) with "double-tap to"
+ * and what it does on its end, on two lines. It drops bunched up as the dot
+ * appears and bounces on an elastic string, and each of the dot's two taps
+ * tugs it again. After HINT_HOLD the dot lets go and falls like a leaf -
+ * drifting side to side and tilting as it goes, gathering speed to a gentle
+ * fall - the string trailing, until it's gone off the bottom of the screen.
  */
-const HINT_LIFE = 2.2; // seconds - .tap-hint.is-showing's animation
-const HINT_TAPS = [0.25, 0.48]; // the dot's presses, as shares of HINT_LIFE (tap-hint-press)
+const HINT_PRESS = 2.2; // seconds - the dot's two presses (tap-hint-press in styles.css)
+const HINT_TAPS = [0.25, 0.48]; // the presses, as shares of HINT_PRESS
+const HINT_FADE_IN = 0.26; // seconds - tap-hint-in
+const HINT_HOLD = 3; // seconds on screen before it falls
+const HINT_FALL_SPEED = 0.28; // the fall's speed once under way, in screen heights a second
+const HINT_FALL_SPEED_MIN = 160; // px a second
+const HINT_FALL_EASE = 0.6; // seconds it takes to get going, roughly
+const HINT_SWAY = 2.2; // drift either side, in dot sizes
+const HINT_SWAY_PERIOD = 1.8; // seconds, one drift there and back
+const HINT_TILT = 0.45; // radians it tilts by as it drifts
 const HINT_STRING_LENGTH = 1.6; // as a share of the dot's size
 const HINT_STRING_MIN = 30; // px
 const HINT_SEGMENTS = 6;
@@ -246,13 +255,27 @@ function hintSize(screen) {
     return THREE.MathUtils.clamp(Math.min(screen.width, screen.height) * 0.03, 1.1 * rem, 2.6 * rem);
 }
 
-// tap-hint-life: in by 12%, held, out from 80%
+// tap-hint-in: in over HINT_FADE_IN, then held until it has fallen away
 function hintOpacity(age) {
-    const at = age / HINT_LIFE;
-    if (at <= 0 || at >= 1) return 0;
-    if (at < 0.12) return at / 0.12;
-    if (at > 0.8) return (1 - at) / 0.2;
-    return 1;
+    if (!(age > 0) || age === Infinity) return 0;
+    return Math.min(age / HINT_FADE_IN, 1);
+}
+
+/**
+ * Where the falling dot is `t` seconds after letting go, as an offset from
+ * where it hung, and its tilt: down at a speed it eases up to (a leaf
+ * doesn't drop like a stone), drifting side to side - the drift growing in
+ * from nothing - and tilted the way it's drifting
+ */
+function hintFall(t, size, screenHeight) {
+    const speed = Math.max(screenHeight * HINT_FALL_SPEED, HINT_FALL_SPEED_MIN);
+    const phase = (t / HINT_SWAY_PERIOD) * Math.PI * 2;
+    const swayIn = Math.min(t / HINT_FALL_EASE, 1);
+    return {
+        x: HINT_SWAY * size * Math.sin(phase) * swayIn,
+        y: speed * (t - HINT_FALL_EASE * (1 - Math.exp(-t / HINT_FALL_EASE))),
+        tilt: HINT_TILT * Math.cos(phase) * swayIn,
+    };
 }
 
 export function createTags({ screen, rig, state, overlays }) {
@@ -306,20 +329,33 @@ export function createTags({ screen, rig, state, overlays }) {
     }
 
     function hangHint(elapsedTime) {
-        const { hintTag, hintString, hintStringPaths, hintKnots } = overlays;
+        const { hintDot, hintTag, hintString, hintStringPaths, hintKnots } = overlays;
         if (!hintTag || !hintString) return;
 
         const age = hint.shownAt === null ? Infinity : elapsedTime - hint.shownAt;
-        const opacity = hintOpacity(age);
+        const size = hintSize(screen);
+        const length = Math.max(HINT_STRING_MIN, size * HINT_STRING_LENGTH);
+
+        // Falling once it has been held; held still instead, it just goes
+        const fall = age > HINT_HOLD && age !== Infinity && !still
+            ? hintFall(age - HINT_HOLD, size, screen.height)
+            : { x: 0, y: 0, tilt: 0 };
+        const gone = age > HINT_HOLD && (still || hint.y + fall.y - size > screen.height + length * 2);
+        if (gone && hint.shownAt !== null) {
+            hint.shownAt = null;
+            hintDot?.classList.remove('is-showing');
+        }
+
+        const opacity = gone ? 0 : hintOpacity(age);
         hintTag.style.opacity = opacity;
         hintString.style.opacity = opacity;
         if (opacity <= 0) return;
 
-        // Tied to the bottom of the dot
-        const size = hintSize(screen);
-        const ax = hint.x;
-        const ay = hint.y + size / 2;
-        const length = Math.max(HINT_STRING_MIN, size * HINT_STRING_LENGTH);
+        if (hintDot) hintDot.style.transform = `translate(${fall.x.toFixed(1)}px, ${fall.y.toFixed(1)}px) rotate(${fall.tilt.toFixed(3)}rad)`;
+
+        // Tied to the bottom of the dot, wherever its fall and tilt have it
+        const ax = hint.x + fall.x - Math.sin(fall.tilt) * size / 2;
+        const ay = hint.y + fall.y + Math.cos(fall.tilt) * size / 2;
         const link = length / HINT_SEGMENTS;
 
         if (hint.taps === -1) {
@@ -328,7 +364,7 @@ export function createTags({ screen, rig, state, overlays }) {
         }
 
         // Each of the dot's presses tugs the string
-        while (!still && hint.taps < HINT_TAPS.length && age >= HINT_TAPS[hint.taps] * HINT_LIFE) {
+        while (!still && hint.taps < HINT_TAPS.length && age >= HINT_TAPS[hint.taps] * HINT_PRESS) {
             hintRope.tug(HINT_TUG * length);
             hint.taps++;
         }
@@ -341,6 +377,7 @@ export function createTags({ screen, rig, state, overlays }) {
         // The tap hint has just appeared at (x, y), in screen pixels
         showHint(x, y, elapsedTime) {
             Object.assign(hint, { shownAt: elapsedTime, x, y, taps: -1 });
+            if (overlays.hintDot) overlays.hintDot.style.transform = '';
         },
 
         hideHint() {

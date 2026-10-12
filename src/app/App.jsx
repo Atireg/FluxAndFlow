@@ -27,8 +27,8 @@ import VelocityTags from '../components/VelocityTags.jsx';
 // The elements matching `selector` inside a ref's node, as an array
 const nodesIn = (ref, selector) => [...(ref.current?.querySelectorAll(selector) ?? [])];
 
-// The tap hint's words, by the project's `doubleClick` ('zoom' says the gesture)
-const HINT_WORDS = { hold: 'pause', drop: 'drop again' };
+// What the tap hint says a double-tap does, by the project's `doubleClick`
+const HINT_WORDS = { zoom: 'zoom', hold: 'pause', drop: 'drop again' };
 
 export default function App() {
     const [project, setProject] = useState(null);
@@ -103,13 +103,12 @@ export default function App() {
                     const hint = tapHintRef.current;
                     if (!hint) return;
 
-                    // What the string's tag says: what a double-click does
-                    // there (the project's `doubleClick`), or for a zoom just
-                    // the gesture - a touch screen taps
+                    // What the string's tag says, on two lines: the gesture -
+                    // a touch screen taps - and what it does there
                     const tag = hintTagRef.current;
                     if (tag) {
                         const gesture = window.matchMedia('(hover: none)').matches ? 'double-tap' : 'double-click';
-                        tag.textContent = HINT_WORDS[action] ?? gesture;
+                        tag.textContent = `${gesture} to\n${HINT_WORDS[action] ?? HINT_WORDS.zoom}`;
                     }
 
                     hint.style.left = `${x}px`;
@@ -131,6 +130,7 @@ export default function App() {
                     spotlightString: stringRef.current,
                     stringPaths: nodesIn(stringRef, 'path'),
                     knots: nodesIn(stringRef, 'circle'),
+                    hintDot: tapHintRef.current,
                     hintTag: hintTagRef.current,
                     hintString: hintStringRef.current,
                     hintStringPaths: nodesIn(hintStringRef, 'path'),

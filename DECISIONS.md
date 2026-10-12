@@ -642,23 +642,24 @@ reliably send `dblclick`, and where they do it's ignored for touch, or it
 would zoom in and straight back out.
 
 The tap hint (`components/TapHint.jsx`) is a white disc with a black outline and rings that presses
-twice (2.2s CSS animation), readable over the cloud, the fog and the paper,
+twice (2.2s CSS animation, `tap-hint-press`), readable over the cloud, the fog and the paper,
 and not competing with the orange. Its size (`--hint-size`) follows the
 screen's shorter side, 3vmin between 1.1rem (a phone, as before) and 2.6rem;
 it sits at `z-index` 2, over the canvas. `maybeShowTapHint` shows it once
-the gather is done, then every `TAP_HINT_GAP` (5s), on a random on-screen
+the gather is done, then every `TAP_HINT_GAP` (8s - long enough for one
+to hang and fall away), on a random on-screen
 point of the cloud clear of the bar and any side drawer - zoomed in too,
 where it invites zooming back out. It skips while the camera moves or a
 phone's drawer is open, and not at all for a project with `doubleClick:
 'none'` (nor for a held model, with nothing to pause).
 
 Hanging from the dot's bottom, asked for "similar to the string and text"
-of the catalog: the spotlight's string and lettering, with just
-"double-click" ("double-tap" on a touch screen, by `(hover: none)`), set
-by App's `showTapHint` when a hint appears - or, asked for, what the
-double-click does where it does something else: "pause" for `'hold'`,
-"drop again" for `'drop'` (`HINT_WORDS` in App; the engine passes the
-project's `doubleClick`, the page picks the words). Both in the dot's black
+of the catalog: the spotlight's string and lettering. Its words, on two
+lines (asked for): "double-tap to" ("double-click to" with a mouse, by
+`(hover: none)`) over what it does - "zoom", "pause" for `'hold'`, "drop
+again" for `'drop'` (`HINT_WORDS` in App; the engine passes the project's
+`doubleClick`, the page picks the words; `white-space: pre` on the tag).
+First just "double-click", then the action alone. Both in the dot's black
 (`--hint-line`) - first orange with "Double-click to zoom in" (or "zoom
 out" while zoomed), until the user asked for the one word, in black. It
 is the same rope as the spotlight's (`createRope` and
@@ -666,9 +667,23 @@ is the same rope as the spotlight's (`createRope` and
 `HINT_*` settings: elastic and slack where the spotlight's is stiff, so it
 starts bunched up at the knot (`HINT_OPEN`), falls open, overshoots to
 about 1.5 times its length and bounces, and each of the dot's two presses
-tugs it again (`HINT_TAPS`, matching `tap-hint-press`). It lives and fades
-with the dot's 2.2s (`HINT_LIFE`, `hintOpacity` copying `tap-hint-life`),
-so the CSS animation and those constants must change together. Hints now
+tugs it again (`HINT_TAPS` of `HINT_PRESS`, matching `tap-hint-press` -
+change them together).
+
+**Then it falls like a leaf** (asked for: stay a bit longer, then "fall
+downwards like leaves until they disappear from the screen"). It used to
+fade out at 2.2s; now the dot fades in (`tap-hint-in`, `HINT_FADE_IN`),
+holds `HINT_HOLD` (3s), and lets go: `hintFall` eases it up to a gentle
+speed (`HINT_FALL_SPEED`, a share of the screen's height a second, so it
+takes about as long on any screen), drifting side to side
+(`HINT_SWAY`, `HINT_SWAY_PERIOD`) and tilting the way it drifts
+(`HINT_TILT`). The engine moves the dot itself (`overlays.hintDot`, a
+transform on `.tap-hint`, which the dot's own press animation doesn't
+use), the string's knot follows the dot's tilted bottom, and the rope
+trails behind under its own gravity. Once it's well past the bottom it's
+over (`is-showing` removed). With reduced motion it just goes at the end
+of the hold. Rock Print's first timed zoom (`AUTO_ZOOM_FIRST`, 4.2s after
+the gather) starts as the first hint lets go. Hints now
 stay above the lower quarter of the screen (y > -0.5), leaving room for
 the words below. The tags' engine module gets the hint through
 `index.js`, which wraps the `ui` handed to `detail.js` - the dot stays

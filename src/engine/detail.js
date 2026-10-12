@@ -52,7 +52,7 @@ const DETAIL_ZOOM_DURATION = 0.9; // seconds
  * screen, or while the camera is moving.
  */
 const TAP_HINT_AFTER_GATHER = 1.2; // seconds after the points have gathered before the first one
-const TAP_HINT_GAP = 5; // seconds from one hint to the next
+const TAP_HINT_GAP = 8; // seconds from one hint to the next - it hangs, then falls away (engine/tags.js)
 
 /**
  * A project's `drop.closeUp`: once a drop is at rest, the camera moves in on
@@ -75,7 +75,7 @@ const TURN_STOP = 3; // seconds the turn (and its floor) takes to slow to a stop
  * visitor's own double-click restarts the wait.
  */
 const AUTO_ZOOM = 0.4; // the camera ends up this fraction of its distance away
-const AUTO_ZOOM_FIRST = 3.5; // seconds after the gather (or the opening) to the first - just after the hint
+const AUTO_ZOOM_FIRST = 4.2; // seconds after the gather (or the opening) to the first - as the hint lets go and falls
 
 /**
  * With `eyeLevel` too, every other move in is from inside the model instead,
@@ -780,10 +780,11 @@ export function createDetail({
             const positions = points.geometry.attributes.position;
             for (let tries = 0; tries < 60; tries++) {
                 tapHintPoint.fromBufferAttribute(positions, Math.floor(Math.random() * positions.count));
-                points.localToWorld(tapHintPoint).project(rig.camera);
+                // In pixels; projects tapHintPoint in place, for the test below
+                const [x, y] = rig.toScreen(points.localToWorld(tapHintPoint));
 
                 if (tapHintPoint.x > -0.7 && tapHintPoint.x < maxX && tapHintPoint.y > -0.5 && tapHintPoint.y < 0.5) {
-                    ui.showTapHint(...rig.toScreen(tapHintPoint), action);
+                    ui.showTapHint(x, y, action);
                     return;
                 }
             }

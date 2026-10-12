@@ -334,10 +334,12 @@ defineProject({
   lives in that file's `TAG_*` constants. Its font size follows
   `--pebble-px` (set by `framing.fitToGrid`), not a fixed rem. The rope
   itself is `createRope`/`drawRope`, shared with the tap hint's elastic
-  string and its words - "double-click", or "pause" / "drop again" by the
-  project's `doubleClick` (`HINT_WORDS` in App) - (`HINT_*`, `HintTag.jsx`), which
-  times itself to the dot's CSS animation - change `tap-hint-life`/
-  `-press` and `HINT_LIFE`/`HINT_TAPS` together. The hint's tag also
+  string and its two lines - "double-tap to" and "zoom" / "pause" / "drop
+  again" by the project's `doubleClick` (`HINT_WORDS` in App) -
+  (`HINT_*`, `HintTag.jsx`). The engine runs the hint's life: it holds
+  `HINT_HOLD`, then falls like a leaf off the screen (`hintFall`, moving
+  `overlays.hintDot`); its taps time themselves to the dot's CSS press -
+  change `tap-hint-press` and `HINT_PRESS`/`HINT_TAPS` together. The hint's tag also
   carries `.cube-tag--spotlight` (for its look), so it's rendered after
   `CatalogTags`: `querySelector('.cube-tag--spotlight')` and
   `.tag-string__knot` still find the catalog's first.
@@ -375,7 +377,8 @@ defineProject({
 - **No per-project URLs yet** - don't assume a project is linkable.
 - **Shared helpers - reach for them rather than spelling it out again**:
   `engine/ease.js` for any 0..1 ramp; `rig.toScreen(vector)` for a world
-  point in screen pixels and `rig.pointerToNdc` for a pointer;
+  point in screen pixels (it projects `vector` in place - never project it
+  first, or it lands thousands of pixels off screen) and `rig.pointerToNdc` for a pointer;
   `detailSince(pebble, t)` for the clock a project's model runs on;
   `halfHeightAt(fov, distance)` for what a lens sees; `pickInk(tone)` in a
   points shader; `clickOnly(fn)` for a button over the canvas.

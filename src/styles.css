@@ -147,8 +147,9 @@ body {
     opacity: 0;
 }
 
+/* In, then held until it has fallen off the screen (engine/tags.js moves it) */
 .tap-hint.is-showing {
-    animation: tap-hint-life 2.2s ease forwards;
+    animation: tap-hint-in 0.26s ease forwards;
 }
 
 .tap-hint__dot,
@@ -188,11 +189,9 @@ body {
 }
 
 /* Never fully solid: the model stays visible through it */
-@keyframes tap-hint-life {
+@keyframes tap-hint-in {
     0%   { opacity: 0; }
-    12%  { opacity: 0.9; }
-    80%  { opacity: 0.9; }
-    100% { opacity: 0; }
+    100% { opacity: 0.9; }
 }
 
 /* Two presses, landing with the two rings */
@@ -488,9 +487,13 @@ canvas.webgl {
 /* The tap hint's word: the spotlight name's look, smaller - an aside over
    the model, not its title - and black like the dot's outline, string and
    all, rather than the catalog's orange */
+/* "double-tap to" over what it does, on two lines */
 .cube-tag--hint {
     font-size: clamp(0.8rem, 1.8vmin, 1rem);
     color: var(--hint-line);
+    white-space: pre;
+    text-align: center;
+    line-height: 1.25;
 }
 
 .tag-string--hint path {
