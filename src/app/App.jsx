@@ -5,6 +5,7 @@ import ProjectBar from '../components/ProjectBar.jsx';
 import ProjectDrawer from '../components/ProjectDrawer.jsx';
 import CatalogTags from '../components/CatalogTags.jsx';
 import TapHint from '../components/TapHint.jsx';
+import HintTag from '../components/HintTag.jsx';
 import Fog from '../components/Fog.jsx';
 import VelocityTags from '../components/VelocityTags.jsx';
 
@@ -32,6 +33,8 @@ export default function App() {
     const drawerRef = useRef(null);
     const fogRef = useRef(null);
     const tapHintRef = useRef(null);
+    const hintStringRef = useRef(null);
+    const hintTagRef = useRef(null);
     const emptyTagRef = useRef(null);
     const stringRef = useRef(null);
     const spotlightTagRef = useRef(null);
@@ -84,9 +87,17 @@ export default function App() {
                     return Math.min(bar.offsetHeight / window.innerHeight, 0.5);
                 },
 
-                showTapHint: (x, y) => {
+                showTapHint: (x, y, zoomed) => {
                     const hint = tapHintRef.current;
                     if (!hint) return;
+
+                    // What the string's tag says: a touch screen taps, and
+                    // zoomed in, the same gesture zooms back out
+                    const tag = hintTagRef.current;
+                    if (tag) {
+                        const gesture = window.matchMedia('(hover: none)').matches ? 'Double-tap' : 'Double-click';
+                        tag.textContent = `${gesture} to zoom ${zoomed ? 'out' : 'in'}`;
+                    }
 
                     hint.style.left = `${x}px`;
                     hint.style.top = `${y}px`;
@@ -107,6 +118,10 @@ export default function App() {
                     spotlightString: stringRef.current,
                     stringPaths: stringRef.current?.querySelectorAll('path') ?? [],
                     knots: [...(stringRef.current?.querySelectorAll('circle') ?? [])],
+                    hintTag: hintTagRef.current,
+                    hintString: hintStringRef.current,
+                    hintStringPaths: hintStringRef.current?.querySelectorAll('path') ?? [],
+                    hintKnots: [...(hintStringRef.current?.querySelectorAll('circle') ?? [])],
                     velocityTags: [...(velocityRef.current?.querySelectorAll('.velocity-tag') ?? [])],
                 },
             },
@@ -160,8 +175,6 @@ export default function App() {
 
             <canvas className="webgl" ref={canvasRef} />
 
-            <TapHint ref={tapHintRef} />
-
             <VelocityTags ref={velocityRef} />
 
             <CatalogTags
@@ -169,6 +182,13 @@ export default function App() {
                 stringRef={stringRef}
                 spotlightTagRef={spotlightTagRef}
             />
+
+            {/*
+              * After the catalog's tags, so their selectors find those first;
+              * the dot after its string, so it sits over the knot
+              */}
+            <HintTag stringRef={hintStringRef} tagRef={hintTagRef} />
+            <TapHint ref={tapHintRef} />
 
             <ProjectBar
                 ref={barRef}

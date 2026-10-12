@@ -394,6 +394,12 @@ canvas.webgl {
     transition: none;
 }
 
+/* The tap hint's words: the spotlight name's look, smaller - an aside over
+   the model, not its title */
+.cube-tag--hint {
+    font-size: clamp(0.8rem, 1.8vmin, 1rem);
+}
+
 /* Quieter: an empty slot is an answer, not a label */
 .cube-tag--empty {
     color: var(--ink-dim);

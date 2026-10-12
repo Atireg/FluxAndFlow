@@ -320,6 +320,17 @@ only.
   readings still show physical speed, so they now read faster than the
   motion looks; and the turn starts about 0.5s after the pile looks still
   rather than 0.3s, since that settle window is in simulated time.
+- **Cyan interlocks, and words on the tap hint.** The contact dots are
+  cyan (the velocity arrows stay graphite). The white touch point that
+  invites a zoom now has "Double-click to zoom in" hanging from it on an
+  orange string like the catalog's ("Double-tap" on a phone, "zoom out"
+  while zoomed in): the same rope, pulled out of `tags.js`'s spotlight code
+  into `createRope`/`drawRope` (the spotlight's behaviour unchanged), but
+  elastic - it drops bunched up, bounces, and each of the dot's taps tugs
+  it again - fading with the dot. Hints now keep out of the lower quarter
+  so the words fit below. Checked in both layouts (the text, the fade, no
+  errors) and the rope's motion run in Node at 60 fps, since software
+  WebGL draws about a frame a second.
 
 Open at end of session (see README, "Next up"): unchanged by this session —
 Safari still to confirm, both projects' real copy and picture credits still

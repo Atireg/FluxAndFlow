@@ -82,7 +82,7 @@ that line.
     src/main.jsx            mounts <App/> (no StrictMode - see the file)
     src/app/App.jsx         the page: React state, the refs, the `ui` bridge
     src/components/         ProjectBar, ProjectDrawer, ProjectImage,
-                            CatalogTags, TapHint, Fog
+                            CatalogTags, HintTag, TapHint, Fog
     src/projects/           the content: one module per project + schema.js
     src/engine/             the canvas - index.js assembles and runs it
     src/styles.css          all of it, unchanged
@@ -99,7 +99,7 @@ Inside `src/engine/`:
     layout.js            the side/stacked breakpoint and the drawer's share
     catalog.js           the grid of pebbles, thumbnails, the idle/spotlight modes
     detail.js            opening and closing a project, the zoom, the tap hint
-    tags.js              the names, their rope and "Still empty...", in screen pixels
+    tags.js              the names, their rope, the tap hint's string, "Still empty...", in screen pixels
     streams.js           the streams themselves
     streams-view.js      wiring them to the pebbles, the camera and the pointer
     pile.js              the physics drop
@@ -292,7 +292,14 @@ defineProject({
   `engine/tags.js`, a screen-space Verlet rope (`ROPE_*`) under gravity and
   a gusty `wind(t)`, drawn into the SVG `CatalogTags` renders. Its feel
   lives in that file's `TAG_*` constants. Its font size follows
-  `--pebble-px` (set by `framing.fitToGrid`), not a fixed rem.
+  `--pebble-px` (set by `framing.fitToGrid`), not a fixed rem. The rope
+  itself is `createRope`/`drawRope`, shared with the tap hint's elastic
+  string and "Double-click to zoom in" (`HINT_*`, `HintTag.jsx`), which
+  times itself to the dot's CSS animation - change `tap-hint-life`/
+  `-press` and `HINT_LIFE`/`HINT_TAPS` together. The hint's tag also
+  carries `.cube-tag--spotlight` (for its look), so it's rendered after
+  `CatalogTags`: `querySelector('.cube-tag--spotlight')` and
+  `.tag-string__knot` still find the catalog's first.
 - **Two cameras, two fields of view** (`camera/rig.js`):
   `CATALOG_FOV = 45`, `DETAIL_FOV = { side: 45, stacked: 30 }`, breakpoint
   860px (`SIDE_PANEL_QUERY` in `engine/layout.js`). A phone gets the longer lens because a wide one

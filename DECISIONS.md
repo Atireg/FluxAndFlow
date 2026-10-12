@@ -492,6 +492,23 @@ point of the cloud clear of the bar and any side drawer - zoomed in too,
 where it invites zooming back out. It skips while the camera moves or a
 phone's drawer is open.
 
+Hanging from the dot's bottom, asked for "similar to the string and text"
+of the catalog: the spotlight's orange string and its orange words,
+"Double-click to zoom in" ("Double-tap" on a touch screen, by `(hover:
+none)`; "zoom out" while zoomed), set by App's `showTapHint` when a hint
+appears. It is the same rope as the spotlight's (`createRope` and
+`drawRope` in `engine/tags.js`, the spotlight's unchanged) with the
+`HINT_*` settings: elastic and slack where the spotlight's is stiff, so it
+starts bunched up at the knot (`HINT_OPEN`), falls open, overshoots to
+about 1.5 times its length and bounces, and each of the dot's two presses
+tugs it again (`HINT_TAPS`, matching `tap-hint-press`). It lives and fades
+with the dot's 2.2s (`HINT_LIFE`, `hintOpacity` copying `tap-hint-life`),
+so the CSS animation and those constants must change together. Hints now
+stay above the lower quarter of the screen (y > -0.5), leaving room for
+the words below. The tags' engine module gets the hint through
+`index.js`, which wraps the `ui` handed to `detail.js` - the dot stays
+React's, the string the engine's.
+
 
 The project view: point cloud
 =============================
@@ -630,8 +647,8 @@ Blender/Rhino simulation. A project's `drop: { count, size, ground }` does it
   give a cluster, shown once the pile looks still and faded with the
   dissolve. Gathered over the settle rather than replaced each step: cannon
   stops reporting a contact once both bodies touching are asleep, and they
-  sleep one by one. Graphite, not orange (one orange means "click me", and
-  the aggregates are drawn in it), each dot a solid centre with a ring
+  sleep one by one. Cyan, asked for (graphite at first; not orange, which
+  means "click me"); the velocity arrows stay graphite. Each dot a solid centre with a ring
   spreading on its own beat; drawn over the rods so a crossing at the back
   isn't lost.
 - **Live velocity** (`drop.velocity`, asked for), the way the project's own

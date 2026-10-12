@@ -155,7 +155,7 @@ Project view
         lagged the landing by ~2.5s, waiting on cannon's sleep), and a
         "Drop again" button in the bar drops it again at the angle it had
         reached; it also drops again by itself 10s after each drop settles
-        (`drop.repeat`), the fallen pile dissolving away first; pulsing dots
+        (`drop.repeat`), the fallen pile dissolving away first; pulsing cyan dots
         mark where the aggregates interlock (`drop.contacts`), and an arrow
         and a live m/s reading show each one's velocity as it falls
         (`drop.velocity`)
@@ -166,7 +166,9 @@ Project view
         a close-up on a phone (Emergent Space: in on the pile in both);
         five pictures in each, Emergent Space's diagrams full width
     [x] Double-click / double-tap zoom, hinted every 5s by a white touch
-        point that scales with the screen
+        point that scales with the screen, "Double-click to zoom in" (or
+        "Double-tap", or "zoom out" when zoomed) hanging from it on a
+        bouncing orange string like the catalog's
     [x] Camera moves only tilt, never roll
 
 Site

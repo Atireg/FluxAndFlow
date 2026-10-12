@@ -37,7 +37,7 @@ import { trailResolution } from './pointcloud/trails.js';
  *   onStatus(message|null)  what to say in the project bar
  *   onFog(boolean)          roll the grey fog in or out
  *   barFraction()           how much viewport height the bar takes, 0..0.5
- *   showTapHint(x, y) / hideTapHint()
+ *   showTapHint(x, y, zoomed) / hideTapHint()
  *   overlays                the DOM nodes the tags are drawn into
  */
 export function createEngine({ canvas, source, ui }) {
@@ -94,6 +94,8 @@ export function createEngine({ canvas, source, ui }) {
 
     const catalog = createCatalog({ scene, grid, state, boot, visited, source });
 
+    const tags = createTags({ screen, rig, state, overlays: ui.overlays });
+
     const detail = createDetail({
         state,
         grid,
@@ -103,10 +105,21 @@ export function createEngine({ canvas, source, ui }) {
         clock,
         visited,
         perlinTexture,
-        ui: { ...ui, resetFlow: () => flow.reset() },
-    });
+        ui: {
+            ...ui,
+            resetFlow: () => flow.reset(),
 
-    const tags = createTags({ screen, rig, state, overlays: ui.overlays });
+            // The hint's dot is React's; the string hanging from it is the tags'
+            showTapHint: (x, y, zoomed) => {
+                ui.showTapHint(x, y, zoomed);
+                tags.showHint(x, y, clock.getElapsedTime());
+            },
+            hideTapHint: () => {
+                ui.hideTapHint();
+                tags.hideHint();
+            },
+        },
+    });
     const streams = createStreamsView({ scene, grid, state, rig });
 
     const raycaster = new THREE.Raycaster();

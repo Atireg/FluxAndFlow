@@ -419,7 +419,8 @@ export function createDetail({
 
             /**
              * A random point of the cloud that's comfortably on screen, clear
-             * of the bar along the top. Zoomed in, most of the cloud is off
+             * of the bar along the top and with room below for the string and
+             * words hanging from it (engine/tags.js). Zoomed in, most of the cloud is off
              * screen, so allow plenty of tries - each is one projected point.
              */
             const positions = points.geometry.attributes.position;
@@ -427,10 +428,11 @@ export function createDetail({
                 tapHintPoint.fromBufferAttribute(positions, Math.floor(Math.random() * positions.count));
                 points.localToWorld(tapHintPoint).project(rig.camera);
 
-                if (tapHintPoint.x > -0.7 && tapHintPoint.x < maxX && tapHintPoint.y > -0.7 && tapHintPoint.y < 0.5) {
+                if (tapHintPoint.x > -0.7 && tapHintPoint.x < maxX && tapHintPoint.y > -0.5 && tapHintPoint.y < 0.5) {
                     ui.showTapHint(
                         (tapHintPoint.x + 1) / 2 * screen.width,
                         (1 - tapHintPoint.y) / 2 * screen.height,
+                        state.detailZoomed,
                     );
                     return;
                 }
