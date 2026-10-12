@@ -1088,8 +1088,8 @@ floating particles behind it, the first thing on opening, with a link to
 landing page is the inline loader's first state (`.loader.is-welcome`):
 the same particle field drifting calmly, the wordmark, one line ("Where
 ideas take shape in motion.") and three short paragraphs, then "Welcome
-to my playground" in the one orange (it's the invitation; first "My
-playground"). Following it swaps the
+to the Flux and Flow playground" in the one orange (it's the invitation;
+first "My playground", then "Welcome to my playground"). Following it swaps the
 words for the progress line and count in the same place under the title,
 and the loader carries on as before - its `MIN_VISIBLE` counted from that
 click, and it leaves only once the catalog is in *and* the visitor has
