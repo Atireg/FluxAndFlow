@@ -49,7 +49,12 @@ and README's "Next up". As of the end of Session 3:
   text is `[PLACEHOLDER ...]`), captions/credits for the pictures, model
   licensing, and checks on real devices (the blind Safari fixes, the
   physics drop, the streams on a phone, the inside view on a phone).
-- **Not started**: per-project URLs, a landing view; README lists the rest.
+- **Landing page**: the first thing on opening is the concept in a short
+  paragraph over the loader's floating particles, with "My playground" -
+  which turns it into the loader and on to the catalog. The back link in a
+  project also reads "My playground".
+- **Not started**: per-project URLs, a way back to the landing page;
+  README lists the rest.
 
 ## Working with the user
 
@@ -86,7 +91,7 @@ React owns the page; the engine owns the canvas. Read "React owns the page;
 the engine owns the canvas" in DECISIONS.md before moving anything across
 that line.
 
-    src/index.html          the inline start-up loader, and #root. Nothing else
+    src/index.html          the landing page + start-up loader (inline), and #root. Nothing else
     src/main.jsx            mounts <App/> (no StrictMode - see the file)
     src/app/App.jsx         the page: React state, the refs, the `ui` bridge
     src/components/         ProjectBar, ProjectDrawer, ProjectImage,
@@ -303,7 +308,7 @@ defineProject({
   parting round each pebble's circle in the scene and drifting towards the
   pointer while the mouse moves or a finger is down (`trackPointer` in
   `streams-view.js`, `PULL_*`); they fade out while a project is open. The loader's own 2D canvas
-  (index.html) only runs until the loader leaves, announced by the
+  (index.html), behind the landing page and then the loader, only runs until the loader leaves, announced by the
   `fluxloader:leaving` event, which also starts the arrival.
 - **The cloud loader re-skins every `Points` in a model** (`pointcloud/
   load.js` gives each the point-cloud shader). Anything else drawn as
@@ -387,8 +392,10 @@ combination of layout × drawer × view. Keep it proportionate (see
 
 Testing tips learnt the hard way:
 
-- **Wait for `#loader` to be removed** before clicking - at least 5s
-  (`MIN_VISIBLE`) plus its 2.6s exit.
+- **Click `#loader-enter` ("My playground"), then wait for `#loader` to
+  be removed** before clicking anything else - the landing page waits for
+  that click, then at least 5s (`MIN_VISIBLE`, counted from the click) plus
+  its 2.6s exit. Without the click the loader never leaves.
 - **Measure the page, not the canvas, for anything about colour.** Reading
   the WebGL canvas and unpremultiplying it recovers the INK's colour however
   faintly it is laid down - the pebbles sit at about 0.27 alpha over paper,

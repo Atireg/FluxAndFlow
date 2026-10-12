@@ -264,6 +264,86 @@ canvas.webgl {
     opacity: 0;
 }
 
+/* The landing page's words and the loader's progress share one place under
+   the title: the welcome first, then the line and count once "My
+   playground" is followed */
+.loader__stage {
+    display: grid;
+    justify-items: center;
+}
+
+.loader__welcome,
+.loader__progress {
+    grid-area: 1 / 1;
+    display: grid;
+    justify-items: center;
+    gap: 0.9rem;
+    transition: opacity 0.8s ease, visibility 0s;
+}
+
+.loader__progress {
+    align-self: start;
+}
+
+.loader.is-welcome .loader__progress,
+.loader:not(.is-welcome) .loader__welcome {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.8s ease, visibility 0s linear 0.8s;
+}
+
+.loader__welcome {
+    gap: 1.1rem;
+    max-width: min(34rem, 86vw);
+    padding-top: 0.4rem;
+}
+
+.loader__tagline {
+    margin: 0;
+    font-size: 0.75rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--loader-dim, var(--ink-dim));
+    text-shadow: 0 0 0.8rem var(--loader-bg, var(--bg)), 0 0 0.3rem var(--loader-bg, var(--bg));
+}
+
+.loader__about {
+    margin: 0;
+    font-size: clamp(0.95rem, 1.6vw, 1.1rem);
+    font-weight: 300;
+    line-height: 1.6;
+    color: var(--loader-ink, var(--ink));
+    /* lifts it off the streams, like the title */
+    text-shadow: 0 0 1rem var(--loader-bg, var(--bg)), 0 0 0.35rem var(--loader-bg, var(--bg)), 0 0 0.15rem var(--loader-bg, var(--bg));
+}
+
+.loader__enter {
+    margin-top: 0.4rem;
+    padding: 0.55rem 0;
+    border: none;
+    border-bottom: 1px solid currentColor;
+    background: none;
+    cursor: pointer;
+
+    font: inherit;
+    font-size: 0.8rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--warm-text);
+    text-shadow: 0 0 0.8rem var(--loader-bg, var(--bg));
+    transition: color 0.2s ease;
+}
+
+.loader__enter span {
+    display: inline-block;
+    transition: transform 0.2s ease;
+}
+
+.loader__enter:hover span,
+.loader__enter:focus-visible span {
+    transform: translateX(0.3rem);
+}
+
 .loader__title {
     margin: 0;
     font-size: clamp(1.75rem, 6vw, 3rem);

@@ -54,6 +54,7 @@ Page, colour and drawer
 - Asset paths resolve against the Vite base URL
 
 Loading
+- The landing page, then the loader, on one field of particles
 - The start-up loader is inline and waits for real progress
 - `?cloudtest`, and why clouds load on click
 
@@ -817,7 +818,7 @@ Blender/Rhino simulation. A project's `drop: { count, size, ground }` does it
   turns sooner. The bodies' own physics is unchanged, so the interlock rate
   is too. Reopening calls `restart()` for a new drop.
 - **"Drop again"** (asked for): a small button in the project bar, on the
-  same line as "All projects" and in its style, shown for any project with
+  same line as "My playground" (the back link) and in its style, shown for any project with
   a `drop` once its model has loaded - so it's Emergent Space today, with no
   per-project code. On its own line it would make the bar taller, and on a
   phone the bar's height is reserved out of the model's framing, so the
@@ -1067,6 +1068,32 @@ too.
 
 Loading
 =======
+
+
+The landing page, then the loader, on one field of particles
+------------------------------------------------------------
+
+Asked for: a landing page explaining the concept in a short paragraph, the
+floating particles behind it, the first thing on opening, with a link to
+"my playground" - and the loader next, on the way to the projects. So the
+landing page is the inline loader's first state (`.loader.is-welcome`):
+the same particle field drifting calmly, the wordmark, one line ("Where
+ideas take shape in motion.") and a paragraph drawn from the user's notes
+on self-organised criticality and the site as a playground, then "My
+playground" in the one orange (it's the invitation). Following it swaps the
+words for the progress line and count in the same place under the title,
+and the loader carries on as before - its `MIN_VISIBLE` counted from that
+click, and it leaves only once the catalog is in *and* the visitor has
+come through (`scheduleExit`). The catalog loads underneath while the
+welcome is read, so the count usually runs straight to 100%.
+
+Inline rather than a React page for the reason the loader is: it's on
+screen before the bundle arrives, and the particles are already there for
+the loader to carry on with. The project bar's back link was renamed from
+"All projects" to "My playground" to match. The 30s cap still counts from
+opening: by then the way in leads through in `MIN_VISIBLE` whatever the
+catalog is doing. The page's `<meta name="description">` is still the old
+one-liner - the user's to write.
 
 
 The start-up loader is inline and waits for real progress

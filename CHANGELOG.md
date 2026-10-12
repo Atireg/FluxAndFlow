@@ -193,6 +193,12 @@ pebbles back along the camera's line to half their size (straight down
 clumped them in the middle); the spotlight stays on the chosen kind, and a
 click on a sunk pebble brings its kind forward.
 
+**Landing page.** The first thing on opening: the concept in a short
+paragraph over the loader's floating particles, and "My playground", which
+turns it into the loader on the way to the catalog (its minimum time now
+counted from that click). The back link in a project reads "My playground"
+instead of "All projects".
+
 **Tap hint.** "double-click" ("double-tap" on touch) hangs from the dot on
 a black, bouncing string - the catalog's rope, shared (`createRope`).
 

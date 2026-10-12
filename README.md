@@ -72,8 +72,11 @@ Next up (waiting on content or a check from the user)
         among them (`INSIDE_*` in src/engine/detail.js)
 
 Landing/welcome view
-    [ ] Graphics (me as a figure?) + welcome text explaning the webside's concept
-    [ ] How does that transform into the cubes/catalog view - maybe just a semi-transparent surface with the text and the figure on top of the moving cubes?
+    [x] Welcome text explaining the website's concept, over the loader's
+        floating particles, first thing on opening; "My playground" leads
+        on to the loader and the catalog (src/index.html)
+    [ ] Graphics (me as a figure?) on the landing page
+    [ ] A way back to the landing page from the catalog
 
 Navigation and general layout
     [ ] Logo
@@ -186,6 +189,9 @@ Project view
     [x] Camera moves only tilt, never roll
 
 Site
+    [x] A landing page: the concept in a short paragraph over the floating
+        particles, and "My playground" on to the projects (the back link in
+        a project reads "My playground" too)
     [x] React structure: the page in components (`src/app/`,
         `src/components/`), the canvas in an engine of focused modules
         (`src/engine/`), one module per project behind one schema

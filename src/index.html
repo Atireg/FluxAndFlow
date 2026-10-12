@@ -17,20 +17,38 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <!-- Start-up loader: a field of flowing particles - the flux - that picks
-       up strength as the catalog loads, and calms as the loader leaves -
-       handing over to the same streams drawn in the scene, among the
-       pebbles (engine/streams.js). Inline, and ahead of
-       everything else, so it's on screen
-       before React has even downloaded. The engine reports
-       progress through window.fluxLoader; see DECISIONS.md. -->
-  <div class="loader" id="loader" role="progressbar" aria-label="Loading Flux and Flow"
-       aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+  <!-- The landing page, then the start-up loader, on one field of flowing
+       particles - the flux. First the welcome: what the site is, over the
+       particles drifting calmly, and the way in ("My playground"); the
+       catalog loads underneath meanwhile. Following that link turns it into
+       the loader, whose flow picks up strength with the progress and calms
+       as it leaves - handing over to the same streams drawn in the scene,
+       among the pebbles (engine/streams.js). Inline, and ahead of everything
+       else, so it's on screen before React has even downloaded. The engine
+       reports progress through window.fluxLoader; see DECISIONS.md. -->
+  <div class="loader is-welcome" id="loader" role="region" aria-label="Flux and Flow">
     <canvas class="loader__field" id="loader-field" aria-hidden="true"></canvas>
     <div class="loader__mark">
-      <p class="loader__title">Flux <span class="loader__and">and</span> Flow</p>
-      <div class="loader__line" aria-hidden="true"><span class="loader__fill" id="loader-fill"></span></div>
-      <p class="loader__count" id="loader-count" aria-hidden="true">0%</p>
+      <h1 class="loader__title">Flux <span class="loader__and">and</span> Flow</h1>
+      <div class="loader__stage">
+        <div class="loader__welcome" id="loader-welcome">
+          <p class="loader__tagline">Where ideas take shape in motion.</p>
+          <p class="loader__about">
+            Some systems organise themselves to the edge of change, where one
+            small nudge can set off something large and unforeseen. My work
+            moves like that &ndash; between architecture, programming, digital
+            fabrication and interactive design. This is its playground:
+            research, teaching and work out in the world, added as it happens.
+            It may never be finished. It lives between flux and flow.
+          </p>
+          <button class="loader__enter" id="loader-enter" type="button">My playground <span aria-hidden="true">&rarr;</span></button>
+        </div>
+        <div class="loader__progress">
+          <div class="loader__line" id="loader-line" role="progressbar" aria-label="Loading the playground"
+               aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span class="loader__fill" id="loader-fill"></span></div>
+          <p class="loader__count" id="loader-count" aria-hidden="true">0%</p>
+        </div>
+      </div>
     </div>
   </div>
   <script>
@@ -39,12 +57,15 @@
       var canvas = document.getElementById('loader-field');
       var fill = document.getElementById('loader-fill');
       var count = document.getElementById('loader-count');
+      var line = document.getElementById('loader-line');
+      var enter = document.getElementById('loader-enter');
       var ctx = canvas.getContext('2d');
       var still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-      // ms - the loader is an opening, not just a wait: it stays this long
-      // however fast the catalog loads, and the bar paces itself to fill over
-      // it rather than racing to 100% and sitting there
+      // ms - the loader is an opening, not just a wait: from "My playground"
+      // it stays this long however fast the catalog loaded (usually while
+      // the welcome was being read), and the bar paces itself to fill over it
+      // rather than racing to 100% and sitting there
       var MIN_VISIBLE = 5000;
       // The exit: the loader fades onto the same paper the site sits on while
       // its streams calm down to the pace of the scene's own, which carry on
@@ -81,7 +102,8 @@
         if (still) drawStillField();
       }
 
-      var startedAt = performance.now();
+      var startedAt = null; // when "My playground" was followed - null on the welcome
+      var loaded = false; // the catalog has reported everything in
       var target = 0; // reported progress, 0..1
       var shown = 0; // eased towards target, so the bar flows rather than jumps
       var lastFrame = null;
@@ -137,7 +159,8 @@
         var dt = lastFrame === null ? 16 : Math.min(now - lastFrame, 100);
         lastFrame = now;
 
-        var paced = Math.min(target, (now - startedAt) / MIN_VISIBLE);
+        // Nothing to show on the welcome; from the way in, paced over MIN_VISIBLE
+        var paced = startedAt === null ? 0 : Math.min(target, (now - startedAt) / MIN_VISIBLE);
         shown += (paced - shown) * (1 - Math.exp(-dt / 180));
 
         if (!still) drawField(now, dt / 16.7);
@@ -145,7 +168,7 @@
         var percent = Math.round(shown * 100);
         fill.style.transform = 'scaleX(' + shown + ')';
         count.textContent = percent + '%';
-        root.setAttribute('aria-valuenow', percent);
+        line.setAttribute('aria-valuenow', percent);
 
         if (finishAt !== null && leavingSince === null && now >= finishAt && shown > 0.97) {
           leavingSince = now;
@@ -228,23 +251,41 @@
         }
       }
 
+      // The exit may start once the catalog is in AND the visitor has
+      // followed the way in - at least MIN_VISIBLE after that
+      function scheduleExit() {
+        if (finishAt !== null || !loaded || startedAt === null) return;
+        finishAt = Math.max(performance.now(), startedAt + MIN_VISIBLE);
+      }
+
       window.fluxLoader = {
         progress: function (fraction) {
           target = Math.max(target, Math.min(fraction, 1));
         },
         finish: function () {
-          if (finishAt !== null) return;
+          loaded = true;
           target = 1;
-          finishAt = Math.max(performance.now(), startedAt + MIN_VISIBLE);
+          scheduleExit();
         },
       };
+
+      // "My playground": the welcome makes way for the loader
+      enter.addEventListener('click', function () {
+        if (startedAt !== null) return;
+        startedAt = performance.now();
+        root.classList.remove('is-welcome');
+        root.setAttribute('aria-busy', 'true');
+        scheduleExit();
+      });
 
       resize();
       window.addEventListener('resize', resize);
 
       window.requestAnimationFrame(step);
 
-      // Whatever happens to the rest of the page, never trap the visitor here
+      // Whatever happens to the rest of the page, never trap the visitor in
+      // the loader: by 30s after opening, the way in leads through in
+      // MIN_VISIBLE however the catalog is doing
       setTimeout(function () { window.fluxLoader.finish(); }, 30000);
     })();
   </script>

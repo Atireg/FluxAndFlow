@@ -30,7 +30,7 @@ const ProjectBar = forwardRef(function ProjectBar({ project, status, onClose, on
                     onClose();
                 }}
             >
-                <span className="bar__back-arrow" aria-hidden="true">&larr;</span> All projects
+                <span className="bar__back-arrow" aria-hidden="true">&larr;</span> My playground
             </button>
 
             {canReplay && (
