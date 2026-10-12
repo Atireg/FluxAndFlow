@@ -180,8 +180,8 @@ in DECISIONS.md.
 - Every 10s the camera moves in by itself and back out (`autoZoom`),
   alternately on a point of the pavilion and from inside at eye height
   among the columns, looking along the clearest line between them
-  (`eyeLevel`; a wider lens, a closer near plane and a cap on point size
-  for it). The first comes 3.5s after the gather, not 10s. The camera's
+  (`eyeLevel`; a wider lens and a closer near plane for it - a cap on
+  point size there was taken out again). The first comes 3.5s after the gather, not 10s. The camera's
   nod is slower (22s).
 - A double-click holds the pavilion still until the next
   (`doubleClick: 'hold'`).

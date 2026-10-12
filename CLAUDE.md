@@ -341,8 +341,8 @@ defineProject({
   settle and slows to a stop before a new drop (`pile.turnStop`), and a
   held model's subtracts the time held (`model.userData.held`). Standing
   inside (`eyeLevel`) lowers the camera's near plane (`rig.baseNear` is
-  the usual one), widens the lens, and caps how big a point by the camera
-  draws (`vertex.glsl`).
+  the usual one) and widens the lens; points by the camera draw at their
+  world size, uncapped (asked for).
 - **Two cameras, two fields of view** (`camera/rig.js`):
   `CATALOG_FOV = 45`, `DETAIL_FOV = { side: 45, stacked: 30 }`, breakpoint
   860px (`SIDE_PANEL_QUERY` in `engine/layout.js`). A phone gets the longer lens because a wide one

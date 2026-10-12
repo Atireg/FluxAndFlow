@@ -717,9 +717,7 @@ pavilion is 1.88 units tall in the scene, so about a person's eyes if its
 columns are ~4m. Three things had to change for it, measured in a
 throwaway build: the camera's near plane (1 unit) clipped ~6,000 points
 of the nearest columns, so it drops to `INSIDE_NEAR` (0.05) while inside
-and back once out (`rig.baseNear`); world-sized points 0.6 units away drew
-as blots, so `gl_PointSize` is capped at `uPointScale * 0.5` (only points
-within about a unit reach it, so every other view is unchanged); and the
+and back once out (`rig.baseNear`); and the
 lens widens to `INSIDE_FOV` (65°), more on a tall phone so it's at least
 `INSIDE_WIDTH` (55°) across, up to 90° - at 30° a phone saw one column.
 The first try looked a random way and straight into a column.
@@ -1360,6 +1358,9 @@ Project view
   glow in orange, blue, then dark grey; also stopping after the first zoom,
   and skipping while zoomed.
 - **A single dark-teal ink** for the points.
+- **Capping a point's size by the camera** (`gl_PointSize` no bigger than
+  `uPointScale * 0.5`), for standing inside Rock Print, where world-sized
+  points 0.6 units away draw large: the user wanted them back as they were.
 
 Site
 - **A dark site in cyan** with a `Sky` dome; bridging a paper loader into it
