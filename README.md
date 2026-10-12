@@ -18,7 +18,8 @@ optional `view` sets the camera angle the project opens on (and, with
 out of a scattered cloud each time it opens; `drop` drops copies of a
 rod-built mesh onto a surface with physics; `doubleClick` says what a
 double-click does (zoom, hold the model still, or nothing); `autoZoom` and
-`eyeLevel` move the camera in by itself; `images` fills the drawer's
+`eyeLevel` move the camera in by itself; `category` says which kind of
+project it is; `images` fills the drawer's
 picture frames. The fields are listed in CLAUDE.md and in
 `src/projects/schema.js`, which fills the defaults and rejects a
 half-declared project rather than letting it render wrong. There is no
@@ -81,6 +82,9 @@ Navigation and general layout
     [ ] Per-project URLs, so a single project can be linked to directly
 
 Catalog view
+    [ ] Real teaching and real-world projects: the empty slots stand in for
+        them (`EMPTY_SLOT_CATEGORIES` in src/projects/schema.js) - drop a
+        slot from that map once a project fills it
     [ ] The element of surprise or discovery - when hovered on a cube add little 3D objects representing each project (e.g. a rock, an aggregate, a spider...)
         (each pebble shows its object all the time instead - Emergent
         Space's holds its aggregate (`thumbSize`), the rest the rock - and
@@ -139,6 +143,9 @@ Catalog
         the project's own as they appear; opened projects' pebbles stay
         darker (remembered)
     [x] An empty slot's click answers "Still empty..."
+    [x] Three kinds of project - research, teaching, the real world - each
+        tagged in its bar; a filter in the catalog brings one kind forward
+        and pushes the others back to half their size
     [x] The grid arrives slowly, a pebble at a time, surfacing out of the
         paper as the loader clears (and on the way back from a project),
         then what's inside them one by one

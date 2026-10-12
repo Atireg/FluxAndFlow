@@ -18,6 +18,7 @@
  *   context        |  accurately - the page implies authorship
  *   body          /   array of paragraph strings
  *   credits       collaborators, and any research group to credit
+ *   category      'research', 'teaching' or 'real-world' - see CATEGORIES
  *   thumbModel    the small model shown in the catalog pebble
  *   thumbSize     fit thumbModel to this longest side (the pebble is 4.4
  *                 across at size 1); without it the model is drawn as-is
@@ -46,6 +47,31 @@ export const SLOT_COUNT = 10;
 // The thumbnail for a slot with no project yet - every pebble gets something
 // inside it, so the grid reads as full rather than as one find among blanks
 export const EMPTY_SLOT_THUMB = 'models/rock.gltf';
+
+/**
+ * The kinds of project, in the order the catalog's filter lists them. Every
+ * project is one (`category`), shown as a tag in its bar; the catalog can
+ * bring one kind forward and sink the rest.
+ */
+export const CATEGORIES = [
+    { id: 'research', label: 'Research' },
+    { id: 'teaching', label: 'Teaching' },
+    { id: 'real-world', label: 'The real world' },
+];
+
+export function categoryLabel(id) {
+    return CATEGORIES.find((category) => category.id === id)?.label ?? '';
+}
+
+/**
+ * Which kind each empty slot stands in for until a project fills it, so the
+ * filter has something to show for every kind. Mixed through the grid rather
+ * than in blocks, so a kind brought forward isn't just a row.
+ */
+export const EMPTY_SLOT_CATEGORIES = {
+    2: 'teaching', 3: 'real-world', 4: 'real-world', 5: 'teaching',
+    6: 'teaching', 7: 'real-world', 8: 'real-world', 9: 'teaching',
+};
 
 const DEFAULT_IMAGE_RATIO = '3 / 2';
 
@@ -188,6 +214,10 @@ export function defineProject(project) {
         throw new Error(`Project "${id}": needs a detailModel, the .glb opened on click`);
     }
 
+    if (!CATEGORIES.some((category) => category.id === project.category)) {
+        throw new Error(`Project "${id}": category should be one of ${CATEGORIES.map((c) => `'${c.id}'`).join(', ')}`);
+    }
+
     const body = project.body ?? [];
 
     if (!Array.isArray(body)) {
@@ -217,6 +247,7 @@ export function defineProject(project) {
         detailModel: project.detailModel,
 
         view: normaliseView(project.view, { id }),
+        category: project.category,
         gather: Boolean(project.gather),
         points: project.points,
         doubleClick: normaliseDoubleClick(project),

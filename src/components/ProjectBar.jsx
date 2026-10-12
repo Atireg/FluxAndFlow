@@ -1,4 +1,5 @@
 import { forwardRef } from 'react';
+import { categoryLabel } from '../projects/index.js';
 
 /**
  * Always on screen while a project is open: just enough to say what you are
@@ -45,7 +46,15 @@ const ProjectBar = forwardRef(function ProjectBar({ project, status, onClose, on
                 </button>
             )}
 
-            <h1 className="bar__title">{project?.title ?? ''}</h1>
+            {/*
+              * Its kind as a tag after the name, on the same line - a line of
+              * its own would make the bar taller, and on a narrow screen its
+              * height is taken out of the model's framing
+              */}
+            <h1 className="bar__title">
+                {project?.title ?? ''}
+                {project && <>{' '}<span className="bar__category">{categoryLabel(project.category)}</span></>}
+            </h1>
             <p className="bar__status" role="status">{status ?? ''}</p>
         </header>
     );

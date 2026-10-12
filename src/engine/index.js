@@ -11,6 +11,7 @@ import { createTags } from './tags.js';
 import { createStreamsView } from './streams-view.js';
 import { createFlow } from './pebbles/flow.js';
 import { applyArrival, ARRIVAL_AFTER_LOADER, startArrival } from './pebbles/arrival.js';
+import { applyFocus, inFocus, setFocus } from './pebbles/focus.js';
 import { initSpotlightCycle, updateSpotlightCycle } from './pebbles/spotlight.js';
 import { placeAtRest } from './pebbles/wander.js';
 import { paintGlow } from './pebbles/materials.js';
@@ -38,6 +39,7 @@ import { trailResolution } from './pointcloud/trails.js';
  *   onFog(boolean)          roll the grey fog in or out
  *   barFraction()           how much viewport height the bar takes, 0..0.5
  *   showTapHint(x, y) / hideTapHint()
+ *   onFocus(category)       the filter changed from the canvas (a sunk pebble clicked)
  *   overlays                the DOM nodes the tags are drawn into
  */
 export function createEngine({ canvas, source, ui }) {
@@ -70,7 +72,7 @@ export function createEngine({ canvas, source, ui }) {
     const boot = createBoot();
 
     // The grid, shared by reference: the catalog fills it, the camera frames it
-    const grid = { pebbles: [], shape: { cols: 1, rows: source.slotCount } };
+    const grid = { pebbles: [], shape: { cols: 1, rows: source.slotCount }, viewHeight: 20 };
 
     const perlinAsset = boot.asset();
     const perlinTexture = textureLoader.load(
@@ -174,8 +176,10 @@ export function createEngine({ canvas, source, ui }) {
             flow.update(frameTime);
             grid.pebbles.forEach(flow.apply);
             grid.pebbles.forEach((pebble) => applyArrival(pebble, state.arrivalStartedAt, elapsedTime));
+            grid.pebbles.forEach((pebble) => applyFocus(pebble, grid.viewHeight, elapsedTime));
         } else if (state.view === 'dropping') {
             grid.pebbles.forEach((pebble) => updateDroppingPebble(pebble, state, elapsedTime));
+            grid.pebbles.forEach((pebble) => applyFocus(pebble, grid.viewHeight, elapsedTime));
             updateDissolve({ state, renderer: rig.renderer, camera: rig.camera, elapsedTime });
         } else if (state.view === 'returning') {
             // Back home before they fade in, wherever the drop left them -
@@ -189,12 +193,15 @@ export function createEngine({ canvas, source, ui }) {
             flow.update(frameTime);
             grid.pebbles.forEach(flow.apply);
             grid.pebbles.forEach((pebble) => applyArrival(pebble, state.arrivalStartedAt, elapsedTime));
+            grid.pebbles.forEach((pebble) => applyFocus(pebble, grid.viewHeight, elapsedTime));
         } else {
             // The camera starts moving in before the drop has finished - the
             // rest of the fall plays out under openProject's fade
             if (dropInProgress(state, elapsedTime)) {
                 grid.pebbles.forEach((pebble) => {
-                    if (pebble !== state.selected) placeDroppingPebble(pebble, state, elapsedTime);
+                    if (pebble === state.selected) return;
+                    placeDroppingPebble(pebble, state, elapsedTime);
+                    applyFocus(pebble, grid.viewHeight, elapsedTime);
                 });
             }
             updateDissolve({ state, renderer: rig.renderer, camera: rig.camera, elapsedTime });
@@ -368,6 +375,20 @@ export function createEngine({ canvas, source, ui }) {
         const pebble = pebbleAt(event);
         if (!pebble) return;
 
+        /**
+         * A pebble sunk by the filter brings its own kind forward rather than
+         * opening: a project opens on its pebble, which must be up in its
+         * place for that
+         */
+        if (!inFocus(state, pebble)) {
+            setFocus(state, grid.pebbles, pebble.userData.category, clock.getElapsedTime());
+            ui.onFocus?.(pebble.userData.category);
+            return;
+        }
+
+        // Up in its place, even if it was still rising
+        pebble.userData.focus = null;
+
         if (pebble.userData.project) {
             detail.startDrop(pebble);
             return;
@@ -422,6 +443,14 @@ export function createEngine({ canvas, source, ui }) {
 
         closeProject() {
             detail.closeProject();
+        },
+
+        /**
+         * The catalog's filter: bring one kind of project forward (a
+         * pebble's `categoryOf`) and sink the rest, or null for all
+         */
+        setFocus(category) {
+            setFocus(state, grid.pebbles, category, clock.getElapsedTime());
         },
 
         // A project with a `drop`: let the pile fall again

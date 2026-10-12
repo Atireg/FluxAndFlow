@@ -24,6 +24,7 @@ The catalog (the grid of pebbles - "cubes" in the code)
 - The grid arrives, a pebble at a time
 - Clicking a project knocks the rest of the grid off the screen
 - A pebble's colour drifts with its shape
+- Three kinds of project, and bringing one forward
 
 The project view: camera
 - The detail camera looks along the catalog's screen-up; every move slerps
@@ -468,6 +469,39 @@ That last figure is also the useful one for tuning: a pebble already spans
 about 43 counts of lightness from its lit face to its silhouette, so `TONE`
 at 0.20 moves its densest parts by around 22 counts over a wave. Judge it by
 eye on the live site; `TONE` and `AMOUNT` are the two dials.
+
+
+Three kinds of project, and bringing one forward
+------------------------------------------------
+
+Asked for: projects divided into research, teaching and "the real world",
+each tagged, and a way in the catalog to highlight one kind "by pulling the
+rest of the pebbles significantly downwards or backwards ... to make them
+look smaller". Every project declares a `category` (`CATEGORIES` in
+`src/projects/schema.js`; required, so a new project can't forget it), shown
+as a small tag after its name in the bar - on the title's own line, since a
+line of its own would make the bar taller, and on a phone that height is
+taken out of the model's framing. Until real projects fill them, the empty
+slots stand in for the other two kinds (`EMPTY_SLOT_CATEGORIES`, four each,
+mixed through the grid so a kind brought forward isn't simply a row). The
+engine is handed `categoryOf(slot)` and only ever compares the strings.
+
+The filter (`CategoryFilter`, top left in the catalog, where the bar sits in
+a project) is All / Research / Teaching / The real world; choosing the one
+already chosen clears it. The pebbles of the other kinds are pushed back
+along the line from the overhead camera until they look `FOCUS_SCALE` (half)
+their size, over `FOCUS_TIME` (`pebbles/focus.js`, laid over every mode
+after the arrival, like it; the depth comes from the camera's height,
+`grid.viewHeight`, so it's the same on every screen). Backwards, not
+straight down: straight down, the perspective drew every sunk pebble in
+towards the middle, into a clump behind the chosen ones; along the camera's
+line each stays where it was, only smaller. No colour change - one orange
+means "click me". While a kind is chosen the spotlight only lands on it.
+
+A click on a sunk pebble brings its kind forward rather than opening it: a
+project opens on its own pebble, which has to be up in its place for the
+dissolve and the framing.
+
 
 
 The project view: camera

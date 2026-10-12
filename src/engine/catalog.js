@@ -149,6 +149,9 @@ export function createCatalog({ scene, grid, state, boot, visited, source }) {
                 // the slot's number. Read once here, so the per-frame tag
                 // update never touches a project.
                 pebble.userData.label = source.label({ project: pebble.userData.project, slot });
+                // Its kind, for the filter to compare - the engine never
+                // knows what the kinds are
+                pebble.userData.category = source.categoryOf?.(slot) ?? null;
 
                 // How this pebble drifts while idle - see wanderOffset(). Its
                 // position is set every frame from this plus the slot, once

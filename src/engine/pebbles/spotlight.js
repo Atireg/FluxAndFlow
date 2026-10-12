@@ -1,4 +1,5 @@
 import { randomBetween } from '../constants.js';
+import { inFocus } from './focus.js';
 import { paintGlow } from './materials.js';
 import { wanderOffset } from './wander.js';
 
@@ -101,7 +102,10 @@ export function poseSpotlightPebble(pebble, state, elapsedTime) {
  * cursor, and not the one that just finished, so it visibly moves on rather
  * than occasionally repeating itself.
  */
-function pickSpotlight(state, pebbles) {
+function pickSpotlight(state, all) {
+    // With one kind brought forward, only among those (pebbles/focus.js)
+    const focused = all.filter((pebble) => inFocus(state, pebble));
+    const pebbles = focused.length ? focused : all;
     const withoutRepeat = pebbles.filter(
         (pebble) => pebble !== state.hovered && pebble !== state.spotlight.last
     );

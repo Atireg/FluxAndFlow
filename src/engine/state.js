@@ -19,6 +19,10 @@ export function createState() {
 
         drawerOpen: false,
 
+        // The kind of project the catalog has brought forward, or null for
+        // all of them - see pebbles/focus.js
+        focus: null,
+
         // Whether a double-click/tap has zoomed in on the model. Any
         // re-framing (drawer, resize, a new project) clears it.
         detailZoomed: false,

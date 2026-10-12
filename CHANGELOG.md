@@ -185,6 +185,14 @@ in DECISIONS.md.
 - A double-click holds the pavilion still until the next
   (`doubleClick: 'hold'`).
 
+**Categories.** Projects are research, teaching or the real world
+(`category`, required; a tag after the name in the bar). Both projects are
+research; the empty slots stand in for four of each other kind. A filter
+top left in the catalog brings one kind forward and pushes the other
+pebbles back along the camera's line to half their size (straight down
+clumped them in the middle); the spotlight stays on the chosen kind, and a
+click on a sunk pebble brings its kind forward.
+
 **Tap hint.** "double-click" ("double-tap" on touch) hangs from the dot on
 a black, bouncing string - the catalog's rope, shared (`createRope`).
 

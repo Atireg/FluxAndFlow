@@ -187,6 +187,9 @@ export function createFraming({ rig, screen, state, grid, ui }) {
             // Clear the highest point a pebble reaches while it bobs
             const pebbleTop = CUBE_SIZE / 2 + 3;
             const height = Math.max(distanceForDepth, distanceForWidth) + pebbleTop;
+            // How high the camera sits over the grid, for the filter's sink
+            // (pebbles/focus.js) to make a pebble look a set share smaller
+            grid.viewHeight = height;
 
             // How big a pebble looks, for the words on and under it to scale
             // with (see .cube-tag in styles.css) - so a wide screen's bigger

@@ -25,6 +25,10 @@ and README's "Next up". As of the end of Session 3:
 
 - **State**: everything built is live - `git log origin/main..` shows
   anything not yet merged.
+- **Categories**: every project is research, teaching or the real world
+  (`category`, a tag in its bar); a filter top left in the catalog brings
+  one kind forward and pushes the rest back to half size. Both projects are
+  research; the empty slots stand in for 4 teaching, 4 real world.
 - **Catalog**: ten pebbles shaded in graphite, each a random size on every
   visit, slowly changing shape and warmth, pushing apart where they touch;
   one at a time glows orange with its name hanging on a string in the
@@ -86,7 +90,7 @@ that line.
     src/main.jsx            mounts <App/> (no StrictMode - see the file)
     src/app/App.jsx         the page: React state, the refs, the `ui` bridge
     src/components/         ProjectBar, ProjectDrawer, ProjectImage,
-                            CatalogTags, HintTag, TapHint, Fog
+                            CatalogTags, CategoryFilter, HintTag, TapHint, Fog
     src/projects/           the content: one module per project + schema.js
     src/engine/             the canvas - index.js assembles and runs it
     src/styles.css          all of it, unchanged
@@ -110,7 +114,8 @@ Inside `src/engine/`:
     pile.js              the physics drop
     smoke.js             parked, not in the scene - see the file
     pebbles/             geometry, materials, wander, flow, arrival, spotlight,
-                         dissolve, drop, gradient (the face's drifting warmth)
+                         dissolve, drop, gradient (the face's drifting warmth),
+                         focus (the filter's sinking of the other kinds)
     pointcloud/          load, mesh sampling, gather, trails
     camera/              rig (cameras, controls, renderer), framing (where it goes),
                          inside (a spot at eye level inside a model)
@@ -149,6 +154,7 @@ defineProject({
     id: 'rock-print',
     slot: 0,                                    // fixed grid position, 0-indexed
     title: 'Rock Print Pavilion',
+    category: 'research',                       // 'research', 'teaching' or 'real-world' - required
     year: '', role: '', context: '',             // shown in the drawer if non-empty
     body: [],                                     // array of paragraph strings
     credits: '',
@@ -179,6 +185,10 @@ defineProject({
   (slot count, what sits in each slot, the empty thumbnail, how to label a
   pebble). Keep it that way - the engine shouldn't know this portfolio's
   content.
+- **`category`** tags the project (after its name in the bar) and is what
+  the catalog's filter brings forward. Empty slots stand in for the other
+  kinds (`EMPTY_SLOT_CATEGORIES` in `schema.js`) - take a slot out of that
+  map once a real project fills it.
 - **`title`** is also the name that hangs under the glowing pebble, so keep
   it short enough for a phone - "Rock Print Pavilion" is about the longest.
 - **`thumbSize`** puts the project's own model in its pebble instead of the
@@ -243,6 +253,10 @@ defineProject({
     the same at 5 fps as at 120: the pointer's flow, which the pebbles'
     bumps ride on (`bumpPebbles`, `FLOW_STEP`), and the tag's rope
     (`TAG_STEP`).
+  - The filter's sink (`applyFocus`, `pebbles/focus.js`) is laid over
+    every mode after the arrival, pushing the other kinds back along the
+    camera's line; a click on a sunk pebble brings its kind forward
+    (`ui.onFocus` tells React) instead of opening it.
   - The arrival (as the loader clears, and back from a project) is laid
     over every mode by `applyArrival`, multiplying opacity and scale -
     the content's too - after the mode has set them. Whatever a mode

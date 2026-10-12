@@ -513,6 +513,68 @@ canvas.webgl {
     transform: rotate(180deg);
 }
 
+/* The catalog's filter, where the bar sits in a project: the bar's small
+   capitals, the chosen kind in ink and underlined, the rest dim. Clear of
+   the canvas's clicks; gone while a project is open */
+.filter {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 2; /* above the canvas (1) by z-index, not page order */
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.1rem;
+    max-width: 100vw;
+    padding: clamp(1.25rem, 3vw, 2.5rem);
+    pointer-events: none;
+
+    transition: opacity 0.5s ease, visibility 0s;
+}
+
+.filter.is-hidden {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0s linear 0.3s;
+}
+
+.filter__choice {
+    padding: 0.4rem 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+    pointer-events: auto;
+
+    font: inherit;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    text-decoration: underline transparent;
+    text-underline-offset: 0.35em;
+    transition: color 0.2s ease, text-decoration-color 0.2s ease;
+}
+
+.filter__choice:hover,
+.filter__choice:focus-visible {
+    color: var(--accent);
+}
+
+.filter__choice.is-chosen {
+    color: var(--ink);
+    text-decoration-color: currentColor;
+}
+
+/* A project's kind, after its name in the bar: a small, quiet tag */
+.bar__category {
+    margin-left: 0.6em;
+    vertical-align: 0.35em;
+    font-size: 0.7rem;
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+}
+
 .bar__title {
     margin: 0;
     font-size: clamp(1.4rem, 2.6vw, 2.1rem);

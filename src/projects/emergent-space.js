@@ -9,6 +9,8 @@ export default defineProject({
     id: 'emergent-space',
     slot: 1,
     title: 'Emergent Space',
+    // Research, teaching or the real world - its tag, and the catalog's filter
+    category: 'research',
 
     // TEMP: placeholder text so the About drawer exists - unmistakably
     // fake on purpose, to be replaced with the real copy. State the

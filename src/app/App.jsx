@@ -6,6 +6,7 @@ import ProjectDrawer from '../components/ProjectDrawer.jsx';
 import CatalogTags from '../components/CatalogTags.jsx';
 import TapHint from '../components/TapHint.jsx';
 import HintTag from '../components/HintTag.jsx';
+import CategoryFilter from '../components/CategoryFilter.jsx';
 import Fog from '../components/Fog.jsx';
 import VelocityTags from '../components/VelocityTags.jsx';
 
@@ -27,6 +28,8 @@ export default function App() {
     const [project, setProject] = useState(null);
     const [status, setStatus] = useState(null);
     const [drawerOpen, setDrawerOpen] = useState(false);
+    // The kind of project the catalog has brought forward, or null for all
+    const [focus, setFocus] = useState(null);
 
     const canvasRef = useRef(null);
     const barRef = useRef(null);
@@ -68,6 +71,9 @@ export default function App() {
                 },
 
                 onStatus: (message) => setStatus(message ?? null),
+
+                // A sunk pebble was clicked, bringing its kind forward
+                onFocus: (category) => setFocus(category),
 
                 onFog: (visible) => {
                     fogRef.current?.classList.toggle('is-in', visible);
@@ -151,6 +157,11 @@ export default function App() {
         engineRef.current?.replayDrop();
     }, []);
 
+    const chooseFocus = useCallback((category) => {
+        engineRef.current?.setFocus(category);
+        setFocus(category);
+    }, []);
+
     // Escape backs out one step at a time: the drawer first, then the project
     useEffect(() => {
         const onKeyDown = (event) => {
@@ -188,6 +199,8 @@ export default function App() {
               */}
             <HintTag stringRef={hintStringRef} tagRef={hintTagRef} />
             <TapHint ref={tapHintRef} />
+
+            <CategoryFilter focus={focus} hidden={Boolean(project)} onChoose={chooseFocus} />
 
             <ProjectBar
                 ref={barRef}

@@ -12,16 +12,17 @@
  * the one declaration, because the engine and the UI both read the
  * normalised project rather than reaching for fields of their own. There is
  * no per-project branch anywhere: a project that wants different behaviour
- * says so in its own file through `view`, `gather`, `drop` or `points`.
+ * says so in its own file through `view`, `gather`, `drop`, `points`,
+ * `doubleClick`, `autoZoom` or `eyeLevel`.
  *
  * Slots with no project listed here render as empty pebbles, holding the
  * rock and answering a click with "Still empty...".
  */
-import { EMPTY_SLOT_THUMB, SLOT_COUNT, defineProject, pebbleLabel } from './schema.js';
+import { EMPTY_SLOT_CATEGORIES, EMPTY_SLOT_THUMB, SLOT_COUNT, defineProject, pebbleLabel } from './schema.js';
 import rockPrint from './rock-print.js';
 import emergentSpace from './emergent-space.js';
 
-export { SLOT_COUNT, EMPTY_SLOT_THUMB, hasDescription, metaRows, pebbleLabel } from './schema.js';
+export { SLOT_COUNT, EMPTY_SLOT_THUMB, CATEGORIES, categoryLabel, hasDescription, metaRows, pebbleLabel } from './schema.js';
 
 const catalog = [
     rockPrint,
@@ -89,4 +90,7 @@ export const catalogSource = {
     projectBySlot,
     emptyThumb: EMPTY_SLOT_THUMB,
     label: pebbleLabel,
+    // Which kind of project a slot holds - its project's, or the kind an
+    // empty slot stands in for - for the catalog's filter to compare
+    categoryOf: (slot) => projectBySlot.get(slot)?.category ?? EMPTY_SLOT_CATEGORIES[slot] ?? null,
 };

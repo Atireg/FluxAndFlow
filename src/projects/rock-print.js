@@ -8,6 +8,8 @@ export default defineProject({
     id: 'rock-print',
     slot: 0,
     title: 'Rock Print Pavilion',
+    // Research, teaching or the real world - its tag, and the catalog's filter
+    category: 'research',
 
     // Fill these in and they appear in the drawer automatically; anything
     // left empty is skipped rather than rendered blank. State the role
