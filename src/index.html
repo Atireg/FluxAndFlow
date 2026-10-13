@@ -185,14 +185,13 @@
 
         if (!still) drawField(now, dt / 16.7);
 
-        // Its words, a part at a time: each gives way to the next, the last
-        // staying as it leaves
+        // Its words, a part at a time, each on the line below the last and
+        // staying, so the sentence builds up
         if (startedAt !== null) {
           var part = Math.min(Math.floor((now - startedAt - WORDS_START) / WORDS_EACH), words.length - 1);
-          if (part !== wordsShown && part >= 0) {
-            if (wordsShown >= 0) words[wordsShown].classList.remove('is-on');
-            words[part].classList.add('is-on');
-            wordsShown = part;
+          while (wordsShown < part) {
+            wordsShown++;
+            words[wordsShown].classList.add('is-on');
           }
         }
 

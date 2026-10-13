@@ -205,7 +205,7 @@ instead of "All projects". Then rewritten with the user into three short,
 more business-like paragraphs: hidden currents, their background, the
 services; the landing page scrolls if it outgrows a small phone. The loader then shows "Nothing here is fixed. At the edge of
 change, a single grain can start an avalanche, and things fall into new
-order, between flux and flow." a part at a time, staying about 8.3s (was
+order, between flux and flow." a part at a time, line by line, staying about 8.3s (was
 5s).
 
 **Tap hint.** "double-click" ("double-tap" on touch; "pause" on Rock Print,

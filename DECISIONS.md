@@ -1172,9 +1172,10 @@ On a fast load it's gone ~6s after the page opens.
 **Its words, a part at a time** (asked for: "Nothing here is fixed. At the
 edge of change, a single grain can start an avalanche, and things fall
 into new order, between flux and flow." in parts, easy to read one after
-the other). Five parts under the progress line, in one place, each rising
-in and giving way to the next every `WORDS_EACH` (1.7s), the last staying
-as the loader leaves (`.loader__words`, set from `step()` by time since the
+the other). Five parts under the progress line, one every `WORDS_EACH`
+(1.7s), each rising in on the line below the last and staying, so the
+sentence builds up (first each gave way to the next in one place; the
+user wanted them to stay) (`.loader__words`, set from `step()` by time since the
 way in). `MIN_VISIBLE` was 5s; it's now worked out from the words
 (`WORDS_START + 4 x WORDS_EACH + 1.2s`, about 8.3s), so the last part is
 read before it goes.

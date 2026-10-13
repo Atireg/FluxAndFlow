@@ -401,10 +401,11 @@ canvas.webgl {
     font-variant-numeric: tabular-nums;
 }
 
-/* The loader's words (index.html, WORDS_*): one part at a time, in one
-   place, each rising in softly and fading as the next comes */
+/* The loader's words (index.html, WORDS_*): a part at a time, each
+   rising in softly on the line below the last, the sentence building up */
 .loader__words {
     display: grid;
+    justify-items: center;
     margin: 0.9rem 0 0;
     max-width: min(28rem, 86vw);
     font-size: clamp(0.95rem, 1.6vw, 1.1rem);
@@ -415,7 +416,6 @@ canvas.webgl {
 }
 
 .loader__words span {
-    grid-area: 1 / 1;
     opacity: 0;
     transform: translateY(0.35rem);
     transition: opacity 0.6s ease, transform 0.6s ease;

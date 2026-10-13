@@ -57,7 +57,7 @@ and README's "Next up". As of the end of Session 3:
   words, worked out line by line: change them only on request) - over the loader's floating
   particles (it scrolls on a small phone), with "Welcome to the F&F
   playground" - which turns it into the loader (its words appear a part at a
-  time: "Nothing here is fixed..." - `WORDS_*`) and on to the catalog. The back link in a
+  time, line under line: "Nothing here is fixed..." - `WORDS_*`) and on to the catalog. The back link in a
   project reads "F&F playground".
 - **Not started**: per-project URLs, a way back to the landing page;
   README lists the rest.
