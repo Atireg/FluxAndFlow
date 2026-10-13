@@ -193,7 +193,7 @@ defineProject({
 
 - **Slots**: the grid always has `SLOT_COUNT` (10) pebbles; an empty slot
   shows the rock (`EMPTY_SLOT_THUMB`) and answers a click with "under
-  construction". Both live in `src/projects/schema.js`; raise `SLOT_COUNT`
+  construction" or another of App's `EMPTY_WORDS`, at random. Both live in `src/projects/schema.js`; raise `SLOT_COUNT`
   before adding an eleventh project.
 - The engine never imports `src/projects/`: it is handed `catalogSource`
   (slot count, what sits in each slot, the empty thumbnail, how to label a

@@ -298,8 +298,11 @@ scale, 1 unit down). Either way the spotlight pulses it from
 Clicking an empty slot shows "under construction" (`.cube-tag--empty`) on it for `EMPTY_TAG_DURATION`,
 fading over `EMPTY_TAG_FADE` - in ink, not the orange, since an empty slot
 isn't an invitation. It was "Still empty..." in a bordered chip; asked for,
-it's now the two words on two lines with no box, lifted off the pebble by
-the spotlight name's paper glow. Tags are HTML over the canvas, not sprites:
+it's now two lines with no box, lifted off the pebble by the spotlight
+name's paper glow, and a different answer each click - "under
+construction", "still settling", "yet to take shape", "a grain not yet
+fallen", never the same twice running (`EMPTY_WORDS` in App, set through
+`ui.onEmptySlot`: the words are the page's, like the tap hint's). Tags are HTML over the canvas, not sprites:
 real Fira Sans, sharp at any pixel ratio, styled in CSS, and
 `pointer-events: none`. `placeTagOnPebble` projects a point on the pebble's
 top towards the bottom of the screen.

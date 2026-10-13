@@ -148,7 +148,8 @@ Catalog
         clicked pebble dissolves into a cloud of points that hands over to
         the project's own as they appear; opened projects' pebbles stay
         darker (remembered)
-    [x] An empty slot's click answers "under construction"
+    [x] An empty slot's click answers "under construction" or one of
+        three others, at random (`EMPTY_WORDS` in App)
     [x] Three kinds of project - research, teaching, the real world - each
         tagged in its bar; a filter in the catalog brings one kind forward
         and pushes the others back to half their size, fainter

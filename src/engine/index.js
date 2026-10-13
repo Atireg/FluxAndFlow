@@ -40,6 +40,7 @@ import { trailResolution } from './pointcloud/trails.js';
  *   barFraction()           how much viewport height the bar takes, 0..0.5
  *   showTapHint(x, y, action) / hideTapHint()   action: the project's doubleClick
  *   onFocus(category)       the filter changed from the canvas (a sunk pebble clicked)
+ *   onEmptySlot()           an empty pebble was clicked - its tag is about to show
  *   overlays                the DOM nodes the tags are drawn into
  */
 export function createEngine({ canvas, source, ui }) {
@@ -400,6 +401,7 @@ export function createEngine({ canvas, source, ui }) {
         // click. Clicking again restarts the timer.
         state.emptyTag.pebble = pebble;
         state.emptyTag.shownAt = clock.getElapsedTime();
+        ui.onEmptySlot?.();
     }
 
     function onResize() {

@@ -27,6 +27,9 @@ import VelocityTags from '../components/VelocityTags.jsx';
 // The elements matching `selector` inside a ref's node, as an array
 const nodesIn = (ref, selector) => [...(ref.current?.querySelectorAll(selector) ?? [])];
 
+// What an empty pebble says when clicked - one at random, two lines each
+const EMPTY_WORDS = ['under\nconstruction', 'still\nsettling', 'yet to\ntake shape', 'a grain\nnot yet fallen'];
+
 // What the tap hint says a double-tap does, by the project's `doubleClick`
 const HINT_WORDS = { zoom: 'zoom', hold: 'pause', drop: 'drop again' };
 
@@ -81,6 +84,14 @@ export default function App() {
 
                 // A sunk pebble was clicked, bringing its kind forward
                 onFocus: (category) => setFocus(category),
+
+                // An empty pebble was clicked: a new answer, never the last one again
+                onEmptySlot: () => {
+                    const tag = emptyTagRef.current;
+                    if (!tag) return;
+                    const others = EMPTY_WORDS.filter((words) => words !== tag.textContent);
+                    tag.textContent = others[Math.floor(Math.random() * others.length)];
+                },
 
                 onFog: (visible) => {
                     fogRef.current?.classList.toggle('is-in', visible);
