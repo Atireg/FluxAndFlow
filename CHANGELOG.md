@@ -194,6 +194,10 @@ in DECISIONS.md.
   a time (at most 0.1s), and its shaders compile as the model loads rather
   than on its first frame. Only every fifth point draws
   a tail now, to lighten it (every third still lagged a bit).
+- Seen from straight above, the camera's nod no longer tips it over the
+  top (it shook back and forth); and the double-tap hint's dissolve no
+  longer filters the whole screen (it froze the page for seconds) - only
+  the dot and its words break up, the string fades.
 
 **Categories.** Projects are research, teaching or the real world
 (`category`, required; a tag after the name in the bar). Both projects are

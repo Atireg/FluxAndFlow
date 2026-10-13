@@ -636,7 +636,11 @@ through the target, so it rides on whatever the camera is doing - landing
 view, drawer, zoom, the visitor's orbit. It holds while a move is in flight
 or the visitor orbits, and until the gather is done, then restarts from
 zero with a `SWAY_EASE_IN`, so it never jumps. Only elevation changes.
-Opt-in: it would break a square-on default view.
+Opt-in: it would break a square-on default view. It never tips the camera
+within `SWAY_POLE` (0.12 rad) of looking straight down or up: orbited to
+the top, a nod carried it over the pole, the controls flipped it round
+each time, and the screen shook (reported after a double-click there) -
+a step that would cross is skipped until the nod turns back.
 
 
 Double-click / double-tap zoom, and the touch-point hint
@@ -702,7 +706,9 @@ any `hideTapHint` meanwhile leaves it to finish (closing the project
 `force`s it). An SVG filter in
 `HintTag.jsx` (`#hint-dissolve` - fractal noise, its value moved into
 alpha, a steep linear transfer, composited "in" the element) is put on
-the dot, the string and the words while it dissolves, and the engine
+the dot and the words while it dissolves (the string only fades: its SVG
+spans the whole screen, and the filter over all of it, redrawn every
+frame, froze the page for seconds), and the engine
 raises the threshold through the transfer's `intercept`
 (`HINT_DISSOLVE`, 1.2s, `HINT_SPECKLE`). Off once it's gone. With reduced
 motion it just goes at the end of the pulsing. Rock Print's first timed zoom

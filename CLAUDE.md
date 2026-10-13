@@ -346,7 +346,8 @@ defineProject({
   moving `overlays.hintDot`) off the screen. Double-tapped, it dissolves
   into specks like the aggregates instead (`tags.dissolveHint`; the
   `#hint-dissolve` SVG filter, its threshold raised through
-  `overlays.hintDissolve`); its taps time themselves to the dot's CSS
+  `overlays.hintDissolve` - on the dot and words only: on the full-screen
+  string SVG it froze the page, so that just fades); its taps time themselves to the dot's CSS
   press - change `tap-hint-press`/`-ripple` (and their count) and
   `HINT_PRESS`/`HINT_TAPS`/`HINT_CYCLES` together. The hint's tag also
   shares the spotlight's look through `.cube-tag--hanging` and is rendered

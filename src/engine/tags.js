@@ -366,16 +366,19 @@ export function createTags({ screen, rig, state, overlays }) {
 
         const opacity = gone ? 0 : hintOpacity(age);
         hintTag.style.opacity = opacity;
-        hintString.style.opacity = opacity;
+        // The string just fades as the rest dissolves: its SVG spans the
+        // whole screen, and a filter over all of it, redrawn every frame,
+        // stalled the page
+        hintString.style.opacity = opacity * (1 - dissolve);
 
-        // The speckle filter on the dot, its string and its words while it
-        // dissolves; specks below the threshold go - the mask is
+        // The speckle filter on the dot and its words while they dissolve
+        // (both small); specks below the threshold go - the mask is
         // HINT_SPECKLE_EDGE x (noise - threshold)
         const filtered = dissolve > 0 && !gone;
         if (filtered !== hint.filtered) {
             hint.filtered = filtered;
             const filter = filtered ? 'url(#hint-dissolve)' : '';
-            [hintDot, hintTag, hintString].forEach((element) => { if (element) element.style.filter = filter; });
+            [hintDot, hintTag].forEach((element) => { if (element) element.style.filter = filter; });
             hintDissolve?.setAttribute('slope', HINT_SPECKLE_EDGE);
         }
         if (filtered && hintDissolve) {

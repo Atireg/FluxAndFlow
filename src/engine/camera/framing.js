@@ -69,6 +69,7 @@ const DETAIL_MODEL_YAW = Math.PI / 2;
  * from zero where the camera now is and grows in over SWAY_EASE_IN - no jump.
  */
 const SWAY_PERIOD = 22; // seconds for one nod up, down and back
+const SWAY_POLE = 0.12; // radians - the nod stops this far short of looking straight down (or up)
 const SWAY_EASE_IN = 2; // seconds to grow into the full nod after resuming
 
 /**
@@ -445,6 +446,14 @@ export function createFraming({ rig, screen, state, grid, ui }) {
             // target (negative raises it); controls.update() then re-aims it
             swayAxis.set(1, 0, 0).applyQuaternion(camera.quaternion);
             swayOffset.copy(camera.position).sub(controls.target).applyAxisAngle(swayAxis, -(angle - swayApplied));
+
+            // Never over the top (or under): seen from straight above, a nod
+            // tipped the camera past the pole, the controls flipped it round,
+            // and it shook back and forth. Held at the edge instead, and
+            // carried on once the nod turns back.
+            const polar = swayOffset.angleTo(camera.up);
+            if (polar < SWAY_POLE || polar > Math.PI - SWAY_POLE) return;
+
             camera.position.copy(controls.target).add(swayOffset);
             swayApplied = angle;
         },
