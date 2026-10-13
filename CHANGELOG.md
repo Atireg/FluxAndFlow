@@ -227,6 +227,11 @@ bouncing string, the catalog's rope (`createRope`); first just
 drifting and tilting, the string trailing - off the screen; double-tapped,
 it dissolves into specks the way the aggregates do. Hints come every 8s.
 
+**Links.** Each project has its own link - `#rock-print`,
+`#emergent-space` on the site's address - shown while it's open, so it
+can be copied; opened, it goes straight through the loader to the
+project. Back and Forward close and reopen it.
+
 **Docs.** All four brought up to date at the end of the session: names from
 the single-file days replaced, misfiled DECISIONS entries moved, this
 entry condensed.
@@ -252,6 +257,6 @@ removed before each merge; no console errors in any run.
 Open at end of session (see README, "Next up"): Safari still to confirm;
 both projects' real copy and picture credits still wanted; Emergent Space's
 drop, the streams and Rock Print's inside view unchecked on a real phone;
-model licensing unchecked; no per-project URLs. Small: `smoke.js` is
+model licensing unchecked. Small: `smoke.js` is
 parked, the points' ink grain does nothing (no UVs - README), and the JS
 bundle is one 905 KB chunk Vite warns about.

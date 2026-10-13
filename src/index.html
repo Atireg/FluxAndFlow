@@ -300,7 +300,7 @@
       };
 
       // "My playground": the welcome makes way for the loader
-      enter.addEventListener('click', function () {
+      function begin() {
         if (startedAt !== null) return;
         startedAt = performance.now();
         root.classList.remove('is-welcome');
@@ -309,7 +309,12 @@
         // screen had scrolled down to the button
         root.scrollTo({ top: 0, behavior: 'smooth' });
         scheduleExit();
-      });
+      }
+      enter.addEventListener('click', begin);
+
+      // A link to a project (#rock-print, app/links.js) goes straight
+      // through the loader to it, without the landing page
+      if (window.location.hash.length > 1) begin();
 
       resize();
       window.addEventListener('resize', resize);

@@ -60,7 +60,10 @@ and README's "Next up". As of the end of Session 3:
   playground" - which turns it into the loader (its words appear a part at a
   time, line under line: "Nothing here is fixed..." - `WORDS_*`) and on to the catalog. The back link in a
   project reads "F&F playground".
-- **Not started**: per-project URLs, a way back to the landing page;
+- **Links**: each project has its own, `#<id>` on the site's address
+  (`#rock-print`) - shown while it's open, and opening it straight
+  through the loader (`src/app/links.js`).
+- **Not started**: a way back to the landing page;
   README lists the rest.
 
 ## Working with the user
@@ -102,6 +105,7 @@ that line.
     src/main.jsx            mounts <App/> (no StrictMode - see the file)
     src/app/App.jsx         the page: React state, the refs, the `ui` bridge
     src/app/words.js        the page's small words: an empty pebble's answers, the tap hint's
+    src/app/links.js        a link to each project: `#<id>` in the address, Back and Forward
     src/components/         ProjectBar, ProjectDrawer, ProjectImage,
                             CatalogTags, CategoryFilter, HintTag, TagString
                             (the string both hang on), TapHint, Fog, clickOnly.js
@@ -384,7 +388,8 @@ defineProject({
   `pow(0, y)`); stack HTML by z-index, never page order (fog 0, canvas 1,
   tags, string and tap hint 2); and use `pointerup` on the canvas, not
   `click` - iPhone/iPad Safari doesn't send it there.
-- **No per-project URLs yet** - don't assume a project is linkable.
+- **A project's link is its `id`** (`#rock-print`, `src/app/links.js`):
+  renaming an `id` breaks links already shared.
 - **Shared helpers - reach for them rather than spelling it out again**:
   `engine/ease.js` for any 0..1 ramp; `rig.toScreen(vector)` for a world
   point in screen pixels (it projects `vector` in place - never project it

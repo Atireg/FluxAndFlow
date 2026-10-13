@@ -57,6 +57,7 @@ Loading
 - The landing page, then the loader, on one field of particles
 - The start-up loader is inline and waits for real progress
 - `?cloudtest`, and why clouds load on click
+- A link to each project
 
 How the code is laid out
 - React owns the page; the engine owns the canvas
@@ -1264,6 +1265,28 @@ cache off, gzipped):
 
 So clouds load only when a project is opened; ten rock thumbnails cost
 ~2 MB. Remove the flag once real projects fill the grid.
+
+
+A link to each project
+----------------------
+
+Asked for: a project that can be shared on its own. The page's address
+carries the open project as a hash - `#rock-print`, the project's `id` -
+set when it opens and cleared when it closes (`src/app/links.js`, from
+App's `onProjectOpen`/`onProjectClose`; the engine knows nothing of
+URLs, it only gained `openProject(id)`, a click on that pebble by name).
+A hash, not a path, because GitHub Pages serves one page: a path would
+need a 404 redirect trick, a hash just works.
+
+Opened with a hash, the page skips the landing page (index.html starts the
+loader itself) and opens the project `LINK_OPEN_AFTER` (1.5s) after the
+loader starts to clear, so the playground surfaces around it first and
+"F&F playground" leads somewhere that makes sense. Opening from the
+playground pushes a history step, so Back closes it and Forward reopens
+it (`popstate`); closing with the page's own way back takes that step
+back off (`history.back()`) rather than piling up entries, and a project
+opened from a link just clears the hash. An unknown hash is dropped. A
+sunk pebble (the filter) is brought forward first.
 
 
 How the code is laid out

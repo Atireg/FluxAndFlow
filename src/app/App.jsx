@@ -10,6 +10,10 @@ import CategoryFilter from '../components/CategoryFilter.jsx';
 import Fog from '../components/Fog.jsx';
 import VelocityTags from '../components/VelocityTags.jsx';
 import { emptyWords, hintWords } from './words.js';
+import { clearProjectLink, linkedProject, showProjectLink } from './links.js';
+
+// ms after the loader starts to clear that a linked project opens
+const LINK_OPEN_AFTER = 1500;
 
 // The elements matching `selector` inside a ref's node, as an array
 const nodesIn = (ref, selector) => [...(ref.current?.querySelectorAll(selector) ?? [])];
@@ -67,10 +71,14 @@ export default function App() {
             canvas: canvasRef.current,
             source: catalogSource,
             ui: {
-                onProjectOpen: (opened) => setProject(opened),
+                onProjectOpen: (opened) => {
+                    setProject(opened);
+                    showProjectLink(opened.id);
+                },
 
                 onProjectClose: () => {
                     setProject(null);
+                    clearProjectLink();
                     setDrawerOpen(false);
                     if (drawerRef.current) drawerRef.current.scrollTop = 0;
                 },
@@ -148,6 +156,39 @@ export default function App() {
         return () => {
             engine.dispose();
             engineRef.current = null;
+        };
+    }, []);
+
+    /**
+     * Links to a project (links.js). One in the address when the page opens
+     * opens that project a moment after the loader clears, once the
+     * playground has surfaced around it; Back and Forward then close and
+     * open it again.
+     */
+    useEffect(() => {
+        let timer = null;
+        const openLinked = () => {
+            const id = linkedProject();
+            if (id && !engineRef.current?.openProject(id)) clearProjectLink();
+        };
+        const onLeaving = () => { timer = window.setTimeout(openLinked, LINK_OPEN_AFTER); };
+
+        if (linkedProject()) {
+            if (document.getElementById('loader')) window.addEventListener('fluxloader:leaving', onLeaving, { once: true });
+            else onLeaving();
+        }
+
+        const onPopState = () => {
+            const id = linkedProject();
+            if (id) engineRef.current?.openProject(id);
+            else engineRef.current?.closeProject();
+        };
+        window.addEventListener('popstate', onPopState);
+
+        return () => {
+            window.clearTimeout(timer);
+            window.removeEventListener('fluxloader:leaving', onLeaving);
+            window.removeEventListener('popstate', onPopState);
         };
     }, []);
 

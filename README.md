@@ -82,7 +82,8 @@ Navigation and general layout
     [ ] Logo
     [ ] Add buttons to switch between views
     [ ] Add footer (Copyrights, )
-    [ ] Per-project URLs, so a single project can be linked to directly
+    [x] A link to each project (`#rock-print`, `#emergent-space`): opens it
+        straight through the loader; Back and Forward close and reopen it
 
 Catalog view
     [ ] Real teaching and real-world projects: the empty slots stand in for

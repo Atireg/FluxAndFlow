@@ -459,6 +459,26 @@ export function createEngine({ canvas, source, ui }) {
         },
 
         /**
+         * Opens a project by its id, as a click on its pebble would - from a
+         * link to it. Only from the playground; false if there's no such
+         * project or it can't open now.
+         */
+        openProject(id) {
+            if (state.view !== 'catalog') return false;
+            const pebble = grid.pebbles.find((candidate) => candidate.userData.project?.id === id);
+            if (!pebble) return false;
+
+            // Its kind brought forward if the filter had sunk it
+            if (!inFocus(state, pebble)) {
+                setFocus(state, grid.pebbles, null, clock.getElapsedTime());
+                ui.onFocus?.(null);
+            }
+            pebble.userData.focus = null;
+            detail.startDrop(pebble);
+            return true;
+        },
+
+        /**
          * The catalog's filter: bring one kind of project forward (a
          * pebble's `categoryOf`) and sink the rest, or null for all
          */
