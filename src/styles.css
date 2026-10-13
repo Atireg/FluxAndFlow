@@ -167,8 +167,9 @@ body {
     border: max(1.5px, calc(var(--hint-size) * 0.08)) solid var(--hint-line);
 }
 
+/* Its two presses, twice over (HINT_PRESS, HINT_CYCLES in engine/tags.js) */
 .tap-hint.is-showing .tap-hint__dot {
-    animation: tap-hint-press 2.2s ease forwards;
+    animation: tap-hint-press 2.2s ease 2 forwards;
 }
 
 .tap-hint__ripple {
@@ -180,12 +181,14 @@ body {
     transform: scale(0.3);
 }
 
+/* A ring with each press, in step with tap-hint-press: one cycle of it
+   is 2.2s, the ring spreading from its press for 0.7s */
 .tap-hint.is-showing .tap-hint__ripple {
-    animation: tap-hint-ripple 0.7s ease-out 0.55s;
+    animation: tap-hint-ripple 2.2s ease-out 2;
 }
 
 .tap-hint.is-showing .tap-hint__ripple--second {
-    animation-delay: 1.05s;
+    animation-delay: 0.5s;
 }
 
 /* Never fully solid: the model stays visible through it */
@@ -206,8 +209,10 @@ body {
 }
 
 @keyframes tap-hint-ripple {
-    0%   { opacity: 0.9; transform: scale(0.3); }
-    100% { opacity: 0; transform: scale(1.5); }
+    0%, 25% { opacity: 0; transform: scale(0.3); }
+    25.1%   { opacity: 0.9; transform: scale(0.3); }
+    57%     { opacity: 0; transform: scale(1.5); }
+    100%    { opacity: 0; transform: scale(1.5); }
 }
 
 canvas.webgl {
@@ -487,6 +492,14 @@ canvas.webgl {
 /* The tap hint's word: the spotlight name's look, smaller - an aside over
    the model, not its title - and black like the dot's outline, string and
    all, rather than the catalog's orange */
+/* Holds the hint's dissolve filter (HintTag.jsx) - takes no room */
+.hint-dissolve {
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+}
+
 /* "double-tap to" over what it does, on two lines */
 .cube-tag--hint {
     font-size: clamp(0.8rem, 1.8vmin, 1rem);

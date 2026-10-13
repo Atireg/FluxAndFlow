@@ -75,7 +75,7 @@ const TURN_STOP = 3; // seconds the turn (and its floor) takes to slow to a stop
  * visitor's own double-click restarts the wait.
  */
 const AUTO_ZOOM = 0.4; // the camera ends up this fraction of its distance away
-const AUTO_ZOOM_FIRST = 4.2; // seconds after the gather (or the opening) to the first - as the hint lets go and falls
+const AUTO_ZOOM_FIRST = 5.6; // seconds after the gather (or the opening) to the first - as the first hint lets go and falls
 
 /**
  * With `eyeLevel` too, every other move in is from inside the model instead,

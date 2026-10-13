@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { CUBE_SIZE, PEBBLE_RADIUS, PEBBLE_SQUASH } from './constants.js';
 import { SPOTLIGHT_TAG_MIN, spotlightGlow, spotlightIntensity } from './pebbles/spotlight.js';
-import { clamp01 } from './ease.js';
+import { clamp01, smooth01 } from './ease.js';
 
 /**
  * The catalog's words on its pebbles: "Still empty..." for a moment on an
@@ -226,14 +226,20 @@ function drawRope(points, tagElement, paths, knots, knot) {
  * the bottom of the hint's dot (styles.css, .tap-hint) with "double-tap to"
  * and what it does on its end, on two lines. It drops bunched up as the dot
  * appears and bounces on an elastic string, and each of the dot's two taps
- * tugs it again. After HINT_HOLD the dot lets go and falls like a leaf -
- * drifting side to side and tilting as it goes, gathering speed to a gentle
- * fall - the string trailing, until it's gone off the bottom of the screen.
+ * tugs it again - twice over (HINT_CYCLES). Then the dot lets go and falls
+ * like a leaf - drifting side to side and tilting as it goes, gathering
+ * speed to a gentle fall - the string trailing, and as it falls it
+ * dissolves into specks the way the dropped aggregates do (the filter in
+ * HintTag.jsx), until nothing is left.
  */
 const HINT_PRESS = 2.2; // seconds - the dot's two presses (tap-hint-press in styles.css)
 const HINT_TAPS = [0.25, 0.48]; // the presses, as shares of HINT_PRESS
+const HINT_CYCLES = 2; // the presses play this many times (tap-hint-press's count)
 const HINT_FADE_IN = 0.26; // seconds - tap-hint-in
-const HINT_HOLD = 3; // seconds on screen before it falls
+const HINT_HOLD = HINT_PRESS * HINT_CYCLES; // seconds pulsing before it falls
+const HINT_DISSOLVE_AFTER = 0.5; // seconds into the fall before it starts to break up
+const HINT_DISSOLVE = 1.6; // seconds it takes to dissolve away
+const HINT_SPECKLE = [0.2, 0.8]; // the noise's range the threshold sweeps (HintTag.jsx's filter)
 const HINT_FALL_SPEED = 0.28; // the fall's speed once under way, in screen heights a second
 const HINT_FALL_SPEED_MIN = 160; // px a second
 const HINT_FALL_EASE = 0.6; // seconds it takes to get going, roughly
@@ -253,6 +259,12 @@ const HINT_TUG = 6; // a tap's tug, in string lengths per second
 function hintSize(screen) {
     const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
     return THREE.MathUtils.clamp(Math.min(screen.width, screen.height) * 0.03, 1.1 * rem, 2.6 * rem);
+}
+
+// When the dot's `n`th press lands, counting through every cycle
+function hintTapAt(n) {
+    const cycle = Math.floor(n / HINT_TAPS.length);
+    return (cycle + HINT_TAPS[n % HINT_TAPS.length]) * HINT_PRESS;
 }
 
 // tap-hint-in: in over HINT_FADE_IN, then held until it has fallen away
@@ -329,7 +341,7 @@ export function createTags({ screen, rig, state, overlays }) {
     }
 
     function hangHint(elapsedTime) {
-        const { hintDot, hintTag, hintString, hintStringPaths, hintKnots } = overlays;
+        const { hintDot, hintDissolve, hintTag, hintString, hintStringPaths, hintKnots } = overlays;
         if (!hintTag || !hintString) return;
 
         const age = hint.shownAt === null ? Infinity : elapsedTime - hint.shownAt;
@@ -340,7 +352,9 @@ export function createTags({ screen, rig, state, overlays }) {
         const fall = age > HINT_HOLD && age !== Infinity && !still
             ? hintFall(age - HINT_HOLD, size, screen.height)
             : { x: 0, y: 0, tilt: 0 };
-        const gone = age > HINT_HOLD && (still || hint.y + fall.y - size > screen.height + length * 2);
+        // ...and breaking up into specks as it goes
+        const dissolve = age === Infinity ? 0 : smooth01((age - HINT_HOLD - HINT_DISSOLVE_AFTER) / HINT_DISSOLVE);
+        const gone = dissolve >= 1 || (age > HINT_HOLD && hint.y + fall.y - size > screen.height + length * 2);
         if (gone && hint.shownAt !== null) {
             hint.shownAt = null;
             hintDot?.classList.remove('is-showing');
@@ -349,6 +363,16 @@ export function createTags({ screen, rig, state, overlays }) {
         const opacity = gone ? 0 : hintOpacity(age);
         hintTag.style.opacity = opacity;
         hintString.style.opacity = opacity;
+
+        const filter = dissolve > 0 && !gone ? 'url(#hint-dissolve)' : '';
+        if (hintTag.style.filter !== filter) {
+            [hintDot, hintTag, hintString].forEach((element) => { if (element) element.style.filter = filter; });
+        }
+        if (filter && hintDissolve) {
+            // Specks below the threshold go: the mask is 16 x (noise - threshold)
+            const threshold = HINT_SPECKLE[0] + (HINT_SPECKLE[1] - HINT_SPECKLE[0]) * dissolve;
+            hintDissolve.setAttribute('intercept', (-16 * threshold).toFixed(3));
+        }
         if (opacity <= 0) return;
 
         if (hintDot) hintDot.style.transform = `translate(${fall.x.toFixed(1)}px, ${fall.y.toFixed(1)}px) rotate(${fall.tilt.toFixed(3)}rad)`;
@@ -363,8 +387,8 @@ export function createTags({ screen, rig, state, overlays }) {
             hint.taps = 0;
         }
 
-        // Each of the dot's presses tugs the string
-        while (!still && hint.taps < HINT_TAPS.length && age >= HINT_TAPS[hint.taps] * HINT_PRESS) {
+        // Each of the dot's presses tugs the string, every cycle
+        while (!still && hint.taps < HINT_TAPS.length * HINT_CYCLES && age >= hintTapAt(hint.taps)) {
             hintRope.tug(HINT_TUG * length);
             hint.taps++;
         }

@@ -673,17 +673,28 @@ change them together).
 **Then it falls like a leaf** (asked for: stay a bit longer, then "fall
 downwards like leaves until they disappear from the screen"). It used to
 fade out at 2.2s; now the dot fades in (`tap-hint-in`, `HINT_FADE_IN`),
-holds `HINT_HOLD` (3s), and lets go: `hintFall` eases it up to a gentle
+pulses - its two presses and rings played `HINT_CYCLES` (2) times, asked
+for "pulse longer", so `HINT_HOLD` is 4.4s; each press tugs the string -
+and lets go: `hintFall` eases it up to a gentle
 speed (`HINT_FALL_SPEED`, a share of the screen's height a second, so it
 takes about as long on any screen), drifting side to side
 (`HINT_SWAY`, `HINT_SWAY_PERIOD`) and tilting the way it drifts
 (`HINT_TILT`). The engine moves the dot itself (`overlays.hintDot`, a
 transform on `.tap-hint`, which the dot's own press animation doesn't
 use), the string's knot follows the dot's tilted bottom, and the rope
-trails behind under its own gravity. Once it's well past the bottom it's
-over (`is-showing` removed). With reduced motion it just goes at the end
-of the hold. Rock Print's first timed zoom (`AUTO_ZOOM_FIRST`, 4.2s after
-the gather) starts as the first hint lets go. Hints now
+trails behind under its own gravity. Half a second into the fall it
+dissolves into specks like the aggregates do (asked for; their `uFade`
+drops a fixed grain under a rising threshold): an SVG filter in
+`HintTag.jsx` (`#hint-dissolve` - fractal noise, its value moved into
+alpha, a steep linear transfer, composited "in" the element) is put on
+the dot, the string and the words while it dissolves, and the engine
+raises the threshold through the transfer's `intercept`
+(`HINT_DISSOLVE`, `HINT_SPECKLE`). Off once it's gone. With reduced motion
+it dissolves where it hangs. Rock Print's first timed zoom
+(`AUTO_ZOOM_FIRST`, 5.6s after the gather) starts as the first hint lets
+go. Unchecked in Safari, whose support for SVG filters on HTML has been
+patchier than Chrome's - if it shows nothing there, the hint still goes at
+the end of the dissolve. Hints now
 stay above the lower quarter of the screen (y > -0.5), leaving room for
 the words below. The tags' engine module gets the hint through
 `index.js`, which wraps the `ui` handed to `detail.js` - the dot stays

@@ -44,6 +44,7 @@ export default function App() {
     const tapHintRef = useRef(null);
     const hintStringRef = useRef(null);
     const hintTagRef = useRef(null);
+    const hintDissolveRef = useRef(null);
     const emptyTagRef = useRef(null);
     const stringRef = useRef(null);
     const spotlightTagRef = useRef(null);
@@ -131,6 +132,7 @@ export default function App() {
                     stringPaths: nodesIn(stringRef, 'path'),
                     knots: nodesIn(stringRef, 'circle'),
                     hintDot: tapHintRef.current,
+                    hintDissolve: hintDissolveRef.current,
                     hintTag: hintTagRef.current,
                     hintString: hintStringRef.current,
                     hintStringPaths: nodesIn(hintStringRef, 'path'),
@@ -201,7 +203,7 @@ export default function App() {
               * After the catalog's tags, so their selectors find those first;
               * the dot after its string, so it sits over the knot
               */}
-            <HintTag stringRef={hintStringRef} tagRef={hintTagRef} />
+            <HintTag stringRef={hintStringRef} tagRef={hintTagRef} dissolveRef={hintDissolveRef} />
             <TapHint ref={tapHintRef} />
 
             <CategoryFilter focus={focus} hidden={Boolean(project)} onChoose={chooseFocus} />

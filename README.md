@@ -186,8 +186,8 @@ Project view
         catalog's. Per project (`doubleClick`): zooms by default, holds
         Rock Print still until the next (hinted "pause"), drops Emergent
         Space again (hinted "drop again"); "double-tap to" over the
-        action on two lines, held 3s, then the dot falls like a leaf off
-        the screen
+        action on two lines; it pulses twice over (4.4s), then falls like
+        a leaf, dissolving into specks like the aggregates
     [x] Rock Print zooms in by itself every 10s and back out (`autoZoom`),
         alternately on a point of the pavilion (following it as it turns)
         and from inside, at eye height among the columns, looking between

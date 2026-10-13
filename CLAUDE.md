@@ -336,10 +336,13 @@ defineProject({
   itself is `createRope`/`drawRope`, shared with the tap hint's elastic
   string and its two lines - "double-tap to" and "zoom" / "pause" / "drop
   again" by the project's `doubleClick` (`HINT_WORDS` in App) -
-  (`HINT_*`, `HintTag.jsx`). The engine runs the hint's life: it holds
-  `HINT_HOLD`, then falls like a leaf off the screen (`hintFall`, moving
-  `overlays.hintDot`); its taps time themselves to the dot's CSS press -
-  change `tap-hint-press` and `HINT_PRESS`/`HINT_TAPS` together. The hint's tag also
+  (`HINT_*`, `HintTag.jsx`). The engine runs the hint's life: it pulses
+  `HINT_CYCLES` times (`HINT_HOLD`), then falls like a leaf (`hintFall`,
+  moving `overlays.hintDot`), dissolving into specks like the aggregates
+  (the `#hint-dissolve` SVG filter, its threshold raised through
+  `overlays.hintDissolve`); its taps time themselves to the dot's CSS
+  press - change `tap-hint-press`/`-ripple` (and their count) and
+  `HINT_PRESS`/`HINT_TAPS`/`HINT_CYCLES` together. The hint's tag also
   carries `.cube-tag--spotlight` (for its look), so it's rendered after
   `CatalogTags`: `querySelector('.cube-tag--spotlight')` and
   `.tag-string__knot` still find the catalog's first.
