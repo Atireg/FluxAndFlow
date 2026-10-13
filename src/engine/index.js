@@ -116,10 +116,13 @@ export function createEngine({ canvas, source, ui }) {
                 ui.showTapHint(x, y, action);
                 tags.showHint(x, y, clock.getElapsedTime());
             },
-            hideTapHint: () => {
+            // A dissolving hint is left to finish, unless `force`d
+            hideTapHint: (force = false) => {
+                if (!force && tags.hintDissolving) return;
                 ui.hideTapHint();
                 tags.hideHint();
             },
+            dissolveTapHint: () => tags.dissolveHint(clock.getElapsedTime()),
         },
     });
     const streams = createStreamsView({ scene, grid, state, rig });

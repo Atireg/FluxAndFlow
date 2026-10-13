@@ -209,8 +209,8 @@ services; the landing page scrolls if it outgrows a small phone.
 "drop again" on Emergent Space - then "double-tap to" over it, on two
 lines) hangs from the dot on
 a black, bouncing string - the catalog's rope, shared (`createRope`). It pulses twice over (4.4s), then falls like a leaf -
-drifting and tilting, the string trailing - and dissolves into specks the
-way the aggregates do; hints come every 8s.
+drifting and tilting, the string trailing - off the screen; double-tapped,
+it dissolves into specks the way the aggregates do. Hints come every 8s.
 
 **Docs.** All four brought up to date at the end of the session: names from
 the single-file days replaced, misfiled DECISIONS entries moved, this

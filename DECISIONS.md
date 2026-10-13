@@ -682,19 +682,24 @@ takes about as long on any screen), drifting side to side
 (`HINT_TILT`). The engine moves the dot itself (`overlays.hintDot`, a
 transform on `.tap-hint`, which the dot's own press animation doesn't
 use), the string's knot follows the dot's tilted bottom, and the rope
-trails behind under its own gravity. Half a second into the fall it
-dissolves into specks like the aggregates do (asked for; their `uFade`
-drops a fixed grain under a rising threshold): an SVG filter in
+trails behind under its own gravity, until it's off the bottom of the
+screen. **Double-tapped, it dissolves** into specks where it is, like the
+aggregates do (asked for - first tried while falling, but the user wanted
+it only on a double-tap; the aggregates' `uFade` drops a fixed grain under
+a rising threshold): `detail.doubleClick` calls `ui.dissolveTapHint`, and
+any `hideTapHint` meanwhile leaves it to finish (closing the project
+`force`s it). An SVG filter in
 `HintTag.jsx` (`#hint-dissolve` - fractal noise, its value moved into
 alpha, a steep linear transfer, composited "in" the element) is put on
 the dot, the string and the words while it dissolves, and the engine
 raises the threshold through the transfer's `intercept`
-(`HINT_DISSOLVE`, `HINT_SPECKLE`). Off once it's gone. With reduced motion
-it dissolves where it hangs. Rock Print's first timed zoom
+(`HINT_DISSOLVE`, 1.2s, `HINT_SPECKLE`). Off once it's gone. With reduced
+motion it just goes at the end of the pulsing. Rock Print's first timed zoom
 (`AUTO_ZOOM_FIRST`, 5.6s after the gather) starts as the first hint lets
 go. Unchecked in Safari, whose support for SVG filters on HTML has been
 patchier than Chrome's - if it shows nothing there, the hint still goes at
-the end of the dissolve. Hints now
+the end of the dissolve. Not watched frame by frame here either: software
+WebGL renders Rock Print at a frame every second or two. Hints now
 stay above the lower quarter of the screen (y > -0.5), leaving room for
 the words below. The tags' engine module gets the hint through
 `index.js`, which wraps the `ui` handed to `detail.js` - the dot stays

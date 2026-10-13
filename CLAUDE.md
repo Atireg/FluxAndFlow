@@ -338,8 +338,9 @@ defineProject({
   again" by the project's `doubleClick` (`HINT_WORDS` in App) -
   (`HINT_*`, `HintTag.jsx`). The engine runs the hint's life: it pulses
   `HINT_CYCLES` times (`HINT_HOLD`), then falls like a leaf (`hintFall`,
-  moving `overlays.hintDot`), dissolving into specks like the aggregates
-  (the `#hint-dissolve` SVG filter, its threshold raised through
+  moving `overlays.hintDot`) off the screen. Double-tapped, it dissolves
+  into specks like the aggregates instead (`tags.dissolveHint`; the
+  `#hint-dissolve` SVG filter, its threshold raised through
   `overlays.hintDissolve`); its taps time themselves to the dot's CSS
   press - change `tap-hint-press`/`-ripple` (and their count) and
   `HINT_PRESS`/`HINT_TAPS`/`HINT_CYCLES` together. The hint's tag also

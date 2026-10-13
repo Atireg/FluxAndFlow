@@ -414,7 +414,7 @@ export function createDetail({
             rig.controls.autoRotate = false;
             rig.controls.enabled = false;
             ui.onFog(false);
-            ui.hideTapHint();
+            ui.hideTapHint(true); // even mid-dissolve
             state.tapHintNext = Infinity;
 
             if (pebble?.userData.detail) pebble.userData.detail.visible = false;
@@ -682,13 +682,13 @@ export function createDetail({
         doubleClick(clientX, clientY) {
             if (state.view !== 'detail' || !state.selected) return;
 
+            // A hint on screen has done its job: it dissolves
+            ui.dissolveTapHint();
+
             const action = state.selected.userData.project?.doubleClick ?? 'zoom';
             if (action === 'zoom') detail.toggleZoom(clientX, clientY);
             else if (action === 'hold') detail.toggleHold();
-            else if (action === 'drop') {
-                detail.replayDrop();
-                ui.hideTapHint();
-            }
+            else if (action === 'drop') detail.replayDrop();
         },
 
         /**
@@ -711,9 +711,6 @@ export function createDetail({
                 const every = state.selected.userData.project?.autoZoom;
                 if (every) autoZoom.next = since + every;
             }
-
-            // Clear a hint that's mid-tap
-            ui.hideTapHint();
         },
 
         toggleZoom(clientX, clientY) {
