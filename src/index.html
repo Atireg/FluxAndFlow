@@ -55,6 +55,13 @@
           <div class="loader__line" id="loader-line" role="progressbar" aria-label="Loading the F&amp;F playground"
                aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span class="loader__fill" id="loader-fill"></span></div>
           <p class="loader__count" id="loader-count" aria-hidden="true">0%</p>
+          <p class="loader__words" id="loader-words">
+            <span>Nothing here is fixed.</span>
+            <span>At the edge of change,</span>
+            <span>a single grain can start an avalanche,</span>
+            <span>and things fall into new order,</span>
+            <span>between flux and flow.</span>
+          </p>
         </div>
       </div>
     </div>
@@ -67,14 +74,19 @@
       var count = document.getElementById('loader-count');
       var line = document.getElementById('loader-line');
       var enter = document.getElementById('loader-enter');
+      var words = document.getElementById('loader-words').children;
+      var wordsShown = -1;
       var ctx = canvas.getContext('2d');
       var still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
       // ms - the loader is an opening, not just a wait: from "My playground"
       // it stays this long however fast the catalog loaded (usually while
       // the welcome was being read), and the bar paces itself to fill over it
-      // rather than racing to 100% and sitting there
-      var MIN_VISIBLE = 5000;
+      // rather than racing to 100% and sitting there - long enough for its
+      // words to be read, a part at a time (WORDS_*)
+      var WORDS_START = 300; // ms after the way in that the first part shows
+      var WORDS_EACH = 1700; // ms each part holds before the next
+      var MIN_VISIBLE = WORDS_START + 4 * WORDS_EACH + 1200; // the last part shows a moment before it leaves
       // The exit: the loader fades onto the same paper the site sits on while
       // its streams calm down to the pace of the scene's own, which carry on
       // among the pebbles
@@ -172,6 +184,17 @@
         shown += (paced - shown) * (1 - Math.exp(-dt / 180));
 
         if (!still) drawField(now, dt / 16.7);
+
+        // Its words, a part at a time: each gives way to the next, the last
+        // staying as it leaves
+        if (startedAt !== null) {
+          var part = Math.min(Math.floor((now - startedAt - WORDS_START) / WORDS_EACH), words.length - 1);
+          if (part !== wordsShown && part >= 0) {
+            if (wordsShown >= 0) words[wordsShown].classList.remove('is-on');
+            words[part].classList.add('is-on');
+            wordsShown = part;
+          }
+        }
 
         var percent = Math.round(shown * 100);
         fill.style.transform = 'scaleX(' + shown + ')';
