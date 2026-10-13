@@ -95,6 +95,20 @@ const INSIDE_PAN_PERIOD = 18; // seconds for one look left, right and back
 export function createDetail({
     state, grid, rig, framing, screen, clock, visited, perlinTexture, ui,
 }) {
+    /**
+     * Compiles a newly loaded model's shaders now - the points' and their
+     * tails', which are hidden until the gather draws them - rather than
+     * leaving it to the first frame they're drawn in, which stalls on it
+     */
+    function prepareShaders(model) {
+        let scene = model;
+        while (scene.parent) scene = scene.parent;
+        const trails = model.userData.trails ?? [];
+        trails.forEach((tails) => { tails.visible = true; });
+        rig.renderer.compile(model, rig.camera, scene);
+        trails.forEach((tails) => { tails.visible = false; });
+    }
+
     const zoomRaycaster = new THREE.Raycaster();
     zoomRaycaster.params.Points.threshold = 0.06;
 
@@ -317,6 +331,7 @@ export function createDetail({
                 pebble.userData.detail.userData.pile?.restart();
                 pebble.userData.detail.userData.turnOffset = 0;
                 pebble.userData.detail.userData.held = null;
+                pebble.userData.detail.userData.gatherTime = 0;
                 pebble.userData.detailRotateStartTime = clock.getElapsedTime();
                 ui.onStatus(null);
                 framing.frameDetail(pebble, { ease });
@@ -352,7 +367,12 @@ export function createDetail({
                         return;
                     }
 
+                    // Its shaders ready before the gather starts, not on its
+                    // first frame
+                    prepareShaders(model);
+
                     ui.onStatus(null);
+                    model.userData.gatherTime = 0;
                     pebble.userData.detailRotateStartTime = clock.getElapsedTime();
 
                     /**

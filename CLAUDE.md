@@ -387,7 +387,9 @@ defineProject({
   `engine/ease.js` for any 0..1 ramp; `rig.toScreen(vector)` for a world
   point in screen pixels (it projects `vector` in place - never project it
   first, or it lands thousands of pixels off screen) and `rig.pointerToNdc` for a pointer;
-  `detailSince(pebble, t)` for the clock a project's model runs on;
+  `detailSince(pebble, t)` for the clock a project's model runs on (all
+  but the gather, which steps on its own `gatherTime` so a stalled frame
+  can't jump it - `GATHER_MAX_STEP`);
   `halfHeightAt(fov, distance)` for what a lens sees; `pickInk(tone)` in a
   points shader; `clickOnly(fn)` for a button over the canvas.
 

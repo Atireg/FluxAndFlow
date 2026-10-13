@@ -9,6 +9,7 @@ import { smooth01 } from '../ease.js';
  * position and a delay, so it costs nothing per frame beyond one uniform.
  */
 export const GATHER_DURATION = 5.4; // seconds from opening the project to the last point home - 3.6 felt rushed
+export const GATHER_MAX_STEP = 0.1; // seconds the gather moves on in one frame, at most - a longer stall holds it rather than jumping it
 export const GATHER_SPREAD = 0.4; // share of that over which points set off
 export const GATHER_SWIRL = 2.4; // radians the scatter turns through on the way in
 const GATHER_SCATTER = 1.5; // scatter radius, as a multiple of the model's own half-width

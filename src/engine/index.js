@@ -18,7 +18,7 @@ import { paintGlow } from './pebbles/materials.js';
 import { pebbleFluxTime, PEBBLE_FLUX_SPEED } from './pebbles/geometry.js';
 import { dropInProgress, placeDroppingPebble, updateDroppingPebble } from './pebbles/drop.js';
 import { updateDissolve } from './pebbles/dissolve.js';
-import { GATHER_DURATION, revealAt, setGather, setReveal } from './pointcloud/gather.js';
+import { GATHER_DURATION, GATHER_MAX_STEP, revealAt, setGather, setReveal } from './pointcloud/gather.js';
 import { trailResolution } from './pointcloud/trails.js';
 
 /**
@@ -160,6 +160,8 @@ export function createEngine({ canvas, source, ui }) {
         rig.renderer.getDrawingBufferSize(trailResolution.value);
 
         const frameTime = Math.min(elapsedTime - lastFrameTime, 0.05);
+        // The gather's step: a slow phone keeps pace, a stall doesn't jump it
+        const gatherStep = Math.min(elapsedTime - lastFrameTime, GATHER_MAX_STEP);
         lastFrameTime = elapsedTime;
 
         /**
@@ -229,9 +231,16 @@ export function createEngine({ canvas, source, ui }) {
                 const dissolve = selected.userData.dissolve;
                 if (pile && dissolve?.userData.ground) dissolve.rotation.y = turning * DETAIL_ROTATE_SPEED;
 
-                // Replays from scattered each time the project opens, since
-                // detailRotateStartTime is reset whenever the model is shown
-                setGather(model, Math.min(since / GATHER_DURATION, 1));
+                /**
+                 * Replays from scattered each time the project opens
+                 * (`gatherTime` is reset whenever the model is shown). On its
+                 * own clock, a frame's step at a time, at most GATHER_MAX_STEP
+                 * - rather than the wall clock's: a stalled frame, above all
+                 * the first, as the points go to the GPU, holds the gather
+                 * there instead of making every point jump ahead.
+                 */
+                model.userData.gatherTime = Math.min((model.userData.gatherTime ?? 0) + gatherStep, GATHER_DURATION);
+                setGather(model, model.userData.gatherTime / GATHER_DURATION);
                 setReveal(model, revealAt(since));
 
                 detail.maybeShowTapHint(model, since);

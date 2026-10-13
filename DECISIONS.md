@@ -985,6 +985,21 @@ lives in `shaders/pointCloud/gather.glsl`, put in front of the points' and
 the tails' vertex shaders in `pointcloud/load.js`, so both place a point
 the same way.
 
+**On its own clock, so it never jumps** (asked for: the settling "is
+lagging"). The gather was driven by the wall clock, and its first frames
+stall - both shaders compiled and the 78,637 points (with their tails'
+copies) uploaded on the first frame they're drawn - so the next frame
+found every point far along and they jumped; any later hitch did the same.
+Now it advances by the frame's time, at most `GATHER_MAX_STEP` (0.1s)
+(`model.userData.gatherTime`, reset each time the model is shown): a stall
+holds it, while a phone running at 10 fps or more keeps the full pace. And
+a newly loaded model's shaders - the points' and the hidden tails' - are
+compiled as it loads, before the gather starts (`prepareShaders` in
+detail.js), not on its first frame. Software WebGL here runs at a frame or
+two a second, so the effect on a real phone is unmeasured - if it still
+stutters, the next cost to cut is the tails: one quad per point, each
+working the gather out twice.
+
 
 Tails behind moving points
 --------------------------
