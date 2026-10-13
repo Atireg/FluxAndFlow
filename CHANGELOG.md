@@ -192,8 +192,8 @@ in DECISIONS.md.
   (`doubleClick: 'hold'`, hinted "pause").
 - The gather no longer jumps: it runs on its own clock, a frame's step at
   a time (at most 0.1s), and its shaders compile as the model loads rather
-  than on its first frame. Only every third point draws
-  a tail now, to lighten it.
+  than on its first frame. Only every fifth point draws
+  a tail now, to lighten it (every third still lagged a bit).
 
 **Categories.** Projects are research, teaching or the real world
 (`category`, required; a tag after the name in the bar). Both projects are

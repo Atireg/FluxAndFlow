@@ -999,7 +999,8 @@ detail.js), not on its first frame. Software WebGL here runs at a frame or
 two a second, so the effect on a real phone is unmeasured. The tails were
 the next cost, and are now cut too (asked to try): one quad per point,
 each working the gather out twice, drew more than the points themselves -
-only every third point has one now (`GATHER_TRAIL_EVERY`, `addTrails`'s
+only every fifth point has one now (every third still lagged a bit;
+`GATHER_TRAIL_EVERY`, `addTrails`'s
 `every`; a pebble's dissolve keeps all of its own).
 
 

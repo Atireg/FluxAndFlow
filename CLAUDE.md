@@ -328,7 +328,7 @@ defineProject({
   `userData.ownMaterial`, or its uniforms vanish and it throws every frame.
 - **Moving points have tails** (`pointcloud/trails.js`,
   `shaders/trail/`): an
-  instanced quad per point (every third, for a cloud's gather -
+  instanced quad per point (every fifth, for a cloud's gather -
   `GATHER_TRAIL_EVERY`) whose shader re-runs the gather or dissolve a
   moment earlier, sharing its points' uniform objects. Change how a point
   moves in `shaders/pointCloud/gather.glsl` or `DISSOLVE_GLSL`
