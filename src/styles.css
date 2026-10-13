@@ -427,9 +427,11 @@ canvas.webgl {
 }
 
 /**
- * The tags on a catalog cube: "under construction" after clicking an empty slot,
- * and "Project 01"... on the cube glowing orange. Positioned and faded from
- * src/engine/tags.js every frame.
+ * The words over the canvas, all bare text on the paper lifted off what's
+ * under it by a soft paper glow: an empty pebble's answer, the glowing
+ * pebble's name and the tap hint's words - the last two hanging on a string.
+ * Positioned and faded from src/engine/tags.js every frame. A "\n" in the
+ * words is a line break.
  */
 .cube-tag {
     position: fixed;
@@ -448,22 +450,58 @@ canvas.webgl {
     font-weight: 600; /* the project title's weight and tracking */
     letter-spacing: -0.01em;
     line-height: 1;
-    white-space: nowrap;
+    white-space: pre;
+    text-align: center;
     color: var(--ink);
-
-    background: var(--panel-bg);
-    border: 1px solid var(--accent);
-    border-radius: 0.4rem;
+    text-shadow:
+        0 0 0.25rem rgba(var(--bg-rgb), 0.95),
+        0 0 0.6rem rgba(var(--bg-rgb), 0.8);
 
     opacity: 0;
     transition: opacity 0.2s ease;
     will-change: transform, opacity;
 }
 
-/* The glowing pebble's name, hanging below it on a thin string (see
-   hangSpotlightTag): bare orange text on the paper, blinking with the glow.
-   Placed and turned every frame about its top centre, where the string is
-   tied - so no transition, which would smear the blink and the swing. */
+/* Hung from a string's end (drawRope): placed and turned every frame about
+   its top centre, where the string is tied - so no transition, which would
+   smear a blink or a swing */
+.cube-tag--hanging {
+    padding-top: 0.2em;
+    transform-origin: 50% 0;
+    transition: none;
+}
+
+/* The glowing pebble's name (hangSpotlightTag), orange, blinking with the glow */
+.cube-tag--spotlight {
+    font-size: max(0.95rem, calc(var(--pebble-px, 50px) * 0.3));
+    color: var(--warm-text);
+}
+
+/* The tap hint's words, "double-tap to" over what it does: smaller - an
+   aside over the model, not its title - and black like the dot's outline
+   and string, rather than the catalog's orange */
+.cube-tag--hint {
+    font-size: clamp(0.8rem, 1.8vmin, 1rem);
+    color: var(--hint-line);
+    line-height: 1.25;
+}
+
+/* An empty pebble's answer, "under construction" or another of
+   app/words.js's, on two lines */
+.cube-tag--empty {
+    line-height: 1.15;
+}
+
+/* Holds the hint's dissolve filter (HintTag.jsx) - takes no room */
+.hint-dissolve {
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+}
+
+/* The string a hanging tag is tied on (TagString.jsx): orange for the
+   spotlight's name, black for the tap hint's (--hint) */
 .tag-string {
     position: fixed;
     inset: 0;
@@ -501,39 +539,7 @@ canvas.webgl {
     opacity: 0.16;
 }
 
-.cube-tag--spotlight {
-    padding-top: 0.2em;
-    font-size: max(0.95rem, calc(var(--pebble-px, 50px) * 0.3));
-    color: var(--warm-text);
-    background: none;
-    border: none;
-    transform-origin: 50% 0;
-    text-shadow:
-        0 0 0.25rem rgba(var(--bg-rgb), 0.95),
-        0 0 0.6rem rgba(var(--bg-rgb), 0.8);
-    transition: none;
-}
-
-/* The tap hint's word: the spotlight name's look, smaller - an aside over
-   the model, not its title - and black like the dot's outline, string and
-   all, rather than the catalog's orange */
-/* Holds the hint's dissolve filter (HintTag.jsx) - takes no room */
-.hint-dissolve {
-    position: absolute;
-    width: 0;
-    height: 0;
-    overflow: hidden;
-}
-
-/* "double-tap to" over what it does, on two lines */
-.cube-tag--hint {
-    font-size: clamp(0.8rem, 1.8vmin, 1rem);
-    color: var(--hint-line);
-    white-space: pre;
-    text-align: center;
-    line-height: 1.25;
-}
-
+/* The tap hint's string, black like its dot */
 .tag-string--hint path {
     stroke: var(--hint-line);
 }
@@ -541,21 +547,6 @@ canvas.webgl {
 .tag-string--hint .tag-string__knot,
 .tag-string--hint .tag-string__knot-glow {
     fill: var(--hint-line);
-}
-
-/* Quieter: an empty slot is an answer, not a label */
-/* "under construction", on two lines: bare words on the pebble, lifted off
-   it by a paper glow like the spotlight's name rather than a box */
-.cube-tag--empty {
-    color: var(--ink);
-    background: none;
-    border: none;
-    white-space: pre;
-    text-align: center;
-    line-height: 1.15;
-    text-shadow:
-        0 0 0.25rem rgba(var(--bg-rgb), 0.95),
-        0 0 0.6rem rgba(var(--bg-rgb), 0.8);
 }
 
 /**

@@ -301,8 +301,13 @@ isn't an invitation. It was "Still empty..." in a bordered chip; asked for,
 it's now two lines with no box, lifted off the pebble by the spotlight
 name's paper glow, and a different answer each click - "under
 construction", "still settling", "yet to take shape", "a grain not yet
-fallen", never the same twice running (`EMPTY_WORDS` in App, set through
-`ui.onEmptySlot`: the words are the page's, like the tap hint's). Tags are HTML over the canvas, not sprites:
+fallen", never the same twice running (`emptyWords` in `src/app/words.js`, set through
+`ui.onEmptySlot`: the words are the page's, like the tap hint's). All
+the tags over the canvas are now bare text, so that look - no box, the
+paper glow, a "\n" kept as a line break - is `.cube-tag` itself; the two
+hanging on a string share `.cube-tag--hanging` (the tap hint's used to
+borrow `.cube-tag--spotlight`, which made selectors depend on render
+order). Tags are HTML over the canvas, not sprites:
 real Fira Sans, sharp at any pixel ratio, styled in CSS, and
 `pointer-events: none`. `placeTagOnPebble` projects a point on the pebble's
 top towards the bottom of the screen.
@@ -662,8 +667,9 @@ Hanging from the dot's bottom, asked for "similar to the string and text"
 of the catalog: the spotlight's string and lettering. Its words, on two
 lines (asked for): "double-tap to" ("double-click to" with a mouse, by
 `(hover: none)`) over what it does - "zoom", "pause" for `'hold'`, "drop
-again" for `'drop'` (`HINT_WORDS` in App; the engine passes the project's
-`doubleClick`, the page picks the words; `white-space: pre` on the tag).
+again" for `'drop'` (`hintWords` in `src/app/words.js`; the engine passes
+the project's `doubleClick`, the page picks the words; every tag keeps a
+"\n", `white-space: pre`).
 First just "double-click", then the action alone. Both in the dot's black
 (`--hint-line`) - first orange with "Double-click to zoom in" (or "zoom
 out" while zoomed), until the user asked for the one word, in black. It

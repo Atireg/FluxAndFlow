@@ -240,6 +240,7 @@ const HINT_FADE_IN = 0.26; // seconds - tap-hint-in
 const HINT_HOLD = HINT_PRESS * HINT_CYCLES; // seconds pulsing before it falls
 const HINT_DISSOLVE = 1.2; // seconds it takes to dissolve away once double-tapped
 const HINT_SPECKLE = [0.2, 0.8]; // the noise's range the threshold sweeps (HintTag.jsx's filter)
+const HINT_SPECKLE_EDGE = 16; // how sharply a speck goes: the filter's slope
 const HINT_FALL_SPEED = 0.28; // the fall's speed once under way, in screen heights a second
 const HINT_FALL_SPEED_MIN = 160; // px a second
 const HINT_FALL_EASE = 0.6; // seconds it takes to get going, roughly
@@ -303,7 +304,7 @@ export function createTags({ screen, rig, state, overlays }) {
         segments: HINT_SEGMENTS, iterations: HINT_ITERATIONS, weight: HINT_WEIGHT,
         give: HINT_GIVE, slack: true, still,
     });
-    const hint = { shownAt: null, x: 0, y: 0, taps: 0, dissolveAt: null };
+    const hint = { shownAt: null, x: 0, y: 0, taps: 0, dissolveAt: null, filtered: false };
 
     /**
      * Pins a tag over the lower part of a pebble's top face, on screen. On
@@ -367,14 +368,19 @@ export function createTags({ screen, rig, state, overlays }) {
         hintTag.style.opacity = opacity;
         hintString.style.opacity = opacity;
 
-        const filter = dissolve > 0 && !gone ? 'url(#hint-dissolve)' : '';
-        if (hintTag.style.filter !== filter) {
+        // The speckle filter on the dot, its string and its words while it
+        // dissolves; specks below the threshold go - the mask is
+        // HINT_SPECKLE_EDGE x (noise - threshold)
+        const filtered = dissolve > 0 && !gone;
+        if (filtered !== hint.filtered) {
+            hint.filtered = filtered;
+            const filter = filtered ? 'url(#hint-dissolve)' : '';
             [hintDot, hintTag, hintString].forEach((element) => { if (element) element.style.filter = filter; });
+            hintDissolve?.setAttribute('slope', HINT_SPECKLE_EDGE);
         }
-        if (filter && hintDissolve) {
-            // Specks below the threshold go: the mask is 16 x (noise - threshold)
+        if (filtered && hintDissolve) {
             const threshold = HINT_SPECKLE[0] + (HINT_SPECKLE[1] - HINT_SPECKLE[0]) * dissolve;
-            hintDissolve.setAttribute('intercept', (-16 * threshold).toFixed(3));
+            hintDissolve.setAttribute('intercept', (-HINT_SPECKLE_EDGE * threshold).toFixed(3));
         }
         if (opacity <= 0) return;
 

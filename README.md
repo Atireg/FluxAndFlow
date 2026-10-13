@@ -149,7 +149,7 @@ Catalog
         the project's own as they appear; opened projects' pebbles stay
         darker (remembered)
     [x] An empty slot's click answers "under construction" or one of
-        three others, at random (`EMPTY_WORDS` in App)
+        three others, at random (`src/app/words.js`)
     [x] Three kinds of project - research, teaching, the real world - each
         tagged in its bar; a filter in the catalog brings one kind forward
         and pushes the others back to half their size, fainter
@@ -181,13 +181,12 @@ Project view
     [x] The About drawer: model moves left and stays whole on a wide screen,
         a close-up on a phone (Emergent Space: in on the pile in both);
         five pictures in each, Emergent Space's diagrams full width
-    [x] Double-click / double-tap, hinted every 5s by a white touch point
-        that scales with the screen, "double-click" ("double-tap" on a
-        touch screen) hanging from it on a bouncing black string like the
-        catalog's. Per project (`doubleClick`): zooms by default, holds
-        Rock Print still until the next (hinted "pause"), drops Emergent
-        Space again (hinted "drop again"); "double-tap to" over the
-        action on two lines; it pulses twice over (4.4s), then falls like
+    [x] Double-click / double-tap, hinted every 8s by a white touch point
+        that scales with the screen, "double-tap to" ("double-click to"
+        with a mouse) over what it does hanging from it on a bouncing black
+        string like the catalog's. Per project (`doubleClick`): zooms by
+        default, holds Rock Print still until the next ("pause"), drops
+        Emergent Space again ("drop again"); it pulses twice over (4.4s), then falls like
         a leaf off the screen; double-tapped, it dissolves into specks like
         the aggregates
     [x] Rock Print zooms in by itself every 10s and back out (`autoZoom`),

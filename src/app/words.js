@@ -1,0 +1,23 @@
+/**
+ * The page's own small words over the canvas - not a project's content, and
+ * not the engine's: it says when to show them, these say what. A "\n" is a
+ * line break (the tags keep it, `white-space: pre`).
+ */
+
+// What an empty pebble says when clicked, one at random
+const EMPTY_WORDS = ['under\nconstruction', 'still\nsettling', 'yet to\ntake shape', 'a grain\nnot yet fallen'];
+
+// What a double-tap does, by the project's `doubleClick`
+const HINT_ACTIONS = { zoom: 'zoom', hold: 'pause', drop: 'drop again' };
+
+// A new answer for an empty pebble - never the one it gave last
+export function emptyWords(last) {
+    const others = EMPTY_WORDS.filter((words) => words !== last);
+    return others[Math.floor(Math.random() * others.length)];
+}
+
+// The tap hint's two lines: the gesture - a touch screen taps - and what it does
+export function hintWords(action) {
+    const gesture = window.matchMedia('(hover: none)').matches ? 'double-tap' : 'double-click';
+    return `${gesture} to\n${HINT_ACTIONS[action] ?? HINT_ACTIONS.zoom}`;
+}

@@ -140,7 +140,7 @@ Open at end of session (see README, "Next up"):
 
 ---
 
-## Session 3 — 2026-10-11 / 2026-10-12
+## Session 3 — 2026-10-11 / 2026-10-13
 
 `09484e9`..the commit carrying this entry, on
 `claude/react-project-structure-gdpqdq`, fast-forwarded into `main` at each
@@ -162,6 +162,9 @@ in DECISIONS.md.
   previewed options), as a multiplier on the graphite, and the same wave
   varies how heavily it's laid down (`TONE`). First retuned after the user
   saw no change - the check had read the canvas, not the composited page.
+- An empty pebble answers a click with two lines and no box - "under
+  construction", "still settling", "yet to take shape" or "a grain not yet
+  fallen", at random (it said "Still empty..." in a chip).
 
 **Emergent Space.**
 - The turn starts when the pile looks still, not when cannon sleeps.
@@ -182,10 +185,11 @@ in DECISIONS.md.
   alternately on a point of the pavilion and from inside at eye height
   among the columns, looking along the clearest line between them
   (`eyeLevel`; a wider lens and a closer near plane for it - a cap on
-  point size there was taken out again). The first comes 3.5s after the gather, not 10s. The camera's
-  nod is slower (22s).
+  point size there was taken out again). The first comes as the first tap
+  hint lets go, 5.6s after the gather, not 10s. The camera's nod is slower
+  (22s).
 - A double-click holds the pavilion still until the next
-  (`doubleClick: 'hold'`).
+  (`doubleClick: 'hold'`, hinted "pause").
 
 **Categories.** Projects are research, teaching or the real world
 (`category`, required; a tag after the name in the bar). Both projects are
@@ -194,26 +198,24 @@ top left in the catalog brings one kind forward and pushes the other
 pebbles back along the camera's line to half their size, and fainter (straight down
 clumped them in the middle); only the chosen kind jumps (one glowing on
 another kind settles as soon as the choice changes), and a click on a sunk
-pebble brings its kind forward. An empty pebble now answers a click with two lines and no box -
-"under construction", "still settling", "yet to take shape" or "a grain
-not yet fallen", at random.
+pebble brings its kind forward.
 
-**Landing page.** The first thing on opening: the concept in a short
-paragraph over the loader's floating particles, and "Welcome to the F&F
-playground" (worded three ways before it), which turns it into the loader
-on the way to the catalog (its minimum time now counted from that click).
-The back link in a project reads "F&F playground" (first "My playground")
-instead of "All projects". Then rewritten with the user into three short,
-more business-like paragraphs: hidden currents, their background, the
-services; the landing page scrolls if it outgrows a small phone. The loader then shows "Nothing here is fixed. At the edge of
-change, a single grain can start an avalanche, and things fall into new
-order, between flux and flow." a part at a time, line by line, staying about 8.3s (was
-5s).
+**Landing page.** The first thing on opening, over the loader's floating
+particles: three short paragraphs written with the user (hidden currents,
+their background, the services - first one paragraph on self-organised
+criticality, then a plain services list), and "Welcome to the F&F
+playground" (worded three ways before it), which turns it into the loader.
+It scrolls if it outgrows a small phone. The loader then builds up
+"Nothing here is fixed. / At the edge of change, / a single grain can
+start an avalanche, / and things fall into new order, / between flux and
+flow." a line at a time, staying about 8.3s from the click (was 5s). The
+back link in a project reads "F&F playground" (first "My playground",
+before that "All projects").
 
-**Tap hint.** "double-click" ("double-tap" on touch; "pause" on Rock Print,
-"drop again" on Emergent Space - then "double-tap to" over it, on two
-lines) hangs from the dot on
-a black, bouncing string - the catalog's rope, shared (`createRope`). It pulses twice over (4.4s), then falls like a leaf -
+**Tap hint.** "double-tap to" ("double-click to" with a mouse) over what
+it does - "zoom", "pause", "drop again" - hangs from the dot on a black,
+bouncing string, the catalog's rope (`createRope`); first just
+"double-click". It pulses twice over (4.4s), then falls like a leaf -
 drifting and tilting, the string trailing - off the screen; double-tapped,
 it dissolves into specks the way the aggregates do. Hints come every 8s.
 
@@ -230,7 +232,11 @@ a lens's visible height (`halfHeightAt`), the points' ink choice
 string (`components/TagString.jsx`), a click kept off the canvas
 (`components/clickOnly.js`) and the loader's paper halo (`--loader-halo`).
 Dead code out: `lil-gui`, unused exports, leftover shader lines and a
-stale file map.
+stale file map. A second pass: the page's small words into
+`src/app/words.js`; every tag over the canvas bare text with the paper
+glow on `.cube-tag` itself, the two on strings sharing `.cube-tag--hanging`
+(the hint no longer borrows the spotlight's class); the hint's filter set
+once rather than every frame; `halfExtentAlong` in framing.
 
 Checks were headless (software WebGL, both layouts) with throwaway hooks,
 removed before each merge; no console errors in any run.

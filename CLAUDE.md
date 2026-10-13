@@ -33,8 +33,9 @@ and README's "Next up". As of the end of Session 3:
 - **Catalog**: ten pebbles shaded in graphite, each a random size on every
   visit, slowly changing shape and warmth, pushing apart where they touch;
   one at a time glows orange with its name hanging on a string in the
-  wind. The grid arrives slowly as the loader clears, and the loader's
-  streams carry on among the pebbles in the scene.
+  wind. An empty one answers a click with one of four two-line phrases
+  ("under construction"...). The grid arrives slowly as the loader clears,
+  and the loader's streams carry on among the pebbles in the scene.
 - **Rock Print Pavilion** (slot 0): a scanned point cloud that gathers out
   of a scattered cloud, turns, and nods. Every 10s the camera moves in by
   itself, then out - alternately on a point of the pavilion and from
@@ -100,6 +101,7 @@ that line.
     src/index.html          the landing page + start-up loader (inline), and #root. Nothing else
     src/main.jsx            mounts <App/> (no StrictMode - see the file)
     src/app/App.jsx         the page: React state, the refs, the `ui` bridge
+    src/app/words.js        the page's small words: an empty pebble's answers, the tap hint's
     src/components/         ProjectBar, ProjectDrawer, ProjectImage,
                             CatalogTags, CategoryFilter, HintTag, TagString
                             (the string both hang on), TapHint, Fog, clickOnly.js
@@ -193,7 +195,8 @@ defineProject({
 
 - **Slots**: the grid always has `SLOT_COUNT` (10) pebbles; an empty slot
   shows the rock (`EMPTY_SLOT_THUMB`) and answers a click with "under
-  construction" or another of App's `EMPTY_WORDS`, at random. Both live in `src/projects/schema.js`; raise `SLOT_COUNT`
+  construction" or another of `src/app/words.js`'s, at random. The count
+  and the thumbnail live in `src/projects/schema.js`; raise `SLOT_COUNT`
   before adding an eleventh project.
 - The engine never imports `src/projects/`: it is handed `catalogSource`
   (slot count, what sits in each slot, the empty thumbnail, how to label a
@@ -336,7 +339,7 @@ defineProject({
   `--pebble-px` (set by `framing.fitToGrid`), not a fixed rem. The rope
   itself is `createRope`/`drawRope`, shared with the tap hint's elastic
   string and its two lines - "double-tap to" and "zoom" / "pause" / "drop
-  again" by the project's `doubleClick` (`HINT_WORDS` in App) -
+  again" by the project's `doubleClick` (`src/app/words.js`) -
   (`HINT_*`, `HintTag.jsx`). The engine runs the hint's life: it pulses
   `HINT_CYCLES` times (`HINT_HOLD`), then falls like a leaf (`hintFall`,
   moving `overlays.hintDot`) off the screen. Double-tapped, it dissolves
@@ -345,9 +348,9 @@ defineProject({
   `overlays.hintDissolve`); its taps time themselves to the dot's CSS
   press - change `tap-hint-press`/`-ripple` (and their count) and
   `HINT_PRESS`/`HINT_TAPS`/`HINT_CYCLES` together. The hint's tag also
-  carries `.cube-tag--spotlight` (for its look), so it's rendered after
-  `CatalogTags`: `querySelector('.cube-tag--spotlight')` and
-  `.tag-string__knot` still find the catalog's first.
+  shares the spotlight's look through `.cube-tag--hanging` and is rendered
+  after `CatalogTags`, so `.tag-string__knot` still finds the catalog's
+  first.
 - **The camera's moves in the project view all go through `moveCamera`**
   (`camera/rig.js`), and the automatic ones follow what they moved in on
   as the model turns (`follow`, `worldAhead` in `detail.js`): aim where it

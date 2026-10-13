@@ -109,6 +109,11 @@ function viewDirection(project, { elevation: elevationDeg = project?.view?.eleva
     );
 }
 
+// Half the extent along `axis` (a unit vector) of a box `half` across each way
+function halfExtentAlong(axis, half) {
+    return Math.abs(axis.x) * half.x + Math.abs(axis.y) * half.y + Math.abs(axis.z) * half.z;
+}
+
 // Seconds since a project's model was shown (its pebble's
 // `detailRotateStartTime`) - the clock its turn, gather and timings run on
 export function detailSince(pebble, elapsedTime) {
@@ -272,9 +277,9 @@ export function createFraming({ rig, screen, state, grid, ui }) {
             // The box's extent as it projects onto the screen axes, plus its
             // depth along the view axis - under perspective the near face
             // projects larger than the centre, so the fit has to allow for it
-            const halfW = Math.abs(right.x) * half.x + Math.abs(right.y) * half.y + Math.abs(right.z) * half.z;
-            const halfH = Math.abs(up.x) * half.x + Math.abs(up.y) * half.y + Math.abs(up.z) * half.z;
-            const halfD = Math.abs(forward.x) * half.x + Math.abs(forward.y) * half.y + Math.abs(forward.z) * half.z;
+            const halfW = halfExtentAlong(right, half);
+            const halfH = halfExtentAlong(up, half);
+            const halfD = halfExtentAlong(forward, half);
 
             const perLayout = (value, fallback) => (typeof value === 'object' ? value[mode] : value) ?? fallback;
             const zoom = perLayout(fit ? fitZoom : ownView.zoom, 1);

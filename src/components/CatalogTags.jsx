@@ -14,14 +14,14 @@ export default function CatalogTags({ emptyTagRef, stringRef, spotlightTagRef })
         <>
             {/* The answer to clicking a slot with no project in it yet */}
             <div className="cube-tag cube-tag--empty" ref={emptyTagRef} aria-hidden="true">
-                {/* Its words are picked on each click (App's EMPTY_WORDS) */}
+                {/* Its words are picked on each click (app/words.js) */}
             </div>
 
             {/* The string the glowing pebble's name hangs on */}
             <TagString ref={stringRef} />
 
             {/* The glowing pebble's name, hanging from the string's end */}
-            <div className="cube-tag cube-tag--spotlight" ref={spotlightTagRef} aria-hidden="true" />
+            <div className="cube-tag cube-tag--hanging cube-tag--spotlight" ref={spotlightTagRef} aria-hidden="true" />
         </>
     );
 }

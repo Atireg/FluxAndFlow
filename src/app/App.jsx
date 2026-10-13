@@ -9,6 +9,10 @@ import HintTag from '../components/HintTag.jsx';
 import CategoryFilter from '../components/CategoryFilter.jsx';
 import Fog from '../components/Fog.jsx';
 import VelocityTags from '../components/VelocityTags.jsx';
+import { emptyWords, hintWords } from './words.js';
+
+// The elements matching `selector` inside a ref's node, as an array
+const nodesIn = (ref, selector) => [...(ref.current?.querySelectorAll(selector) ?? [])];
 
 /**
  * The page.
@@ -24,15 +28,6 @@ import VelocityTags from '../components/VelocityTags.jsx';
  * round. The start-up loader stays inline in index.html, ahead of this
  * module, so it is on screen before React has even downloaded.
  */
-// The elements matching `selector` inside a ref's node, as an array
-const nodesIn = (ref, selector) => [...(ref.current?.querySelectorAll(selector) ?? [])];
-
-// What an empty pebble says when clicked - one at random, two lines each
-const EMPTY_WORDS = ['under\nconstruction', 'still\nsettling', 'yet to\ntake shape', 'a grain\nnot yet fallen'];
-
-// What the tap hint says a double-tap does, by the project's `doubleClick`
-const HINT_WORDS = { zoom: 'zoom', hold: 'pause', drop: 'drop again' };
-
 export default function App() {
     const [project, setProject] = useState(null);
     const [status, setStatus] = useState(null);
@@ -88,9 +83,7 @@ export default function App() {
                 // An empty pebble was clicked: a new answer, never the last one again
                 onEmptySlot: () => {
                     const tag = emptyTagRef.current;
-                    if (!tag) return;
-                    const others = EMPTY_WORDS.filter((words) => words !== tag.textContent);
-                    tag.textContent = others[Math.floor(Math.random() * others.length)];
+                    if (tag) tag.textContent = emptyWords(tag.textContent);
                 },
 
                 onFog: (visible) => {
@@ -115,13 +108,9 @@ export default function App() {
                     const hint = tapHintRef.current;
                     if (!hint) return;
 
-                    // What the string's tag says, on two lines: the gesture -
-                    // a touch screen taps - and what it does there
+                    // What the string's tag says (words.js)
                     const tag = hintTagRef.current;
-                    if (tag) {
-                        const gesture = window.matchMedia('(hover: none)').matches ? 'double-tap' : 'double-click';
-                        tag.textContent = `${gesture} to\n${HINT_WORDS[action] ?? HINT_WORDS.zoom}`;
-                    }
+                    if (tag) tag.textContent = hintWords(action);
 
                     hint.style.left = `${x}px`;
                     hint.style.top = `${y}px`;
@@ -211,8 +200,9 @@ export default function App() {
             />
 
             {/*
-              * After the catalog's tags, so their selectors find those first;
-              * the dot after its string, so it sits over the knot
+              * After the catalog's tags, so `.tag-string__knot` finds the
+              * spotlight's first; the dot after its string, so it sits over
+              * the knot
               */}
             <HintTag stringRef={hintStringRef} tagRef={hintTagRef} dissolveRef={hintDissolveRef} />
             <TapHint ref={tapHintRef} />
