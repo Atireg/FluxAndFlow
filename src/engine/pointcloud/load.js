@@ -3,7 +3,7 @@ import { gltfLoader } from '../assets.js';
 import { MESH_FIT_SIZE } from '../constants.js';
 import { POINT_INKS, POINT_SIZES, pointInkUniforms } from '../colors.js';
 import { createPile, findRods } from '../pile.js';
-import { addGatherAttributes, GATHER_DURATION, GATHER_SPREAD, GATHER_SWIRL, GATHER_TRAIL } from './gather.js';
+import { addGatherAttributes, GATHER_DURATION, GATHER_SPREAD, GATHER_SWIRL, GATHER_TRAIL, GATHER_TRAIL_EVERY } from './gather.js';
 import { addTrails } from './trails.js';
 import { makeInkMaterial, pointsFromMeshes } from './mesh.js';
 
@@ -140,6 +140,7 @@ export function loadPointCloud({
                     fragmentShader: inkGlsl + trailGatherFragmentShader,
                     names: ['aScatter', 'aGatherDelay', 'aScale', 'aTone'],
                     lag: GATHER_TRAIL / GATHER_DURATION,
+                    every: GATHER_TRAIL_EVERY,
                 }));
             }
         });

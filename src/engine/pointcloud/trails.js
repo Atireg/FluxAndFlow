@@ -21,28 +21,37 @@ export const trailResolution = { value: new THREE.Vector2(1, 1) };
 /**
  * Tails for a cloud of points: its own attributes (`names`) per instance,
  * its place as aHome, and the uniforms it shares with the points - the same
- * objects, so whatever drives the points drives the tails.
+ * objects, so whatever drives the points drives the tails. `every` gives
+ * only every that-many'th point a tail: each is a quad working the motion
+ * out twice, so a big cloud's tails cost more to draw than its points.
  */
-export function addTrails(points, { vertexShader, fragmentShader, names, lag }) {
+export function addTrails(points, { vertexShader, fragmentShader, names, lag, every = 1 }) {
     const source = points.geometry;
     const home = source.attributes.position;
+    const count = Math.ceil(home.count / every);
     const geometry = new THREE.InstancedBufferGeometry();
     geometry.setAttribute('position', new THREE.Float32BufferAttribute([0, -1, 0, 0, 1, 0, 1, -1, 0, 1, 1, 0], 3));
     geometry.setIndex([0, 1, 2, 2, 1, 3]);
 
     // Read out as floats, whatever the cloud is stored in (quantized)
-    const homes = new Float32Array(home.count * 3);
-    for (let i = 0; i < home.count; i++) {
-        homes[i * 3] = home.getX(i);
-        homes[i * 3 + 1] = home.getY(i);
-        homes[i * 3 + 2] = home.getZ(i);
+    const homes = new Float32Array(count * 3);
+    for (let i = 0; i < count; i++) {
+        homes[i * 3] = home.getX(i * every);
+        homes[i * 3 + 1] = home.getY(i * every);
+        homes[i * 3 + 2] = home.getZ(i * every);
     }
     geometry.setAttribute('aHome', new THREE.InstancedBufferAttribute(homes, 3));
     names.forEach((name) => {
-        const attribute = source.attributes[name];
-        geometry.setAttribute(name, new THREE.InstancedBufferAttribute(attribute.array, attribute.itemSize, attribute.normalized));
+        const { array, itemSize, normalized } = source.attributes[name];
+        const picked = every === 1 ? array : new array.constructor(count * itemSize);
+        if (every !== 1) {
+            for (let i = 0; i < count; i++) {
+                for (let k = 0; k < itemSize; k++) picked[i * itemSize + k] = array[i * every * itemSize + k];
+            }
+        }
+        geometry.setAttribute(name, new THREE.InstancedBufferAttribute(picked, itemSize, normalized));
     });
-    geometry.instanceCount = home.count;
+    geometry.instanceCount = count;
 
     // The cloud's own extent, not the quad's, for anything framing the model
     if (!source.boundingBox) source.computeBoundingBox();

@@ -996,9 +996,11 @@ holds it, while a phone running at 10 fps or more keeps the full pace. And
 a newly loaded model's shaders - the points' and the hidden tails' - are
 compiled as it loads, before the gather starts (`prepareShaders` in
 detail.js), not on its first frame. Software WebGL here runs at a frame or
-two a second, so the effect on a real phone is unmeasured - if it still
-stutters, the next cost to cut is the tails: one quad per point, each
-working the gather out twice.
+two a second, so the effect on a real phone is unmeasured. The tails were
+the next cost, and are now cut too (asked to try): one quad per point,
+each working the gather out twice, drew more than the points themselves -
+only every third point has one now (`GATHER_TRAIL_EVERY`, `addTrails`'s
+`every`; a pebble's dissolve keeps all of its own).
 
 
 Tails behind moving points

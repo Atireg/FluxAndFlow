@@ -15,6 +15,7 @@ export const GATHER_SWIRL = 2.4; // radians the scatter turns through on the way
 const GATHER_SCATTER = 1.5; // scatter radius, as a multiple of the model's own half-width
 
 export const GATHER_TRAIL = 0.15; // seconds back a gathering point's tail reaches - 0.3 read as too long
+export const GATHER_TRAIL_EVERY = 3; // only every third point has a tail - all of them made the gather lag
 
 /**
  * The handover from the clicked pebble's dissolve to the project's own
