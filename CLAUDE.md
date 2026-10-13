@@ -121,7 +121,7 @@ Inside `src/engine/`:
     catalog.js           the grid of pebbles, thumbnails, the idle/spotlight modes
     detail.js            opening and closing a project, double-click, the timed zooms
                          and close-ups, the tap hint
-    tags.js              the names, their rope, the tap hint's string, "Still empty...", in screen pixels
+    tags.js              the names, their rope, the tap hint's string, "under construction", in screen pixels
     streams.js           the streams themselves
     streams-view.js      wiring them to the pebbles, the camera and the pointer
     pile.js              the physics drop
@@ -192,8 +192,8 @@ defineProject({
 ```
 
 - **Slots**: the grid always has `SLOT_COUNT` (10) pebbles; an empty slot
-  shows the rock (`EMPTY_SLOT_THUMB`) and answers a click with "Still
-  empty...". Both live in `src/projects/schema.js`; raise `SLOT_COUNT`
+  shows the rock (`EMPTY_SLOT_THUMB`) and answers a click with "under
+  construction". Both live in `src/projects/schema.js`; raise `SLOT_COUNT`
   before adding an eleventh project.
 - The engine never imports `src/projects/`: it is handed `catalogSource`
   (slot count, what sits in each slot, the empty thumbnail, how to label a
@@ -254,7 +254,7 @@ defineProject({
   the code they tune. Don't re-introduce work at module scope in
   `src/engine/`.
 - **Per-frame HTML must not go through React state.** The pebbles' names,
-  the string, "Still empty..." and the tap hint move every frame: React
+  the string, "under construction" and the tap hint move every frame: React
   renders the elements and the engine writes their `style`/`d` through refs
   (`ui.overlays`, `ui.showTapHint`). React state is only for what changes
   on a click - the open project, the bar's status, the drawer.

@@ -46,7 +46,7 @@ export function createState() {
             nextAt: 0,
         },
 
-        // "Still empty..." on a slot that was just clicked
+        // "under construction" on a slot that was just clicked
         emptyTag: { pebble: null, shownAt: 0 },
 
         // Seconds into the model's showing before the next double-tap hint

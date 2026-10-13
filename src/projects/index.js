@@ -16,7 +16,7 @@
  * `doubleClick`, `autoZoom` or `eyeLevel`.
  *
  * Slots with no project listed here render as empty pebbles, holding the
- * rock and answering a click with "Still empty...".
+ * rock and answering a click with "under construction".
  */
 import { EMPTY_SLOT_CATEGORIES, EMPTY_SLOT_THUMB, SLOT_COUNT, defineProject, pebbleLabel } from './schema.js';
 import rockPrint from './rock-print.js';

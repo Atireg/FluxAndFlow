@@ -4,7 +4,7 @@ import { SPOTLIGHT_TAG_MIN, spotlightGlow, spotlightIntensity } from './pebbles/
 import { clamp01, smooth01 } from './ease.js';
 
 /**
- * The catalog's words on its pebbles: "Still empty..." for a moment on an
+ * The catalog's words on its pebbles: "under construction" for a moment on an
  * empty slot that was just clicked, and the glowing pebble's name hanging
  * below it on a string, blinking with its glow and gone once it's back in
  * its float.
@@ -14,7 +14,7 @@ import { clamp01, smooth01 } from './ease.js';
  * nothing about them goes through React state, because they move every frame
  * (see DECISIONS.md).
  */
-const EMPTY_TAG_DURATION = 1.6; // seconds "Still empty..." stays up after a click
+const EMPTY_TAG_DURATION = 1.6; // seconds "under construction" stays up after a click
 const EMPTY_TAG_FADE = 0.3; // seconds of that spent fading out
 
 /**
@@ -431,7 +431,7 @@ export function createTags({ screen, rig, state, overlays }) {
             /**
              * The same beat and ramp the pebble itself glows by, so the name
              * is brightest when the pebble is most orange and has faded out
-             * entirely by the time the pebble has settled. "Still empty..."
+             * entirely by the time the pebble has settled. "under construction"
              * wins on its own pebble.
              */
             const spotlit = state.spotlight.pebble;

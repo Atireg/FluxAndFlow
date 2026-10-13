@@ -194,7 +194,8 @@ top left in the catalog brings one kind forward and pushes the other
 pebbles back along the camera's line to half their size, and fainter (straight down
 clumped them in the middle); only the chosen kind jumps (one glowing on
 another kind settles as soon as the choice changes), and a click on a sunk
-pebble brings its kind forward.
+pebble brings its kind forward. An empty pebble now answers a click with "under construction",
+on two lines, with no box.
 
 **Landing page.** The first thing on opening: the concept in a short
 paragraph over the loader's floating particles, and "Welcome to the F&F

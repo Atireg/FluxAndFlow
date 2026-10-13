@@ -14,7 +14,7 @@ export default function CatalogTags({ emptyTagRef, stringRef, spotlightTagRef })
         <>
             {/* The answer to clicking a slot with no project in it yet */}
             <div className="cube-tag cube-tag--empty" ref={emptyTagRef} aria-hidden="true">
-                Still empty...
+                {'under\nconstruction'}
             </div>
 
             {/* The string the glowing pebble's name hangs on */}

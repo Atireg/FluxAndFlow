@@ -427,7 +427,7 @@ canvas.webgl {
 }
 
 /**
- * The tags on a catalog cube: "Still empty..." after clicking an empty slot,
+ * The tags on a catalog cube: "under construction" after clicking an empty slot,
  * and "Project 01"... on the cube glowing orange. Positioned and faded from
  * src/engine/tags.js every frame.
  */
@@ -544,9 +544,18 @@ canvas.webgl {
 }
 
 /* Quieter: an empty slot is an answer, not a label */
+/* "under construction", on two lines: bare words on the pebble, lifted off
+   it by a paper glow like the spotlight's name rather than a box */
 .cube-tag--empty {
-    color: var(--ink-dim);
-    border-color: var(--rule);
+    color: var(--ink);
+    background: none;
+    border: none;
+    white-space: pre;
+    text-align: center;
+    line-height: 1.15;
+    text-shadow:
+        0 0 0.25rem rgba(var(--bg-rgb), 0.95),
+        0 0 0.6rem rgba(var(--bg-rgb), 0.8);
 }
 
 /**

@@ -19,7 +19,7 @@ The catalog (the grid of pebbles - "cubes" in the code)
 - The glowing pebble's name hangs on a string
 - The pointer stirs the grid; the grid doesn't orbit
 - Every pebble holds its thumbnail - the rock, or the project's own model
-- "Still empty...", and tags as HTML over the canvas
+- "Under construction", and tags as HTML over the canvas
 - Selecting: pointerup on the canvas, and drags don't count
 - The grid arrives, a pebble at a time
 - Clicking a project knocks the rest of the grid off the screen
@@ -133,7 +133,7 @@ classes `.cube-tag` - cube-era names left as they are.
 - **No frame in the project view.** The pebble has dissolved; the project
   stands alone in the fog. Framing still fits the invisible `CUBE_SIZE` box.
 - **Visited pebbles stay darker**, like visited links: once its project has
-  been opened (`markVisited` in `openProject`; "Still empty..." doesn't
+  been opened (`markVisited` in `openProject`; "under construction" doesn't
   count), a pebble rests in deeper glass with a darker rim. Every state
   that rests or glows takes its base from `restingFaceColor` /
   `restingFaceOpacity` / `restingRimColor`, so nothing writes a resting
@@ -208,7 +208,7 @@ The spotlight's tag (`.cube-tag--spotlight`, in `CatalogTags`) reads the project
 "Emergent Space"), or "Project 03".."Project 10" for an empty slot, and
 pulses with the glow (down to `SPOTLIGHT_TAG_MIN`, 0.65, between beats - at
 0.2 it read as see-through), gone once the pebble settles. Hovering it
-changes nothing - the spotlight runs its whole dwell. "Still empty..." wins
+changes nothing - the spotlight runs its whole dwell. "under construction" wins
 on its pebble.
 
 **Size**: the tags scale with the pebbles on screen - `--pebble-px`, their
@@ -292,12 +292,14 @@ scale, 1 unit down). Either way the spotlight pulses it from
 `contentBaseScale`.
 
 
-"Still empty...", and tags as HTML over the canvas
---------------------------------------------------
+"Under construction", and tags as HTML over the canvas
+------------------------------------------------------
 
-Clicking an empty slot shows "Still empty..." (`.cube-tag--empty`) on it for `EMPTY_TAG_DURATION`,
-fading over `EMPTY_TAG_FADE` - the quiet ink chip, not the orange, since an
-empty slot isn't an invitation. Tags are HTML over the canvas, not sprites:
+Clicking an empty slot shows "under construction" (`.cube-tag--empty`) on it for `EMPTY_TAG_DURATION`,
+fading over `EMPTY_TAG_FADE` - in ink, not the orange, since an empty slot
+isn't an invitation. It was "Still empty..." in a bordered chip; asked for,
+it's now the two words on two lines with no box, lifted off the pebble by
+the spotlight name's paper glow. Tags are HTML over the canvas, not sprites:
 real Fira Sans, sharp at any pixel ratio, styled in CSS, and
 `pointer-events: none`. `placeTagOnPebble` projects a point on the pebble's
 top towards the bottom of the screen.
@@ -1274,7 +1276,7 @@ opened, the status changed, roll the fog in) and the methods it
 returns (`start`, `closeProject`, `replayDrop`, `setDrawerOpen`,
 `dispose`).
 
-The per-frame HTML - the pebbles' names, the string, "Still empty...", the
+The per-frame HTML - the pebbles' names, the string, "under construction", the
 tap hint - is the one place this needs care. Those move every frame, so
 they must not go through React state: React renders the elements and hands
 their DOM nodes to the engine through refs (`ui.overlays`), and the engine

@@ -24,8 +24,8 @@ picture frames. The fields are listed in CLAUDE.md and in
 `src/projects/schema.js`, which fills the defaults and rejects a
 half-declared project rather than letting it render wrong. There is no
 per-project branch in the engine, so nothing else needs touching. Slots
-with no project show the rock thumbnail and answer a click with "Still
-empty...". See DECISIONS.md for why things are built the way they are, and
+with no project show the rock thumbnail and answer a click with "under
+construction". See DECISIONS.md for why things are built the way they are, and
 CHANGELOG.md for what changed when.
 
 Add `?cloudtest` to the address to fill every slot with a copy of the
@@ -148,7 +148,7 @@ Catalog
         clicked pebble dissolves into a cloud of points that hands over to
         the project's own as they appear; opened projects' pebbles stay
         darker (remembered)
-    [x] An empty slot's click answers "Still empty..."
+    [x] An empty slot's click answers "under construction"
     [x] Three kinds of project - research, teaching, the real world - each
         tagged in its bar; a filter in the catalog brings one kind forward
         and pushes the others back to half their size, fainter
