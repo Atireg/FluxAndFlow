@@ -227,6 +227,12 @@ bouncing string, the catalog's rope (`createRope`); first just
 drifting and tilting, the string trailing - off the screen; double-tapped,
 it dissolves into specks the way the aggregates do. Hints come every 8s.
 
+**Safari: every pebble was Rock Print.** The `?cloudtest` load test
+(every slot a copy of the first project) was still in the site, and
+Safari's address bar had remembered a `?cloudtest` address - so there every
+pebble read and opened Rock Print, Emergent Space was missing and the
+filter did nothing. The test mode is removed.
+
 **Links.** Each project has its own link - `#rock-print`,
 `#emergent-space` on the site's address - shown while it's open, so it
 can be copied; opened, it goes straight through the loader to the

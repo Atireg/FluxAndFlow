@@ -18,7 +18,7 @@
  * Slots with no project listed here render as empty pebbles, holding the
  * rock and answering a click with "under construction".
  */
-import { EMPTY_SLOT_CATEGORIES, EMPTY_SLOT_THUMB, SLOT_COUNT, defineProject, pebbleLabel } from './schema.js';
+import { EMPTY_SLOT_CATEGORIES, EMPTY_SLOT_THUMB, SLOT_COUNT, pebbleLabel } from './schema.js';
 import rockPrint from './rock-print.js';
 import emergentSpace from './emergent-space.js';
 
@@ -28,29 +28,6 @@ const catalog = [
     rockPrint,
     emergentSpace,
 ];
-
-/**
- * Load test: `?cloudtest` in the address fills every slot with a copy of the
- * first project - its rock thumbnail in every pebble at start-up, its point
- * cloud loaded only when that pebble is clicked - each with its own
- * downloads, the way ten different projects would be. Off unless asked for -
- * see DECISIONS.md.
- */
-function cloudTestCopies(first) {
-    return Array.from({ length: SLOT_COUNT }, (_, slot) => defineProject({
-        ...first,
-        id: `${first.id}-copy-${slot}`,
-        slot,
-        thumbModel: `${first.thumbModel}?copy=${slot}`,
-        detailModel: `${first.detailModel}?copy=${slot}`,
-    }));
-}
-
-function isCloudTest() {
-    if (typeof window === 'undefined') return false;
-
-    return new URLSearchParams(window.location.search).has('cloudtest');
-}
 
 /**
  * Two projects in the same slot would silently hide one of them, with
@@ -74,11 +51,7 @@ function bySlot(list) {
     return map;
 }
 
-const projects = isCloudTest() && catalog.length
-    ? cloudTestCopies(catalog[0])
-    : catalog;
-
-const projectBySlot = bySlot(projects);
+const projectBySlot = bySlot(catalog);
 
 /**
  * What the engine needs to build the grid: how many pebbles, and what (if

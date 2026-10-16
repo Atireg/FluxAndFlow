@@ -28,9 +28,6 @@ with no project show the rock thumbnail and answer a click with "under
 construction". See DECISIONS.md for why things are built the way they are, and
 CHANGELOG.md for what changed when.
 
-Add `?cloudtest` to the address to fill every slot with a copy of the
-first project - a load test, see DECISIONS.md.
-
 
     npm install
     npm run dev      # dev server
@@ -109,7 +106,8 @@ Performance and tech
     [ ] Point-cloud colours from the scan: COLOR_0 is still in the .glb but
         unread - the points are drawn in three inks. Use it, or drop it
         (~315 KB less per cloud)
-    [ ] Remove `?cloudtest` once there are real projects to fill the grid
+    [x] `?cloudtest` removed - a Safari address bar had remembered it and
+        kept opening the test version (every pebble Rock Print)
     [x] `lil-gui` dropped - nothing imported it (the debug panel was
         commented out since before Session 1)
     [ ] The points' ink grain does nothing: the cloud's fragment shader

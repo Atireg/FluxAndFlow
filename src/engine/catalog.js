@@ -26,8 +26,6 @@ export function createCatalog({ scene, grid, state, boot, visited, source }) {
     /**
      * One download per file, however many pebbles show it: each pebble gets
      * its own clone of the loaded scene (geometry and materials shared).
-     * Under ?cloudtest each copy has its own URL, so there it's still ten
-     * downloads.
      */
     const thumbScenes = new Map();
 

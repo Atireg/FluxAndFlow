@@ -56,7 +56,7 @@ Page, colour and drawer
 Loading
 - The landing page, then the loader, on one field of particles
 - The start-up loader is inline and waits for real progress
-- `?cloudtest`, and why clouds load on click
+- Why clouds load on click
 - A link to each project
 
 How the code is laid out
@@ -1249,13 +1249,13 @@ apart from the flow's own tracking, since a tap with no move must count
 too.
 
 
-`?cloudtest`, and why clouds load on click
-------------------------------------------
+Why clouds load on click
+------------------------
 
-`?cloudtest` fills every slot with a copy of the first project, each with
-its own `?copy=n` URLs so they download as ten projects would. Its first
-version loaded all ten clouds at start-up, measured here (phone viewport,
-cache off, gzipped):
+A load test, `?cloudtest`, filled every slot with a copy of the first
+project, each with its own `?copy=n` URLs so they downloaded as ten
+projects would. Its first version loaded all ten clouds at start-up,
+measured here (phone viewport, cache off, gzipped):
 
 | Connection        | Normal: models done | Normal: total | Ten clouds at start-up | total   |
 |-------------------|--------------------:|--------------:|-----------------------:|--------:|
@@ -1264,7 +1264,11 @@ cache off, gzipped):
 | Slow 4G, 1.6 Mbps |               2.5s  |       0.48 MB |                  49.2s | 9.66 MB |
 
 So clouds load only when a project is opened; ten rock thumbnails cost
-~2 MB. Remove the flag once real projects fill the grid.
+~2 MB. The flag is gone: Safari's address bar had remembered a
+`?cloudtest` address and auto-completed to it, so the live site there
+showed Rock Print on every pebble, opened it from all of them, and had no
+Emergent Space or working filter. A test switch reachable from the public
+address is a trap; rebuild it as a local-only change if it's needed again.
 
 
 A link to each project
