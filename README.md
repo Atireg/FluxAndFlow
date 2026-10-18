@@ -30,10 +30,6 @@ TO DOs
 ======
 
 Next up (waiting on content or a check from the user)
-    [ ] The real copy for both projects - year, role, context, body,
-        credits. Rock Print's and Emergent Space's fields hold unmistakable
-        [PLACEHOLDER ...] text so their About drawers exist; it is live and
-        needs replacing. State the role accurately
     [ ] Captions / photo credits for both projects' five pictures, if
         wanted (the `caption` fields are empty)
     [ ] Check the licensing/attribution for the Rock Print and Emergent
@@ -105,6 +101,11 @@ Sound?
 
 Done
 ====
+
+Content
+    [x] The real copy for both projects - year, role, context, body and
+        credits, drafted from the published descriptions (ETH, Gewerbemuseum
+        Winterthur, ITECH Stuttgart) and approved by the user
 
 Catalog
     [x] Ten fixed slots (SLOT_COUNT), reachable on every viewport, with

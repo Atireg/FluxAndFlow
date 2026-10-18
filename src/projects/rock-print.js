@@ -11,26 +11,33 @@ export default defineProject({
     // Research, teaching or the real world - its tag, and the catalog's filter
     category: 'research',
 
-    // Fill these in and they appear in the drawer automatically; anything
-    // left empty is skipped rather than rendered blank. State the role
-    // accurately - the page implies authorship of whatever it shows.
-    //   year:    '2018'
-    //   role:    what you actually did on it
-    //   context: studio, course or research group
-    //   body:    ['paragraph', 'paragraph']
-    //   credits: collaborators, and the research group to credit
-    // TEMP: placeholder text to verify the drawer renders on the live
-    // site. Unmistakably fake on purpose - replace with the real copy
-    // before sharing this link. See README.md.
-    year: '[PLACEHOLDER YEAR]',
-    role: '[PLACEHOLDER ROLE - replace before publishing]',
-    context: '[PLACEHOLDER CONTEXT]',
+    // The drawer's rows and text; anything left empty is skipped. State
+    // the role accurately - the page implies authorship of what it shows.
+    year: '2018',
+    role: 'Project lead, with Petrus Aejmelaeus-Lindström',
+    context: 'Gramazio Kohler Research, ETH Zurich, for "Hello, Robot." '
+        + 'at the Gewerbemuseum Winterthur',
     body: [
-        '[PLACEHOLDER BODY TEXT] This paragraph exists only to verify '
-        + 'that the About drawer opens, scrolls and closes correctly. '
-        + 'Replace it with the real project description.',
+        'A temporary pavilion on the Kirchplatz in Winterthur, built in four '
+        + 'weeks by a mobile robot, the In situ Fabricator, out of nothing '
+        + 'but loose stones and string. Eleven three-metre pillars carry an '
+        + 'eight-tonne steel roof.',
+        'The robot lays string between layers of gravel in a pattern it '
+        + 'keeps calculating as it builds. Pressed together, the loose stones '
+        + 'jam into a stable, load-bearing structure. It took about 30 tonnes '
+        + 'of stone and 120 km of string, with no binder, so both can be '
+        + 'taken apart and reused.',
+        'It was shown from 4 October to 4 November 2018 in the exhibition '
+        + '"Hello, Robot. Design between Human and Machine", as part of the '
+        + 'research project Design and Robotic Fabrication of Jammed '
+        + 'Architectural Structures. It follows the first Rock Print, made '
+        + 'with MIT\'s Self-Assembly Lab for the 2015 Chicago Architecture '
+        + 'Biennial.',
     ],
-    credits: '[PLACEHOLDER CREDITS]',
+    credits: 'Gramazio Kohler Research, ETH Zurich. Petrus '
+        + 'Aejmelaeus-Lindström and Gergana Rusenova (project lead), Hannes '
+        + 'Mayer, Dr. Ammar Mirjan, Esther Lombardini, Jesús Medina Ibáñez. '
+        + 'Structural advice and sponsorship: Lüchinger+Meyer Bauingenieure.',
 
     thumbModel: 'models/rock.gltf',
     detailModel: 'models/RockPrintStructureReduced.glb',

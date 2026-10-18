@@ -33,9 +33,10 @@ in a pull-out drawer.
   velocity arrows, interlock dots, a close-up, then a new drop. A
   double-click drops again. One Vimeo film in its drawer.
 - **Links**: each project's own address is `#<id>` (`#rock-print`).
-- **Waiting on the user**: real drawer copy (the live text is
-  `[PLACEHOLDER ...]`), captions/credits, model licensing, real-device and
-  Safari checks.
+- **Drawer copy** is real for both projects (approved by the user);
+  change it only on request.
+- **Waiting on the user**: picture captions/credits, model licensing,
+  real-device and Safari checks.
 
 ## Working with the user
 

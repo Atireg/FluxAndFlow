@@ -12,18 +12,29 @@ export default defineProject({
     // Research, teaching or the real world - its tag, and the catalog's filter
     category: 'research',
 
-    // TEMP: placeholder text so the About drawer exists - unmistakably
-    // fake on purpose, to be replaced with the real copy. State the
-    // role accurately. See README.md.
-    year: '[PLACEHOLDER YEAR]',
-    role: '[PLACEHOLDER ROLE - replace before publishing]',
-    context: '[PLACEHOLDER CONTEXT]',
+    // The drawer's rows and text; state the role accurately
+    year: '2015',
+    role: 'M.Sc. thesis',
+    context: 'ITECH M.Sc. thesis, University of Stuttgart',
     body: [
-        '[PLACEHOLDER BODY TEXT] A description of Emergent Space goes '
-        + 'here: the designed aggregate, how the pieces interlock, and '
-        + 'what the project explores.',
+        'How far can loose aggregates build space on their own? This thesis '
+        + 'simulates and analyses spatial formations of aggregates. Their '
+        + 'micro-mechanical behaviour, and above all how stable each '
+        + 'formation is, drives the design.',
+        'The design runs as a loop. First, simulate a formation. Then read '
+        + 'it through two numbers: how fast the aggregates are still moving, '
+        + 'and how many contacts hold them together. Then feed the result '
+        + 'back in. The simulation drives an inflatable formwork under online '
+        + 'control, which responds to how stable the formation is. The '
+        + 'concept was tested on a one-to-one physical model.',
+        'The tools were simulation in FISH and Python, statistical analysis, '
+        + '3D scanning, physical experiments, and a pneumatic system run '
+        + 'directly from the simulation software.',
     ],
-    credits: '[PLACEHOLDER CREDITS]',
+    credits: 'ITECH M.Sc. thesis, University of Stuttgart. Thesis advisers: '
+        + 'Karola Dierichs, Ehsan Baharlou. Supervisor: Prof. Achim Menges. '
+        + 'Second supervisor: Prof. Jan Knippers. Sponsorship: Itasca '
+        + 'Educational Partnership Program (IEP).',
 
     // All across the drawer's full width (`wide`) - three are diagrams
     // whose text is unreadable at half

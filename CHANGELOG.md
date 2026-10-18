@@ -240,6 +240,12 @@ phone's own full-screen player, and "Watch on Vimeo" sits under it.
 Rock Print's two films the same way. On a phone, every drawer picture runs full width,
 one after the other.
 
+**The real copy.** Both drawers' placeholder text replaced: year, role,
+context, three paragraphs and credits each, drafted from the published
+descriptions (ETH News, the Gewerbemuseum Winterthur and designboom for
+Rock Print; the ITECH / ICD Stuttgart thesis page for Emergent Space) and
+approved by the user.
+
 **Links.** Each project has its own link - `#rock-print`,
 `#emergent-space` on the site's address - shown while it's open, so it
 can be copied; opened, it goes straight through the loader to the
@@ -271,8 +277,8 @@ Checks were headless (software WebGL, both layouts) with throwaway hooks,
 removed before each merge; no console errors in any run.
 
 Open at end of session (see README, "Next up"): Safari to confirm (the
-blind fixes, and the playground now that `?cloudtest` is gone); both
-projects' real copy and picture credits; Emergent Space's drop, the
+blind fixes, and the playground now that `?cloudtest` is gone); picture
+captions and credits; Emergent Space's drop, the
 streams, Rock Print's inside views and its gather's smoothness on a real
 phone; the films' shape (assumed 16:9); model licensing. Small: `smoke.js`
 is parked, the points' ink grain does nothing (no UVs - README), and the JS
