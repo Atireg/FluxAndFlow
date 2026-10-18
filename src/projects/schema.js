@@ -28,7 +28,8 @@
  *   gather        points gather from a scattered cloud on open
  *   points        a mesh detailModel only: how many points to sample
  *   solid         a mesh detailModel only: drawn as the mesh itself in the
- *                 inks, not sampled into points
+ *                 inks, not sampled into points; or { lit, shade } as screen
+ *                 [r, g, b] for its own colour, lit side and turned away
  *   still         the model doesn't turn by itself (it can still be orbited)
  *   doubleClick   what a double-click/double-tap on the model does: 'zoom'
  *                 (the default) in and back out, 'hold' stops its turn until
@@ -213,7 +214,13 @@ function normaliseAutoZoom(autoZoom, { id, drop }) {
 function normaliseSolid({ id, solid, gather, points, drop }) {
     if (!solid) return false;
     if (gather || points !== undefined || drop) throw new Error(`Project "${id}": solid can't go with gather, points or drop`);
-    return true;
+    if (solid === true) return true;
+    const rgb = (value) => value === undefined
+        || (Array.isArray(value) && value.length === 3 && value.every((n) => n >= 0 && n <= 255));
+    if (typeof solid !== 'object' || !rgb(solid.lit) || !rgb(solid.shade)) {
+        throw new Error(`Project "${id}": solid should be true or { lit, shade } as [r, g, b], 0-255`);
+    }
+    return { lit: solid.lit, shade: solid.shade };
 }
 
 function normaliseEyeLevel({ id, eyeLevel, autoZoom }) {

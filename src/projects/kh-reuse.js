@@ -16,8 +16,9 @@ export default defineProject({
     thumbModel: 'models/laptop.glb',
     thumbSize: 1.9,
     detailModel: 'models/laptop.glb',
-    // The mesh itself in the inks rather than points, and no turn of its own
-    solid: true,
+    // The mesh itself rather than points, in light grey (screen [r, g, b],
+    // where it faces the light and where it turns away), and no turn of its own
+    solid: { lit: [222, 222, 220], shade: [160, 160, 162] },
     still: true,
     // Square-on to the screen (the model's front is its +Z, which the
     // detail view's quarter turn would swing away), from a little above

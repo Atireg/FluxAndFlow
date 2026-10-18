@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { MeshSurfaceSampler } from 'three/examples/jsm/math/MeshSurfaceSampler.js';
 import { MESH_FIT_SIZE } from '../constants.js';
-import { POINT_INKS } from '../colors.js';
+import { POINT_INKS, screenColor } from '../colors.js';
 
 /**
  * A model that arrives as a mesh rather than a point cloud - straight out of
@@ -99,13 +99,14 @@ export function pointsFromMeshes(root, total = MESH_SAMPLE_POINTS) {
  * A solid model drawn in the inks rather than lit by the scene (whose cyan
  * lights would tint it): orange where it faces a fixed light from above,
  * deepening to the dark red where it turns away - like the points' inks,
- * laid on as shade. Opaque, so it hides what's behind it.
+ * laid on as shade. Opaque, so it hides what's behind it. A project's
+ * `solid: { lit, shade }` gives its own pair, as screen [r, g, b].
  */
-export function makeInkMaterial() {
+export function makeInkMaterial({ lit, shade } = {}) {
     return new THREE.ShaderMaterial({
         uniforms: {
-            uLit: { value: POINT_INKS[1].color },
-            uShade: { value: POINT_INKS[0].color },
+            uLit: { value: lit ? screenColor(...lit) : POINT_INKS[1].color },
+            uShade: { value: shade ? screenColor(...shade) : POINT_INKS[0].color },
             // 0..1, how far it has dissolved away - see pile.js's fade
             uFade: { value: 0 },
         },

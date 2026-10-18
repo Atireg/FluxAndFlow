@@ -831,7 +831,11 @@ as Emergent Space's aggregates), dissolving in through its grain over the
 reveal instead of points gathering; `still` holds the model's turn at 0
 (it can still be orbited by hand, and a double-click still zooms).
 `view.turn: -90` undoes the detail view's quarter turn so the screen (+Z in
-the model) faces the camera. No tap hint: it picks a point of a cloud, and
+the model) faces the camera. At the user's request it is light grey and
+its edges rounded: `solid: { lit, shade }` gives a solid model its own
+colour pair (screen RGB) in place of the inks' orange and red - the
+pebble's thumbnail stays graphite like every other. The mesh is welded,
+so the rounds shade smoothly (and the file is 176 KB gzipped). No tap hint: it picks a point of a cloud, and
 there is none. The model is placeholder geometry built in code; the screen
 is a separate thin panel on the lid, where content would go.
 

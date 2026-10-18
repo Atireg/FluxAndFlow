@@ -54,7 +54,7 @@ export function loadPointCloud({
 
             // The mesh itself in the inks, no points (its reveal fades it in)
             if (solid) {
-                const material = makeInkMaterial();
+                const material = makeInkMaterial(solid === true ? {} : solid);
                 material.uniforms.uFade.value = 1;
                 const group = new THREE.Group();
                 group.add(new THREE.Mesh(sampled.userData.solid, material));

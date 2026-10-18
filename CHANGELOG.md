@@ -302,3 +302,8 @@ screen square to the visitor. Something is to be shown on its screen later.
 **The landing page's paragraphs appear one by one**, each fading up over 2s,
 1.8s apart, from 0.8s in (`.loader__about p` in styles.css); all at once
 with reduced motion.
+
+**kh-reuse, rounded and light grey.** The laptop's edges, keys, trackpad
+and screen are rounded, and the model is light grey (`solid: { lit,
+shade }`, a new option for a solid model's colour). Its pebble's thumbnail
+stays graphite.
