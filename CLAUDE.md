@@ -37,7 +37,9 @@ in a pull-out drawer.
   rounded edges (`solid: { lit, shade }`), open, screen to the visitor, not
   turning (`still`), no orbiting by hand (`orbit: false`). A third of the pebble's points settle onto its
   screen in the inks and float there with tails (`screen: 'Screen'`), over the user's film
-  (`screenVideo: 'videos/kh-reuse.mp4'`, muted, looping). Its pebble holds a reuse sign (`reuse.glb`). No drawer text yet.
+  (`screenVideo: 'videos/kh-reuse.mp4'`, muted, looping), which fade down once
+  it plays. On a phone (under 860px) a phone instead, playing
+  `kh-reuse-mobile.mp4` (`phone: { detailModel, screenVideo }`). Its pebble holds a reuse sign (`reuse.glb`). No drawer text yet.
 - **Links**: each project's own address is `#<id>` (`#rock-print`).
 - **Drawer copy** is real for Rock Print and Emergent Space (approved by the user);
   change it only on request.
@@ -133,6 +135,7 @@ defineProject({
     //                                       solid: { lit: [r,g,b], shade: [r,g,b] } for its own colour;
     //                                       screen: 'Screen' - the pebble's points float on that mesh;
     //                                       screenVideo: 'videos/x.mp4' - a film on that screen;
+    //                                       phone: { detailModel, screenVideo } - shown under 860px;
     //                                       orbit: false - no orbiting the view by hand
     doubleClick: 'hold',                  // 'zoom' (default), 'hold', 'drop' (with `drop`), 'none'
     autoZoom: 10,                         // camera moves in / out by itself every 10s (not with `drop`)

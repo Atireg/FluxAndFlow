@@ -329,7 +329,10 @@ laptop's screen stays square on. A double-click still zooms.
 under the floating points, fading in once it starts (`screenVideo`, a new
 setting). It pauses when the project closes.
 
-**kh-reuse: closer on the screen, points softer over the film** (in
-progress). The camera comes in on the laptop's screen (`view.zoom`,
+**kh-reuse: closer on the screen, points softer over the film, and a
+phone on phones.** The camera comes in on the screen (`view.zoom`,
 `view.lift`), and once the film plays the points fade down to a quarter
-(`SCREEN_FILM_DIM`). The phone framing still sits low - to be tuned.
+(`SCREEN_FILM_DIM`). On a phone (under 860px) a 3D phone made in code
+(`static/models/phone.glb`) stands in for the laptop, playing the user's
+mobile recording (`static/videos/kh-reuse-mobile.mp4`) - a new `phone`
+setting.

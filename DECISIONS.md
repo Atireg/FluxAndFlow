@@ -847,7 +847,18 @@ cropped to fill rather than squeezed; it fades in once its first frames
 play, so until then the points float on a bare screen. 1.7 MB, 720p H.264,
 copied as it came (metadata stripped, `faststart` so it streams at once).
 Headless Chromium here can't decode H.264, so it was checked with a WebM
-copy in a throwaway `dist/`. Until the model has
+copy in a throwaway `dist/`. Once the film plays the points fade down to
+a quarter (`SCREEN_FILM_DIM`), and the camera comes in close on the screen
+(`view.zoom`, `view.lift`).
+
+On a phone (the stacked layout, under 860px) it shows a phone instead,
+playing the user's mobile recording (`phone: { detailModel, screenVideo }`):
+a narrow screen shows a tall film better than a laptop's wide one. Which
+model is chosen as the project opens (`layoutMode()`), each kept once
+loaded (`pebble.userData.details`); the same `view` serves both, its
+`stacked` values fitted to the phone. `phone.glb` is made in code like the
+laptop, its screen shaped like the mobile film (390 x 664) so none of it is
+cropped. Until the model has
 loaded the points hold, swollen, at SCREEN_HOLD rather than fall towards a
 screen not yet known. Only one point in three
 stays (`SCREEN_EVERY`, the rest fade as in any dissolve), and those keep

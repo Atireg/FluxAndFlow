@@ -27,7 +27,12 @@ export default defineProject({
     screen: 'Screen',
     // The recorded film on the screen, under the points (muted, looping)
     screenVideo: 'videos/kh-reuse.mp4',
+    // On a phone (under 860px), a phone instead of the laptop, made in code
+    // like it (static/models/phone.glb, its screen also 'Screen'), playing
+    // the mobile recording
+    phone: { detailModel: 'models/phone.glb', screenVideo: 'videos/kh-reuse-mobile.mp4' },
     // Square-on to the screen (the model's front is its +Z, which the
-    // detail view's quarter turn would swing away), from a little above
-    view: { elevation: 15, turn: -90, zoom: { side: 2.0, stacked: 1.15 }, lift: { side: -0.15, stacked: -0.05 } },
+    // detail view's quarter turn would swing away), from a little above,
+    // close on the screen: the laptop's on a wide screen, the phone's (stacked)
+    view: { elevation: 15, turn: -90, zoom: { side: 2.0, stacked: 1.8 }, lift: { side: -0.15, stacked: 0.03 } },
 });

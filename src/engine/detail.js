@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { gsap } from 'gsap';
 import { assetUrl } from './assets.js';
-import { getPanelLayout } from './layout.js';
+import { getPanelLayout, layoutMode } from './layout.js';
 import { loadPhysics, PILE_FADE_OUT, PILE_REPLAY_WAIT } from './pile.js';
 import { loadPointCloud } from './pointcloud/load.js';
 import { GATHER_DURATION } from './pointcloud/gather.js';
@@ -328,6 +328,22 @@ export function createDetail({
              */
             const ease = OPEN_CAMERA_EASE;
 
+            /**
+             * Which model: on a narrow screen a project may have its own
+             * (`phone`), kept apart from the wide one so each loads once.
+             * Chosen as it opens - turning the phone round mid-view keeps it.
+             */
+            const variant = project.phone && layoutMode() === 'stacked' ? 'phone' : 'main';
+            const source = variant === 'phone'
+                ? { ...project, detailModel: project.phone.detailModel, screenVideo: project.phone.screenVideo }
+                : project;
+            pebble.userData.details ??= {};
+            if (pebble.userData.detail && pebble.userData.detail !== pebble.userData.details[variant]) {
+                pebble.userData.detail.visible = false;
+            }
+            pebble.userData.detail = pebble.userData.details[variant] ?? null;
+            pebble.userData.detailVariant = variant;
+
             if (pebble.userData.detail) {
                 pebble.userData.detail.visible = true;
                 pebble.userData.detail.rotation.y = modelStartYaw(project);
@@ -348,7 +364,7 @@ export function createDetail({
             framing.frameDetail(pebble, { duration: OPEN_CAMERA_DURATION_LOADING, ease });
 
             loadPointCloud({
-                url: assetUrl(project.detailModel),
+                url: assetUrl(source.detailModel),
                 parent: pebble,
                 perlinTexture,
                 registerPointMaterial: rig.registerPointMaterial,
@@ -357,18 +373,24 @@ export function createDetail({
                 drop: project.drop,
                 solid: project.solid,
                 screen: project.screen,
-                screenVideo: project.screenVideo && assetUrl(project.screenVideo),
+                screenVideo: source.screenVideo && assetUrl(source.screenVideo),
                 // Say so rather than leave "Loading model" up forever, and
                 // keep the real error for the browser's console
                 onError: (error) => {
-                    console.error('Could not load', project.detailModel, error);
+                    console.error('Could not load', source.detailModel, error);
                     if (state.selected === pebble) ui.onStatus('The model could not be loaded');
                 },
                 onLoaded: (model) => {
-                    pebble.userData.detail = model;
+                    pebble.userData.details[variant] = model;
                     model.rotation.y = modelStartYaw(project);
 
-                    // The visitor may have gone back while this was downloading
+                    // The visitor may have gone back while this was
+                    // downloading, or reopened it on another screen width
+                    if (pebble.userData.detailVariant !== variant) {
+                        model.visible = false;
+                        return;
+                    }
+                    pebble.userData.detail = model;
                     if (state.view !== 'detail' || state.selected !== pebble) {
                         model.visible = false;
                         return;

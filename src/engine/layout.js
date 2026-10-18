@@ -6,7 +6,7 @@
 const PANEL_FRACTION = { side: 0.42, stacked: 0.58 };
 const SIDE_PANEL_QUERY = '(min-width: 860px)';
 
-function layoutMode() {
+export function layoutMode() {
     return window.matchMedia(SIDE_PANEL_QUERY).matches ? 'side' : 'stacked';
 }
 

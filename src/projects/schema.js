@@ -32,6 +32,8 @@
  *                 [r, g, b] for its own colour, lit side and turned away
  *   still         the model doesn't turn by itself (it can still be orbited)
  *   screenVideo   with screen: a film (.mp4 in static/) playing on it, muted, looping
+ *   phone         with screen: { detailModel, screenVideo } shown instead on a
+ *                 narrow screen (the stacked layout, under 860px)
  *   orbit         false: the visitor can't orbit or wheel-zoom the view by hand
  *   screen        with solid: the name of the model's screen mesh (X across,
  *                 Y up, Z out of it); the pebble's points settle there and float
@@ -241,6 +243,18 @@ function normaliseScreenVideo({ id, screenVideo, screen }) {
     return screenVideo;
 }
 
+function normalisePhone({ id, phone, screen }) {
+    if (phone === undefined) return undefined;
+    if (!phone || typeof phone !== 'object' || !phone.detailModel) {
+        throw new Error(`Project "${id}": phone should be { detailModel, screenVideo }`);
+    }
+    if (!screen) throw new Error(`Project "${id}": phone needs screen - its model's screen mesh has the same name`);
+    if (phone.screenVideo !== undefined && typeof phone.screenVideo !== 'string') {
+        throw new Error(`Project "${id}": phone.screenVideo should be a path, like 'videos/x.mp4'`);
+    }
+    return { detailModel: phone.detailModel, screenVideo: phone.screenVideo };
+}
+
 function normaliseEyeLevel({ id, eyeLevel, autoZoom }) {
     if (eyeLevel === undefined) return undefined;
     if (!(eyeLevel > 0 && eyeLevel < 1)) throw new Error(`Project "${id}": eyeLevel should be a share of the height, between 0 and 1`);
@@ -318,6 +332,7 @@ export function defineProject(project) {
         orbit: project.orbit !== false,
         screen: normaliseScreen(project),
         screenVideo: normaliseScreenVideo(project),
+        phone: normalisePhone(project),
         doubleClick: normaliseDoubleClick(project),
         autoZoom: normaliseAutoZoom(project.autoZoom, project),
         eyeLevel: normaliseEyeLevel(project),
