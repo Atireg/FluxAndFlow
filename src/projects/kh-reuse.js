@@ -33,6 +33,8 @@ export default defineProject({
         + 'and elements, and collect elements in a personal basket for reuse.',
         'Tech stack: React (Vite) frontend on Firebase Hosting, Node.js server '
         + 'on Google Cloud Run, and a MongoDB Atlas database.',
+        'The author wrote both the frontend and the backend from scratch, '
+        + 'before AI tools were part of everyday development.',
         '👉 Live demo: [kh-reuse.web.app](https://kh-reuse.web.app/)',
     ],
 

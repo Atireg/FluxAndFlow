@@ -347,3 +347,6 @@ sentence approved. The points now go away altogether once the film plays.
 The laptop's and the phone's screens are reshaped to their films' exact
 proportions, so nothing is cropped, and the camera comes square-on to the
 screen with its edges at the window's (`view.fillScreen`, a new setting).
+
+**kh-reuse's drawer**: a sentence after the tech stack, approved by the
+user, on writing both ends from scratch before AI tools were everyday.
