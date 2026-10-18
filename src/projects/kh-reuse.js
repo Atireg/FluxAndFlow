@@ -1,14 +1,14 @@
 import { defineProject } from './schema.js';
 
 /**
- * kh-reuse - a laptop, a plain mesh (static/models/laptop.glb, lid open),
- * drawn as itself, standing still with its screen to the visitor. No drawer
- * text yet: it comes from the user.
+ * kh ReUse (written exactly so; its link stays #kh-reuse) - a laptop, a plain
+ * mesh (static/models/laptop.glb, lid open), drawn as itself, standing still
+ * with its screen to the visitor; a phone instead on a phone.
  */
 export default defineProject({
     id: 'kh-reuse',
     slot: 3,
-    title: 'kh-reuse',
+    title: 'kh ReUse',
     // Research, teaching or the real world - its tag, and the catalog's filter
     category: 'real-world',
 
@@ -24,7 +24,7 @@ export default defineProject({
         + 'software development. The aim is to keep usable materials like steel '
         + 'beams, timber and glass in circulation instead of sending them to '
         + 'landfill.',
-        'It was made for [Knippers Helbig](https://www.knippershelbig.com/), '
+        'It was made for [knippershelbig](https://www.knippershelbig.com/), '
         + 'where the author is Head of Digital Technologies.',
         'Visitors can browse demolition projects, such as Stuttgart Rathaus and '
         + 'Kittler Schule Heilbronn, and see the elements recovered from each '

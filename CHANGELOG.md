@@ -358,3 +358,7 @@ starts, the points fading as it does.
 
 **kh-reuse's close-up a little further back**, framed into the space below
 the project's title, so the laptop's or phone's top edge always clears it.
+
+**Names as the user writes them**: the project is "kh ReUse" (its pebble,
+title and drawer; the link stays `#kh-reuse`), and the office
+"knippershelbig", together, in small letters.

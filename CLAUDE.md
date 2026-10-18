@@ -32,7 +32,8 @@ in a pull-out drawer.
 - **Emergent Space** (slot 1): three aggregates dropped with live physics;
   velocity arrows, interlock dots, a close-up, then a new drop. A
   double-click drops again. One Vimeo film in its drawer.
-- **kh-reuse** (slot 3, the real world, `#kh-reuse`): a laptop
+- **kh ReUse** (slot 3, the real world, `#kh-reuse` - the name written
+  exactly so, and "knippershelbig" together in small letters): a laptop
   (`static/models/laptop.glb`, made in code) drawn solid in light grey with
   rounded edges (`solid: { lit, shade }`), open, screen to the visitor, not
   turning (`still`), no orbiting by hand (`orbit: false`). A third of the pebble's points settle onto its
@@ -42,7 +43,7 @@ in a pull-out drawer.
   the points settle, then the camera moves in square-on to the screen and the
   film starts (`view.fillScreen: 1.2`, edges kept in view, its top below the title). On a phone (under 860px) a phone instead, playing
   `kh-reuse-mobile.mp4` (`phone: { detailModel, screenVideo }`). Its pebble holds a reuse sign (`reuse.glb`). Drawer text from the user
-  (approved), links to the live demo and Knippers Helbig.
+  (approved), links to the live demo and knippershelbig.
 - **Links**: each project's own address is `#<id>` (`#rock-print`).
 - **Drawer copy** is real for Rock Print and Emergent Space (approved by the user);
   change it only on request.
