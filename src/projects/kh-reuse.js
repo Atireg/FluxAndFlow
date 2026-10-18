@@ -59,7 +59,9 @@ export default defineProject({
     phone: { detailModel: 'models/phone.glb', screenVideo: 'videos/kh-reuse-mobile.mp4' },
     // Square-on to the screen (the model's front is its +Z, which the
     // detail view's quarter turn would swing away), from a little above,
-    // while it loads; then square-on to the device's screen, its edges at
-    // the window's (`fillScreen`) - the laptop's, or on a phone the phone's
-    view: { elevation: 15, turn: -90, zoom: { side: 2.0, stacked: 1.8 }, lift: { side: -0.15, stacked: 0.03 }, fillScreen: true },
+    // the whole device - the laptop, or on a phone the phone - while the
+    // points settle on its screen; then square-on to that screen, the film
+    // starting, 1.15 times as far as would put its edges at the window's
+    // (`fillScreen`), so the device's own edges stay in view
+    view: { elevation: 15, turn: -90, zoom: { side: 1.3, stacked: 1.7 }, lift: { side: 0, stacked: 0.03 }, fillScreen: 1.15 },
 });

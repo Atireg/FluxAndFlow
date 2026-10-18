@@ -67,6 +67,10 @@ const CLOSE_UP_AFTER = 1; // seconds after the pile is asleep - the dots have fa
 const CLOSE_UP_ZOOM = 0.3; // the camera ends up this fraction of its distance away
 const CLOSE_UP_MOVE = 1.6; // seconds each way - slower than a double-click's zoom
 const TURN_STOP = 3; // seconds the turn (and its floor) takes to slow to a stop before the next drop
+// `view.fillScreen`: the whole device first, the points settling on its
+// screen (the dissolve takes 3.6s), then the move in on the screen
+const FILL_SCREEN_AT = 5; // seconds after the model is shown
+const FILL_SCREEN_DURATION = 2.4; // seconds the move in takes
 
 /**
  * A project's `autoZoom`: every that many seconds the camera moves in on a
@@ -109,6 +113,17 @@ export function createDetail({
         trails.forEach((tails) => { tails.visible = true; });
         rig.renderer.compile(model, rig.camera, scene);
         trails.forEach((tails) => { tails.visible = false; });
+    }
+
+    /**
+     * A model with a film on its screen: played straight away - unless the
+     * project fills the window with that screen (`view.fillScreen`), when the
+     * whole device is shown first while the points settle on its screen, and
+     * the film waits for the camera to move in (maybeFillScreen)
+     */
+    function startScreen(model, project) {
+        model.userData.screenFilled = false;
+        if (!project.view?.fillScreen) playScreenVideo(model, true);
     }
 
     const zoomRaycaster = new THREE.Raycaster();
@@ -352,7 +367,7 @@ export function createDetail({
                 pebble.userData.detail.userData.held = null;
                 pebble.userData.detail.userData.gatherTime = 0;
                 pebble.userData.detailRotateStartTime = clock.getElapsedTime();
-                playScreenVideo(pebble.userData.detail, true);
+                startScreen(pebble.userData.detail, project);
                 ui.onStatus(null);
                 framing.frameDetail(pebble, { ease });
                 return;
@@ -399,7 +414,7 @@ export function createDetail({
                     // Its shaders ready before the gather starts, not on its
                     // first frame
                     prepareShaders(model);
-                    playScreenVideo(model, true);
+                    startScreen(model, project);
 
                     ui.onStatus(null);
                     model.userData.gatherTime = 0;
@@ -541,6 +556,18 @@ export function createDetail({
         },
 
         // A project's `autoZoom`, a step each frame
+        // `since` is seconds since the model was shown: `view.fillScreen`'s
+        // move in on the screen, and its film starting with it
+        maybeFillScreen(model, since) {
+            const project = state.selected?.userData.project;
+            if (!project?.view?.fillScreen || !model.userData.screen || model.userData.screenFilled) return;
+            if (since < FILL_SCREEN_AT) return;
+
+            model.userData.screenFilled = true;
+            playScreenVideo(model, true);
+            framing.reframe(state.selected, { duration: FILL_SCREEN_DURATION });
+        },
+
         maybeAutoZoom(model, since) {
             const project = state.selected?.userData.project;
             const every = project?.autoZoom;

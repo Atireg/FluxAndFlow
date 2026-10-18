@@ -168,7 +168,7 @@ export function modelTurn(model, since) {
 
 export function createFraming({ rig, screen, state, grid, ui }) {
     // A model's screen (see frameDetail's `fillScreen`) filling the window
-    function frameOnScreen(model, mode, duration, ease) {
+    function frameOnScreen(model, mode, duration, ease, margin) {
         const display = model.userData.screen;
         model.updateMatrixWorld(true);
         const centre = model.localToWorld(display.face.clone());
@@ -177,7 +177,7 @@ export function createFraming({ rig, screen, state, grid, ui }) {
         const out = across.clone().cross(upward).normalize();
 
         const tan = Math.tan(THREE.MathUtils.degToRad(DETAIL_FOV[mode]) / 2);
-        const distance = Math.max(upward.length() / tan, across.length() / (tan * screen.aspect));
+        const distance = margin * Math.max(upward.length() / tan, across.length() / (tan * screen.aspect));
 
         rig.animateFov(DETAIL_FOV[mode], duration);
         rig.moveCamera(centre.clone().addScaledVector(out, distance), centre, duration, ease);
@@ -275,14 +275,17 @@ export function createFraming({ rig, screen, state, grid, ui }) {
             const side = mode === 'side';
 
             /**
-             * `view.fillScreen`: once the model with a screen (`screen`) is
-             * in, the camera looks square-on at that screen, close enough
-             * that its edges meet the window's - the whole film, as large as
-             * it goes. Not with the drawer out, which takes its usual frame.
+             * `view.fillScreen`: once it's time (detail's maybeFillScreen),
+             * the camera looks square-on at the model's screen (`screen`),
+             * close enough that its edges nearly meet the window's - the
+             * whole film, as large as it goes with the device's own edges
+             * still in view (a number: how much room to leave, 1 for none).
+             * Not with the drawer out, which takes its usual frame.
              */
             const shown = object.userData.detail;
-            if (object.userData.project?.view?.fillScreen && shown?.userData.screen && !state.drawerOpen && !fit) {
-                frameOnScreen(shown, mode, duration, ease);
+            const fill = object.userData.project?.view?.fillScreen;
+            if (fill && shown?.userData.screenFilled && !state.drawerOpen && !fit) {
+                frameOnScreen(shown, mode, duration, ease, fill === true ? 1 : fill);
                 return;
             }
             // Or framed on a box of its own (`fit`, world space) - a pile's

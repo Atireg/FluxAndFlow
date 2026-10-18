@@ -350,3 +350,8 @@ screen with its edges at the window's (`view.fillScreen`, a new setting).
 
 **kh-reuse's drawer**: a sentence after the tech stack, approved by the
 user, on writing both ends from scratch before AI tools were everyday.
+
+**kh-reuse opens in two steps**: the whole laptop (or phone) first, the
+points settling on its screen; then, 5s in, the camera moves in on the
+screen - stopping short so the device's edges stay in view - and the film
+starts, the points fading as it does.
