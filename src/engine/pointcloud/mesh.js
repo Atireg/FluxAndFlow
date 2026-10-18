@@ -80,6 +80,8 @@ export function pointsFromMeshes(root, total = MESH_SAMPLE_POINTS) {
         }
     });
     group.userData.vertices = vertices;
+    // How the file's own space was fitted, for finding a part of it again (`screen`)
+    group.userData.fit = { centre, factor };
 
     // And the meshes themselves, merged, for drawing them solid (`drop.solid`)
     group.userData.solid = mergeGeometries(meshes.map((mesh) => {

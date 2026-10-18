@@ -37,6 +37,7 @@ export function loadPointCloud({
     points,
     drop,
     solid = false,
+    screen,
 }) {
     gltfLoader.load(url, async (gltf) => {
         const materials = [];
@@ -45,6 +46,7 @@ export function loadPointCloud({
         let hasPoints = false;
         gltf.scene.traverse((child) => { if (child.isPoints) hasPoints = true; });
         if (!hasPoints) {
+            const original = gltf.scene;
             const sampled = pointsFromMeshes(gltf.scene, points);
             if (!sampled) {
                 onError?.(new Error('No points or meshes in the model'));
@@ -59,6 +61,8 @@ export function loadPointCloud({
                 const group = new THREE.Group();
                 group.add(new THREE.Mesh(sampled.userData.solid, material));
                 group.userData.solidMaterial = material;
+                // Where the pebble's points settle and float (`screen`)
+                if (screen) group.userData.screen = screenFrame(original, screen, sampled.userData.fit);
                 parent.add(group);
                 onLoaded?.(group);
                 return;
@@ -166,4 +170,36 @@ export function loadPointCloud({
 
         onLoaded?.(gltf.scene);
     }, onProgress, onError);
+}
+
+const SCREEN_LIFT = 0.03; // how far in front of the screen its points float, in fitted units
+
+/**
+ * A solid model's screen (`screen`, the name of one of its meshes, drawn in
+ * its own space with X across, Y up and Z out towards the viewer), in the
+ * fitted model's space: its middle just in front of its face, and the
+ * vectors from there to its right and top edges.
+ */
+function screenFrame(root, name, { centre, factor }) {
+    let mesh = null;
+    root.getObjectByName(name)?.traverse((child) => { if (!mesh && child.isMesh) mesh = child; });
+    if (!mesh) {
+        console.error(`No mesh called "${name}" in the model for its screen`);
+        return null;
+    }
+
+    mesh.geometry.computeBoundingBox();
+    const box = mesh.geometry.boundingBox;
+    const local = box.getCenter(new THREE.Vector3());
+    const half = box.getSize(new THREE.Vector3()).multiplyScalar(0.5);
+    const fitted = (x, y, z) => new THREE.Vector3(local.x + x, local.y + y, local.z + z)
+        .applyMatrix4(mesh.matrixWorld).sub(centre).multiplyScalar(factor);
+
+    const middle = fitted(0, 0, 0);
+    const out = fitted(0, 0, half.z).sub(middle);
+    return {
+        centre: middle.clone().add(out).addScaledVector(out.clone().normalize(), SCREEN_LIFT),
+        u: fitted(half.x, 0, 0).sub(middle),
+        v: fitted(0, half.y, 0).sub(middle),
+    };
 }

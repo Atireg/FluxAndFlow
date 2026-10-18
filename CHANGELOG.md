@@ -307,3 +307,8 @@ with reduced motion.
 and screen are rounded, and the model is light grey (`solid: { lit,
 shade }`, a new option for a solid model's colour). Its pebble's thumbnail
 stays graphite.
+
+**kh-reuse: points on the screen.** The pebble's dissolve no longer fades
+away for the laptop: its points take the clouds' inks, settle onto the
+screen and float about there while it's open (`screen`, a new setting naming
+the model's screen mesh). The film to play under them is still to come.

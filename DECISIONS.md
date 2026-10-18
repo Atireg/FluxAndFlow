@@ -835,7 +835,14 @@ the model) faces the camera. At the user's request it is light grey and
 its edges rounded: `solid: { lit, shade }` gives a solid model its own
 colour pair (screen RGB) in place of the inks' orange and red - the
 pebble's thumbnail stays graphite like every other. The mesh is welded,
-so the rounds shade smoothly (and the file is 176 KB gzipped). No tap hint: it picks a point of a cloud, and
+so the rounds shade smoothly (and the file is 176 KB gzipped). The pebble's dissolve
+doesn't fade away here: its points settle onto the laptop's screen in the
+clouds' inks and float about there, slowly, while the project is open
+(`screen`, the name of the model's screen mesh, in its own space X across,
+Y up, Z out; uScreen in pebbles/dissolve.js). It's where a recorded film is
+to play later, the points over it while it loads. Until the model has
+loaded the points hold, swollen, at SCREEN_HOLD rather than fall towards a
+screen not yet known. No tap hint: it picks a point of a cloud, and
 there is none. The model is placeholder geometry built in code; the screen
 is a separate thin panel on the lid, where content would go.
 

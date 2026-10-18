@@ -31,6 +31,8 @@
  *                 inks, not sampled into points; or { lit, shade } as screen
  *                 [r, g, b] for its own colour, lit side and turned away
  *   still         the model doesn't turn by itself (it can still be orbited)
+ *   screen        with solid: the name of the model's screen mesh (X across,
+ *                 Y up, Z out of it); the pebble's points settle there and float
  *   doubleClick   what a double-click/double-tap on the model does: 'zoom'
  *                 (the default) in and back out, 'hold' stops its turn until
  *                 the next, 'drop' drops it again (with a `drop`), 'none'
@@ -223,6 +225,13 @@ function normaliseSolid({ id, solid, gather, points, drop }) {
     return { lit: solid.lit, shade: solid.shade };
 }
 
+function normaliseScreen({ id, screen, solid }) {
+    if (screen === undefined) return undefined;
+    if (!screen || typeof screen !== 'string') throw new Error(`Project "${id}": screen should be the name of a mesh in the model`);
+    if (!solid) throw new Error(`Project "${id}": screen needs solid`);
+    return screen;
+}
+
 function normaliseEyeLevel({ id, eyeLevel, autoZoom }) {
     if (eyeLevel === undefined) return undefined;
     if (!(eyeLevel > 0 && eyeLevel < 1)) throw new Error(`Project "${id}": eyeLevel should be a share of the height, between 0 and 1`);
@@ -297,6 +306,7 @@ export function defineProject(project) {
         points: project.points,
         solid: normaliseSolid(project),
         still: Boolean(project.still),
+        screen: normaliseScreen(project),
         doubleClick: normaliseDoubleClick(project),
         autoZoom: normaliseAutoZoom(project.autoZoom, project),
         eyeLevel: normaliseEyeLevel(project),

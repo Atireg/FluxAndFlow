@@ -353,6 +353,7 @@ export function createDetail({
                 points: project.points,
                 drop: project.drop,
                 solid: project.solid,
+                screen: project.screen,
                 // Say so rather than leave "Loading model" up forever, and
                 // keep the real error for the browser's console
                 onError: (error) => {

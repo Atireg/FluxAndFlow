@@ -34,8 +34,10 @@ in a pull-out drawer.
   double-click drops again. One Vimeo film in its drawer.
 - **kh-reuse** (slot 3, the real world, `#kh-reuse`): a laptop
   (`static/models/laptop.glb`, made in code) drawn solid in light grey with
-  rounded edges (`solid: { lit, shade }`), open, screen to the visitor, not turning (`still`). Something is to go on its
-  screen later. No drawer text yet.
+  rounded edges (`solid: { lit, shade }`), open, screen to the visitor, not
+  turning (`still`). The pebble's points settle onto its screen in the
+  inks and float there (`screen: 'Screen'`); a recorded film is to play
+  there later. No drawer text yet.
 - **Links**: each project's own address is `#<id>` (`#rock-print`).
 - **Drawer copy** is real for Rock Print and Emergent Space (approved by the user);
   change it only on request.
@@ -128,7 +130,8 @@ defineProject({
             lift: { stacked: 0.14, side: 0 }, sway: 13 },  // camera angle; give every new model one
     gather: true,                         // points gather from a scattered swirl on open
     // solid: true, still: true,          // a mesh drawn as itself, not points; no turn (kh-reuse);
-    //                                       solid: { lit: [r,g,b], shade: [r,g,b] } for its own colour
+    //                                       solid: { lit: [r,g,b], shade: [r,g,b] } for its own colour;
+    //                                       screen: 'Screen' - the pebble's points float on that mesh
     doubleClick: 'hold',                  // 'zoom' (default), 'hold', 'drop' (with `drop`), 'none'
     autoZoom: 10,                         // camera moves in / out by itself every 10s (not with `drop`)
     eyeLevel: 0.4,                        // with autoZoom: two of every three moves in are from inside

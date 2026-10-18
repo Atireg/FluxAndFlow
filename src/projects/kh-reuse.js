@@ -20,6 +20,9 @@ export default defineProject({
     // where it faces the light and where it turns away), and no turn of its own
     solid: { lit: [222, 222, 220], shade: [160, 160, 162] },
     still: true,
+    // The pebble's points settle onto the laptop's screen and float there
+    // in the clouds' inks - in time, over a film playing on it
+    screen: 'Screen',
     // Square-on to the screen (the model's front is its +Z, which the
     // detail view's quarter turn would swing away), from a little above
     view: { elevation: 15, turn: -90, zoom: { side: 1.3, stacked: 1.1 } },
