@@ -32,6 +32,7 @@ const SCREEN_MARGIN = 0.88; // how far out across the screen a point's home is, 
 const SCREEN_FLOAT = 0.1; // how far a point floats from its home, the same way
 const SCREEN_EVERY = 3; // one point in this many settles on the screen; the rest fade as usual
 const SCREEN_TRAIL = 2.5; // seconds back for the tails of the points floating on it
+const SCREEN_FILM_DIM = 0.75; // how much the points fade down once a film plays under them
 // Points hold, swollen, at this share of the dissolve until the screen they're
 // to settle on has loaded - rather than falling towards nowhere
 const SCREEN_HOLD = 0.25;
@@ -321,7 +322,9 @@ export function updateDissolve({ state, renderer, camera, elapsedTime }) {
     const uniforms = points.material.uniforms;
     uniforms.uT.value = Math.min(t, 1);
     uniforms.uTime.value = elapsedTime;
-    uniforms.uOpacity.value = POINT_OPACITY * (1 - reveal);
+    // ...and down over a film playing on the screen under them (screenVideo.js)
+    const film = screen ? detail.userData.screenFilmShown ?? 0 : 0;
+    uniforms.uOpacity.value = POINT_OPACITY * (1 - reveal) * (1 - SCREEN_FILM_DIM * film);
     uniforms.uFluxTime.value = state.dropStartedAt * PEBBLE_FLUX_SPEED;
     uniforms.uPixelsPerUnit.value = renderer.domElement.height
         / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov ?? 45) / 2));

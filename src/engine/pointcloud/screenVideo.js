@@ -5,7 +5,8 @@ import { smooth01 } from '../ease.js';
  * A film playing on a solid model's screen (`screenVideo`, with `screen`):
  * a quad just in front of the screen's face, under the points floating on it,
  * showing a muted, looping <video>. Until its first frames have arrived the
- * screen stays bare and the points float alone; then the film fades in.
+ * screen stays bare and the points float alone; then the film fades in and
+ * the points fade down over it (`screenFilmShown`, 0..1, read by the dissolve).
  */
 const VIDEO_LIFT = 0.008; // in front of the screen's face, in fitted units - behind the points
 const VIDEO_INSET = 0.985; // a hair inside the screen's edges, clear of its rounding
@@ -53,6 +54,7 @@ export function addScreenVideo(group, screen, url) {
         if (!playing) playingSince = null;
         else playingSince ??= performance.now();
         material.opacity = playingSince === null ? 0 : smooth01((performance.now() - playingSince) / 1000 / VIDEO_FADE);
+        group.userData.screenFilmShown = material.opacity;
     };
 
     group.add(quad);

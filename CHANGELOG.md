@@ -328,3 +328,8 @@ laptop's screen stays square on. A double-click still zooms.
 (`static/videos/kh-reuse.mp4`) plays on the screen, muted and looping,
 under the floating points, fading in once it starts (`screenVideo`, a new
 setting). It pauses when the project closes.
+
+**kh-reuse: closer on the screen, points softer over the film** (in
+progress). The camera comes in on the laptop's screen (`view.zoom`,
+`view.lift`), and once the film plays the points fade down to a quarter
+(`SCREEN_FILM_DIM`). The phone framing still sits low - to be tuned.

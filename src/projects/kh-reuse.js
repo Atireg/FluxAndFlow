@@ -29,5 +29,5 @@ export default defineProject({
     screenVideo: 'videos/kh-reuse.mp4',
     // Square-on to the screen (the model's front is its +Z, which the
     // detail view's quarter turn would swing away), from a little above
-    view: { elevation: 15, turn: -90, zoom: { side: 1.3, stacked: 1.1 } },
+    view: { elevation: 15, turn: -90, zoom: { side: 2.0, stacked: 1.15 }, lift: { side: -0.15, stacked: -0.05 } },
 });
