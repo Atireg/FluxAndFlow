@@ -366,3 +366,7 @@ title and drawer; the link stays `#kh-reuse`), and the office
 **kh ReUse's film can be paused**: a double-click (double-tap on a phone)
 pauses it on its frame and the next plays it on - the site's existing
 "pause" action, hinted on the screen once the film plays.
+
+**kh ReUse's films replaced** with the user's new recordings: the laptop's
+now 1080p (3.5 MB), the phone's 390 x 664 (2.3 MB) - the same shapes, so
+the screens still fit them exactly.
