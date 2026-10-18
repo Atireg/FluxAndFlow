@@ -166,6 +166,10 @@ export function modelTurn(model, since) {
     return offset + before + slowing - (slowing * slowing) / (2 * stop.over);
 }
 
+// `view.drawer: 'whole'` on a narrow screen: the whole model above the
+// drawer, this far back from its plain fit so the handle doesn't cover it
+const WHOLE_ABOVE_DRAWER_ZOOM = 0.72;
+
 export function createFraming({ rig, screen, state, grid, ui }) {
     // Clear space kept under the project's title bar, as a share of the height
     const UNDER_BAR_GAP = 0.03;
@@ -422,7 +426,8 @@ export function createFraming({ rig, screen, state, grid, ui }) {
          * beside the model, so the whole piece is framed into the space to its
          * left (frameDetail already fits into whatever the drawer leaves
          * free). On a narrow one it covers the lower half, and the close-up is
-         * what fits.
+         * what fits - unless the project wants the whole model above it
+         * (`view.drawer: 'whole'`).
          */
         frameWithDrawerOpen(pebble, options) {
             // A pile: in on the aggregates themselves, beside the drawer or
@@ -430,6 +435,15 @@ export function createFraming({ rig, screen, state, grid, ui }) {
             const pile = pebble.userData.detail?.userData.pile;
             if (pile) {
                 framing.frameDetail(pebble, { ...options, fit: pile.bounds(), fitZoom: PILE_DRAWER_ZOOM });
+                return;
+            }
+
+            // The whole model, fitted to its own outline rather than the pebble's -
+            // stacked, a little further back, clear of the drawer's handle
+            const model = pebble.userData.detail;
+            if (pebble.userData.project?.view?.drawer === 'whole' && model) {
+                const side = getPanelLayout(state.drawerOpen).mode === 'side';
+                framing.frameDetail(pebble, { ...options, fit: new THREE.Box3().setFromObject(model), fitZoom: side ? 1 : WHOLE_ABOVE_DRAWER_ZOOM });
                 return;
             }
 

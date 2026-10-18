@@ -42,7 +42,8 @@ in a pull-out drawer.
   (`screenVideo: 'videos/kh-reuse.mp4'`, muted, looping), which fade away once
   it plays; the whole device shows first while
   the points settle, then the camera moves in square-on to the screen and the
-  film starts (`view.fillScreen: 1.2`, edges kept in view, its top below the title). On a phone (under 860px) a phone instead, playing
+  film starts (`view.fillScreen: 1.2`, edges kept in view, its top below the title);
+  the About drawer shows the whole device again (`view.drawer: 'whole'`). On a phone (under 860px) a phone instead, playing
   `kh-reuse-mobile.mp4` (`phone: { detailModel, screenVideo }`). A double-click or double-tap pauses the film
   and plays it on (`doubleClick: 'hold'`). Its pebble holds a reuse sign (`reuse.glb`). Drawer text from the user
   (approved), links to the live demo and knippershelbig.

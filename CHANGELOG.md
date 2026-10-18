@@ -374,3 +374,8 @@ the screens still fit them exactly.
 **Empty pebbles hold nothing**: the rock that filled every slot without a
 project is gone from them; a project's pebble still holds its own model
 (Rock Print the rock).
+
+**The double-click hint comes round less often** on every project: every
+20s rather than 8 (`TAP_HINT_GAP`). **kh ReUse's About drawer** pulls back
+to the whole device instead of zooming in - on a phone, the whole phone
+above the drawer (`view.drawer: 'whole'`).

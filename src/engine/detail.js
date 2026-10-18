@@ -53,7 +53,7 @@ const DETAIL_ZOOM_DURATION = 0.9; // seconds
  * screen, or while the camera is moving.
  */
 const TAP_HINT_AFTER_GATHER = 1.2; // seconds after the points have gathered before the first one
-const TAP_HINT_GAP = 8; // seconds from one hint to the next - it hangs, then falls away (engine/tags.js)
+const TAP_HINT_GAP = 20; // seconds from one hint to the next (8 came round too often) - it hangs, then falls away (engine/tags.js)
 
 /**
  * A project's `drop.closeUp`: once a drop is at rest, the camera moves in on

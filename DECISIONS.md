@@ -664,8 +664,8 @@ twice (2.2s CSS animation, `tap-hint-press`), readable over the cloud, the fog a
 and not competing with the orange. Its size (`--hint-size`) follows the
 screen's shorter side, 3vmin between 1.1rem (a phone, as before) and 2.6rem;
 it sits at `z-index` 2, over the canvas. `maybeShowTapHint` shows it once
-the gather is done, then every `TAP_HINT_GAP` (8s - long enough for one
-to hang and fall away), on a random on-screen
+the gather is done, then every `TAP_HINT_GAP` (20s; 8s - just long enough
+for one to hang and fall away - came round too often for the user), on a random on-screen
 point of the cloud clear of the bar and any side drawer - zoomed in too,
 where it invites zooming back out. It skips while the camera moves or a
 phone's drawer is open, and not at all for a project with `doubleClick:
@@ -861,7 +861,10 @@ window's it stops - 1.2, so the device's own edges stay in view - and it
 frames into the band below the title bar (`ui.barFraction()` plus
 `UNDER_BAR_GAP`), so the device's top always clears the title. Filling
 the window outright came first; the user wanted the device seen whole
-first and its edges kept.
+first and its edges kept. With the About drawer out it shows the whole
+device again rather than a close-up (`view.drawer: 'whole'`): fitted to
+the model's own outline, beside the drawer on a wide screen and above it
+on a phone, `WHOLE_ABOVE_DRAWER_ZOOM` back so the handle doesn't cover it.
 
 On a phone (the stacked layout, under 860px) it shows a phone instead,
 playing the user's mobile recording (`phone: { detailModel, screenVideo }`):
