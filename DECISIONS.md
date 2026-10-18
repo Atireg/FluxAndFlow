@@ -846,8 +846,8 @@ Y up, Z out; uScreen in pebbles/dissolve.js). The user's recorded film plays
 under them (`screenVideo`, `pointcloud/screenVideo.js`): a muted, looping
 <video> on a quad just in front of the screen's face, as a VideoTexture,
 cropped to fill rather than squeezed; it fades in once its first frames
-play, so until then the points float on a bare screen. Now 3.5 MB, 1080p H.264 (the
-mobile one 2.3 MB, 390 x 664), copied as they came (metadata stripped, `faststart` so it streams at once).
+play, so until then the points float on a bare screen. Now 3.7 MB, 1080p H.264 (the
+mobile one 2.5 MB, 390 x 664), copied as they came (metadata stripped, `faststart` so it streams at once).
 Headless Chromium here can't decode H.264, so it was checked with a WebM
 copy in a throwaway `dist/`. Once the film plays the points fade away
 altogether (`SCREEN_FILM_DIM` 1; a quarter was tried first). Each device's

@@ -379,3 +379,6 @@ project is gone from them; a project's pebble still holds its own model
 20s rather than 8 (`TAP_HINT_GAP`). **kh ReUse's About drawer** pulls back
 to the whole device instead of zooming in - on a phone, the whole phone
 above the drawer (`view.drawer: 'whole'`).
+
+**kh ReUse's films replaced again** with the user's latest recordings
+(laptop 1080p, 3.7 MB; phone 390 x 664, 2.5 MB - the same shapes).
