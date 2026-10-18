@@ -12,14 +12,18 @@ import * as THREE from 'three';
  * (a breadth-first pass), and the best few kept so the spot varies from one
  * visit to the next. Returns the spot and the direction to look, along
  * the longest clear line of sight; null when nothing qualifies.
+ *
+ * Given the last spot (`previous`), it stands there again and turns round:
+ * the clearest line among those facing back the way it came (FACING_BACK).
  */
 const GRID = 40; // cells across the footprint, each way
 const SLAB = 0.12; // points this share of the height above or below the eye count
 const INNER = 0.7; // the share of the footprint, about its middle, a spot may be in
 const CHOICES = 3; // picked at random from this many of the most open spots
 const LOOKS = 72; // directions tried for the clearest view
+const FACING_BACK = -0.7; // turned round: a look at most this aligned with the last one (a dot product - 135° round or more)
 
-export function findInsideSpot(points, eye) {
+export function findInsideSpot(points, eye, previous = null) {
     const position = points.geometry.attributes.position;
     points.geometry.computeBoundingBox();
     const box = points.geometry.boundingBox;
@@ -76,20 +80,31 @@ export function findInsideSpot(points, eye) {
         return false;
     };
 
-    const margin = Math.floor(GRID * (1 - INNER) / 2);
-    const spots = [];
-    for (let z = margin; z < GRID - margin; z++) {
-        for (let x = margin; x < GRID - margin; x++) {
-            const k = z * GRID + x;
-            if (full[k]) continue;
-            const surrounded = blocked(x, z, 1, 0) && blocked(x, z, -1, 0) && blocked(x, z, 0, 1) && blocked(x, z, 0, -1);
-            if (surrounded) spots.push({ x, z, clear: distance[k] });
+    let spot;
+    if (previous) {
+        // The same place, to turn round in
+        const [x, z] = cell(previous.position.x, previous.position.z);
+        spot = { x, z };
+    } else {
+        const margin = Math.floor(GRID * (1 - INNER) / 2);
+        const spots = [];
+        for (let z = margin; z < GRID - margin; z++) {
+            for (let x = margin; x < GRID - margin; x++) {
+                const k = z * GRID + x;
+                if (full[k]) continue;
+                const surrounded = blocked(x, z, 1, 0) && blocked(x, z, -1, 0) && blocked(x, z, 0, 1) && blocked(x, z, 0, -1);
+                if (surrounded) spots.push({ x, z, clear: distance[k] });
+            }
         }
-    }
-    if (!spots.length) return null;
+        if (!spots.length) return null;
 
-    spots.sort((a, b) => b.clear - a.clear);
-    const spot = spots[Math.floor(Math.random() * Math.min(CHOICES, spots.length))];
+        spots.sort((a, b) => b.clear - a.clear);
+        spot = spots[Math.floor(Math.random() * Math.min(CHOICES, spots.length))];
+    }
+
+    // A grid angle as a direction in the cloud's own units - grid cells
+    // aren't square when the footprint isn't
+    const along = (angle) => new THREE.Vector3(Math.cos(angle) * sizeX, 0, Math.sin(angle) * sizeZ).normalize();
 
     /**
      * Which way to look: the longest clear line of sight from there at eye
@@ -98,10 +113,11 @@ export function findInsideSpot(points, eye) {
      * meets a full cell; a line that leaves the footprint only if none
      * meets anything
      */
-    let look = 0;
+    let look = null;
     let longest = -1;
     for (let k = 0; k < LOOKS; k++) {
         const angle = (k / LOOKS) * Math.PI * 2;
+        if (previous && along(angle).dot(previous.direction) > FACING_BACK) continue;
         const dx = Math.cos(angle);
         const dz = Math.sin(angle);
         let steps = 0;
@@ -123,16 +139,14 @@ export function findInsideSpot(points, eye) {
         }
     }
 
-    // Grid cells aren't square when the footprint isn't, so turn the angle
-    // into a direction in the cloud's own units
-    const direction = new THREE.Vector3(Math.cos(look) * sizeX, 0, Math.sin(look) * sizeZ).normalize();
-
     return {
-        position: new THREE.Vector3(
-            box.min.x + (spot.x + 0.5) / GRID * sizeX,
-            eyeY,
-            box.min.z + (spot.z + 0.5) / GRID * sizeZ,
-        ),
-        direction,
+        position: previous
+            ? previous.position.clone()
+            : new THREE.Vector3(
+                box.min.x + (spot.x + 0.5) / GRID * sizeX,
+                eyeY,
+                box.min.z + (spot.z + 0.5) / GRID * sizeZ,
+            ),
+        direction: look === null ? previous.direction.clone().negate() : along(look),
     };
 }

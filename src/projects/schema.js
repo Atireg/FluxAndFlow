@@ -32,8 +32,8 @@
  *                 the next, 'drop' drops it again (with a `drop`), 'none'
  *                 nothing (and no hint for it)
  *   autoZoom      seconds: the camera moves in on the model, or back out, this often
- *   eyeLevel      with autoZoom: every other move in is from inside, at this
- *                 share of the model's height
+ *   eyeLevel      with autoZoom: two of every three moves in are from inside,
+ *                 at this share of the model's height - the second turned round
  *   drop          a crossed-rod mesh only: copies dropped with live physics
  *   images        drawer pictures - see normaliseImage
  *   videos        drawer films, embedded from Vimeo - see normaliseVideo

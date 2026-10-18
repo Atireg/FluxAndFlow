@@ -38,8 +38,9 @@ and README's "Next up". As of the end of Session 3:
   and the loader's streams carry on among the pebbles in the scene.
 - **Rock Print Pavilion** (slot 0): a scanned point cloud that gathers out
   of a scattered cloud, turns, and nods. Every 10s the camera moves in by
-  itself, then out - alternately on a point of the pavilion and from
-  inside, at eye height among the columns (`autoZoom`, `eyeLevel`). A
+  itself, then out - in turn on a point of the pavilion, from inside at
+  eye height among the columns, then from the same spot facing back the
+  other way (`autoZoom`, `eyeLevel`). A
   double-click holds it still until the next (`doubleClick: 'hold'`),
   hinted "pause".
 - **Emergent Space** (slot 1): three solid aggregates dropped with live
@@ -189,7 +190,7 @@ defineProject({
     // points: 20000,                             // optional, a mesh detailModel only: how many points to sample
     doubleClick: 'hold',                          // optional: 'zoom' (default), 'hold' (stop the turn till the next), 'drop' (drop again), 'none'
     autoZoom: 10,                                 // optional: camera moves in on a point / back out every 10s (not with `drop`)
-    eyeLevel: 0.4,                                // optional, with autoZoom: every other move in is from inside, at this share of the height
+    eyeLevel: 0.4,                                // optional, with autoZoom: two of every three moves in are from inside (then turned round), at this share of the height
     // drop: { count: 3, size: 3, ground: -1.2, solid: true,   // optional, a crossed-rod mesh only (Emergent Space)
     //         contacts: true, closeUp: { hold: 5, after: 5 },   // interlock dots; camera in on one 5s, out, drop 5s later
     //         velocity: true },                                  // live velocity (or `repeat: 10`: drop again 10s after rest)

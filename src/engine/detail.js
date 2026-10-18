@@ -78,7 +78,8 @@ const AUTO_ZOOM = 0.4; // the camera ends up this fraction of its distance away
 const AUTO_ZOOM_FIRST = 5.6; // seconds after the gather (or the opening) to the first - as the first hint lets go and falls
 
 /**
- * With `eyeLevel` too, every other move in is from inside the model instead,
+ * With `eyeLevel` too, the moves in go in threes: a point, then from inside
+ * the model, then from the same place facing back the other way - inside,
  * standing at that share of its height among its columns (findInsideSpot)
  * and looking out level across it. The camera stays on its spot as the model
  * turns but keeps facing the same way, so the columns pass across the view.
@@ -574,8 +575,15 @@ export function createDetail({
             autoZoom.count += 1;
             autoZoom.last = null;
 
-            // Every other time, from inside at eye level
-            const spot = project.eyeLevel && autoZoom.count % 2 === 0 ? findInsideSpot(points, project.eyeLevel) : null;
+            /**
+             * In turn: on a point of the model; from inside at eye level;
+             * then from the same place inside, turned to face back the
+             * other way
+             */
+            const phase = autoZoom.count % 3;
+            const spot = project.eyeLevel && phase !== 1
+                ? findInsideSpot(points, project.eyeLevel, phase === 0 ? autoZoom.spot : null)
+                : null;
             if (spot) {
                 const box = points.geometry.boundingBox;
                 autoZoom.reach = INSIDE_LOOK * Math.max(box.max.x - box.min.x, box.max.z - box.min.z);

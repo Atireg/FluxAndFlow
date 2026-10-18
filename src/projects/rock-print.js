@@ -60,8 +60,9 @@ export default defineProject({
     // Every 10 seconds the camera moves in on a point of the pavilion, then
     // back out, following the point as the model turns
     autoZoom: 10,
-    // ...and every other time from inside, standing among the columns at a
-    // person's eye height (a share of the pavilion's height above its ground)
+    // ...in turn: on a point, then from inside, standing among the columns at
+    // a person's eye height (a share of the pavilion's height above its
+    // ground), then from the same spot facing back the other way
     eyeLevel: 0.4,
 
     // A double-click (or double-tap) holds the pavilion still - its turn

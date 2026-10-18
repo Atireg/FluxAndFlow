@@ -755,7 +755,7 @@ waits while held and for a full round after. The hint still says
 
 **From inside, at eye level** (asked for: "zoom ins from inside the
 pavilion as if you are at a person's height looking through the
-columns"). `eyeLevel: 0.4` makes every other timed zoom a walk in to a
+columns"). `eyeLevel: 0.4` makes two of every three timed zooms a walk in to a
 spot inside (`findInsideSpot`, `camera/inside.js`): the points within
 `SLAB` of that share of the height binned into a grid over the footprint,
 the most open cell (furthest from any column, by a breadth-first pass)
@@ -773,6 +773,13 @@ and back once out (`rig.baseNear`); and the
 lens widens to `INSIDE_FOV` (65°), more on a tall phone so it's at least
 `INSIDE_WIDTH` (55°) across, up to 90° - at 30° a phone saw one column.
 The first try looked a random way and straight into a column.
+
+**And facing back** (asked for: "another zoomed in view from inside the
+pavilion facing the other direction"). The timed zooms now go in threes:
+a point, inside, then inside again from the same spot turned round -
+`findInsideSpot` given the last spot keeps it and looks along the
+clearest line at least `FACING_BACK` (about 135°) from the last gaze,
+rather than straight back, which could face a column.
 
 
 The project view: point cloud

@@ -182,8 +182,9 @@ in DECISIONS.md.
 
 **Rock Print.**
 - Every 10s the camera moves in by itself and back out (`autoZoom`),
-  alternately on a point of the pavilion and from inside at eye height
-  among the columns, looking along the clearest line between them
+  in turn on a point of the pavilion, from inside at eye height among the
+  columns, looking along the clearest line between them, and from the
+  same spot facing back the other way
   (`eyeLevel`; a wider lens and a closer near plane for it - a cap on
   point size there was taken out again). The first comes as the first tap
   hint lets go, 5.6s after the gather, not 10s. The camera's nod is slower

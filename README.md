@@ -188,9 +188,9 @@ Project view
         a leaf off the screen; double-tapped, it dissolves into specks like
         the aggregates
     [x] Rock Print zooms in by itself every 10s and back out (`autoZoom`),
-        alternately on a point of the pavilion (following it as it turns)
-        and from inside, at eye height among the columns, looking between
-        them (`eyeLevel`); its camera nods more slowly (22s)
+        in turn on a point of the pavilion (following it as it turns),
+        from inside at eye height among the columns, looking between them,
+        then from the same spot facing back the other way (`eyeLevel`); its camera nods more slowly (22s)
     [x] Camera moves only tilt, never roll
 
 Site
