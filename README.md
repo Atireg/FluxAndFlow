@@ -44,11 +44,10 @@ Next up (waiting on content or a check from the user)
         needs replacing. State the role accurately
     [ ] Captions / photo credits for both projects' five pictures, if
         wanted (the `caption` fields are empty)
-    [ ] A video in the drawer, if wanted. Agreed approach: a short clip
-        (under ~1 min) compressed to a small MP4 in static/, playing as a
-        silent loop with a poster frame; a longer film or one with sound
-        embedded from Vimeo (or YouTube unlisted, no-cookie). Not played
-        from Google Drive - Drive is only a way to hand the file over
+    [x] Emergent Space's film in its drawer, embedded from Vimeo
+        (`videos`). For a short silent clip, the agreed approach is still a
+        small MP4 in static/ playing as a loop with a poster frame - not
+        built yet
     [ ] Check the licensing/attribution for the Rock Print and Emergent
         Space models now that the repository is public and the site serves
         them

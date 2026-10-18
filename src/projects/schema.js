@@ -36,6 +36,7 @@
  *                 share of the model's height
  *   drop          a crossed-rod mesh only: copies dropped with live physics
  *   images        drawer pictures - see normaliseImage
+ *   videos        drawer films, embedded from Vimeo - see normaliseVideo
  *
  * See CLAUDE.md ("Adding or editing a project") for the prose version, and
  * src/projects/rock-print.js for a worked example.
@@ -102,6 +103,25 @@ function normaliseImage(image, { id, index }) {
         // The file's own width / height, as a CSS aspect ratio
         ratio: image.ratio || DEFAULT_IMAGE_RATIO,
         wide: Boolean(image.wide),
+    };
+}
+
+/**
+ * A film in the drawer, above the pictures: embedded from Vimeo by its
+ * number - the digits in vimeo.com/148494213, never a link's long
+ * `?turnstile=` part, which is one visitor's session. `title` names the
+ * player for screen readers; `ratio` is the film's width / height.
+ */
+function normaliseVideo(video, { id, index }) {
+    if (!video || !/^\d+$/.test(String(video.vimeo ?? ''))) {
+        throw new Error(`Project "${id}": videos[${index}] needs a vimeo number, like '148494213'`);
+    }
+
+    return {
+        vimeo: String(video.vimeo),
+        title: video.title ?? '',
+        caption: video.caption ?? '',
+        ratio: video.ratio || '16 / 9',
     };
 }
 
@@ -232,6 +252,12 @@ export function defineProject(project) {
         throw new Error(`Project "${id}": images should be an array`);
     }
 
+    const videos = project.videos ?? [];
+
+    if (!Array.isArray(videos)) {
+        throw new Error(`Project "${id}": videos should be an array`);
+    }
+
     return {
         id,
         slot,
@@ -258,6 +284,7 @@ export function defineProject(project) {
         drop: normaliseDrop(project.drop, { id }),
 
         images: images.map((image, index) => normaliseImage(image, { id, index })),
+        videos: videos.map((video, index) => normaliseVideo(video, { id, index })),
     };
 }
 
@@ -269,7 +296,8 @@ export function defineProject(project) {
 export function hasDescription(project) {
     return Boolean(
         project
-        && (metaRows(project).length || project.credits || project.body.length || project.images.length)
+        && (metaRows(project).length || project.credits || project.body.length
+            || project.images.length || project.videos.length)
     );
 }
 

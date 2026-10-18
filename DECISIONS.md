@@ -1135,6 +1135,18 @@ twice the pixel density), ~950 KB in all. Captions/credits are empty for
 both.
 
 
+**A film above them** (asked for: Emergent Space's video on Vimeo).
+`videos` embeds Vimeo's own player by the film's number
+(`components/ProjectVideo.jsx`), full width above the pictures, in its own
+grid so the first picture still spans the drawer. Vimeo rather than a file
+in `static/`: it's a long film with sound, and Vimeo streams it at the
+screen's quality while the site ships nothing. `dnt=1` asks the player not
+to track visitors, and `loading="lazy"` leaves it unloaded until the drawer
+is scrolled to it. The link it came from carried a `?turnstile=` token -
+the sender's Vimeo session - which is dropped: only the number is kept.
+Its shape is assumed 16:9 (Vimeo couldn't be reached from here to check);
+`ratio` corrects it if the player shows bars.
+
 Asset paths resolve against the Vite base URL
 ---------------------------------------------
 

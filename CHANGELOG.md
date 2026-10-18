@@ -233,6 +233,9 @@ Safari's address bar had remembered a `?cloudtest` address - so there every
 pebble read and opened Rock Print, Emergent Space was missing and the
 filter did nothing. The test mode is removed.
 
+**Emergent Space's film** in its About drawer, above the pictures, from
+Vimeo (`videos`, `components/ProjectVideo.jsx`).
+
 **Links.** Each project has its own link - `#rock-print`,
 `#emergent-space` on the site's address - shown while it's open, so it
 can be copied; opened, it goes straight through the loader to the

@@ -2,6 +2,7 @@ import { forwardRef } from 'react';
 import { hasDescription, metaRows } from '../projects/index.js';
 import clickOnly from './clickOnly.js';
 import ProjectImage from './ProjectImage.jsx';
+import ProjectVideo from './ProjectVideo.jsx';
 
 /**
  * The project's description, pulled out from the edge on demand - so by
@@ -55,6 +56,10 @@ const ProjectDrawer = forwardRef(function ProjectDrawer({ project, open, onToggl
 
                 <div className="drawer__body">
                     {(project?.body ?? []).map((text, index) => <p key={index}>{text}</p>)}
+                </div>
+
+                <div className="drawer__videos">
+                    {(project?.videos ?? []).map((video) => <ProjectVideo key={video.vimeo} video={video} />)}
                 </div>
 
                 <div className="drawer__images">

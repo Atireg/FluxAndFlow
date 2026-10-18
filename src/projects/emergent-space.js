@@ -27,6 +27,10 @@ export default defineProject({
 
     // All across the drawer's full width (`wide`) - three are diagrams
     // whose text is unreadable at half
+    // The film, from Vimeo, above the pictures in the drawer
+    videos: [
+        { vimeo: '148494213', title: 'Emergent Space - film' },
+    ],
     images: [
         {
             src: 'images/emergent-space-01-balloon.jpg',

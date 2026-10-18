@@ -194,6 +194,7 @@ defineProject({
     //         contacts: true, closeUp: { hold: 5, after: 5 },   // interlock dots; camera in on one 5s, out, drop 5s later
     //         velocity: true },                                  // live velocity (or `repeat: 10`: drop again 10s after rest)
     images: [{ src: 'images/x.jpg', alt: '', caption: '', ratio: '3 / 2', wide: false }],  // drawer pictures; no src = empty frame
+    // videos: [{ vimeo: '148494213', title: '', caption: '', ratio: '16 / 9' }],  // drawer films from Vimeo, above the pictures (Emergent Space)
 })
 ```
 
@@ -224,6 +225,10 @@ defineProject({
   quality ~80, progressive, metadata stripped (no GPS on a public site);
   about 1500px across for a lead or a wide one (1000px if portrait), 900px
   otherwise; `ratio` is the file's own width / height.
+- **`videos`** are Vimeo films in the drawer, above the pictures
+  (`components/ProjectVideo.jsx`), by the number in `vimeo.com/<number>` -
+  never paste a link's `?turnstile=...` part, it's one visitor's session.
+  `ratio` defaults to 16 / 9; set it if the film isn't widescreen.
 - **`detailModel`** is a `.glb` in `static/models/`: a point cloud, or a
   plain mesh sampled into points as it loads (`MESH_SAMPLE_POINTS`, 20,000,
   or `points`), centred and scaled to fit. Give a new model a `view` (even
