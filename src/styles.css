@@ -940,6 +940,59 @@ canvas.webgl {
     border: 0;
 }
 
+/* A picture is a button that enlarges it (ImageViewer) */
+.drawer__enlarge {
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: zoom-in;
+}
+
+/* The enlarged picture: over everything but the loader - the drawer is 3 -
+   on paper, whole (contain, not cropped), with its caption under it */
+.image-viewer {
+    position: fixed;
+    inset: 0;
+    z-index: 4;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    background: rgba(var(--bg-rgb), 0.96);
+    cursor: zoom-out;
+    animation: image-viewer-in 0.25s ease-out;
+}
+
+.image-viewer__figure {
+    margin: 0;
+    max-width: 100%;
+    max-height: 100%;
+    display: grid;
+    justify-items: center;
+    gap: 0.5rem;
+}
+
+.image-viewer__figure img {
+    display: block;
+    max-width: 100%;
+    max-height: calc(100vh - 4rem);
+    max-height: calc(100dvh - 4rem);
+    object-fit: contain;
+}
+
+.image-viewer__figure figcaption {
+    font-size: 0.8125rem;
+    color: var(--ink-dim);
+    text-align: center;
+}
+
+@keyframes image-viewer-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
 /* No file yet: an open frame, dashed, holding the picture's place */
 .drawer__image.is-empty .drawer__frame {
     border-style: dashed;

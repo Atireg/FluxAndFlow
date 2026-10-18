@@ -1,4 +1,5 @@
 import { assetUrl } from '../engine/assets.js';
+import clickOnly from './clickOnly.js';
 import DrawerFigure from './DrawerFigure.jsx';
 
 /**
@@ -7,9 +8,10 @@ import DrawerFigure from './DrawerFigure.jsx';
  * The first picture spans the drawer's width and the rest sit two to a row
  * (styles.css), unless `wide` - diagrams whose text is unreadable at half.
  * An entry with no `src` is deliberate: a dashed frame keeping its place
- * until there is a file for it.
+ * until there is a file for it. A picture is a button: clicked, it opens
+ * enlarged (`onEnlarge`, ImageViewer).
  */
-export default function ProjectImage({ image }) {
+export default function ProjectImage({ image, onEnlarge }) {
     const empty = !image.src;
 
     return (
@@ -19,7 +21,11 @@ export default function ProjectImage({ image }) {
             frameHidden={empty}
             caption={image.caption}
         >
-            {!empty && <img src={assetUrl(image.src)} alt={image.alt} loading="lazy" />}
+            {!empty && (
+                <button className="drawer__enlarge" type="button" aria-label="Enlarge picture" onClick={clickOnly(onEnlarge)}>
+                    <img src={assetUrl(image.src)} alt={image.alt} loading="lazy" />
+                </button>
+            )}
         </DrawerFigure>
     );
 }

@@ -246,6 +246,10 @@ descriptions (ETH News, the Gewerbemuseum Winterthur and designboom for
 Rock Print; the ITECH / ICD Stuttgart thesis page for Emergent Space) and
 approved by the user.
 
+**Pictures enlarge.** A click on a drawer picture opens it whole over the
+page, on paper, with its caption (`components/ImageViewer.jsx`); a click
+anywhere or Escape puts it back, the drawer still open.
+
 **Links.** Each project has its own link - `#rock-print`,
 `#emergent-space` on the site's address - shown while it's open, so it
 can be copied; opened, it goes straight through the loader to the

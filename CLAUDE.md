@@ -74,7 +74,8 @@ DECISIONS.md before moving anything across the line.
     src/app/            App.jsx (React state, refs, the `ui` bridge), words.js (the
                         page's small words), links.js (`#<id>`, Back and Forward)
     src/components/     the page's pieces: bar, drawer, DrawerFigure (+ ProjectImage,
-                        ProjectVideo), tags and strings, tap hint, filter, fog
+                        ProjectVideo), ImageViewer (a picture enlarged), tags and
+                        strings, tap hint, filter, fog
     src/projects/       the content: one module per project + schema.js
     src/engine/         the canvas - index.js assembles it and runs the render loop
     src/styles.css      all the CSS
@@ -139,7 +140,8 @@ defineProject({
   stripped (no GPS on a public site); ~1500px across for a lead or wide
   one, 900px otherwise; `ratio` is the file's width / height. The first
   spans the drawer, the rest sit two to a row on a wide screen (one to a
-  row on a phone) unless `wide`. No `src` = an empty dashed frame.
+  row on a phone) unless `wide`. No `src` = an empty dashed frame. A
+  click enlarges one (`ImageViewer`).
 - **Films** are Vimeo numbers (`vimeo.com/<number>`) - never paste a link's
   `?turnstile=` part, it's one visitor's session. `ratio` defaults to 16 / 9.
 - **Models** are `.glb` in `static/models/`. Read "Quantized, not

@@ -1,6 +1,7 @@
-import { forwardRef } from 'react';
+import { forwardRef, useEffect, useState } from 'react';
 import { hasDescription, metaRows } from '../projects/index.js';
 import clickOnly from './clickOnly.js';
+import ImageViewer from './ImageViewer.jsx';
 import ProjectImage from './ProjectImage.jsx';
 import ProjectVideo from './ProjectVideo.jsx';
 
@@ -19,6 +20,12 @@ import ProjectVideo from './ProjectVideo.jsx';
 const ProjectDrawer = forwardRef(function ProjectDrawer({ project, open, onToggle }, ref) {
     const available = hasDescription(project);
     const rows = metaRows(project);
+    const [enlarged, setEnlarged] = useState(null);
+
+    // An enlarged picture goes with the drawer, and with the project
+    useEffect(() => {
+        if (!open) setEnlarged(null);
+    }, [open, project]);
 
     return (
         <aside
@@ -64,12 +71,14 @@ const ProjectDrawer = forwardRef(function ProjectDrawer({ project, open, onToggl
 
                 <div className="drawer__images">
                     {(project?.images ?? []).map((image, index) => (
-                        <ProjectImage key={image.src || `empty-${index}`} image={image} />
+                        <ProjectImage key={image.src || `empty-${index}`} image={image} onEnlarge={() => setEnlarged(image)} />
                     ))}
                 </div>
 
                 <p className="drawer__credits">{project?.credits ?? ''}</p>
             </div>
+
+            {enlarged && <ImageViewer image={enlarged} onClose={() => setEnlarged(null)} />}
         </aside>
     );
 });

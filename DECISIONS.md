@@ -1146,6 +1146,19 @@ On a phone (under 860px) every picture runs the full width, one after the
 other (asked for - two to a row, Rock Print's were too small to see);
 the two-to-a-row layout is for the side drawer on a wide screen.
 
+**A click enlarges one** (asked for). Each picture is a button
+(`.drawer__enlarge`, a zoom-in cursor) that opens it in
+`components/ImageViewer.jsx`: the whole picture (`contain`, not the
+frame's crop) as large as the screen allows, on 96% paper, with its
+caption. A click anywhere or Escape puts it back, leaving the drawer open
+- Escape is caught on the way down and stopped, so App's own Escape
+doesn't shut the drawer too; it also goes when the drawer shuts or the
+project changes. It is portalled to the body because the drawer moves by
+`transform`, which would pin a fixed overlay to the drawer rather than
+the screen, and sits at z-index 4, above the drawer (3). No paging
+between pictures or pinch zoom of its own - a phone's pinch still works
+on the page; add them if asked.
+
 
 **A film above them** (asked for: Emergent Space's video on Vimeo).
 `videos` embeds Vimeo's own player by the film's number

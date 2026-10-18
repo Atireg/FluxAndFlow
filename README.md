@@ -180,6 +180,8 @@ Project view
         Emergent Space's one, Rock Print's two; full screen on a phone in
         its own player, "Watch on Vimeo" under each
     [x] On a phone, every drawer picture runs full width
+    [x] A click on a drawer picture enlarges it over the page; a click or
+        Escape puts it back
     [x] Camera moves only tilt, never roll
 
 Site
