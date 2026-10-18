@@ -1,3 +1,5 @@
+import DrawerFigure from './DrawerFigure.jsx';
+
 /**
  * A film in the drawer, from Vimeo, across the drawer's full width above
  * the pictures. Vimeo's own player, so it streams at the right quality for
@@ -12,25 +14,26 @@
 export default function ProjectVideo({ video }) {
     const src = `https://player.vimeo.com/video/${video.vimeo}?dnt=1&title=0&byline=0&portrait=0&playsinline=0`;
 
+    const caption = (
+        <>
+            {video.caption && <>{video.caption} </>}
+            <a className="drawer__video-link" href={`https://vimeo.com/${video.vimeo}`} target="_blank" rel="noopener noreferrer">
+                Watch on Vimeo <span aria-hidden="true">&#x2197;</span>
+            </a>
+        </>
+    );
+
     return (
-        <figure className="drawer__video">
-            <div className="drawer__frame" style={{ aspectRatio: video.ratio }}>
-                <iframe
-                    src={src}
-                    title={video.title || 'Film'}
-                    loading="lazy"
-                    allow="autoplay; fullscreen; picture-in-picture"
-                    allowFullScreen
-                    webkitallowfullscreen="true"
-                    mozallowfullscreen="true"
-                />
-            </div>
-            <figcaption>
-                {video.caption && <>{video.caption} </>}
-                <a className="drawer__video-link" href={`https://vimeo.com/${video.vimeo}`} target="_blank" rel="noopener noreferrer">
-                    Watch on Vimeo <span aria-hidden="true">&#x2197;</span>
-                </a>
-            </figcaption>
-        </figure>
+        <DrawerFigure className="drawer__video" ratio={video.ratio} caption={caption}>
+            <iframe
+                src={src}
+                title={video.title || 'Film'}
+                loading="lazy"
+                allow="autoplay; fullscreen; picture-in-picture"
+                allowFullScreen
+                webkitallowfullscreen="true"
+                mozallowfullscreen="true"
+            />
+        </DrawerFigure>
     );
 }

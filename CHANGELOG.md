@@ -140,7 +140,7 @@ Open at end of session (see README, "Next up"):
 
 ---
 
-## Session 3 — 2026-10-11 / 2026-10-13
+## Session 3 — 2026-10-11 / 2026-10-18
 
 `09484e9`..the commit carrying this entry, on
 `claude/react-project-structure-gdpqdq`, fast-forwarded into `main` at each
@@ -262,14 +262,18 @@ stale file map. A second pass: the page's small words into
 `src/app/words.js`; every tag over the canvas bare text with the paper
 glow on `.cube-tag` itself, the two on strings sharing `.cube-tag--hanging`
 (the hint no longer borrows the spotlight's class); the hint's filter set
-once rather than every frame; `halfExtentAlong` in framing.
+once rather than every frame; `halfExtentAlong` in framing. A third: the
+drawer's pictures and films share one frame (`components/DrawerFigure.jsx`)
+and one set of CSS; CLAUDE.md rewritten to half its length, the detail
+left to DECISIONS.md; README's finished items moved under "Done".
 
 Checks were headless (software WebGL, both layouts) with throwaway hooks,
 removed before each merge; no console errors in any run.
 
-Open at end of session (see README, "Next up"): Safari still to confirm;
-both projects' real copy and picture credits still wanted; Emergent Space's
-drop, the streams and Rock Print's inside view unchecked on a real phone;
-model licensing unchecked. Small: `smoke.js` is
-parked, the points' ink grain does nothing (no UVs - README), and the JS
+Open at end of session (see README, "Next up"): Safari to confirm (the
+blind fixes, and the playground now that `?cloudtest` is gone); both
+projects' real copy and picture credits; Emergent Space's drop, the
+streams, Rock Print's inside views and its gather's smoothness on a real
+phone; the films' shape (assumed 16:9); model licensing. Small: `smoke.js`
+is parked, the points' ink grain does nothing (no UVs - README), and the JS
 bundle is one 905 KB chunk Vite warns about.

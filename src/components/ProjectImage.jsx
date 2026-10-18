@@ -1,4 +1,5 @@
 import { assetUrl } from '../engine/assets.js';
+import DrawerFigure from './DrawerFigure.jsx';
 
 /**
  * One picture in the drawer, or an empty frame holding its place.
@@ -12,15 +13,13 @@ export default function ProjectImage({ image }) {
     const empty = !image.src;
 
     return (
-        <figure className={`drawer__image${image.wide ? ' is-wide' : ''}${empty ? ' is-empty' : ''}`}>
-            <div
-                className="drawer__frame"
-                style={{ aspectRatio: image.ratio }}
-                aria-hidden={empty ? 'true' : undefined}
-            >
-                {!empty && <img src={assetUrl(image.src)} alt={image.alt} loading="lazy" />}
-            </div>
-            {image.caption && <figcaption>{image.caption}</figcaption>}
-        </figure>
+        <DrawerFigure
+            className={`drawer__image${image.wide ? ' is-wide' : ''}${empty ? ' is-empty' : ''}`}
+            ratio={image.ratio}
+            frameHidden={empty}
+            caption={image.caption}
+        >
+            {!empty && <img src={assetUrl(image.src)} alt={image.alt} loading="lazy" />}
+        </DrawerFigure>
     );
 }

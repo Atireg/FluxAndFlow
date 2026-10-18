@@ -10,23 +10,15 @@ says why the line between React and the engine is drawn where it is.
 
 Adding a project is two steps: write `src/projects/<id>.js` exporting
 `defineProject({ ... })`, then add it to the `catalog` array in
-`src/projects/index.js`. Each declares the slot it sits in and its own
-models - a point cloud, or a plain mesh sampled into points as it loads -
-and any text field left empty is skipped rather than rendered blank. An
-optional `view` sets the camera angle the project opens on (and, with
-`sway`, a slow nod of the camera); `gather: true` makes its points gather
-out of a scattered cloud each time it opens; `drop` drops copies of a
-rod-built mesh onto a surface with physics; `doubleClick` says what a
-double-click does (zoom, hold the model still, drop again, or nothing); `autoZoom` and
-`eyeLevel` move the camera in by itself; `category` says which kind of
-project it is; `images` fills the drawer's
-picture frames. The fields are listed in CLAUDE.md and in
-`src/projects/schema.js`, which fills the defaults and rejects a
-half-declared project rather than letting it render wrong. There is no
-per-project branch in the engine, so nothing else needs touching. Slots
-with no project show the rock thumbnail and answer a click with "under
-construction". See DECISIONS.md for why things are built the way they are, and
-CHANGELOG.md for what changed when.
+`src/projects/index.js`. Its settings say everything that's particular to
+it - its slot and kind, its models, the camera angle and nod (`view`), the
+gather, a physics drop, what a double-click does, timed zooms, and the
+drawer's text, films (Vimeo) and pictures. CLAUDE.md lists them with an
+example; `src/projects/schema.js` fills the defaults and rejects a
+half-declared project. There is no per-project branch in the engine, so
+nothing else needs touching. Each project has its own link, `#<id>` on the
+site's address. See DECISIONS.md for why things are built the way they
+are, and CHANGELOG.md for what changed when.
 
 
     npm install
@@ -44,19 +36,17 @@ Next up (waiting on content or a check from the user)
         needs replacing. State the role accurately
     [ ] Captions / photo credits for both projects' five pictures, if
         wanted (the `caption` fields are empty)
-    [x] Emergent Space's film in its drawer, embedded from Vimeo
-        (`videos`). For a short silent clip, the agreed approach is still a
-        small MP4 in static/ playing as a loop with a poster frame - not
-        built yet
     [ ] Check the licensing/attribution for the Rock Print and Emergent
         Space models now that the repository is public and the site serves
         them
     [ ] Confirm on Safari (Mac and iPhone), all fixed blind: tapping a
-        pebble opens its project (it did nothing - selection no longer
-        relies on Safari's `click`), and the names, their string and the
-        zoom hint draw over the pebbles and the cloud, not behind (see
-        DECISIONS.md, "Safari"). If anything fails, note the device and any
-        message in the project bar
+        pebble opens its project, the names, strings and the hint draw over
+        the pebbles and the cloud, and the playground shows every project
+        (it showed Rock Print everywhere from a remembered `?cloudtest`
+        address, now removed). See DECISIONS.md, "Safari"
+    [ ] A short silent clip, if wanted: the agreed approach is a small MP4
+        in static/ playing as a loop with a poster frame (longer films are
+        Vimeo `videos`)
     [ ] More projects: each needs a slot, a .glb (point cloud or mesh) and
         a `view` - see CLAUDE.md
     [ ] Emergent Space's drop on a phone: confirm it runs smoothly on a real
@@ -68,9 +58,6 @@ Next up (waiting on content or a check from the user)
         among them (`INSIDE_*` in src/engine/detail.js)
 
 Landing/welcome view
-    [x] Welcome text explaining the website's concept, over the loader's
-        floating particles, first thing on opening; "Welcome to the F&F playground" leads
-        on to the loader and the catalog (src/index.html)
     [ ] Graphics (me as a figure?) on the landing page
     [ ] A way back to the landing page from the catalog
 
@@ -78,8 +65,6 @@ Navigation and general layout
     [ ] Logo
     [ ] Add buttons to switch between views
     [ ] Add footer (Copyrights, )
-    [x] A link to each project (`#rock-print`, `#emergent-space`): opens it
-        straight through the loader; Back and Forward close and reopen it
 
 Catalog view
     [ ] Real teaching and real-world projects: the empty slots stand in for
@@ -105,10 +90,6 @@ Performance and tech
     [ ] Point-cloud colours from the scan: COLOR_0 is still in the .glb but
         unread - the points are drawn in three inks. Use it, or drop it
         (~315 KB less per cloud)
-    [x] `?cloudtest` removed - a Safari address bar had remembered it and
-        kept opening the test version (every pebble Rock Print)
-    [x] `lil-gui` dropped - nothing imported it (the debug panel was
-        commented out since before Session 1)
     [ ] The points' ink grain does nothing: the cloud's fragment shader
         reads a perlin texture at `uv`, but neither cloud has texture
         coordinates, so every point gets the same grain. Give each point its
@@ -167,8 +148,9 @@ Project view
         into 8,000 points as it loads; the mesh itself, in the rock's ink,
         in its pebble; opening the About drawer zooms in on the three
     [x] Emergent Space: the turn starts as soon as the pile looks still; a
-        double-click drops it again (hinted "drop again" on the dot's string); an arrow and a live m/s reading
-        show each aggregate's velocity as it falls (`drop.velocity`);
+        double-click drops it again (hinted "drop again"); an arrow and a
+        live m/s reading show each aggregate's velocity as it falls
+        (`drop.velocity`);
         pulsing blue dots mark where they interlock once fully at rest
         (`drop.contacts`); then the camera moves in on one interlock for
         5s, back out, the floor slows to a stop and 5s later it drops
@@ -184,19 +166,30 @@ Project view
         with a mouse) over what it does hanging from it on a bouncing black
         string like the catalog's. Per project (`doubleClick`): zooms by
         default, holds Rock Print still until the next ("pause"), drops
-        Emergent Space again ("drop again"); it pulses twice over (4.4s), then falls like
-        a leaf off the screen; double-tapped, it dissolves into specks like
-        the aggregates
+        Emergent Space again ("drop again"); it pulses twice over (4.4s),
+        then falls like a leaf off the screen; double-tapped, it dissolves
+        into specks like the aggregates
     [x] Rock Print zooms in by itself every 10s and back out (`autoZoom`),
-        in turn on a point of the pavilion (following it as it turns),
-        from inside at eye height among the columns, looking between them,
-        then from the same spot facing back the other way (`eyeLevel`); its camera nods more slowly (22s)
+        in turn on a point of the pavilion (following it as it turns), from
+        inside at eye height among the columns, looking between them, then
+        from the same spot facing back (`eyeLevel`); its camera nods more
+        slowly (22s). Its gather runs on its own clock and only every fifth
+        point draws a tail, so it doesn't lag
+    [x] Films in the drawer from Vimeo (`videos`, above the pictures):
+        Emergent Space's one, Rock Print's two; full screen on a phone in
+        its own player, "Watch on Vimeo" under each
+    [x] On a phone, every drawer picture runs full width
     [x] Camera moves only tilt, never roll
 
 Site
-    [x] A landing page: the concept, background and services in three short paragraphs over the floating
-        particles, and "Welcome to the F&F playground" on to the projects (the back link in
-        a project reads "F&F playground")
+    [x] A landing page: three short paragraphs (hidden currents, the
+        background, the services) over the floating particles, and
+        "Welcome to the F&F playground" on to the projects (the back link
+        in a project reads "F&F playground")
+    [x] A link to each project (`#rock-print`, `#emergent-space`): opens it
+        straight through the loader; Back and Forward close and reopen it
+    [x] Housekeeping: `?cloudtest` and `lil-gui` removed; repeated code
+        pulled into shared helpers and components (twice)
     [x] React structure: the page in components (`src/app/`,
         `src/components/`), the canvas in an engine of focused modules
         (`src/engine/`), one module per project behind one schema

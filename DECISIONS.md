@@ -1130,7 +1130,8 @@ Drawer pictures
 ---------------
 
 `images` entries (`{ src, alt, caption, ratio, wide }`) render as figures
-under the text (`components/ProjectImage.jsx`): the first full width, the rest two to a row
+under the text (`components/ProjectImage.jsx`, in the frame it shares with
+the films, `DrawerFigure.jsx`): the first full width, the rest two to a row
 unless `wide`, lazy-loaded, framed at their `ratio` so nothing jumps; no
 `src` is an empty dashed frame. The panel is 98% opaque so the cloud
 doesn't muddy them. Rock Print's five are photos sized for the drawer -
