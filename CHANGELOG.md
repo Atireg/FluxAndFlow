@@ -234,7 +234,8 @@ pebble read and opened Rock Print, Emergent Space was missing and the
 filter did nothing. The test mode is removed.
 
 **Emergent Space's film** in its About drawer, above the pictures, from
-Vimeo (`videos`, `components/ProjectVideo.jsx`).
+Vimeo (`videos`, `components/ProjectVideo.jsx`). On a phone it opens in the
+phone's own full-screen player, and "Watch on Vimeo" sits under it.
 
 **Links.** Each project has its own link - `#rock-print`,
 `#emergent-space` on the site's address - shown while it's open, so it

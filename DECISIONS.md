@@ -1145,7 +1145,12 @@ to track visitors, and `loading="lazy"` leaves it unloaded until the drawer
 is scrolled to it. The link it came from carried a `?turnstile=` token -
 the sender's Vimeo session - which is dropped: only the number is kept.
 Its shape is assumed 16:9 (Vimeo couldn't be reached from here to check);
-`ratio` corrects it if the player shows bars.
+`ratio` corrects it if the player shows bars. On a phone it wouldn't go
+full screen (reported): iPhone Safari can't put an embedded frame full
+screen, only its own video player, so `playsinline=0` has the film open
+in that as it starts, the old `webkitallowfullscreen`/`mozallowfullscreen`
+cover older browsers, and a "Watch on Vimeo" link under it opens the film
+on Vimeo - the way that always works.
 
 Asset paths resolve against the Vite base URL
 ---------------------------------------------

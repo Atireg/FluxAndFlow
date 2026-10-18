@@ -920,6 +920,13 @@ canvas.webgl {
     color: var(--ink-dim);
 }
 
+/* The way to the film that always works, full screen on a phone included */
+.drawer__video-link {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+}
+
 /* Pictures: the first across the full width, the rest two to a row */
 .drawer__images:empty {
     display: none;
