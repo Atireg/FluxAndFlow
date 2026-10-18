@@ -948,6 +948,14 @@ canvas.webgl {
     grid-column: 1 / -1;
 }
 
+/* On a phone every picture runs the full width, one after the other -
+   two to a row they were too small to see (asked for) */
+@media (max-width: 859px) {
+    .drawer__images {
+        grid-template-columns: 1fr;
+    }
+}
+
 .drawer__frame {
     position: relative;
     overflow: hidden;

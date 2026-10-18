@@ -1134,6 +1134,10 @@ unreadable at half the drawer, so all are `wide`: the landscape diagrams
 twice the pixel density), ~950 KB in all. Captions/credits are empty for
 both.
 
+On a phone (under 860px) every picture runs the full width, one after the
+other (asked for - two to a row, Rock Print's were too small to see);
+the two-to-a-row layout is for the side drawer on a wide screen.
+
 
 **A film above them** (asked for: Emergent Space's video on Vimeo).
 `videos` embeds Vimeo's own player by the film's number

@@ -220,7 +220,8 @@ defineProject({
   gets no drawer handle at all. **State the role accurately** once written.
 - **`images`** go in `static/images/` and are rendered by
   `components/ProjectImage.jsx`. The first spans the drawer, the rest
-  sit two to a row unless `wide: true` (diagrams with small text - all of
+  sit two to a row (on a wide screen - a phone shows every one full
+  width, one after the other) unless `wide: true` (diagrams with small text - all of
   Emergent Space's). No `src` = an empty dashed frame. Prepare as JPEG
   quality ~80, progressive, metadata stripped (no GPS on a public site);
   about 1500px across for a lead or a wide one (1000px if portrait), 900px
