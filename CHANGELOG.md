@@ -317,3 +317,6 @@ the model's screen mesh). The film to play under them is still to come.
 points float on the laptop's screen, each with a tail. Its pebble holds a
 small 3D reuse sign (three chasing arrows, `static/models/reuse.glb`)
 instead of the laptop.
+
+**"Welcome to the F&F playground" comes last** on the landing page, fading
+up 1.8s after the third paragraph starts.

@@ -333,9 +333,19 @@ canvas.webgl {
     /* One after another, slowly, as the page opens */
     opacity: 0;
     animation: loader-paragraph var(--paragraph-fade) ease forwards;
+}
+
+.loader__welcome {
     --paragraph-fade: 2s;
     --paragraph-first: 0.8s; /* after the title and tagline have settled */
     --paragraph-gap: 1.8s;
+}
+
+/* "Welcome to the F&F playground" last, after the third paragraph */
+.loader__enter {
+    opacity: 0;
+    animation: loader-paragraph var(--paragraph-fade) ease forwards;
+    animation-delay: calc(var(--paragraph-first) + 3 * var(--paragraph-gap));
 }
 
 .loader__about p:nth-child(1) { animation-delay: var(--paragraph-first); }
@@ -348,7 +358,8 @@ canvas.webgl {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .loader__about p {
+    .loader__about p,
+    .loader__enter {
         animation: none;
         opacity: 1;
     }
