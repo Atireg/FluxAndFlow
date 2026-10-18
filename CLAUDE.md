@@ -32,8 +32,11 @@ in a pull-out drawer.
 - **Emergent Space** (slot 1): three aggregates dropped with live physics;
   velocity arrows, interlock dots, a close-up, then a new drop. A
   double-click drops again. One Vimeo film in its drawer.
+- **Laptop** (slot 3, the real world): a laptop mesh
+  (`static/models/laptop.glb`, made in code) sampled to points that gather.
+  Working name, no drawer text yet.
 - **Links**: each project's own address is `#<id>` (`#rock-print`).
-- **Drawer copy** is real for both projects (approved by the user);
+- **Drawer copy** is real for Rock Print and Emergent Space (approved by the user);
   change it only on request.
 - **Waiting on the user**: picture captions/credits, model licensing,
   real-device and Safari checks.
