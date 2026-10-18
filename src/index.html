@@ -19,10 +19,12 @@
 <body>
   <!-- The landing page, then the start-up loader, on one field of flowing
        particles - the flux. First the welcome: what the site is, over the
-       particles drifting calmly, and the way in ("Welcome to the F&F playground"); the
-       catalog loads underneath meanwhile. Following that link turns it into
-       the loader, whose flow picks up strength with the progress and calms
-       as it leaves - handing over to the same streams drawn in the scene,
+       particles drifting calmly, and the way in ("Welcome to the F&F
+       playground"), grey while the catalog loads underneath and orange once
+       it's ready. Following it, the page fades away onto the playground; a
+       link to a project skips the welcome and shows a progress line instead,
+       the flow picking up with it. Either way the particles calm as it leaves -
+       handing over to the same streams drawn in the scene,
        among the pebbles (engine/streams.js). Inline, and ahead of everything
        else, so it's on screen before React has even downloaded. The engine
        reports progress through window.fluxLoader; see DECISIONS.md. -->
@@ -49,19 +51,12 @@
               where they slow down: art from code, and yoga.
             </p>
           </div>
-          <button class="loader__enter" id="loader-enter" type="button">Welcome to the F&amp;F playground <span aria-hidden="true">&rarr;</span></button>
+          <button class="loader__enter" id="loader-enter" type="button" disabled>Welcome to the F&amp;F playground <span aria-hidden="true">&rarr;</span></button>
         </div>
         <div class="loader__progress">
           <div class="loader__line" id="loader-line" role="progressbar" aria-label="Loading the F&amp;F playground"
                aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span class="loader__fill" id="loader-fill"></span></div>
           <p class="loader__count" id="loader-count" aria-hidden="true">0%</p>
-          <p class="loader__words" id="loader-words">
-            <span>Nothing here is fixed.</span>
-            <span>At the edge of change,</span>
-            <span>a single grain can start an avalanche,</span>
-            <span>and things fall into new order,</span>
-            <span>between flux and flow.</span>
-          </p>
         </div>
       </div>
     </div>
@@ -74,19 +69,13 @@
       var count = document.getElementById('loader-count');
       var line = document.getElementById('loader-line');
       var enter = document.getElementById('loader-enter');
-      var words = document.getElementById('loader-words').children;
-      var wordsShown = -1;
       var ctx = canvas.getContext('2d');
       var still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-      // ms - the loader is an opening, not just a wait: from "My playground"
-      // it stays this long however fast the catalog loaded (usually while
-      // the welcome was being read), and the bar paces itself to fill over it
-      // rather than racing to 100% and sitting there - long enough for its
-      // words to be read, a part at a time (WORDS_*)
-      var WORDS_START = 300; // ms after the way in that the first part shows
-      var WORDS_EACH = 1700; // ms each part holds before the next
-      var MIN_VISIBLE = WORDS_START + 4 * WORDS_EACH + 1200; // the last part shows a moment before it leaves
+      // The playground loads behind the landing page while it's read: the way
+      // in stays grey (disabled) until it's ready, then turns orange, and
+      // following it goes straight to the playground. Only a link to a project
+      // (#rock-print), which skips the landing page, shows the progress line.
       // The exit: the loader fades onto the same paper the site sits on while
       // its streams calm down to the pace of the scene's own, which carry on
       // among the pebbles
@@ -179,28 +168,20 @@
         var dt = lastFrame === null ? 16 : Math.min(now - lastFrame, 100);
         lastFrame = now;
 
-        // Nothing to show on the welcome; from the way in, paced over MIN_VISIBLE
-        var paced = startedAt === null ? 0 : Math.min(target, (now - startedAt) / MIN_VISIBLE);
+        // The progress line, shown only on the way to a linked project
+        var paced = startedAt === null ? 0 : target;
         shown += (paced - shown) * (1 - Math.exp(-dt / 180));
 
         if (!still) drawField(now, dt / 16.7);
-
-        // Its words, a part at a time, each on the line below the last and
-        // staying, so the sentence builds up
-        if (startedAt !== null) {
-          var part = Math.min(Math.floor((now - startedAt - WORDS_START) / WORDS_EACH), words.length - 1);
-          while (wordsShown < part) {
-            wordsShown++;
-            words[wordsShown].classList.add('is-on');
-          }
-        }
 
         var percent = Math.round(shown * 100);
         fill.style.transform = 'scaleX(' + shown + ')';
         count.textContent = percent + '%';
         line.setAttribute('aria-valuenow', percent);
 
-        if (finishAt !== null && leavingSince === null && now >= finishAt && shown > 0.97) {
+        // Straight from the landing page; from the progress line, once it's full
+        var ready = root.classList.contains('is-welcome') || shown > 0.97;
+        if (finishAt !== null && leavingSince === null && now >= finishAt && ready) {
           leavingSince = now;
           root.classList.add('is-leaving');
           // The pebbles surface, and the scene's streams start (engine/)
@@ -282,10 +263,10 @@
       }
 
       // The exit may start once the catalog is in AND the visitor has
-      // followed the way in - at least MIN_VISIBLE after that
+      // followed the way in (or a link to a project)
       function scheduleExit() {
         if (finishAt !== null || !loaded || startedAt === null) return;
-        finishAt = Math.max(performance.now(), startedAt + MIN_VISIBLE);
+        finishAt = performance.now();
       }
 
       window.fluxLoader = {
@@ -295,19 +276,20 @@
         finish: function () {
           loaded = true;
           target = 1;
+          enter.disabled = false; // grey to orange: the way in is open
           scheduleExit();
         },
       };
 
-      // "My playground": the welcome makes way for the loader
+      // The way in: once loaded, straight on to the playground; a link to a
+      // project gets here before then, and shows the progress line meanwhile
       function begin() {
         if (startedAt !== null) return;
         startedAt = performance.now();
-        root.classList.remove('is-welcome');
-        root.setAttribute('aria-busy', 'true');
-        // Back up to the title, where the progress line shows, if a small
-        // screen had scrolled down to the button
-        root.scrollTo({ top: 0, behavior: 'smooth' });
+        if (!loaded) {
+          root.classList.remove('is-welcome');
+          root.setAttribute('aria-busy', 'true');
+        }
         scheduleExit();
       }
       enter.addEventListener('click', begin);
@@ -321,9 +303,9 @@
 
       window.requestAnimationFrame(step);
 
-      // Whatever happens to the rest of the page, never trap the visitor in
-      // the loader: by 30s after opening, the way in leads through in
-      // MIN_VISIBLE however the catalog is doing
+      // Whatever happens to the rest of the page, never trap the visitor on
+      // the landing page: by 30s after opening, the way in opens however the
+      // catalog is doing
       setTimeout(function () { window.fluxLoader.finish(); }, 30000);
     })();
   </script>

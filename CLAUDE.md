@@ -19,8 +19,8 @@ in a pull-out drawer.
   anything not yet merged.
 - **Landing page** (inline in `src/index.html`): three short paragraphs in
   the user's own words - change them only on request - over floating
-  particles, then "Welcome to the F&F playground" turns it into the loader,
-  whose words build up a line at a time (`WORDS_*`).
+  particles. The playground loads behind it: "Welcome to the F&F
+  playground" is grey until it's ready, then orange, and leads straight in.
 - **Playground**: ten pebbles, a random size each visit, slowly changing
   shape; one at a time glows orange with its name on a string. A filter
   (research / teaching / the real world) brings one kind forward. An empty
@@ -221,8 +221,8 @@ and a phone's drawer open and shut when touching layout. Keep it
 proportionate. Run test scripts from the scratchpad, so screenshots never
 land in the repository.
 
-- **Click `#loader-enter`, then wait for `#loader` to be removed** - about
-  8.3s from the click (`MIN_VISIBLE`) plus a 2.6s exit. Or open
+- **Click `#loader-enter` once it's enabled** (Playwright waits for that),
+  then wait for `#loader` to be removed - its 2.6s exit. Or open
   `#rock-print` / `#emergent-space` to go straight to a project.
 - **Software WebGL runs at 1-30 fps** (a frame or two a second on Rock
   Print): log state rather than trust timing, and don't judge smoothness

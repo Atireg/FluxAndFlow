@@ -213,11 +213,11 @@ pebble brings its kind forward.
 particles: three short paragraphs written with the user (hidden currents,
 their background, the services - first one paragraph on self-organised
 criticality, then a plain services list), and "Welcome to the F&F
-playground" (worded three ways before it), which turns it into the loader.
-It scrolls if it outgrows a small phone. The loader then builds up
-"Nothing here is fixed. / At the edge of change, / a single grain can
-start an avalanche, / and things fall into new order, / between flux and
-flow." a line at a time, staying about 8.3s from the click (was 5s). The
+playground" (worded three ways before it). It scrolls if it outgrows a
+small phone. The playground loads behind it: the button stays grey until
+it's ready, then turns orange and leads straight in - no loading screen,
+no minimum time (it was 5s, then 8.3s while the loader built up "Nothing
+here is fixed..." a line at a time; those words went with it). The
 back link in a project reads "F&F playground" (first "My playground",
 before that "All projects").
 

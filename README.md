@@ -196,8 +196,9 @@ Site
         (`src/projects/`) - `src/script.js` was 3,733 lines holding all of
         it. Look and feel unchanged
     [x] "Paper" palette and Fira Sans everywhere
-    [x] Start-up loader (inline, real progress, at least ~8.3s while its
-        words appear a part at a time); its streams
+    [x] The playground loads behind the landing page: its button is grey
+        until it's ready, then orange, and leads straight in (no minimum
+        time); the particles' streams
         carry on in the scene among the pebbles, parting round them and
         drifting towards the mouse or a finger
     [x] Point clouds load only on click (ten at start-up measured ~9.7 MB)

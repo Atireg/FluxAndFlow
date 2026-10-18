@@ -346,7 +346,14 @@ canvas.webgl {
     text-transform: uppercase;
     color: var(--warm-text);
     text-shadow: 0 0 0.8rem var(--loader-halo);
-    transition: color 0.2s ease;
+    transition: color 0.8s ease;
+}
+
+/* Grey while the playground loads behind the landing page; orange (above)
+   once it's ready (fluxLoader.finish in index.html) */
+.loader__enter:disabled {
+    color: var(--loader-dim, var(--ink-dim));
+    cursor: default;
 }
 
 .loader__enter span {
@@ -354,8 +361,8 @@ canvas.webgl {
     transition: transform 0.2s ease;
 }
 
-.loader__enter:hover span,
-.loader__enter:focus-visible span {
+.loader__enter:enabled:hover span,
+.loader__enter:enabled:focus-visible span {
     transform: translateX(0.3rem);
 }
 
@@ -399,31 +406,6 @@ canvas.webgl {
     line-height: 1;
     color: var(--loader-dim, var(--ink-dim));
     font-variant-numeric: tabular-nums;
-}
-
-/* The loader's words (index.html, WORDS_*): a part at a time, each
-   rising in softly on the line below the last, the sentence building up */
-.loader__words {
-    display: grid;
-    justify-items: center;
-    margin: 0.9rem 0 0;
-    max-width: min(28rem, 86vw);
-    font-size: clamp(0.95rem, 1.6vw, 1.1rem);
-    font-weight: 300;
-    line-height: 1.5;
-    color: var(--loader-ink, var(--ink));
-    text-shadow: 0 0 1rem var(--loader-halo), 0 0 0.35rem var(--loader-halo);
-}
-
-.loader__words span {
-    opacity: 0;
-    transform: translateY(0.35rem);
-    transition: opacity 0.6s ease, transform 0.6s ease;
-}
-
-.loader__words span.is-on {
-    opacity: 1;
-    transform: none;
 }
 
 /**
@@ -1055,12 +1037,6 @@ canvas.webgl {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    /* The loader's words swap rather than drift */
-    .loader__words span {
-        transform: none;
-        transition: none;
-    }
-
     /* The hint just appears and fades - no presses or rings */
     .tap-hint.is-showing .tap-hint__dot,
     .tap-hint.is-showing .tap-hint__ripple {

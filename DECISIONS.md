@@ -1188,12 +1188,16 @@ the same particle field drifting calmly, the wordmark, one line ("Where
 ideas take shape in motion.") and three short paragraphs, then "Welcome
 to the F&F playground" in the one orange (it's the invitation; first "My
 playground", then "Welcome to my playground", then "...the Flux and Flow
-playground"). Following it swaps the
-words for the progress line and count in the same place under the title,
-and the loader carries on as before - its `MIN_VISIBLE` counted from that
-click, and it leaves only once the catalog is in *and* the visitor has
-come through (`scheduleExit`). The catalog loads underneath while the
-welcome is read, so the count usually runs straight to 100%.
+playground").
+
+**The landing page is the wait** (asked for: no minimum time - load while
+the text is read). The catalog loads underneath from the moment the page
+opens; the button is `disabled` and grey until `fluxLoader.finish()`, then
+turns orange, and following it goes straight into the exit - the page fades
+onto the playground as it surfaces (`scheduleExit`: once loaded and
+followed). There is no loading screen in between any more: a link to a
+project (`#rock-print`), which skips the welcome, is the only way to see
+the progress line, while it loads.
 
 The words were first one paragraph from the user's notes on self-organised
 criticality; then, asked for something more business-like, a plain list of
@@ -1207,16 +1211,14 @@ A longer version ran taller than a small phone (375x667), so the loader
 scrolls: `place-items: start center` with the mark's `margin-block: auto`
 centres it when it fits and starts it at the top when it doesn't (plain
 centring would cut its head off, out of reach), the particle field is
-`position: fixed` so it stays put, and following the button scrolls back
-up to the title, where the progress line shows.
+`position: fixed` so it stays put.
 
 Inline rather than a React page for the reason the loader is: it's on
 screen before the bundle arrives, and the particles are already there for
 the loader to carry on with. The project bar's back link was renamed from
 "All projects" to "My playground" to match, and later to "F&F playground"
-along with the button. The 30s cap still counts from
-opening: by then the way in leads through in `MIN_VISIBLE` whatever the
-catalog is doing. The page's `<meta name="description">` is still the old
+along with the button. The 30s cap counts from opening: by then the
+button opens whatever the catalog is doing. The page's `<meta name="description">` is still the old
 one-liner - the user's to write.
 
 
@@ -1229,21 +1231,9 @@ braided currents around the wordmark, in paper, gathering strength with
 progress. Progress is
 real: each start-up asset registers with `engine/boot.js` (`createBoot`),
 which calls `window.fluxLoader.finish()` when all are done (failures count as done; a
-30s cap). It stays at least `MIN_VISIBLE`, the bar showing the lesser
-of real progress and elapsed time so a fast load fills it steadily rather
-than jumping to 100%. All its animation runs on elapsed time, not frames.
-On a fast load it's gone ~6s after the page opens.
-
-**Its words, a part at a time** (asked for: "Nothing here is fixed. At the
-edge of change, a single grain can start an avalanche, and things fall
-into new order, between flux and flow." in parts, easy to read one after
-the other). Five parts under the progress line, one every `WORDS_EACH`
-(1.7s), each rising in on the line below the last and staying, so the
-sentence builds up (first each gave way to the next in one place; the
-user wanted them to stay) (`.loader__words`, set from `step()` by time since the
-way in). `MIN_VISIBLE` was 5s; it's now worked out from the words
-(`WORDS_START + 4 x WORDS_EACH + 1.2s`, about 8.3s), so the last part is
-read before it goes.
+30s cap). That opens the landing page's way in (above); the progress line
+shows only on the way to a linked project, following real progress. All
+its animation runs on elapsed time, not frames.
 
 **The streams carry on among the pebbles.** Asked for: the loader's
 particles floating on around the pebbles - and then, not crossing them
@@ -1516,6 +1506,11 @@ Project view
   points 0.6 units away draw large: the user wanted them back as they were.
 
 Site
+- **A minimum time for the loader** (5s, then ~8.3s), and **its words a
+  part at a time** under the progress line ("Nothing here is fixed. / At
+  the edge of change, / ..."): the user asked for the loader to last no
+  longer than the loading, which now happens behind the landing page, so
+  there was no time left for the words.
 - **A dark site in cyan** with a `Sky` dome; bridging a paper loader into it
   with a plain fade or a spreading pool of ink.
 - **Other loader palettes** (tide, ember, current, aurora, magma), via a
