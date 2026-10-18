@@ -40,7 +40,7 @@ in a pull-out drawer.
   (`screenVideo: 'videos/kh-reuse.mp4'`, muted, looping), which fade away once
   it plays; the whole device shows first while
   the points settle, then the camera moves in square-on to the screen and the
-  film starts (`view.fillScreen: 1.15`, edges kept in view). On a phone (under 860px) a phone instead, playing
+  film starts (`view.fillScreen: 1.2`, edges kept in view, its top below the title). On a phone (under 860px) a phone instead, playing
   `kh-reuse-mobile.mp4` (`phone: { detailModel, screenVideo }`). Its pebble holds a reuse sign (`reuse.glb`). Drawer text from the user
   (approved), links to the live demo and Knippers Helbig.
 - **Links**: each project's own address is `#<id>` (`#rock-print`).
@@ -133,7 +133,7 @@ defineProject({
     detailModel: 'models/RockPrintStructureReduced.glb',  // opened on click: a cloud, or a mesh sampled to points (`points`)
     view: { elevation: 58, azimuth: 4, turn: 94, zoom: { stacked: 1.75, side: 1.4 },
             lift: { stacked: 0.14, side: 0 }, sway: 13 },  // camera angle; give every new model one
-                                          // (fillScreen: 1.15 - then square-on to a `screen`, nearly filling the window)
+                                          // (fillScreen: 1.2 - then square-on to a `screen`, nearly filling the window)
     gather: true,                         // points gather from a scattered swirl on open
     // solid: true, still: true,          // a mesh drawn as itself, not points; no turn (kh-reuse);
     //                                       solid: { lit: [r,g,b], shade: [r,g,b] } for its own colour;

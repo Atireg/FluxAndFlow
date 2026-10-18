@@ -167,7 +167,14 @@ export function modelTurn(model, since) {
 }
 
 export function createFraming({ rig, screen, state, grid, ui }) {
-    // A model's screen (see frameDetail's `fillScreen`) filling the window
+    // Clear space kept under the project's title bar, as a share of the height
+    const UNDER_BAR_GAP = 0.03;
+
+    /**
+     * A model's screen (see frameDetail's `fillScreen`) filling the window
+     * below the title bar - `margin` times its own size, so the device's
+     * edges show and its top stays under the title
+     */
     function frameOnScreen(model, mode, duration, ease, margin) {
         const display = model.userData.screen;
         model.updateMatrixWorld(true);
@@ -176,11 +183,20 @@ export function createFraming({ rig, screen, state, grid, ui }) {
         const upward = model.localToWorld(display.face.clone().add(display.v)).sub(centre);
         const out = across.clone().cross(upward).normalize();
 
+        // The free band: from the bottom of the window up to just under the bar
+        const below = Math.min(ui.barFraction() + UNDER_BAR_GAP, 0.5);
         const tan = Math.tan(THREE.MathUtils.degToRad(DETAIL_FOV[mode]) / 2);
-        const distance = margin * Math.max(upward.length() / tan, across.length() / (tan * screen.aspect));
+        const distance = margin * Math.max(
+            upward.length() / ((1 - below) * tan),
+            across.length() / (tan * screen.aspect),
+        );
+
+        // Centred in that band: the camera raised by the bar's share
+        const raise = upward.clone().normalize().multiplyScalar(below * distance * tan);
+        const target = centre.clone().add(raise);
 
         rig.animateFov(DETAIL_FOV[mode], duration);
-        rig.moveCamera(centre.clone().addScaledVector(out, distance), centre, duration, ease);
+        rig.moveCamera(target.clone().addScaledVector(out, distance), target, duration, ease);
     }
 
     let swayStartedAt = null; // elapsed time the current run began; null while held

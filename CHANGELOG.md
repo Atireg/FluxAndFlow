@@ -355,3 +355,6 @@ user, on writing both ends from scratch before AI tools were everyday.
 points settling on its screen; then, 5s in, the camera moves in on the
 screen - stopping short so the device's edges stay in view - and the film
 starts, the points fading as it does.
+
+**kh-reuse's close-up a little further back**, framed into the space below
+the project's title, so the laptop's or phone's top edge always clears it.

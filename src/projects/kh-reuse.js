@@ -61,7 +61,8 @@ export default defineProject({
     // detail view's quarter turn would swing away), from a little above,
     // the whole device - the laptop, or on a phone the phone - while the
     // points settle on its screen; then square-on to that screen, the film
-    // starting, 1.15 times as far as would put its edges at the window's
-    // (`fillScreen`), so the device's own edges stay in view
-    view: { elevation: 15, turn: -90, zoom: { side: 1.3, stacked: 1.7 }, lift: { side: 0, stacked: 0.03 }, fillScreen: 1.15 },
+    // starting, 1.2 times as far as would put its edges at the window's
+    // (`fillScreen`), so the device's own edges stay in view and its top
+    // under the title
+    view: { elevation: 15, turn: -90, zoom: { side: 1.3, stacked: 1.7 }, lift: { side: 0, stacked: 0.03 }, fillScreen: 1.2 },
 });

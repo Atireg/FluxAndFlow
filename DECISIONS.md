@@ -855,7 +855,9 @@ device first (`zoom`, `lift`) while the points settle on its screen, then
 at `FILL_SCREEN_AT` (5s) the camera moves in square-on to the screen
 (`view.fillScreen`, `frameOnScreen` in camera/framing.js) and the film
 starts. Its number is how far back from the screen's edges meeting the
-window's it stops - 1.15, so the device's own edges stay in view. Filling
+window's it stops - 1.2, so the device's own edges stay in view - and it
+frames into the band below the title bar (`ui.barFraction()` plus
+`UNDER_BAR_GAP`), so the device's top always clears the title. Filling
 the window outright came first; the user wanted the device seen whole
 first and its edges kept.
 
