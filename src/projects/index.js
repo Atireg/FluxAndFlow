@@ -21,14 +21,14 @@
 import { EMPTY_SLOT_CATEGORIES, EMPTY_SLOT_THUMB, SLOT_COUNT, pebbleLabel } from './schema.js';
 import rockPrint from './rock-print.js';
 import emergentSpace from './emergent-space.js';
-import laptop from './laptop.js';
+import khReuse from './kh-reuse.js';
 
 export { CATEGORIES, categoryLabel, hasDescription, metaRows } from './schema.js';
 
 const catalog = [
     rockPrint,
     emergentSpace,
-    laptop,
+    khReuse,
 ];
 
 /**

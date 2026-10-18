@@ -1,14 +1,13 @@
 import { defineProject } from './schema.js';
 
 /**
- * A laptop - a plain mesh (static/models/laptop.glb, lid open), sampled into
- * points as it opens. The name is a working one and there is no drawer text
- * yet: both come from the user.
+ * kh-reuse - a laptop, a plain mesh (static/models/laptop.glb, lid open),
+ * sampled into points as it opens. No drawer text yet: it comes from the user.
  */
 export default defineProject({
-    id: 'laptop',
+    id: 'kh-reuse',
     slot: 3,
-    title: 'Laptop',
+    title: 'kh-reuse',
     // Research, teaching or the real world - its tag, and the catalog's filter
     category: 'real-world',
 

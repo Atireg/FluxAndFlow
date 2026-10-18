@@ -45,8 +45,8 @@ Next up (waiting on content or a check from the user)
         Vimeo `videos`)
     [ ] More projects: each needs a slot, a .glb (point cloud or mesh) and
         a `view` - see CLAUDE.md
-    [ ] The laptop (slot 3, the real world): its real name, drawer text,
-        pictures and films - it opens with none, so no drawer handle yet
+    [ ] kh-reuse (slot 3, the real world): its drawer text, pictures and
+        films - it opens with none, so no drawer handle yet
     [ ] Emergent Space's drop on a phone: confirm it runs smoothly on a real
         device (it was only checked with software rendering here)
     [ ] The catalog's streams on a phone: WebGL draws them one device pixel

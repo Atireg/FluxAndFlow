@@ -288,10 +288,10 @@ phone; the films' shape (assumed 16:9); model licensing. Small: `smoke.js`
 is parked, the points' ink grain does nothing (no UVs - README), and the JS
 bundle is one 905 KB chunk Vite warns about.
 
-**A third project: the laptop** (slot 3, "The real world",
-`src/projects/laptop.js`, `#laptop`). Its pebble holds a small laptop and
+**A third project: kh-reuse, a laptop** (slot 3, "The real world",
+`src/projects/kh-reuse.js`, `#kh-reuse`). Its pebble holds a small laptop and
 opens a laptop - lid open, keys, trackpad and screen - gathering out of
 points. The model is a plain mesh built in code (`static/models/laptop.glb`,
-64 KB), sampled to points like Emergent Space's. "Laptop" is a working name;
-no drawer until the user gives the text.
+64 KB), sampled to points like Emergent Space's. Named "kh-reuse" by the user;
+no drawer until they give the text.
 
