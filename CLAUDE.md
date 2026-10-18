@@ -24,7 +24,8 @@ in a pull-out drawer.
 - **Playground**: ten pebbles, a random size each visit, slowly changing
   shape; one at a time glows orange with its name on a string. A filter
   (research / teaching / the real world) brings one kind forward. An empty
-  pebble answers a click with a two-line phrase (`src/app/words.js`).
+  pebble holds nothing and answers a click with a two-line phrase
+  (`src/app/words.js`).
 - **Rock Print Pavilion** (slot 0): a point cloud that gathers out of a
   scattered swirl, turns and nods; every 10s the camera moves in by itself,
   in turn on a point, from inside at eye height, and from there facing back.

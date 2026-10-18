@@ -71,7 +71,7 @@ Catalog view
         slot from that map once a project fills it
     [ ] The element of surprise or discovery - when hovered on a cube add little 3D objects representing each project (e.g. a rock, an aggregate, a spider...)
         (each pebble shows its object all the time instead - Emergent
-        Space's holds its aggregate (`thumbSize`), the rest the rock - and
+        Space's holds its aggregate (`thumbSize`), empty ones nothing - and
         hover deliberately changes nothing; see DECISIONS.md)
     [ ] Add a "magic/mystery" appearance (e.g. fog shader or lights)
         (scene fog is off for a reason - see DECISIONS.md before re-adding)

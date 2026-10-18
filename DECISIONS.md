@@ -18,7 +18,7 @@ The catalog (the grid of pebbles - "cubes" in the code)
 - The spotlight: any pebble, held still, in the one orange
 - The glowing pebble's name hangs on a string
 - The pointer stirs the grid; the grid doesn't orbit
-- Every pebble holds its thumbnail - the rock, or the project's own model
+- A project's pebble holds its thumbnail; an empty one holds nothing
 - "Under construction", and tags as HTML over the canvas
 - Selecting: pointerup on the canvas, and drags don't count
 - The grid arrives, a pebble at a time
@@ -275,13 +275,15 @@ The pointer stirs the grid; the grid doesn't orbit
   they fade in rather than springing apart in view.
 
 
-Every pebble holds its thumbnail - the rock, or the project's own model
------------------------------------------------------------------------
+A project's pebble holds its thumbnail; an empty one holds nothing
+-----------------------------------------------------------------
 
-Empty slots use `EMPTY_SLOT_THUMB` (the same rock). `loadThumb` keeps one
-promise per path and each pebble adds a `clone()`, so ten rocks are one
-187 KB download (`EMPTY_SLOT_THUMB` lives in `src/projects/schema.js`). A
-binary `.glb` would be about a quarter smaller than the `.gltf`.
+A project names its `thumbModel` (the rock, `DEFAULT_THUMB` in
+`src/projects/schema.js`, if it doesn't). A slot with no project yet stays
+empty - at the user's request; it held the rock too, so the grid read as
+full. `loadThumb` keeps one promise per path and each pebble adds a
+`clone()`, so a model shared by several pebbles is one download. A binary
+`.glb` would be about a quarter smaller than the rock's `.gltf`.
 
 A project with `thumbSize` shows its own model instead (Emergent Space:
 `thumbModel` is the same `aggregate.glb` its project view samples into
@@ -1535,6 +1537,7 @@ Tried and removed
 Built, shipped or previewed, and taken out at the user's request.
 
 Catalog
+- **The rock in every empty pebble** - empty pebbles now hold nothing.
 - **Cubes** (box glass with teal edge lines; the cube's outline kept at 0.3
   around the model) - replaced by pebbles. Also shown: bubbles, morphing
   blobs, rounded cubes, plain clouds of points.

@@ -56,9 +56,9 @@
 // project is ever unreachable. Raise it before adding an eleventh project.
 export const SLOT_COUNT = 10;
 
-// The thumbnail for a slot with no project yet - every pebble gets something
-// inside it, so the grid reads as full rather than as one find among blanks
-export const EMPTY_SLOT_THUMB = 'models/rock.gltf';
+// The thumbnail inside a project's pebble when it names none of its own; a
+// slot with no project yet holds nothing
+const DEFAULT_THUMB = 'models/rock.gltf';
 
 /**
  * The kinds of project, in the order the catalog's filter lists them. Every
@@ -319,7 +319,7 @@ export function defineProject(project) {
         body,
         credits: project.credits ?? '',
 
-        thumbModel: project.thumbModel ?? EMPTY_SLOT_THUMB,
+        thumbModel: project.thumbModel ?? DEFAULT_THUMB,
         thumbSize: project.thumbSize,
         detailModel: project.detailModel,
 

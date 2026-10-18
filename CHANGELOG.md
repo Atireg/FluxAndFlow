@@ -370,3 +370,7 @@ pauses it on its frame and the next plays it on - the site's existing
 **kh ReUse's films replaced** with the user's new recordings: the laptop's
 now 1080p (3.5 MB), the phone's 390 x 664 (2.3 MB) - the same shapes, so
 the screens still fit them exactly.
+
+**Empty pebbles hold nothing**: the rock that filled every slot without a
+project is gone from them; a project's pebble still holds its own model
+(Rock Print the rock).

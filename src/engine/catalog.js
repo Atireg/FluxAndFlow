@@ -46,9 +46,10 @@ export function createCatalog({ scene, grid, state, boot, visited, source }) {
         return thumbScenes.get(path);
     }
 
-    // A project's thumbnail, or the rock for a slot with nothing in it yet
+    // A project's thumbnail; a slot with no project yet stays empty
     function addContentToPebble(pebble) {
-        const path = pebble.userData.project?.thumbModel ?? source.emptyThumb;
+        const path = pebble.userData.project?.thumbModel;
+        if (!path) return;
 
         loadThumb(path).then((scene) => {
             if (!scene) return;

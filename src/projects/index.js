@@ -15,10 +15,10 @@
  * says so in its own file through `view`, `gather`, `drop`, `points`,
  * `doubleClick`, `autoZoom` or `eyeLevel`.
  *
- * Slots with no project listed here render as empty pebbles, holding the
- * rock and answering a click with "under construction".
+ * Slots with no project listed here render as empty pebbles, holding
+ * nothing and answering a click with "under construction".
  */
-import { EMPTY_SLOT_CATEGORIES, EMPTY_SLOT_THUMB, SLOT_COUNT, pebbleLabel } from './schema.js';
+import { EMPTY_SLOT_CATEGORIES, SLOT_COUNT, pebbleLabel } from './schema.js';
 import rockPrint from './rock-print.js';
 import emergentSpace from './emergent-space.js';
 import khReuse from './kh-reuse.js';
@@ -63,7 +63,6 @@ const projectBySlot = bySlot(catalog);
 export const catalogSource = {
     slotCount: SLOT_COUNT,
     projectBySlot,
-    emptyThumb: EMPTY_SLOT_THUMB,
     label: pebbleLabel,
     // Which kind of project a slot holds - its project's, or the kind an
     // empty slot stands in for - for the catalog's filter to compare
