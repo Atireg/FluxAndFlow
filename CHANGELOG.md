@@ -298,3 +298,7 @@ no drawer until they give the text.
 **kh-reuse, solid and still.** The laptop is now drawn as the model itself
 (new `solid` setting), not a point cloud, and doesn't turn (`still`): open,
 screen square to the visitor. Something is to be shown on its screen later.
+
+**The landing page's paragraphs appear one by one**, each fading up over 2s,
+1.8s apart, from 0.8s in (`.loader__about p` in styles.css); all at once
+with reduced motion.

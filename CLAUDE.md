@@ -18,8 +18,8 @@ in a pull-out drawer.
 - **Live**: everything built is on `main`; `git log origin/main..` shows
   anything not yet merged.
 - **Landing page** (inline in `src/index.html`): three short paragraphs in
-  the user's own words - change them only on request - over floating
-  particles. The playground loads behind it: "Welcome to the F&F
+  the user's own words - change them only on request - fading in one
+  by one over floating particles. The playground loads behind it: "Welcome to the F&F
   playground" is grey until it's ready, then orange, and leads straight in.
 - **Playground**: ten pebbles, a random size each visit, slowly changing
   shape; one at a time glows orange with its name on a string. A filter
