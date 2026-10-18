@@ -386,3 +386,6 @@ above the drawer (`view.drawer: 'whole'`).
 **kh ReUse's screenshots** in its drawer: two from a desktop across the
 drawer's width, then three from a phone two to a row - on a phone too, a
 new `pair` option for pictures (elsewhere a phone shows one to a row).
+
+**kh ReUse's drawer**: a note, approved by the user, that the data in this
+version of the website is fictional.

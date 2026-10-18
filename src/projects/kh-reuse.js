@@ -31,6 +31,8 @@ export default defineProject({
         + 'one. The element catalog can be filtered by material, profile type, '
         + 'profile and condition. Registered users can also add new projects '
         + 'and elements, and collect elements in a personal basket for reuse.',
+        'Note: the data in this version of the website is fictional and serves '
+        + 'only to demonstrate the platform.',
         'Tech stack: React (Vite) frontend on Firebase Hosting, Node.js server '
         + 'on Google Cloud Run, and a MongoDB Atlas database.',
         'The author wrote both the frontend and the backend from scratch, '
