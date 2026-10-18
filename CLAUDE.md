@@ -35,7 +35,7 @@ in a pull-out drawer.
 - **kh-reuse** (slot 3, the real world, `#kh-reuse`): a laptop
   (`static/models/laptop.glb`, made in code) drawn solid in light grey with
   rounded edges (`solid: { lit, shade }`), open, screen to the visitor, not
-  turning (`still`). A third of the pebble's points settle onto its
+  turning (`still`), no orbiting by hand (`orbit: false`). A third of the pebble's points settle onto its
   screen in the inks and float there with tails (`screen: 'Screen'`); a recorded film is to play
   there later. Its pebble holds a reuse sign (`reuse.glb`). No drawer text yet.
 - **Links**: each project's own address is `#<id>` (`#rock-print`).
@@ -131,7 +131,8 @@ defineProject({
     gather: true,                         // points gather from a scattered swirl on open
     // solid: true, still: true,          // a mesh drawn as itself, not points; no turn (kh-reuse);
     //                                       solid: { lit: [r,g,b], shade: [r,g,b] } for its own colour;
-    //                                       screen: 'Screen' - the pebble's points float on that mesh
+    //                                       screen: 'Screen' - the pebble's points float on that mesh;
+    //                                       orbit: false - no orbiting the view by hand
     doubleClick: 'hold',                  // 'zoom' (default), 'hold', 'drop' (with `drop`), 'none'
     autoZoom: 10,                         // camera moves in / out by itself every 10s (not with `drop`)
     eyeLevel: 0.4,                        // with autoZoom: two of every three moves in are from inside

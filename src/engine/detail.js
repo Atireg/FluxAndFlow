@@ -300,8 +300,9 @@ export function createDetail({
             // The elevation is the point of this view, so nothing rotates it
             // off-axis...
             rig.controls.autoRotate = false;
-            // ...but the visitor may orbit it by hand
-            rig.controls.enabled = true;
+            // ...but the visitor may orbit it by hand - unless the project
+            // holds its view (`orbit: false`)
+            rig.controls.enabled = project.orbit;
 
             // The grey fog rolls in behind the project as the camera moves in
             ui.onFog(true);

@@ -320,3 +320,6 @@ instead of the laptop.
 
 **"Welcome to the F&F playground" comes last** on the landing page, fading
 up 1.8s after the third paragraph starts.
+
+**kh-reuse can't be orbited** by hand (`orbit: false`, a new setting): the
+laptop's screen stays square on. A double-click still zooms.

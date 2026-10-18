@@ -828,8 +828,9 @@ rotation, open and with its screen facing the visitor - something will be
 shown on the screen later. Two project settings rather than a branch:
 `solid` draws a mesh detailModel as itself in the inks (`makeInkMaterial`,
 as Emergent Space's aggregates), dissolving in through its grain over the
-reveal instead of points gathering; `still` holds the model's turn at 0
-(it can still be orbited by hand, and a double-click still zooms).
+reveal instead of points gathering; `still` holds the model's turn at 0,
+and `orbit: false` keeps the visitor from orbiting or wheel-zooming it by
+hand (asked for later; a double-click still zooms).
 `view.turn: -90` undoes the detail view's quarter turn so the screen (+Z in
 the model) faces the camera. At the user's request it is light grey and
 its edges rounded: `solid: { lit, shade }` gives a solid model its own

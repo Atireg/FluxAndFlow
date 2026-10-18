@@ -31,6 +31,7 @@
  *                 inks, not sampled into points; or { lit, shade } as screen
  *                 [r, g, b] for its own colour, lit side and turned away
  *   still         the model doesn't turn by itself (it can still be orbited)
+ *   orbit         false: the visitor can't orbit or wheel-zoom the view by hand
  *   screen        with solid: the name of the model's screen mesh (X across,
  *                 Y up, Z out of it); the pebble's points settle there and float
  *   doubleClick   what a double-click/double-tap on the model does: 'zoom'
@@ -306,6 +307,7 @@ export function defineProject(project) {
         points: project.points,
         solid: normaliseSolid(project),
         still: Boolean(project.still),
+        orbit: project.orbit !== false,
         screen: normaliseScreen(project),
         doubleClick: normaliseDoubleClick(project),
         autoZoom: normaliseAutoZoom(project.autoZoom, project),
