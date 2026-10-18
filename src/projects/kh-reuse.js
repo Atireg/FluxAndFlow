@@ -38,6 +38,41 @@ export default defineProject({
         '👉 Live demo: [kh-reuse.web.app](https://kh-reuse.web.app/)',
     ],
 
+    // Screenshots: the two on a desktop across the drawer, then the three on
+    // a phone two to a row (`pair`), on a phone too
+    images: [
+        {
+            src: 'images/kh-reuse-01-home.jpg',
+            alt: 'The kh ReUse home page on a desktop: a welcome, a short introduction, and the newest projects, Stuttgart Rathaus and Kittler Schule Heilbronn',
+            ratio: '1500 / 938',
+            wide: true,
+        },
+        {
+            src: 'images/kh-reuse-02-project.jpg',
+            alt: 'The Stuttgart Rathaus project page on a desktop: a photo, building data, a description, and a table of the building elements recovered from it',
+            ratio: '1500 / 938',
+            wide: true,
+        },
+        {
+            src: 'images/kh-reuse-03-mobile-new-project.jpg',
+            alt: 'On a phone: the form for adding a new demolition project',
+            ratio: '700 / 1192',
+            pair: true,
+        },
+        {
+            src: 'images/kh-reuse-04-mobile-search.jpg',
+            alt: 'On a phone: searching the element catalog by material, profile type, profile and condition',
+            ratio: '700 / 1192',
+            pair: true,
+        },
+        {
+            src: 'images/kh-reuse-05-mobile-new-element.jpg',
+            alt: 'On a phone: the form for adding a new building element, here a steel IPE100 beam',
+            ratio: '700 / 1192',
+            pair: true,
+        },
+    ],
+
     // A small reuse sign in its pebble (static/models/reuse.glb, made in code)
     thumbModel: 'models/reuse.glb',
     thumbSize: 1.9,

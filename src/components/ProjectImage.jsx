@@ -16,7 +16,7 @@ export default function ProjectImage({ image, onEnlarge }) {
 
     return (
         <DrawerFigure
-            className={`drawer__image${image.wide ? ' is-wide' : ''}${empty ? ' is-empty' : ''}`}
+            className={`drawer__image${image.wide ? ' is-wide' : ''}${image.pair ? ' is-pair' : ''}${empty ? ' is-empty' : ''}`}
             ratio={image.ratio}
             frameHidden={empty}
             caption={image.caption}

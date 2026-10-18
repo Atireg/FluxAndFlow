@@ -113,6 +113,9 @@ function normaliseImage(image, { id, index }) {
         // The file's own width / height, as a CSS aspect ratio
         ratio: image.ratio || DEFAULT_IMAGE_RATIO,
         wide: Boolean(image.wide),
+        // Two to a row on a phone too, where pictures otherwise run one to a
+        // row - for tall phone screenshots, too big at full width
+        pair: Boolean(image.pair),
     };
 }
 

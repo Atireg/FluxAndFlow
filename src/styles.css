@@ -945,10 +945,11 @@ canvas.webgl {
 }
 
 /* On a phone every picture runs the full width, one after the other -
-   two to a row they were too small to see (asked for) */
+   two to a row they were too small to see (asked for) - but a `pair` one
+   (a tall phone screenshot) stays two to a row */
 @media (max-width: 859px) {
-    .drawer__images {
-        grid-template-columns: 1fr;
+    .drawer__image:not(.is-pair) {
+        grid-column: 1 / -1;
     }
 }
 

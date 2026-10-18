@@ -46,7 +46,8 @@ in a pull-out drawer.
   the About drawer shows the whole device again (`view.drawer: 'whole'`). On a phone (under 860px) a phone instead, playing
   `kh-reuse-mobile.mp4` (`phone: { detailModel, screenVideo }`). A double-click or double-tap pauses the film
   and plays it on (`doubleClick: 'hold'`). Its pebble holds a reuse sign (`reuse.glb`). Drawer text from the user
-  (approved), links to the live demo and knippershelbig.
+  (approved), links to the live demo and knippershelbig; five screenshots,
+  two desktop (wide) then three phone ones (`pair`).
 - **Links**: each project's own address is `#<id>` (`#rock-print`).
 - **Drawer copy** is real for Rock Print and Emergent Space (approved by the user);
   change it only on request.
@@ -152,6 +153,7 @@ defineProject({
     //         closeUp: { hold: 5, after: 5 }, velocity: true },  // physics drop (Emergent Space)
     videos: [{ vimeo: '294086902', title: '' }],  // Vimeo films above the pictures, by number
     images: [{ src: 'images/x.jpg', alt: '', caption: '', ratio: '3 / 2', wide: false }],
+                                          // (pair: true - two to a row on a phone too)
 })
 ```
 
@@ -162,7 +164,7 @@ defineProject({
   stripped (no GPS on a public site); ~1500px across for a lead or wide
   one, 900px otherwise; `ratio` is the file's width / height. The first
   spans the drawer, the rest sit two to a row on a wide screen (one to a
-  row on a phone) unless `wide`. No `src` = an empty dashed frame. A
+  row on a phone, unless `pair` - tall phone screenshots) unless `wide`. No `src` = an empty dashed frame. A
   click enlarges one (`ImageViewer`).
 - **A film on a model's screen** (`screenVideo`) is an .mp4 in
   `static/videos/`, H.264, no sound needed (it plays muted). Headless

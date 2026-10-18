@@ -382,3 +382,7 @@ above the drawer (`view.drawer: 'whole'`).
 
 **kh ReUse's films replaced again** with the user's latest recordings
 (laptop 1080p, 3.7 MB; phone 390 x 664, 2.5 MB - the same shapes).
+
+**kh ReUse's screenshots** in its drawer: two from a desktop across the
+drawer's width, then three from a phone two to a row - on a phone too, a
+new `pair` option for pictures (elsewhere a phone shows one to a row).
