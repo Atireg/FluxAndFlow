@@ -2,7 +2,8 @@ import { defineProject } from './schema.js';
 
 /**
  * kh-reuse - a laptop, a plain mesh (static/models/laptop.glb, lid open),
- * sampled into points as it opens. No drawer text yet: it comes from the user.
+ * drawn as itself, standing still with its screen to the visitor. No drawer
+ * text yet: it comes from the user.
  */
 export default defineProject({
     id: 'kh-reuse',
@@ -14,11 +15,11 @@ export default defineProject({
     // Its own mesh in its pebble, like Emergent Space's
     thumbModel: 'models/laptop.glb',
     thumbSize: 1.9,
-    // A plain mesh, not a point cloud: its surface is sampled into points
-    // as it loads (see pointsFromMeshes)
     detailModel: 'models/laptop.glb',
-    // Seen from a little above and turned three-quarters, so the keys and
-    // the screen both read
-    view: { elevation: 28, turn: 35, zoom: { side: 1.3, stacked: 1.1 } },
-    gather: true,
+    // The mesh itself in the inks rather than points, and no turn of its own
+    solid: true,
+    still: true,
+    // Square-on to the screen (the model's front is its +Z, which the
+    // detail view's quarter turn would swing away), from a little above
+    view: { elevation: 15, turn: -90, zoom: { side: 1.3, stacked: 1.1 } },
 });

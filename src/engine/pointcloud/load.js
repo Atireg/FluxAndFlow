@@ -22,7 +22,7 @@ import inkGlsl from '../shaders/pointCloud/ink.glsl';
  * One path for every project, whatever it declared: a .glb that is already a
  * point cloud is drawn as it is; a plain mesh is sampled into points as it
  * loads (`points`), and a rod-built one can have copies dropped onto a
- * surface with physics (`drop`). Which of those happens is read off the
+ * surface with physics (`drop`), or drawn as the mesh itself (`solid`). Which of those happens is read off the
  * project, so a new project needs no new code here - see src/projects/.
  */
 export function loadPointCloud({
@@ -36,6 +36,7 @@ export function loadPointCloud({
     gather = false,
     points,
     drop,
+    solid = false,
 }) {
     gltfLoader.load(url, async (gltf) => {
         const materials = [];
@@ -50,6 +51,18 @@ export function loadPointCloud({
                 return;
             }
             gltf.scene = sampled;
+
+            // The mesh itself in the inks, no points (its reveal fades it in)
+            if (solid) {
+                const material = makeInkMaterial();
+                material.uniforms.uFade.value = 1;
+                const group = new THREE.Group();
+                group.add(new THREE.Mesh(sampled.userData.solid, material));
+                group.userData.solidMaterial = material;
+                parent.add(group);
+                onLoaded?.(group);
+                return;
+            }
 
             // Several copies dropped onto a surface with physics (../pile.js)
             if (drop) {

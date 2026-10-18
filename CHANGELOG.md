@@ -295,3 +295,6 @@ points. The model is a plain mesh built in code (`static/models/laptop.glb`,
 64 KB), sampled to points like Emergent Space's. Named "kh-reuse" by the user;
 no drawer until they give the text.
 
+**kh-reuse, solid and still.** The laptop is now drawn as the model itself
+(new `solid` setting), not a point cloud, and doesn't turn (`still`): open,
+screen square to the visitor. Something is to be shown on its screen later.

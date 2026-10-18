@@ -27,6 +27,9 @@
  *   view          camera angle in degrees - see normaliseView
  *   gather        points gather from a scattered cloud on open
  *   points        a mesh detailModel only: how many points to sample
+ *   solid         a mesh detailModel only: drawn as the mesh itself in the
+ *                 inks, not sampled into points
+ *   still         the model doesn't turn by itself (it can still be orbited)
  *   doubleClick   what a double-click/double-tap on the model does: 'zoom'
  *                 (the default) in and back out, 'hold' stops its turn until
  *                 the next, 'drop' drops it again (with a `drop`), 'none'
@@ -206,6 +209,13 @@ function normaliseAutoZoom(autoZoom, { id, drop }) {
     return autoZoom;
 }
 
+// A solid model has no points to gather, sample or drop
+function normaliseSolid({ id, solid, gather, points, drop }) {
+    if (!solid) return false;
+    if (gather || points !== undefined || drop) throw new Error(`Project "${id}": solid can't go with gather, points or drop`);
+    return true;
+}
+
 function normaliseEyeLevel({ id, eyeLevel, autoZoom }) {
     if (eyeLevel === undefined) return undefined;
     if (!(eyeLevel > 0 && eyeLevel < 1)) throw new Error(`Project "${id}": eyeLevel should be a share of the height, between 0 and 1`);
@@ -278,6 +288,8 @@ export function defineProject(project) {
         category: project.category,
         gather: Boolean(project.gather),
         points: project.points,
+        solid: normaliseSolid(project),
+        still: Boolean(project.still),
         doubleClick: normaliseDoubleClick(project),
         autoZoom: normaliseAutoZoom(project.autoZoom, project),
         eyeLevel: normaliseEyeLevel(project),

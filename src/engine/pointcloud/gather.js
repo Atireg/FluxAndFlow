@@ -33,6 +33,9 @@ export function setReveal(model, reveal) {
     model.userData.pointMaterials?.forEach((material) => {
         material.uniforms.uReveal.value = reveal;
     });
+    // A solid model (`solid`) dissolves in through its grain instead
+    const solid = model.userData.solidMaterial;
+    if (solid) solid.uniforms.uFade.value = 1 - reveal;
 }
 
 export function setGather(model, progress) {

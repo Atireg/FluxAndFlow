@@ -32,9 +32,10 @@ in a pull-out drawer.
 - **Emergent Space** (slot 1): three aggregates dropped with live physics;
   velocity arrows, interlock dots, a close-up, then a new drop. A
   double-click drops again. One Vimeo film in its drawer.
-- **kh-reuse** (slot 3, the real world, `#kh-reuse`): a laptop mesh
-  (`static/models/laptop.glb`, made in code) sampled to points that gather.
-  No drawer text yet.
+- **kh-reuse** (slot 3, the real world, `#kh-reuse`): a laptop
+  (`static/models/laptop.glb`, made in code) drawn solid (`solid`), open,
+  screen to the visitor, not turning (`still`). Something is to go on its
+  screen later. No drawer text yet.
 - **Links**: each project's own address is `#<id>` (`#rock-print`).
 - **Drawer copy** is real for Rock Print and Emergent Space (approved by the user);
   change it only on request.
@@ -126,6 +127,7 @@ defineProject({
     view: { elevation: 58, azimuth: 4, turn: 94, zoom: { stacked: 1.75, side: 1.4 },
             lift: { stacked: 0.14, side: 0 }, sway: 13 },  // camera angle; give every new model one
     gather: true,                         // points gather from a scattered swirl on open
+    // solid: true, still: true,          // a mesh drawn as itself, not points; no turn (kh-reuse)
     doubleClick: 'hold',                  // 'zoom' (default), 'hold', 'drop' (with `drop`), 'none'
     autoZoom: 10,                         // camera moves in / out by itself every 10s (not with `drop`)
     eyeLevel: 0.4,                        // with autoZoom: two of every three moves in are from inside

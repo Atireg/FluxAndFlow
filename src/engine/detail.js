@@ -352,6 +352,7 @@ export function createDetail({
                 gather: project.gather,
                 points: project.points,
                 drop: project.drop,
+                solid: project.solid,
                 // Say so rather than leave "Loading model" up forever, and
                 // keep the real error for the browser's console
                 onError: (error) => {

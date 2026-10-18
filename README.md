@@ -46,7 +46,8 @@ Next up (waiting on content or a check from the user)
     [ ] More projects: each needs a slot, a .glb (point cloud or mesh) and
         a `view` - see CLAUDE.md
     [ ] kh-reuse (slot 3, the real world): its drawer text, pictures and
-        films - it opens with none, so no drawer handle yet
+        films - it opens with none, so no drawer handle yet - and what goes
+        on the laptop's screen
     [ ] Emergent Space's drop on a phone: confirm it runs smoothly on a real
         device (it was only checked with software rendering here)
     [ ] The catalog's streams on a phone: WebGL draws them one device pixel
