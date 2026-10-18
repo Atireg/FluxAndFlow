@@ -6,6 +6,7 @@ import { loadPhysics, PILE_FADE_OUT, PILE_REPLAY_WAIT } from './pile.js';
 import { loadPointCloud } from './pointcloud/load.js';
 import { GATHER_DURATION } from './pointcloud/gather.js';
 import { getDissolve } from './pebbles/dissolve.js';
+import { playScreenVideo } from './pointcloud/screenVideo.js';
 import { armDrop, DROP_BOOM_HANG, DROP_OPEN_AFTER } from './pebbles/drop.js';
 import { startArrival } from './pebbles/arrival.js';
 import { restingFaceColor, restingRimColor } from './pebbles/materials.js';
@@ -335,6 +336,7 @@ export function createDetail({
                 pebble.userData.detail.userData.held = null;
                 pebble.userData.detail.userData.gatherTime = 0;
                 pebble.userData.detailRotateStartTime = clock.getElapsedTime();
+                playScreenVideo(pebble.userData.detail, true);
                 ui.onStatus(null);
                 framing.frameDetail(pebble, { ease });
                 return;
@@ -355,6 +357,7 @@ export function createDetail({
                 drop: project.drop,
                 solid: project.solid,
                 screen: project.screen,
+                screenVideo: project.screenVideo && assetUrl(project.screenVideo),
                 // Say so rather than leave "Loading model" up forever, and
                 // keep the real error for the browser's console
                 onError: (error) => {
@@ -374,6 +377,7 @@ export function createDetail({
                     // Its shaders ready before the gather starts, not on its
                     // first frame
                     prepareShaders(model);
+                    playScreenVideo(model, true);
 
                     ui.onStatus(null);
                     model.userData.gatherTime = 0;
@@ -442,6 +446,7 @@ export function createDetail({
             state.tapHintNext = Infinity;
 
             if (pebble?.userData.detail) pebble.userData.detail.visible = false;
+            playScreenVideo(pebble?.userData.detail, false);
             detail.hideVelocityTags();
             if (pebble?.userData.dissolve) pebble.userData.dissolve.visible = false;
 

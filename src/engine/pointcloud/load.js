@@ -6,6 +6,7 @@ import { createPile, findRods } from '../pile.js';
 import { addGatherAttributes, GATHER_DURATION, GATHER_SPREAD, GATHER_SWIRL, GATHER_TRAIL, GATHER_TRAIL_EVERY } from './gather.js';
 import { addTrails } from './trails.js';
 import { makeInkMaterial, pointsFromMeshes } from './mesh.js';
+import { addScreenVideo } from './screenVideo.js';
 
 import gatherGlsl from '../shaders/pointCloud/gather.glsl';
 import pointCloudVertexShader from '../shaders/pointCloud/vertex.glsl';
@@ -38,6 +39,7 @@ export function loadPointCloud({
     drop,
     solid = false,
     screen,
+    screenVideo,
 }) {
     gltfLoader.load(url, async (gltf) => {
         const materials = [];
@@ -63,6 +65,8 @@ export function loadPointCloud({
                 group.userData.solidMaterial = material;
                 // Where the pebble's points settle and float (`screen`)
                 if (screen) group.userData.screen = screenFrame(original, screen, sampled.userData.fit);
+                // ...over a film playing on it (`screenVideo`)
+                if (screenVideo && group.userData.screen) addScreenVideo(group, group.userData.screen, screenVideo);
                 parent.add(group);
                 onLoaded?.(group);
                 return;
@@ -177,8 +181,9 @@ const SCREEN_LIFT = 0.03; // how far in front of the screen its points float, in
 /**
  * A solid model's screen (`screen`, the name of one of its meshes, drawn in
  * its own space with X across, Y up and Z out towards the viewer), in the
- * fitted model's space: its middle just in front of its face, and the
- * vectors from there to its right and top edges.
+ * fitted model's space: where its points float (just in front of its face),
+ * its face's middle, the way out of it, and the vectors to its right and
+ * top edges.
  */
 function screenFrame(root, name, { centre, factor }) {
     let mesh = null;
@@ -197,8 +202,12 @@ function screenFrame(root, name, { centre, factor }) {
 
     const middle = fitted(0, 0, 0);
     const out = fitted(0, 0, half.z).sub(middle);
+    const face = middle.clone().add(out);
+    out.normalize();
     return {
-        centre: middle.clone().add(out).addScaledVector(out.clone().normalize(), SCREEN_LIFT),
+        centre: face.clone().addScaledVector(out, SCREEN_LIFT),
+        face,
+        out,
         u: fitted(half.x, 0, 0).sub(middle),
         v: fitted(0, half.y, 0).sub(middle),
     };

@@ -840,8 +840,14 @@ so the rounds shade smoothly (and the file is 176 KB gzipped). The pebble's diss
 doesn't fade away here: its points settle onto the laptop's screen in the
 clouds' inks and float about there, slowly, while the project is open
 (`screen`, the name of the model's screen mesh, in its own space X across,
-Y up, Z out; uScreen in pebbles/dissolve.js). It's where a recorded film is
-to play later, the points over it while it loads. Until the model has
+Y up, Z out; uScreen in pebbles/dissolve.js). The user's recorded film plays
+under them (`screenVideo`, `pointcloud/screenVideo.js`): a muted, looping
+<video> on a quad just in front of the screen's face, as a VideoTexture,
+cropped to fill rather than squeezed; it fades in once its first frames
+play, so until then the points float on a bare screen. 1.7 MB, 720p H.264,
+copied as it came (metadata stripped, `faststart` so it streams at once).
+Headless Chromium here can't decode H.264, so it was checked with a WebM
+copy in a throwaway `dist/`. Until the model has
 loaded the points hold, swollen, at SCREEN_HOLD rather than fall towards a
 screen not yet known. Only one point in three
 stays (`SCREEN_EVERY`, the rest fade as in any dissolve), and those keep

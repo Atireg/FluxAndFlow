@@ -23,8 +23,10 @@ export default defineProject({
     // ...and the visitor can't orbit it: the screen stays square on
     orbit: false,
     // The pebble's points settle onto the laptop's screen and float there
-    // in the clouds' inks - in time, over a film playing on it
+    // in the clouds' inks, over the film below
     screen: 'Screen',
+    // The recorded film on the screen, under the points (muted, looping)
+    screenVideo: 'videos/kh-reuse.mp4',
     // Square-on to the screen (the model's front is its +Z, which the
     // detail view's quarter turn would swing away), from a little above
     view: { elevation: 15, turn: -90, zoom: { side: 1.3, stacked: 1.1 } },

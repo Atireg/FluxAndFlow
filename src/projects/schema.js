@@ -31,6 +31,7 @@
  *                 inks, not sampled into points; or { lit, shade } as screen
  *                 [r, g, b] for its own colour, lit side and turned away
  *   still         the model doesn't turn by itself (it can still be orbited)
+ *   screenVideo   with screen: a film (.mp4 in static/) playing on it, muted, looping
  *   orbit         false: the visitor can't orbit or wheel-zoom the view by hand
  *   screen        with solid: the name of the model's screen mesh (X across,
  *                 Y up, Z out of it); the pebble's points settle there and float
@@ -233,6 +234,13 @@ function normaliseScreen({ id, screen, solid }) {
     return screen;
 }
 
+function normaliseScreenVideo({ id, screenVideo, screen }) {
+    if (screenVideo === undefined) return undefined;
+    if (!screenVideo || typeof screenVideo !== 'string') throw new Error(`Project "${id}": screenVideo should be a path, like 'videos/x.mp4'`);
+    if (!screen) throw new Error(`Project "${id}": screenVideo needs screen`);
+    return screenVideo;
+}
+
 function normaliseEyeLevel({ id, eyeLevel, autoZoom }) {
     if (eyeLevel === undefined) return undefined;
     if (!(eyeLevel > 0 && eyeLevel < 1)) throw new Error(`Project "${id}": eyeLevel should be a share of the height, between 0 and 1`);
@@ -309,6 +317,7 @@ export function defineProject(project) {
         still: Boolean(project.still),
         orbit: project.orbit !== false,
         screen: normaliseScreen(project),
+        screenVideo: normaliseScreenVideo(project),
         doubleClick: normaliseDoubleClick(project),
         autoZoom: normaliseAutoZoom(project.autoZoom, project),
         eyeLevel: normaliseEyeLevel(project),

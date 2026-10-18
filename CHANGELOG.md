@@ -323,3 +323,8 @@ up 1.8s after the third paragraph starts.
 
 **kh-reuse can't be orbited** by hand (`orbit: false`, a new setting): the
 laptop's screen stays square on. A double-click still zooms.
+
+**kh-reuse: the film on the laptop's screen.** The user's recording
+(`static/videos/kh-reuse.mp4`) plays on the screen, muted and looping,
+under the floating points, fading in once it starts (`screenVideo`, a new
+setting). It pauses when the project closes.

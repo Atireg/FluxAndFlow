@@ -36,8 +36,8 @@ in a pull-out drawer.
   (`static/models/laptop.glb`, made in code) drawn solid in light grey with
   rounded edges (`solid: { lit, shade }`), open, screen to the visitor, not
   turning (`still`), no orbiting by hand (`orbit: false`). A third of the pebble's points settle onto its
-  screen in the inks and float there with tails (`screen: 'Screen'`); a recorded film is to play
-  there later. Its pebble holds a reuse sign (`reuse.glb`). No drawer text yet.
+  screen in the inks and float there with tails (`screen: 'Screen'`), over the user's film
+  (`screenVideo: 'videos/kh-reuse.mp4'`, muted, looping). Its pebble holds a reuse sign (`reuse.glb`). No drawer text yet.
 - **Links**: each project's own address is `#<id>` (`#rock-print`).
 - **Drawer copy** is real for Rock Print and Emergent Space (approved by the user);
   change it only on request.
@@ -132,6 +132,7 @@ defineProject({
     // solid: true, still: true,          // a mesh drawn as itself, not points; no turn (kh-reuse);
     //                                       solid: { lit: [r,g,b], shade: [r,g,b] } for its own colour;
     //                                       screen: 'Screen' - the pebble's points float on that mesh;
+    //                                       screenVideo: 'videos/x.mp4' - a film on that screen;
     //                                       orbit: false - no orbiting the view by hand
     doubleClick: 'hold',                  // 'zoom' (default), 'hold', 'drop' (with `drop`), 'none'
     autoZoom: 10,                         // camera moves in / out by itself every 10s (not with `drop`)
@@ -152,6 +153,9 @@ defineProject({
   spans the drawer, the rest sit two to a row on a wide screen (one to a
   row on a phone) unless `wide`. No `src` = an empty dashed frame. A
   click enlarges one (`ImageViewer`).
+- **A film on a model's screen** (`screenVideo`) is an .mp4 in
+  `static/videos/`, H.264, no sound needed (it plays muted). Headless
+  Chromium can't play H.264 - test with a WebM copy in `dist/`.
 - **Films** are Vimeo numbers (`vimeo.com/<number>`) - never paste a link's
   `?turnstile=` part, it's one visitor's session. `ratio` defaults to 16 / 9.
 - **Models** are `.glb` in `static/models/`. Read "Quantized, not
