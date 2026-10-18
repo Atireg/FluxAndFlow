@@ -922,7 +922,8 @@ canvas.webgl {
 }
 
 /* The way to the film that always works, full screen on a phone included */
-.drawer__video-link {
+.drawer__video-link,
+.drawer__link {
     color: inherit;
     text-decoration: underline;
     text-underline-offset: 0.15em;

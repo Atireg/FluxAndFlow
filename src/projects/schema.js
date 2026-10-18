@@ -16,7 +16,7 @@
  *   year          \
  *   role           |  shown in the drawer if non-empty. State the role
  *   context        |  accurately - the page implies authorship
- *   body          /   array of paragraph strings
+ *   body          /   array of paragraph strings; [words](https://...) is a link
  *   credits       collaborators, and any research group to credit
  *   category      'research', 'teaching' or 'real-world' - see CATEGORIES
  *   thumbModel    the small model shown in the catalog pebble

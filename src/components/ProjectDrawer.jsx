@@ -6,6 +6,25 @@ import ProjectImage from './ProjectImage.jsx';
 import ProjectVideo from './ProjectVideo.jsx';
 
 /**
+ * A paragraph of the drawer's text, its [words](https://...) made links that
+ * open in a new tab - the only markup a project's `body` takes
+ */
+const LINK = /\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g;
+function withLinks(text) {
+    const parts = [];
+    let from = 0;
+    for (const match of text.matchAll(LINK)) {
+        parts.push(text.slice(from, match.index));
+        parts.push(
+            <a key={match.index} className="drawer__link" href={match[2]} target="_blank" rel="noopener noreferrer">{match[1]}</a>
+        );
+        from = match.index + match[0].length;
+    }
+    parts.push(text.slice(from));
+    return parts;
+}
+
+/**
  * The project's description, pulled out from the edge on demand - so by
  * default the model gets the whole canvas, and pulling the drawer out hands
  * part of that back.
@@ -62,7 +81,7 @@ const ProjectDrawer = forwardRef(function ProjectDrawer({ project, open, onToggl
                 </dl>
 
                 <div className="drawer__body">
-                    {(project?.body ?? []).map((text, index) => <p key={index}>{text}</p>)}
+                    {(project?.body ?? []).map((text, index) => <p key={index}>{withLinks(text)}</p>)}
                 </div>
 
                 <div className="drawer__videos">

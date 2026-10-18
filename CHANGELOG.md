@@ -336,3 +336,8 @@ phone on phones.** The camera comes in on the screen (`view.zoom`,
 (`static/models/phone.glb`) stands in for the laptop, playing the user's
 mobile recording (`static/videos/kh-reuse-mobile.mp4`) - a new `phone`
 setting.
+
+**kh-reuse's drawer**: year, role, context and text from the user, with a
+link to the live demo and a drafted sentence (awaiting approval) on making
+it for Knippers Helbig, where they are Head of Digital Technologies. The
+drawer's text can now hold links, written `[words](https://...)`.

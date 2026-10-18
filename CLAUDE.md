@@ -39,7 +39,8 @@ in a pull-out drawer.
   screen in the inks and float there with tails (`screen: 'Screen'`), over the user's film
   (`screenVideo: 'videos/kh-reuse.mp4'`, muted, looping), which fade down once
   it plays. On a phone (under 860px) a phone instead, playing
-  `kh-reuse-mobile.mp4` (`phone: { detailModel, screenVideo }`). Its pebble holds a reuse sign (`reuse.glb`). No drawer text yet.
+  `kh-reuse-mobile.mp4` (`phone: { detailModel, screenVideo }`). Its pebble holds a reuse sign (`reuse.glb`). Drawer text from the user;
+  the Knippers Helbig sentence was drafted - awaiting their approval.
 - **Links**: each project's own address is `#<id>` (`#rock-print`).
 - **Drawer copy** is real for Rock Print and Emergent Space (approved by the user);
   change it only on request.
@@ -125,7 +126,7 @@ defineProject({
     title: 'Rock Print Pavilion',         // also the name on its pebble - keep it phone-short
     category: 'research',                 // 'research', 'teaching' or 'real-world' - required
     year: '', role: '', context: '',      // drawer rows, if non-empty - state the role accurately
-    body: [], credits: '',                // drawer text; nothing at all = no drawer handle
+    body: [], credits: '',                // drawer text, [words](https://...) a link; nothing = no handle
     thumbModel: 'models/rock.gltf',       // in the pebble; thumbSize: 1.9 fits the project's own
     detailModel: 'models/RockPrintStructureReduced.glb',  // opened on click: a cloud, or a mesh sampled to points (`points`)
     view: { elevation: 58, azimuth: 4, turn: 94, zoom: { stacked: 1.75, side: 1.4 },

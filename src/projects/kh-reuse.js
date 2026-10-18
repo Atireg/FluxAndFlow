@@ -12,6 +12,30 @@ export default defineProject({
     // Research, teaching or the real world - its tag, and the catalog's filter
     category: 'real-world',
 
+    // The drawer's rows and text, the user's own; state the role accurately
+    year: '2025',
+    role: 'Web developer',
+    context: 'Final exam project for JavaScript Developer at SoftUni',
+    body: [
+        'kh ReUse – Salvaged Building Elements Platform',
+        'kh ReUse is a web platform for collecting, cataloguing and reusing '
+        + 'building elements salvaged from demolished buildings. It brings '
+        + 'together the author’s background as an architect and their work in '
+        + 'software development. The aim is to keep usable materials like steel '
+        + 'beams, timber and glass in circulation instead of sending them to '
+        + 'landfill.',
+        'It was made for [Knippers Helbig](https://www.knippershelbig.com/), '
+        + 'where the author is Head of Digital Technologies.',
+        'Visitors can browse demolition projects, such as Stuttgart Rathaus and '
+        + 'Kittler Schule Heilbronn, and see the elements recovered from each '
+        + 'one. The element catalog can be filtered by material, profile type, '
+        + 'profile and condition. Registered users can also add new projects '
+        + 'and elements, and collect elements in a personal basket for reuse.',
+        'Tech stack: React (Vite) frontend on Firebase Hosting, Node.js server '
+        + 'on Google Cloud Run, and a MongoDB Atlas database.',
+        '👉 Live demo: [kh-reuse.web.app](https://kh-reuse.web.app/)',
+    ],
+
     // A small reuse sign in its pebble (static/models/reuse.glb, made in code)
     thumbModel: 'models/reuse.glb',
     thumbSize: 1.9,
