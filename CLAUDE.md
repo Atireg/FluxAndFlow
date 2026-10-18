@@ -18,9 +18,10 @@ in a pull-out drawer.
 - **Live**: everything built is on `main`; `git log origin/main..` shows
   anything not yet merged.
 - **Landing page** (inline in `src/index.html`): three short paragraphs in
-  the user's own words - change them only on request - fading in one
-  by one over floating particles, then the welcome line. The playground loads behind it: "Welcome to the F&F
-  playground" is grey until it's ready, then orange, and leads straight in.
+  the user's own words - change them only on request - fading in one by
+  one over floating particles, then "Welcome to the F&F playground" last.
+  The playground loads behind it: the welcome line is grey until it's
+  ready, then orange, and leads straight in.
 - **Playground**: ten pebbles, a random size each visit, slowly changing
   shape; one at a time glows orange with its name on a string. A filter
   (research / teaching / the real world) brings one kind forward. An empty
@@ -33,24 +34,19 @@ in a pull-out drawer.
 - **Emergent Space** (slot 1): three aggregates dropped with live physics;
   velocity arrows, interlock dots, a close-up, then a new drop. A
   double-click drops again. One Vimeo film in its drawer.
-- **kh ReUse** (slot 3, the real world, `#kh-reuse` - the name written
-  exactly so, and "knippershelbig" together in small letters): a laptop
-  (`static/models/laptop.glb`, made in code) drawn solid in light grey with
-  rounded edges (`solid: { lit, shade }`), open, screen to the visitor, not
-  turning (`still`), no orbiting by hand (`orbit: false`). A third of the pebble's points settle onto its
-  screen in the inks and float there with tails (`screen: 'Screen'`), over the user's film
-  (`screenVideo: 'videos/kh-reuse.mp4'`, muted, looping), which fade away once
-  it plays; the whole device shows first while
-  the points settle, then the camera moves in square-on to the screen and the
-  film starts (`view.fillScreen: 1.2`, edges kept in view, its top below the title);
-  the About drawer shows the whole device again (`view.drawer: 'whole'`). On a phone (under 860px) a phone instead, playing
-  `kh-reuse-mobile.mp4` (`phone: { detailModel, screenVideo }`). A double-click or double-tap pauses the film
-  and plays it on (`doubleClick: 'hold'`). Its pebble holds a reuse sign (`reuse.glb`). Drawer text from the user
-  (approved), links to the live demo and knippershelbig; five screenshots,
-  two desktop (wide) then three phone ones (`pair`).
+- **kh ReUse** (slot 3, the real world, `#kh-reuse`; write the name
+  exactly so, and "knippershelbig" as one lowercase word): a laptop made in
+  code, solid light grey, still, not orbitable. A third of the pebble's
+  points settle on its screen and float there with tails; 5s in, the
+  camera moves in square-on to the screen (its edges kept, its top below
+  the title) and the user's recording plays there as the points fade. A
+  double-click pauses the film. On a phone (under 860px) a phone instead,
+  with the mobile recording. The About drawer shows the whole device. Its
+  pebble holds a reuse sign. Drawer: the user's text, two links, five
+  screenshots (two desktop `wide`, three phone `pair`).
 - **Links**: each project's own address is `#<id>` (`#rock-print`).
-- **Drawer copy** is real for Rock Print and Emergent Space (approved by the user);
-  change it only on request.
+- **Drawer copy** is real for all three projects, approved by the user
+  word for word; change it only on request.
 - **Waiting on the user**: picture captions/credits, model licensing,
   real-device and Safari checks.
 
@@ -72,7 +68,13 @@ in a pull-out drawer.
 - **Look and feel** went through many rounds: tune the existing constants
   before rebuilding anything.
 - Placeholder project text stays obviously fake: the real copy and the
-  role come from the user.
+  role come from the user. Names are written exactly as the user writes
+  them (casing, spacing).
+- **Uploads** (films, pictures) arrive under `/root/.claude/uploads/...` or
+  the scratchpad. Films: `ffmpeg -c copy -map_metadata -1 -movflags
+  +faststart` into `static/videos/`; check the shape matches the screen it
+  plays on. Pictures: as under "Adding or editing a project". Replacing a
+  file keeps its name.
 
 ## Stack and layout
 
@@ -82,6 +84,7 @@ demand for Emergent Space's physics. No test suite.
     npm install
     npm run dev      # dev server
     npm run build    # production build into dist/
+    npm run models   # rebuild static/models/{laptop,phone,reuse}.glb
 
 React owns the page, the engine owns the canvas - read that entry in
 DECISIONS.md before moving anything across the line.
@@ -95,6 +98,9 @@ DECISIONS.md before moving anything across the line.
     src/projects/       the content: one module per project + schema.js
     src/engine/         the canvas - index.js assembles it and runs the render loop
     src/styles.css      all the CSS
+    static/             models/, images/, videos/ - served as they are
+    tools/models/       the models made in code (kh ReUse's laptop, phone, reuse
+                        sign) and the glTF writer they share - `npm run models`
 
 Inside `src/engine/`: `state.js` (shared mutable state), `constants.js`
 (the few shared numbers; its header maps the rest), `ease.js`, `colors.js`,
@@ -138,14 +144,7 @@ defineProject({
     detailModel: 'models/RockPrintStructureReduced.glb',  // opened on click: a cloud, or a mesh sampled to points (`points`)
     view: { elevation: 58, azimuth: 4, turn: 94, zoom: { stacked: 1.75, side: 1.4 },
             lift: { stacked: 0.14, side: 0 }, sway: 13 },  // camera angle; give every new model one
-                                          // (fillScreen: 1.2 - then square-on to a `screen`, nearly filling the window)
     gather: true,                         // points gather from a scattered swirl on open
-    // solid: true, still: true,          // a mesh drawn as itself, not points; no turn (kh-reuse);
-    //                                       solid: { lit: [r,g,b], shade: [r,g,b] } for its own colour;
-    //                                       screen: 'Screen' - the pebble's points float on that mesh;
-    //                                       screenVideo: 'videos/x.mp4' - a film on that screen;
-    //                                       phone: { detailModel, screenVideo } - shown under 860px;
-    //                                       orbit: false - no orbiting the view by hand
     doubleClick: 'hold',                  // 'zoom' (default), 'hold', 'drop' (with `drop`), 'none'
     autoZoom: 10,                         // camera moves in / out by itself every 10s (not with `drop`)
     eyeLevel: 0.4,                        // with autoZoom: two of every three moves in are from inside
@@ -153,8 +152,20 @@ defineProject({
     //         closeUp: { hold: 5, after: 5 }, velocity: true },  // physics drop (Emergent Space)
     videos: [{ vimeo: '294086902', title: '' }],  // Vimeo films above the pictures, by number
     images: [{ src: 'images/x.jpg', alt: '', caption: '', ratio: '3 / 2', wide: false }],
-                                          // (pair: true - two to a row on a phone too)
 })
+```
+
+A solid model with a film on its screen - `kh-reuse.js` is the example:
+
+```js
+    solid: { lit: [222, 222, 220], shade: [160, 160, 162] },  // the mesh itself, not points (or `true`: the inks)
+    still: true, orbit: false,            // no turn; no orbiting or wheel-zoom by hand
+    screen: 'Screen',                     // the model's screen mesh (X across, Y up, Z out): the points float there
+    screenVideo: 'videos/x.mp4',          // a muted, looping film on it; the points fade as it plays
+    phone: { detailModel, screenVideo },  // shown instead under 860px
+    view: { ..., fillScreen: 1.2,         // whole device first, then square-on to the screen at 5s
+            drawer: 'whole' },            // the whole model above the drawer on a phone, not a close-up
+    images: [{ ..., pair: true }],        // two to a row on a phone too (tall screenshots)
 ```
 
 - **Slots**: always `SLOT_COUNT` (10) pebbles; raise it before an eleventh
@@ -226,6 +237,13 @@ defineProject({
   Safari auto-completed an old `?cloudtest` and showed it for days.
 - **Nothing runs at module scope in `src/engine/`** - everything waits for
   `engine.start()`.
+- **A project can have two models** (`phone`): `pebble.userData.details`
+  keeps each once loaded, `pebble.userData.detail` is the one shown -
+  chosen as the project opens, so read `detail`, never assume one model.
+- **A screen's film decides the screen's shape**: the models in
+  `tools/models/` size each screen to its recording (16:9, 390 x 664). A
+  new recording of another shape means changing the screen there, then
+  `npm run models` - otherwise it's cropped to fill.
 
 **Shared helpers - use them rather than spelling it out again**:
 `engine/ease.js` for any 0..1 ramp; `rig.toScreen(vector)` for screen
@@ -253,7 +271,12 @@ land in the repository.
 
 - **Click `#loader-enter` once it's enabled** (Playwright waits for that),
   then wait for `#loader` to be removed - its 2.6s exit. Or open
-  `#rock-print` / `#emergent-space` to go straight to a project.
+  `#rock-print` / `#emergent-space` / `#kh-reuse` to go straight to a
+  project.
+- **kh ReUse's films**: this Chromium can't play H.264, so after building
+  overwrite `dist/videos/*.mp4` with WebM copies (`ffmpeg -c:v libvpx-vp9`)
+  served as `video/webm`; rebuild before a merge. It plays them slowly -
+  log `currentTime` rather than trust the frame on screen.
 - **Software WebGL runs at 1-30 fps** (a frame or two a second on Rock
   Print): log state rather than trust timing, and don't judge smoothness
   here.
@@ -266,7 +289,8 @@ land in the repository.
   (`.tag-string__knot` `cx`/`cy`), walking up a few pixels until it lands.
 - **Useful selectors**: `.bar.is-open`, `.bar__title`, `.bar__status`
   (empty once loaded), `.drawer.is-available`/`.is-open`,
-  `.cube-tag--spotlight`, `.cube-tag--empty`, `.tap-hint.is-showing`.
+  `.cube-tag--spotlight`, `.cube-tag--empty`, `.tap-hint.is-showing`,
+  `.drawer__handle` (opens the drawer), `.drawer__image`.
 - Visited pebbles persist in `localStorage` within a context; the pile's
   physics is tuned in Node; views are fitted by mask overlap in a
   throwaway build (see DECISIONS.md).

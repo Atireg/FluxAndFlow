@@ -38,7 +38,7 @@ The project view: camera
 The project view: point cloud
 - Quantized, not Draco-compressed
 - A mesh becomes points as it loads
-- kh-reuse: a solid laptop that stands still
+- kh ReUse: a laptop with a film on its screen
 - Emergent Space: aggregates dropped with live physics
 - Point size, three sizes, three inks
 - Points gather out of a scattered cloud
@@ -609,7 +609,9 @@ phone the drawer covers the lower half, so it's the close-up
 (`framing.frameCloseup`: `CLOSEUP_ELEVATION` 38° on the project's heading,
 `CLOSEUP_DISTANCE_FACTOR` of its radius) - an atmospheric crop, not the
 whole piece. Rock Print's steeper angle left only fragments of pillars
-there, hence the fixed elevation.
+there, hence the fixed elevation. A project with `view.drawer: 'whole'`
+(kh ReUse) shows its whole model above the drawer instead, fitted to its
+own outline.
 
 A pile (Emergent Space) is framed on its aggregates instead, in both
 layouts - a zoom in on the three, asked for by the user: `pile.bounds()`
@@ -822,71 +824,66 @@ drawn as the mesh itself (`drop.solid`, below); its sampled points are no
 longer seen.
 
 
-kh-reuse: a solid laptop that stands still
-------------------------------------------
+kh ReUse: a laptop with a film on its screen
+--------------------------------------------
 
-The user asked for the laptop as a 3D model, not a point cloud, with no
-rotation, open and with its screen facing the visitor - something will be
-shown on the screen later. Two project settings rather than a branch:
-`solid` draws a mesh detailModel as itself in the inks (`makeInkMaterial`,
-as Emergent Space's aggregates), dissolving in through its grain over the
-reveal instead of points gathering; `still` holds the model's turn at 0,
-and `orbit: false` keeps the visitor from orbiting or wheel-zooming it by
-hand (asked for later; a double-click still zooms).
-`view.turn: -90` undoes the detail view's quarter turn so the screen (+Z in
-the model) faces the camera. At the user's request it is light grey and
-its edges rounded: `solid: { lit, shade }` gives a solid model its own
-colour pair (screen RGB) in place of the inks' orange and red - the
-pebble's thumbnail stays graphite like every other. The mesh is welded,
-so the rounds shade smoothly (and the file is 176 KB gzipped). The pebble's dissolve
-doesn't fade away here: its points settle onto the laptop's screen in the
-clouds' inks and float about there, slowly, while the project is open
-(`screen`, the name of the model's screen mesh, in its own space X across,
-Y up, Z out; uScreen in pebbles/dissolve.js). The user's recorded film plays
-under them (`screenVideo`, `pointcloud/screenVideo.js`): a muted, looping
-<video> on a quad just in front of the screen's face, as a VideoTexture,
-cropped to fill rather than squeezed; it fades in once its first frames
-play, so until then the points float on a bare screen. Now 3.7 MB, 1080p H.264 (the
-mobile one 2.5 MB, 390 x 664), copied as they came (metadata stripped, `faststart` so it streams at once).
-Headless Chromium here can't decode H.264, so it was checked with a WebM
-copy in a throwaway `dist/`. Once the film plays the points fade away
-altogether (`SCREEN_FILM_DIM` 1; a quarter was tried first). Each device's
-screen is shaped exactly like its film (16:9 on the laptop, 390 x 664 on
-the phone) so none of it is cropped, and it opens in two steps: the whole
-device first (`zoom`, `lift`) while the points settle on its screen, then
-at `FILL_SCREEN_AT` (5s) the camera moves in square-on to the screen
-(`view.fillScreen`, `frameOnScreen` in camera/framing.js) and the film
-starts. Its number is how far back from the screen's edges meeting the
-window's it stops - 1.2, so the device's own edges stay in view - and it
-frames into the band below the title bar (`ui.barFraction()` plus
-`UNDER_BAR_GAP`), so the device's top always clears the title. Filling
-the window outright came first; the user wanted the device seen whole
-first and its edges kept. With the About drawer out it shows the whole
-device again rather than a close-up (`view.drawer: 'whole'`): fitted to
-the model's own outline, beside the drawer on a wide screen and above it
-on a phone, `WHOLE_ABOVE_DRAWER_ZOOM` back so the handle doesn't cover it.
+The user asked for a 3D model, not a point cloud: a laptop, open, its
+screen to the visitor and not turning, the pebble's points floating on the
+screen, then the recording of the website playing there. Each step is a
+project setting read by one code path, not a branch for the project:
 
-On a phone (the stacked layout, under 860px) it shows a phone instead,
-playing the user's mobile recording (`phone: { detailModel, screenVideo }`):
-a narrow screen shows a tall film better than a laptop's wide one. Which
-model is chosen as the project opens (`layoutMode()`), each kept once
-loaded (`pebble.userData.details`); the same `view` serves both, its
-`stacked` values fitted to the phone. `phone.glb` is made in code like the
-laptop, its screen shaped like the mobile film (390 x 664) so none of it is
-cropped. Until the model has
-loaded the points hold, swollen, at SCREEN_HOLD rather than fall towards a
-screen not yet known. Only one point in three
-stays (`SCREEN_EVERY`, the rest fade as in any dissolve), and those keep
-their tails for good: a tail re-runs the float `SCREEN_TRAIL` (2.5s)
-earlier, since at its slow pace the dissolve's own 0.12s showed nothing.
-Its pebble holds a reuse sign rather than the laptop (`reuse.glb`, three
-arrows round a circle, made in code, lying face up for the playground's
-camera from above). Its `doubleClick: 'hold'` pauses the film
-on its screen and plays it on (`holdScreenVideo`), the existing "pause"
-action and hint rather than a new button or words; paused, the film stays
-on its frame. The tap hint, which picks a point of a cloud, here picks a
-spot on the screen instead, once the film plays. The model is placeholder geometry built in code; the screen
-is a separate thin panel on the lid, where content would go.
+- **`solid`** draws a mesh `detailModel` as itself (`makeInkMaterial`, as
+  Emergent Space's aggregates) and dissolves it in through its grain over
+  the reveal, rather than sampling points; `solid: { lit, shade }` gives
+  its own colour pair, light grey here (screen RGB). **`still`** holds its
+  turn at 0; **`orbit: false`** stops orbiting and wheel-zooming by hand.
+  `view.turn: -90` undoes the detail view's quarter turn, so the model's
+  +Z faces the camera.
+- **`screen`** names the model's screen mesh, drawn in its own space - X
+  across, Y up, Z out (`screenFrame` in pointcloud/load.js). The pebble's
+  dissolve doesn't fade there: one point in three (`SCREEN_EVERY`) settles
+  onto the screen in the clouds' inks and floats about it slowly (`uScreen`
+  in pebbles/dissolve.js), keeping a tail that re-runs the float
+  `SCREEN_TRAIL` (2.5s) earlier - the dissolve's own 0.12s showed nothing at
+  that pace. Until the model has loaded the points hold, swollen, at
+  `SCREEN_HOLD`, rather than fall towards a screen not yet known.
+- **`screenVideo`** plays a muted, looping `<video>` on a quad just in front
+  of the screen (`pointcloud/screenVideo.js`, a VideoTexture, cropped to
+  fill if the shapes differ). It fades in once its first frames play, and
+  the points fade away over it (`SCREEN_FILM_DIM` 1 - a quarter was tried
+  first). The user's recordings are copied as they came (H.264, metadata
+  stripped, `faststart` so they stream at once). Headless Chromium here
+  can't decode H.264, so they are checked with a WebM copy in `dist/`.
+- **`view.fillScreen`** opens it in two steps: the whole device first
+  (`zoom`, `lift`) while the points settle, then at `FILL_SCREEN_AT` (5s)
+  the camera moves in square-on to the screen (`frameOnScreen` in
+  camera/framing.js) and the film starts. Its number is how far back from
+  the screen's edges meeting the window's it stops - 1.2, so the device's
+  own edges stay in view - framed into the band below the title bar
+  (`ui.barFraction()` plus `UNDER_BAR_GAP`), so the device's top always
+  clears the title. Filling the window outright came first; the user wanted
+  the device seen whole, and its edges kept. **`view.drawer: 'whole'`**:
+  with the About drawer out, the whole device again rather than a close-up,
+  fitted to its own outline - above the drawer on a phone,
+  `WHOLE_ABOVE_DRAWER_ZOOM` back so the handle doesn't cover it.
+- **`phone: { detailModel, screenVideo }`** shows a phone instead under
+  860px, playing the mobile recording: a narrow screen shows a tall film
+  better than a laptop's wide one. Chosen as the project opens
+  (`layoutMode()`), each model kept once loaded (`pebble.userData.details`);
+  the one `view` serves both, its `stacked` values fitted to the phone.
+- **`doubleClick: 'hold'`** pauses the film on its frame and plays it on
+  (`holdScreenVideo`) - the existing "pause" action and hint rather than a
+  new button or words. The tap hint, which otherwise picks a point of a
+  cloud, picks a spot on the screen once the film plays.
+
+The laptop, the phone and the pebble's reuse sign are placeholder geometry
+made in code (`tools/models/`, `npm run models`, sharing `glb.mjs`): rounded
+boxes and bevelled extrusions, welded so the rounds shade smoothly. Each
+screen is shaped exactly like its film - 16:9 on the laptop, 390 x 664 on
+the phone - so none of the film is cropped; a recording of another shape
+means changing the screen's proportions there. The reuse sign lies face up
+for the playground's camera from above. A real model would replace them if
+it names its screen mesh the same way.
 
 
 Emergent Space: aggregates dropped with live physics
@@ -1199,7 +1196,7 @@ every width (`nowrap`, ellipsis if ever too long).
 Drawer pictures
 ---------------
 
-`images` entries (`{ src, alt, caption, ratio, wide }`) render as figures
+`images` entries (`{ src, alt, caption, ratio, wide, pair }`) render as figures
 under the text (`components/ProjectImage.jsx`, in the frame it shares with
 the films, `DrawerFigure.jsx`): the first full width, the rest two to a row
 unless `wide`, lazy-loaded, framed at their `ratio` so nothing jumps; no
@@ -1210,11 +1207,18 @@ the recipe). Emergent Space's five are mostly diagrams with small text,
 unreadable at half the drawer, so all are `wide`: the landscape diagrams
 1500px across, the two portrait photos 1000px (enough for the drawer at
 twice the pixel density), ~950 KB in all. Captions/credits are empty for
-both.
+both. kh ReUse's are screenshots: two from a desktop (`wide`, 1500px),
+three from a phone (700px across).
 
 On a phone (under 860px) every picture runs the full width, one after the
 other (asked for - two to a row, Rock Print's were too small to see);
-the two-to-a-row layout is for the side drawer on a wide screen.
+the two-to-a-row layout is for the side drawer on a wide screen. A `pair`
+picture stays two to a row there too: a tall phone screenshot at full
+width would fill several screens (asked for, kh ReUse's three).
+
+**Links in the text**: a drawer paragraph's `[words](https://...)` becomes a
+link opening in a new tab (`withLinks` in ProjectDrawer.jsx) - the only
+markup `body` takes, so the copy stays plain strings.
 
 **A click enlarges one** (asked for). Each picture is a button
 (`.drawer__enlarge`, a zoom-in cursor) that opens it in
@@ -1271,7 +1275,10 @@ the same particle field drifting calmly, the wordmark, one line ("Where
 ideas take shape in motion.") and three short paragraphs, then "Welcome
 to the F&F playground" in the one orange (it's the invitation; first "My
 playground", then "Welcome to my playground", then "...the Flux and Flow
-playground").
+playground"). The three paragraphs fade up one after another, slowly (2s
+each, 1.8s apart, from 0.8s), then the welcome line last (asked for) - CSS
+alone (`loader-paragraph`, timed by `--paragraph-*` on `.loader__welcome`),
+everything at once with reduced motion.
 
 **The landing page is the wait** (asked for: no minimum time - load while
 the text is read). The catalog loads underneath from the moment the page

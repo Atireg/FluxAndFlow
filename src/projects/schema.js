@@ -149,6 +149,11 @@ function normaliseVideo(video, { id, index }) {
  *   zoom       closer than fitting the pebble; a number, or per layout
  *   lift       raised on screen, as a share of its height; number or per layout
  *   sway       the camera nods this many degrees up and back down, slowly
+ *   fillScreen with a `screen`: after the whole model, the camera moves in
+ *              square-on to that screen, this many times as far back as
+ *              would put its edges at the window's (true: 1)
+ *   drawer     'whole': with the drawer out on a narrow screen, the whole
+ *              model above it rather than a close-up
  *
  * Only the keys a project gave are kept: the engine's own `?? 0` fallbacks
  * stay the single source of each default, so normalising can't quietly
@@ -239,11 +244,16 @@ function normaliseScreen({ id, screen, solid }) {
     return screen;
 }
 
+// A film for a model's screen: a path in static/, or left out
+function filmPath(path, { id, name }) {
+    if (path === undefined) return undefined;
+    if (!path || typeof path !== 'string') throw new Error(`Project "${id}": ${name} should be a path, like 'videos/x.mp4'`);
+    return path;
+}
+
 function normaliseScreenVideo({ id, screenVideo, screen }) {
-    if (screenVideo === undefined) return undefined;
-    if (!screenVideo || typeof screenVideo !== 'string') throw new Error(`Project "${id}": screenVideo should be a path, like 'videos/x.mp4'`);
-    if (!screen) throw new Error(`Project "${id}": screenVideo needs screen`);
-    return screenVideo;
+    if (screenVideo !== undefined && !screen) throw new Error(`Project "${id}": screenVideo needs screen`);
+    return filmPath(screenVideo, { id, name: 'screenVideo' });
 }
 
 function normalisePhone({ id, phone, screen }) {
@@ -252,10 +262,7 @@ function normalisePhone({ id, phone, screen }) {
         throw new Error(`Project "${id}": phone should be { detailModel, screenVideo }`);
     }
     if (!screen) throw new Error(`Project "${id}": phone needs screen - its model's screen mesh has the same name`);
-    if (phone.screenVideo !== undefined && typeof phone.screenVideo !== 'string') {
-        throw new Error(`Project "${id}": phone.screenVideo should be a path, like 'videos/x.mp4'`);
-    }
-    return { detailModel: phone.detailModel, screenVideo: phone.screenVideo };
+    return { detailModel: phone.detailModel, screenVideo: filmPath(phone.screenVideo, { id, name: 'phone.screenVideo' }) };
 }
 
 function normaliseEyeLevel({ id, eyeLevel, autoZoom }) {

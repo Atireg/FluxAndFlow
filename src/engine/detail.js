@@ -851,20 +851,32 @@ export function createDetail({
             // Clear of the drawer on the right, when it's open beside the model
             const maxX = Math.min(0.7, 1 - 2 * fraction - 0.15);
 
-            // A film on the model's screen: hinted on the screen, once it plays
-            const display = model.userData.screen;
-            const film = model.userData.screenVideo;
-            if (!model.userData.points && display && film && model.visible) {
-                if (film.paused) return;
-                for (let tries = 0; tries < 20; tries++) {
-                    tapHintPoint.copy(display.face)
-                        .addScaledVector(display.u, (Math.random() * 2 - 1) * 0.6)
-                        .addScaledVector(display.v, (Math.random() * 2 - 1) * 0.5);
-                    const [x, y] = rig.toScreen(model.localToWorld(tapHintPoint));
+            /**
+             * A random spot comfortably on screen, clear of the bar along the
+             * top and with room below for the string and words hanging from
+             * it (engine/tags.js): `pick` sets tapHintPoint in world space,
+             * one try at a time.
+             */
+            const showOnSpot = (tries, pick) => {
+                for (let i = 0; i < tries; i++) {
+                    pick();
+                    // In pixels; projects tapHintPoint in place, for the test below
+                    const [x, y] = rig.toScreen(tapHintPoint);
                     if (tapHintPoint.x > -0.7 && tapHintPoint.x < maxX && tapHintPoint.y > -0.5 && tapHintPoint.y < 0.5) {
                         ui.showTapHint(x, y, action);
                         return;
                     }
+                }
+            };
+
+            // A film on the model's screen: hinted on the screen, once it plays
+            const display = model.userData.screen;
+            const film = model.userData.screenVideo;
+            if (!model.userData.points && display && film && model.visible) {
+                if (!film.paused) {
+                    showOnSpot(20, () => model.localToWorld(tapHintPoint.copy(display.face)
+                        .addScaledVector(display.u, (Math.random() * 2 - 1) * 0.6)
+                        .addScaledVector(display.v, (Math.random() * 2 - 1) * 0.5)));
                 }
                 return;
             }
@@ -873,23 +885,12 @@ export function createDetail({
             const points = model.userData.points;
             if (!points || !model.visible || !points.visible) return;
 
-            /**
-             * A random point of the cloud that's comfortably on screen, clear
-             * of the bar along the top and with room below for the string and
-             * words hanging from it (engine/tags.js). Zoomed in, most of the cloud is off
-             * screen, so allow plenty of tries - each is one projected point.
-             */
+            // A random point of the cloud. Zoomed in, most of it is off screen,
+            // so allow plenty of tries - each is one projected point.
             const positions = points.geometry.attributes.position;
-            for (let tries = 0; tries < 60; tries++) {
-                tapHintPoint.fromBufferAttribute(positions, Math.floor(Math.random() * positions.count));
-                // In pixels; projects tapHintPoint in place, for the test below
-                const [x, y] = rig.toScreen(points.localToWorld(tapHintPoint));
-
-                if (tapHintPoint.x > -0.7 && tapHintPoint.x < maxX && tapHintPoint.y > -0.5 && tapHintPoint.y < 0.5) {
-                    ui.showTapHint(x, y, action);
-                    return;
-                }
-            }
+            showOnSpot(60, () => points.localToWorld(
+                tapHintPoint.fromBufferAttribute(positions, Math.floor(Math.random() * positions.count)),
+            ));
         },
     };
 

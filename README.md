@@ -12,8 +12,9 @@ Adding a project is two steps: write `src/projects/<id>.js` exporting
 `defineProject({ ... })`, then add it to the `catalog` array in
 `src/projects/index.js`. Its settings say everything that's particular to
 it - its slot and kind, its models, the camera angle and nod (`view`), the
-gather, a physics drop, what a double-click does, timed zooms, and the
-drawer's text, films (Vimeo) and pictures. CLAUDE.md lists them with an
+gather, a physics drop, a solid model with a film on its screen, what a
+double-click does, timed zooms, and the drawer's text, films (Vimeo) and
+pictures. CLAUDE.md lists them with an
 example; `src/projects/schema.js` fills the defaults and rejects a
 half-declared project. There is no per-project branch in the engine, so
 nothing else needs touching. Each project has its own link, `#<id>` on the
@@ -24,6 +25,7 @@ are, and CHANGELOG.md for what changed when.
     npm install
     npm run dev      # dev server
     npm run build    # production build into dist/
+    npm run models   # rebuild the models made in code (tools/models/)
 
 
 TO DOs
@@ -45,9 +47,10 @@ Next up (waiting on content or a check from the user)
         Vimeo `videos`)
     [ ] More projects: each needs a slot, a .glb (point cloud or mesh) and
         a `view` - see CLAUDE.md
-    [ ] kh ReUse (slot 3, the real world): confirm the knippershelbig link
-        (www.knippershelbig.com, unreachable from the container); pictures,
-        if wanted
+    [ ] kh ReUse on a real phone and in Safari: the film starting by itself
+        (muted autoplay), the two-step camera, the double-tap pause
+    [ ] kh ReUse: confirm the knippershelbig link (www.knippershelbig.com,
+        unreachable from the container)
     [ ] Emergent Space's drop on a phone: confirm it runs smoothly on a real
         device (it was only checked with software rendering here)
     [ ] The catalog's streams on a phone: WebGL draws them one device pixel
@@ -109,6 +112,11 @@ Content
     [x] The real copy for both projects - year, role, context, body and
         credits, drafted from the published descriptions (ETH, Gewerbemuseum
         Winterthur, ITECH Stuttgart) and approved by the user
+    [x] kh ReUse (slot 3, the real world): a laptop made in code, the
+        pebble's points settling on its screen, then the user's recording
+        playing there as the camera moves in; a phone with the mobile
+        recording on a phone; a double-click pauses the film; the user's
+        drawer text and five screenshots; a reuse sign in its pebble
 
 Catalog
     [x] Ten fixed slots (SLOT_COUNT), reachable on every viewport, with
@@ -121,7 +129,7 @@ Catalog
         before), each its own shape and slowly
         changing it, each a random size (up to 1.8x); touching, they
         push each other apart,
-        each holding the little rock or the project's own model; they
+        a project's holding its own model, an empty one nothing; they
         float and rock, the pointer stirs them, no orbit
     [x] One pebble at a time glows orange and jumps; its name (a project's
         title, "Project XX" for an empty slot) hangs below it on a soft,
@@ -182,7 +190,8 @@ Project view
     [x] Films in the drawer from Vimeo (`videos`, above the pictures):
         Emergent Space's one, Rock Print's two; full screen on a phone in
         its own player, "Watch on Vimeo" under each
-    [x] On a phone, every drawer picture runs full width
+    [x] On a phone, every drawer picture runs full width (unless `pair`,
+        kh ReUse's phone screenshots, two to a row)
     [x] A click on a drawer picture enlarges it over the page; a click or
         Escape puts it back
     [x] Camera moves only tilt, never roll
@@ -191,7 +200,8 @@ Site
     [x] A landing page: three short paragraphs (hidden currents, the
         background, the services) over the floating particles, and
         "Welcome to the F&F playground" on to the projects (the back link
-        in a project reads "F&F playground")
+        in a project reads "F&F playground"); the paragraphs fade in one
+        by one, the welcome line last
     [x] A link to each project (`#rock-print`, `#emergent-space`): opens it
         straight through the loader; Back and Forward close and reopen it
     [x] Housekeeping: `?cloudtest` and `lil-gui` removed; repeated code

@@ -440,14 +440,14 @@ export function createFraming({ rig, screen, state, grid, ui }) {
 
             // The whole model, fitted to its own outline rather than the pebble's -
             // stacked, a little further back, clear of the drawer's handle
+            const side = getPanelLayout(state.drawerOpen).mode === 'side';
             const model = pebble.userData.detail;
             if (pebble.userData.project?.view?.drawer === 'whole' && model) {
-                const side = getPanelLayout(state.drawerOpen).mode === 'side';
                 framing.frameDetail(pebble, { ...options, fit: new THREE.Box3().setFromObject(model), fitZoom: side ? 1 : WHOLE_ABOVE_DRAWER_ZOOM });
                 return;
             }
 
-            if (getPanelLayout(state.drawerOpen).mode === 'side') {
+            if (side) {
                 framing.frameDetail(pebble, options);
             } else {
                 framing.frameCloseup(pebble, options);

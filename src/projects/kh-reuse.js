@@ -1,9 +1,10 @@
 import { defineProject } from './schema.js';
 
 /**
- * kh ReUse (written exactly so; its link stays #kh-reuse) - a laptop, a plain
- * mesh (static/models/laptop.glb, lid open), drawn as itself, standing still
- * with its screen to the visitor; a phone instead on a phone.
+ * kh ReUse (written exactly so; its link stays #kh-reuse) - a laptop drawn as
+ * itself, standing still with the pebble's points settling on its screen,
+ * then the camera moving in as the user's recording plays there; a phone
+ * instead on a phone. The models are made in code: tools/models/.
  */
 export default defineProject({
     id: 'kh-reuse',
@@ -75,7 +76,7 @@ export default defineProject({
         },
     ],
 
-    // A small reuse sign in its pebble (static/models/reuse.glb, made in code)
+    // A small reuse sign in its pebble
     thumbModel: 'models/reuse.glb',
     thumbSize: 1.9,
     detailModel: 'models/laptop.glb',
@@ -93,17 +94,14 @@ export default defineProject({
     screen: 'Screen',
     // The recorded film on the screen, under the points (muted, looping)
     screenVideo: 'videos/kh-reuse.mp4',
-    // On a phone (under 860px), a phone instead of the laptop, made in code
-    // like it (static/models/phone.glb, its screen also 'Screen'), playing
-    // the mobile recording
+    // On a phone (under 860px), a phone instead of the laptop (its screen
+    // also 'Screen'), playing the mobile recording
     phone: { detailModel: 'models/phone.glb', screenVideo: 'videos/kh-reuse-mobile.mp4' },
-    // Square-on to the screen (the model's front is its +Z, which the
-    // detail view's quarter turn would swing away), from a little above,
-    // the whole device - the laptop, or on a phone the phone - while the
-    // points settle on its screen; then square-on to that screen, the film
-    // starting, 1.2 times as far as would put its edges at the window's
-    // (`fillScreen`), so the device's own edges stay in view and its top
-    // under the title. With the About drawer out, the whole device again
-    // (on a phone, above the drawer - `drawer: 'whole'`)
+    // First the whole device, from a little above (`turn: -90` undoes the
+    // detail view's quarter turn, so its front faces the camera) while the
+    // points settle; then square-on to its screen as the film starts,
+    // `fillScreen` times as far back as would put the screen's edges at the
+    // window's - the device's own edges in view, its top below the title.
+    // With the About drawer out, the whole device again (`drawer: 'whole'`).
     view: { elevation: 15, turn: -90, zoom: { side: 1.3, stacked: 1.7 }, lift: { side: 0, stacked: 0.03 }, fillScreen: 1.2, drawer: 'whole' },
 });

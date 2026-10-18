@@ -288,104 +288,47 @@ phone; the films' shape (assumed 16:9); model licensing. Small: `smoke.js`
 is parked, the points' ink grain does nothing (no UVs - README), and the JS
 bundle is one 905 KB chunk Vite warns about.
 
-**A third project: kh-reuse, a laptop** (slot 3, "The real world",
-`src/projects/kh-reuse.js`, `#kh-reuse`). Its pebble holds a small laptop and
-opens a laptop - lid open, keys, trackpad and screen - gathering out of
-points. The model is a plain mesh built in code (`static/models/laptop.glb`,
-64 KB), sampled to points like Emergent Space's. Named "kh-reuse" by the user;
-no drawer until they give the text.
 
-**kh-reuse, solid and still.** The laptop is now drawn as the model itself
-(new `solid` setting), not a point cloud, and doesn't turn (`still`): open,
-screen square to the visitor. Something is to be shown on its screen later.
+## Session 4 — 2026-10-18
 
-**The landing page's paragraphs appear one by one**, each fading up over 2s,
-1.8s apart, from 0.8s in (`.loader__about p` in styles.css); all at once
-with reduced motion.
+**A third project, kh ReUse** (slot 3, the real world, `#kh-reuse`; the name
+and "knippershelbig" written exactly as the user writes them). A laptop,
+made in code, drawn solid in light grey with rounded edges, open, its
+screen to the visitor, not turning and not orbitable. Clicked, a third of
+the pebble's points settle onto the screen in the clouds' inks and float
+there with tails; 5s in the camera moves in square-on to the screen,
+stopping short so the laptop's edges show and its top clears the title,
+and the user's recording plays there as the points fade away. A
+double-click pauses the film and plays it on. On a phone, a phone made in
+code instead, playing the mobile recording; each screen is shaped like its
+film, so none is cropped. The About drawer pulls back to the whole device.
+Its pebble holds a reuse sign. Drawer: the user's text (with links to the
+live demo and knippershelbig, and notes that it was written from scratch
+before AI tools were everyday and that the data is fictional) and five
+screenshots, two desktop across the drawer and three phone ones two to a
+row. New project settings for all of it, no per-project code: `solid`,
+`still`, `orbit`, `screen`, `screenVideo`, `phone`, `view.fillScreen`,
+`view.drawer`; pictures' `pair`; drawer text's `[words](https://...)`
+links. The model scripts are in `tools/models/` (`npm run models`).
 
-**kh-reuse, rounded and light grey.** The laptop's edges, keys, trackpad
-and screen are rounded, and the model is light grey (`solid: { lit,
-shade }`, a new option for a solid model's colour). Its pebble's thumbnail
-stays graphite.
+**Landing page**: the three paragraphs fade in one after another, slowly,
+then "Welcome to the F&F playground" last.
 
-**kh-reuse: points on the screen.** The pebble's dissolve no longer fades
-away for the laptop: its points take the clouds' inks, settle onto the
-screen and float about there while it's open (`screen`, a new setting naming
-the model's screen mesh). The film to play under them is still to come.
+**Playground**: empty pebbles hold nothing (the rock is gone from them);
+the double-click hint comes round every 20s rather than 8, on every
+project.
 
-**kh-reuse: fewer points, with tails, and a reuse sign.** A third as many
-points float on the laptop's screen, each with a tail. Its pebble holds a
-small 3D reuse sign (three chasing arrows, `static/models/reuse.glb`)
-instead of the laptop.
+**Cleanup** (asked for): the model scripts moved from a scratch folder into
+`tools/models/`, sharing one glTF writer (`glb.mjs`) and rebuilding the
+three models byte for byte; repeated code folded (the film-path check in
+schema.js, the tap hint's spot search in detail.js); the session's
+DECISIONS.md entries rewritten as one per subject, CLAUDE.md brought up to
+date.
 
-**"Welcome to the F&F playground" comes last** on the landing page, fading
-up 1.8s after the third paragraph starts.
+Checks were headless (software WebGL, both layouts, the films as WebM
+copies since this Chromium can't play H.264); no console errors in any run.
 
-**kh-reuse can't be orbited** by hand (`orbit: false`, a new setting): the
-laptop's screen stays square on. A double-click still zooms.
-
-**kh-reuse: the film on the laptop's screen.** The user's recording
-(`static/videos/kh-reuse.mp4`) plays on the screen, muted and looping,
-under the floating points, fading in once it starts (`screenVideo`, a new
-setting). It pauses when the project closes.
-
-**kh-reuse: closer on the screen, points softer over the film, and a
-phone on phones.** The camera comes in on the screen (`view.zoom`,
-`view.lift`), and once the film plays the points fade down to a quarter
-(`SCREEN_FILM_DIM`). On a phone (under 860px) a 3D phone made in code
-(`static/models/phone.glb`) stands in for the laptop, playing the user's
-mobile recording (`static/videos/kh-reuse-mobile.mp4`) - a new `phone`
-setting.
-
-**kh-reuse's drawer**: year, role, context and text from the user, with a
-link to the live demo and a drafted sentence (awaiting approval) on making
-it for Knippers Helbig, where they are Head of Digital Technologies. The
-drawer's text can now hold links, written `[words](https://...)`.
-
-**kh-reuse: the whole film, filling the window.** The Knippers Helbig
-sentence approved. The points now go away altogether once the film plays.
-The laptop's and the phone's screens are reshaped to their films' exact
-proportions, so nothing is cropped, and the camera comes square-on to the
-screen with its edges at the window's (`view.fillScreen`, a new setting).
-
-**kh-reuse's drawer**: a sentence after the tech stack, approved by the
-user, on writing both ends from scratch before AI tools were everyday.
-
-**kh-reuse opens in two steps**: the whole laptop (or phone) first, the
-points settling on its screen; then, 5s in, the camera moves in on the
-screen - stopping short so the device's edges stay in view - and the film
-starts, the points fading as it does.
-
-**kh-reuse's close-up a little further back**, framed into the space below
-the project's title, so the laptop's or phone's top edge always clears it.
-
-**Names as the user writes them**: the project is "kh ReUse" (its pebble,
-title and drawer; the link stays `#kh-reuse`), and the office
-"knippershelbig", together, in small letters.
-
-**kh ReUse's film can be paused**: a double-click (double-tap on a phone)
-pauses it on its frame and the next plays it on - the site's existing
-"pause" action, hinted on the screen once the film plays.
-
-**kh ReUse's films replaced** with the user's new recordings: the laptop's
-now 1080p (3.5 MB), the phone's 390 x 664 (2.3 MB) - the same shapes, so
-the screens still fit them exactly.
-
-**Empty pebbles hold nothing**: the rock that filled every slot without a
-project is gone from them; a project's pebble still holds its own model
-(Rock Print the rock).
-
-**The double-click hint comes round less often** on every project: every
-20s rather than 8 (`TAP_HINT_GAP`). **kh ReUse's About drawer** pulls back
-to the whole device instead of zooming in - on a phone, the whole phone
-above the drawer (`view.drawer: 'whole'`).
-
-**kh ReUse's films replaced again** with the user's latest recordings
-(laptop 1080p, 3.7 MB; phone 390 x 664, 2.5 MB - the same shapes).
-
-**kh ReUse's screenshots** in its drawer: two from a desktop across the
-drawer's width, then three from a phone two to a row - on a phone too, a
-new `pair` option for pictures (elsewhere a phone shows one to a row).
-
-**kh ReUse's drawer**: a note, approved by the user, that the data in this
-version of the website is fictional.
+Open at end of session (see README, "Next up"): kh ReUse on a real phone
+and in Safari - autoplay of the film, the two-step camera, the double-tap
+pause; the knippershelbig link (unreachable from the container); the rest
+as at the end of session 3.
