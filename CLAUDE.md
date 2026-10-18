@@ -35,9 +35,9 @@ in a pull-out drawer.
 - **kh-reuse** (slot 3, the real world, `#kh-reuse`): a laptop
   (`static/models/laptop.glb`, made in code) drawn solid in light grey with
   rounded edges (`solid: { lit, shade }`), open, screen to the visitor, not
-  turning (`still`). The pebble's points settle onto its screen in the
-  inks and float there (`screen: 'Screen'`); a recorded film is to play
-  there later. No drawer text yet.
+  turning (`still`). A third of the pebble's points settle onto its
+  screen in the inks and float there with tails (`screen: 'Screen'`); a recorded film is to play
+  there later. Its pebble holds a reuse sign (`reuse.glb`). No drawer text yet.
 - **Links**: each project's own address is `#<id>` (`#rock-print`).
 - **Drawer copy** is real for Rock Print and Emergent Space (approved by the user);
   change it only on request.

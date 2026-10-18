@@ -842,7 +842,13 @@ clouds' inks and float about there, slowly, while the project is open
 Y up, Z out; uScreen in pebbles/dissolve.js). It's where a recorded film is
 to play later, the points over it while it loads. Until the model has
 loaded the points hold, swollen, at SCREEN_HOLD rather than fall towards a
-screen not yet known. No tap hint: it picks a point of a cloud, and
+screen not yet known. Only one point in three
+stays (`SCREEN_EVERY`, the rest fade as in any dissolve), and those keep
+their tails for good: a tail re-runs the float `SCREEN_TRAIL` (2.5s)
+earlier, since at its slow pace the dissolve's own 0.12s showed nothing.
+Its pebble holds a reuse sign rather than the laptop (`reuse.glb`, three
+arrows round a circle, made in code, lying face up for the playground's
+camera from above). No tap hint: it picks a point of a cloud, and
 there is none. The model is placeholder geometry built in code; the screen
 is a separate thin panel on the lid, where content would go.
 

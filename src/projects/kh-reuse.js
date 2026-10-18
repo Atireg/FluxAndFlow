@@ -12,8 +12,8 @@ export default defineProject({
     // Research, teaching or the real world - its tag, and the catalog's filter
     category: 'real-world',
 
-    // Its own mesh in its pebble, like Emergent Space's
-    thumbModel: 'models/laptop.glb',
+    // A small reuse sign in its pebble (static/models/reuse.glb, made in code)
+    thumbModel: 'models/reuse.glb',
     thumbSize: 1.9,
     detailModel: 'models/laptop.glb',
     // The mesh itself rather than points, in light grey (screen [r, g, b],

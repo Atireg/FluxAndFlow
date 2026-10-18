@@ -312,3 +312,8 @@ stays graphite.
 away for the laptop: its points take the clouds' inks, settle onto the
 screen and float about there while it's open (`screen`, a new setting naming
 the model's screen mesh). The film to play under them is still to come.
+
+**kh-reuse: fewer points, with tails, and a reuse sign.** A third as many
+points float on the laptop's screen, each with a tail. Its pebble holds a
+small 3D reuse sign (three chasing arrows, `static/models/reuse.glb`)
+instead of the laptop.

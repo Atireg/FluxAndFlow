@@ -30,6 +30,8 @@ const DISSOLVE_POINT_SIZE = 0.07; // world units across
 const DISSOLVE_TRAIL = 0.12; // seconds back for the dissolve's points
 const SCREEN_MARGIN = 0.88; // how far out across the screen a point's home is, as a share of half its width
 const SCREEN_FLOAT = 0.1; // how far a point floats from its home, the same way
+const SCREEN_EVERY = 3; // one point in this many settles on the screen; the rest fade as usual
+const SCREEN_TRAIL = 2.5; // seconds back for the tails of the points floating on it
 // Points hold, swollen, at this share of the dissolve until the screen they're
 // to settle on has loaded - rather than falling towards nowhere
 const SCREEN_HOLD = 0.25;
@@ -48,22 +50,28 @@ uniform vec3 uScreenCentre; // the screen's middle, and the vectors to its right
 uniform vec3 uScreenU;
 uniform vec3 uScreenV;
 attribute vec3 aScreen; // a point's home on the screen (-1..1 across and up) and its phase
+attribute float aStay; // 1 for the points that settle on a screen
 attribute vec3 aDrift;
 attribute float aDelay;
 attribute vec3 aNormal;
 attribute vec3 aGround;
 ${PEBBLE_FLUX_GLSL}
 
-// Where a point floats on the screen now: slow loops round its home, each
-// at its own pace
-vec3 screenPoint() {
+// Whether this point lands and stays: all of a pile's ground, some of a screen's
+float landsHere() {
+    return uGround * mix(1.0, aStay, uScreen);
+}
+
+// Where a point floats on the screen at a time: slow loops round its home,
+// each at its own pace
+vec3 screenPoint(float time) {
     float pace = 0.18 + 0.2 * fract(aScreen.z * 7.31);
-    vec2 drift = vec2(sin(uTime * pace + aScreen.z), cos(uTime * pace * 0.83 + aScreen.z * 1.7));
+    vec2 drift = vec2(sin(time * pace + aScreen.z), cos(time * pace * 0.83 + aScreen.z * 1.7));
     vec2 at = aScreen.xy + ${SCREEN_FLOAT.toFixed(3)} * drift;
     return uScreenCentre + uScreenU * at.x + uScreenV * at.y;
 }
 
-vec3 dissolvePosition(vec3 home, float T, out float falling) {
+vec3 dissolvePosition(vec3 home, float T, float time, out float falling) {
     // From the pebble's shape at the moment it was clicked, flux and all
     vec3 start = home + aNormal * pebbleFlux(normalize(home)) * uFluxAmount;
 
@@ -77,16 +85,16 @@ vec3 dissolvePosition(vec3 home, float T, out float falling) {
     float puff = smoothstep(0.0, 0.3, T);
     vec3 swollen = start * (1.0 + uSwell * puff) + aDrift * puff;
     falling = clamp((T - 0.25 - aDelay * 0.35) / 0.35, 0.0, 1.0);
-    vec3 ground = mix(aGround, screenPoint(), uScreen);
+    vec3 ground = mix(aGround, screenPoint(time), uScreen);
     vec3 landed = mix(swollen, ground, falling * falling);
-    return mix(p, landed, uGround);
+    return mix(p, landed, landsHere());
 }
 
 // How much ink a point lays down at T, before its tail's fade
 float dissolveAlpha(float T, float falling) {
     float fading = 1.0 - smoothstep(0.55, 1.0, T);
     // (a pile's ground lighter once landed; a screen's points not)
-    return smoothstep(0.0, 0.12, T) * mix(fading, 1.0 - 0.45 * falling * (1.0 - uScreen), uGround);
+    return smoothstep(0.0, 0.12, T) * mix(fading, 1.0 - 0.45 * falling * (1.0 - uScreen), landsHere());
 }`;
 
 const dissolveVertexShader = `
@@ -100,10 +108,10 @@ ${DISSOLVE_GLSL}
 
 void main() {
     float falling;
-    vec4 mv = modelViewMatrix * vec4(dissolvePosition(position, uT, falling), 1.0);
+    vec4 mv = modelViewMatrix * vec4(dissolvePosition(position, uT, uTime, falling), 1.0);
     gl_Position = projectionMatrix * mv;
     // Landed, they're finer and fainter - a ground, not a cloud
-    float settled = falling * uGround * (1.0 - uScreen);
+    float settled = falling * landsHere() * (1.0 - uScreen);
     gl_PointSize = uSize * (1.0 - 0.5 * settled) * uPixelsPerUnit / max(-mv.z, 0.001);
 
     vAlpha = dissolveAlpha(uT, falling);
@@ -127,10 +135,10 @@ ${trailCornerGlsl}
 void main() {
     float falling;
     float before;
-    vec4 headView = modelViewMatrix * vec4(dissolvePosition(aHome, uT, falling), 1.0);
-    vec4 tailView = modelViewMatrix * vec4(dissolvePosition(aHome, max(uT - uTrailLag, 0.0), before), 1.0);
+    vec4 headView = modelViewMatrix * vec4(dissolvePosition(aHome, uT, uTime, falling), 1.0);
+    vec4 tailView = modelViewMatrix * vec4(dissolvePosition(aHome, max(uT - uTrailLag, 0.0), uTime - ${SCREEN_TRAIL.toFixed(2)}, before), 1.0);
 
-    float settled = falling * uGround * (1.0 - uScreen);
+    float settled = falling * landsHere() * (1.0 - uScreen);
     float width = uSize * (1.0 - 0.5 * settled) * uPixelsPerUnit / max(-headView.z, 0.001);
     float moving;
     gl_Position = trailCorner(headView, tailView, width, moving);
@@ -175,6 +183,7 @@ export function getDissolve(pebble) {
     const tones = new Float32Array(DISSOLVE_POINTS);
     const grounds = new Float32Array(DISSOLVE_POINTS * 3);
     const screens = new Float32Array(DISSOLVE_POINTS * 3);
+    const stays = new Float32Array(DISSOLVE_POINTS);
     const v = new THREE.Vector3();
     const screen = Boolean(pebble.userData.project?.screen);
 
@@ -201,6 +210,7 @@ export function getDissolve(pebble) {
         screens[i * 3] = (Math.random() * 2 - 1) * SCREEN_MARGIN;
         screens[i * 3 + 1] = (Math.random() * 2 - 1) * SCREEN_MARGIN;
         screens[i * 3 + 2] = Math.random() * Math.PI * 2;
+        stays[i] = i % SCREEN_EVERY === 0 ? 1 : 0;
 
         if (drop) {
             const r = Math.sqrt(Math.random()) * groundRadius;
@@ -216,6 +226,7 @@ export function getDissolve(pebble) {
     geometry.setAttribute('aNormal', new THREE.BufferAttribute(normals, 3));
     geometry.setAttribute('aGround', new THREE.BufferAttribute(grounds, 3));
     geometry.setAttribute('aScreen', new THREE.BufferAttribute(screens, 3));
+    geometry.setAttribute('aStay', new THREE.BufferAttribute(stays, 1));
     geometry.setAttribute('aDrift', new THREE.BufferAttribute(drifts, 3));
     geometry.setAttribute('aDelay', new THREE.BufferAttribute(delays, 1));
     geometry.setAttribute('aTone', new THREE.BufferAttribute(tones, 1));
@@ -254,7 +265,7 @@ export function getDissolve(pebble) {
     points.userData.trails = addTrails(points, {
         vertexShader: dissolveTrailVertexShader,
         fragmentShader: dissolveTrailFragmentShader,
-        names: ['aNormal', 'aGround', 'aScreen', 'aDrift', 'aDelay', 'aTone'],
+        names: ['aNormal', 'aGround', 'aScreen', 'aStay', 'aDrift', 'aDelay', 'aTone'],
         lag: DISSOLVE_TRAIL / DISSOLVE_DURATION,
     });
 
@@ -303,8 +314,9 @@ export function updateDissolve({ state, renderer, camera, elapsedTime }) {
         ? revealAt(detailSince(state.droppingFrom, elapsedTime))
         : 0;
 
-    // Tails until everything has landed or gone
-    points.userData.trails.visible = t < 1;
+    // Tails until everything has landed or gone - and on a screen, for good,
+    // behind the points floating there
+    points.userData.trails.visible = t < 1 || points.userData.screen;
 
     const uniforms = points.material.uniforms;
     uniforms.uT.value = Math.min(t, 1);
