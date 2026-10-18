@@ -362,3 +362,7 @@ the project's title, so the laptop's or phone's top edge always clears it.
 **Names as the user writes them**: the project is "kh ReUse" (its pebble,
 title and drawer; the link stays `#kh-reuse`), and the office
 "knippershelbig", together, in small letters.
+
+**kh ReUse's film can be paused**: a double-click (double-tap on a phone)
+pauses it on its frame and the next plays it on - the site's existing
+"pause" action, hinted on the screen once the film plays.

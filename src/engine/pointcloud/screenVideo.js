@@ -47,13 +47,13 @@ export function addScreenVideo(group, screen, url) {
         texture.offset.set((1 - texture.repeat.x) / 2, (1 - texture.repeat.y) / 2);
     });
 
-    // Fades in once it's really playing; back to bare whenever it stops
-    let playingSince = null;
+    // Fades in once it's really playing, and stays - paused, on the frame it
+    // stopped at - until the project closes (playScreenVideo)
+    group.userData.screenFilmSince = null;
     quad.onBeforeRender = () => {
-        const playing = !video.paused && video.readyState >= 2;
-        if (!playing) playingSince = null;
-        else playingSince ??= performance.now();
-        material.opacity = playingSince === null ? 0 : smooth01((performance.now() - playingSince) / 1000 / VIDEO_FADE);
+        if (!video.paused && video.readyState >= 2) group.userData.screenFilmSince ??= performance.now();
+        const since = group.userData.screenFilmSince;
+        material.opacity = since === null ? 0 : smooth01((performance.now() - since) / 1000 / VIDEO_FADE);
         group.userData.screenFilmShown = material.opacity;
     };
 
@@ -61,10 +61,23 @@ export function addScreenVideo(group, screen, url) {
     group.userData.screenVideo = video;
 }
 
-// Played while its project is open, paused otherwise
+// Played while its project is open; closed, paused and bare again, so it
+// fades back in next time
 export function playScreenVideo(model, playing) {
     const video = model?.userData.screenVideo;
     if (!video) return;
-    if (playing) video.play().catch(() => {}); // a refused autoplay leaves the points alone
-    else video.pause();
+    if (playing) {
+        video.play().catch(() => {}); // a refused autoplay leaves the points alone
+    } else {
+        video.pause();
+        model.userData.screenFilmSince = null;
+    }
+}
+
+// Paused by the visitor (`doubleClick: 'hold'`), staying on its frame - or going on
+export function holdScreenVideo(model, held) {
+    const video = model?.userData.screenVideo;
+    if (!video || model.userData.screenFilmSince === null) return; // not started yet
+    if (held) video.pause();
+    else video.play().catch(() => {});
 }

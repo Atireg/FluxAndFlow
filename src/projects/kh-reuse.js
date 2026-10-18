@@ -48,6 +48,9 @@ export default defineProject({
     still: true,
     // ...and the visitor can't orbit it: the screen stays square on
     orbit: false,
+    // A double-click (or double-tap) pauses the film on its screen, and the
+    // next plays it on - hinted "pause", like Rock Print's turn
+    doubleClick: 'hold',
     // The pebble's points settle onto the laptop's screen and float there
     // in the clouds' inks, over the film below
     screen: 'Screen',

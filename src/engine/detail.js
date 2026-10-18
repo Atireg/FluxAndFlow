@@ -6,7 +6,7 @@ import { loadPhysics, PILE_FADE_OUT, PILE_REPLAY_WAIT } from './pile.js';
 import { loadPointCloud } from './pointcloud/load.js';
 import { GATHER_DURATION } from './pointcloud/gather.js';
 import { getDissolve } from './pebbles/dissolve.js';
-import { playScreenVideo } from './pointcloud/screenVideo.js';
+import { holdScreenVideo, playScreenVideo } from './pointcloud/screenVideo.js';
 import { armDrop, DROP_BOOM_HANG, DROP_OPEN_AFTER } from './pebbles/drop.js';
 import { startArrival } from './pebbles/arrival.js';
 import { restingFaceColor, restingRimColor } from './pebbles/materials.js';
@@ -564,7 +564,7 @@ export function createDetail({
             if (since < FILL_SCREEN_AT) return;
 
             model.userData.screenFilled = true;
-            playScreenVideo(model, true);
+            if (!isHeld(model)) playScreenVideo(model, true);
             framing.reframe(state.selected, { duration: FILL_SCREEN_DURATION });
         },
 
@@ -788,7 +788,9 @@ export function createDetail({
             const held = (model.userData.held ??= { total: 0, at: null });
             if (held.at === null) {
                 held.at = since;
+                holdScreenVideo(model, true);
             } else {
+                holdScreenVideo(model, false);
                 held.total += since - held.at;
                 held.at = null;
 
@@ -848,6 +850,24 @@ export function createDetail({
 
             // Clear of the drawer on the right, when it's open beside the model
             const maxX = Math.min(0.7, 1 - 2 * fraction - 0.15);
+
+            // A film on the model's screen: hinted on the screen, once it plays
+            const display = model.userData.screen;
+            const film = model.userData.screenVideo;
+            if (!model.userData.points && display && film && model.visible) {
+                if (film.paused) return;
+                for (let tries = 0; tries < 20; tries++) {
+                    tapHintPoint.copy(display.face)
+                        .addScaledVector(display.u, (Math.random() * 2 - 1) * 0.6)
+                        .addScaledVector(display.v, (Math.random() * 2 - 1) * 0.5);
+                    const [x, y] = rig.toScreen(model.localToWorld(tapHintPoint));
+                    if (tapHintPoint.x > -0.7 && tapHintPoint.x < maxX && tapHintPoint.y > -0.5 && tapHintPoint.y < 0.5) {
+                        ui.showTapHint(x, y, action);
+                        return;
+                    }
+                }
+                return;
+            }
 
             // (a pile's aggregates are hidden while they wait to drop)
             const points = model.userData.points;

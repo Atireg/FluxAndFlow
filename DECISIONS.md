@@ -876,8 +876,11 @@ their tails for good: a tail re-runs the float `SCREEN_TRAIL` (2.5s)
 earlier, since at its slow pace the dissolve's own 0.12s showed nothing.
 Its pebble holds a reuse sign rather than the laptop (`reuse.glb`, three
 arrows round a circle, made in code, lying face up for the playground's
-camera from above). No tap hint: it picks a point of a cloud, and
-there is none. The model is placeholder geometry built in code; the screen
+camera from above). Its `doubleClick: 'hold'` pauses the film
+on its screen and plays it on (`holdScreenVideo`), the existing "pause"
+action and hint rather than a new button or words; paused, the film stays
+on its frame. The tap hint, which picks a point of a cloud, here picks a
+spot on the screen instead, once the film plays. The model is placeholder geometry built in code; the screen
 is a separate thin panel on the lid, where content would go.
 
 

@@ -42,7 +42,8 @@ in a pull-out drawer.
   it plays; the whole device shows first while
   the points settle, then the camera moves in square-on to the screen and the
   film starts (`view.fillScreen: 1.2`, edges kept in view, its top below the title). On a phone (under 860px) a phone instead, playing
-  `kh-reuse-mobile.mp4` (`phone: { detailModel, screenVideo }`). Its pebble holds a reuse sign (`reuse.glb`). Drawer text from the user
+  `kh-reuse-mobile.mp4` (`phone: { detailModel, screenVideo }`). A double-click or double-tap pauses the film
+  and plays it on (`doubleClick: 'hold'`). Its pebble holds a reuse sign (`reuse.glb`). Drawer text from the user
   (approved), links to the live demo and knippershelbig.
 - **Links**: each project's own address is `#<id>` (`#rock-print`).
 - **Drawer copy** is real for Rock Print and Emergent Space (approved by the user);
