@@ -72,6 +72,11 @@ export default defineProject({
     // slowly gather into the pavilion - see GATHER_DURATION
     gather: true,
 
+    // The films, from Vimeo, above the pictures in the drawer, in this order
+    videos: [
+        { vimeo: '294086902', title: 'Rock Print Pavilion - film 1' },
+        { vimeo: '306400252', title: 'Rock Print Pavilion - film 2' },
+    ],
     // Pictures in the About drawer, in order: the first spans the full
     // width, the rest sit two to a row. An entry with no `src` yet shows
     // as an empty frame, holding its place. Paths are like the models'

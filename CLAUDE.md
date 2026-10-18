@@ -194,7 +194,7 @@ defineProject({
     //         contacts: true, closeUp: { hold: 5, after: 5 },   // interlock dots; camera in on one 5s, out, drop 5s later
     //         velocity: true },                                  // live velocity (or `repeat: 10`: drop again 10s after rest)
     images: [{ src: 'images/x.jpg', alt: '', caption: '', ratio: '3 / 2', wide: false }],  // drawer pictures; no src = empty frame
-    // videos: [{ vimeo: '148494213', title: '', caption: '', ratio: '16 / 9' }],  // drawer films from Vimeo, above the pictures (Emergent Space)
+    videos: [{ vimeo: '294086902', title: '' }, ...],  // optional: drawer films from Vimeo, in order, above the pictures (ratio defaults to '16 / 9')
 })
 ```
 
