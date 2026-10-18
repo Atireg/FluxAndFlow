@@ -847,9 +847,14 @@ cropped to fill rather than squeezed; it fades in once its first frames
 play, so until then the points float on a bare screen. 1.7 MB, 720p H.264,
 copied as it came (metadata stripped, `faststart` so it streams at once).
 Headless Chromium here can't decode H.264, so it was checked with a WebM
-copy in a throwaway `dist/`. Once the film plays the points fade down to
-a quarter (`SCREEN_FILM_DIM`), and the camera comes in close on the screen
-(`view.zoom`, `view.lift`).
+copy in a throwaway `dist/`. Once the film plays the points fade away
+altogether (`SCREEN_FILM_DIM` 1; a quarter was tried first). Each device's
+screen is shaped exactly like its film (16:9 on the laptop, 390 x 664 on
+the phone) so none of it is cropped, and once the model is in, the camera
+looks square-on at the screen, its edges at the window's (`view.fillScreen`,
+`frameOnScreen` in camera/framing.js) - the film as large as it goes, the
+device's bezel just showing where the window's shape differs. The `zoom`
+and `lift` only frame the opening, while the model loads.
 
 On a phone (the stacked layout, under 860px) it shows a phone instead,
 playing the user's mobile recording (`phone: { detailModel, screenVideo }`):

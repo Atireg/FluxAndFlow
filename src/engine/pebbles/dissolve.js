@@ -32,7 +32,7 @@ const SCREEN_MARGIN = 0.88; // how far out across the screen a point's home is, 
 const SCREEN_FLOAT = 0.1; // how far a point floats from its home, the same way
 const SCREEN_EVERY = 3; // one point in this many settles on the screen; the rest fade as usual
 const SCREEN_TRAIL = 2.5; // seconds back for the tails of the points floating on it
-const SCREEN_FILM_DIM = 0.75; // how much the points fade down once a film plays under them
+const SCREEN_FILM_DIM = 1; // how much the points fade once a film plays under them: away altogether
 // Points hold, swollen, at this share of the dissolve until the screen they're
 // to settle on has loaded - rather than falling towards nowhere
 const SCREEN_HOLD = 0.25;

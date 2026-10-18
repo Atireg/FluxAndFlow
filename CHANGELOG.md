@@ -341,3 +341,9 @@ setting.
 link to the live demo and a drafted sentence (awaiting approval) on making
 it for Knippers Helbig, where they are Head of Digital Technologies. The
 drawer's text can now hold links, written `[words](https://...)`.
+
+**kh-reuse: the whole film, filling the window.** The Knippers Helbig
+sentence approved. The points now go away altogether once the film plays.
+The laptop's and the phone's screens are reshaped to their films' exact
+proportions, so nothing is cropped, and the camera comes square-on to the
+screen with its edges at the window's (`view.fillScreen`, a new setting).

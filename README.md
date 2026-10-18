@@ -45,8 +45,9 @@ Next up (waiting on content or a check from the user)
         Vimeo `videos`)
     [ ] More projects: each needs a slot, a .glb (point cloud or mesh) and
         a `view` - see CLAUDE.md
-    [ ] kh-reuse (slot 3, the real world): approve the drafted Knippers
-        Helbig sentence and its link; pictures, if wanted
+    [ ] kh-reuse (slot 3, the real world): confirm the Knippers Helbig link
+        (www.knippershelbig.com, unreachable from the container); pictures,
+        if wanted
     [ ] Emergent Space's drop on a phone: confirm it runs smoothly on a real
         device (it was only checked with software rendering here)
     [ ] The catalog's streams on a phone: WebGL draws them one device pixel

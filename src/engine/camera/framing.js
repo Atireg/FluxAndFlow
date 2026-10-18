@@ -167,6 +167,22 @@ export function modelTurn(model, since) {
 }
 
 export function createFraming({ rig, screen, state, grid, ui }) {
+    // A model's screen (see frameDetail's `fillScreen`) filling the window
+    function frameOnScreen(model, mode, duration, ease) {
+        const display = model.userData.screen;
+        model.updateMatrixWorld(true);
+        const centre = model.localToWorld(display.face.clone());
+        const across = model.localToWorld(display.face.clone().add(display.u)).sub(centre);
+        const upward = model.localToWorld(display.face.clone().add(display.v)).sub(centre);
+        const out = across.clone().cross(upward).normalize();
+
+        const tan = Math.tan(THREE.MathUtils.degToRad(DETAIL_FOV[mode]) / 2);
+        const distance = Math.max(upward.length() / tan, across.length() / (tan * screen.aspect));
+
+        rig.animateFov(DETAIL_FOV[mode], duration);
+        rig.moveCamera(centre.clone().addScaledVector(out, distance), centre, duration, ease);
+    }
+
     let swayStartedAt = null; // elapsed time the current run began; null while held
     let swayApplied = 0; // radians currently applied on top of the camera's own place
     const swayOffset = new THREE.Vector3();
@@ -257,6 +273,18 @@ export function createFraming({ rig, screen, state, grid, ui }) {
              */
             const { mode, fraction } = getPanelLayout(state.drawerOpen);
             const side = mode === 'side';
+
+            /**
+             * `view.fillScreen`: once the model with a screen (`screen`) is
+             * in, the camera looks square-on at that screen, close enough
+             * that its edges meet the window's - the whole film, as large as
+             * it goes. Not with the drawer out, which takes its usual frame.
+             */
+            const shown = object.userData.detail;
+            if (object.userData.project?.view?.fillScreen && shown?.userData.screen && !state.drawerOpen && !fit) {
+                frameOnScreen(shown, mode, duration, ease);
+                return;
+            }
             // Or framed on a box of its own (`fit`, world space) - a pile's
             // aggregates with the drawer open - at the plain fit, no zoom or lift
             const ownView = framesCube && !fit && (!state.drawerOpen || side)
