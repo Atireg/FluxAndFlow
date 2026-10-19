@@ -26,6 +26,10 @@ const SPOTLIGHT_ROTATE_AMPLITUDE = 0.14; // radians, ~8 degrees
 const SPOTLIGHT_SCALE_AMPLITUDE = 0.18; // the thumbnail scales +/- 18% at the peak of each jump
 const SPOTLIGHT_PEBBLE_SCALE_AMPLITUDE = 0.14; // the pebble itself, kept well clear of its neighbours
 const SPOTLIGHT_JUMP_HEIGHT = 0.4; // units lifted at the peak of each jump
+// None until the grid has surfaced (pebbles/arrival.js): it ran behind the
+// loader, and whichever pebble was glowing popped in lit, name and all, the
+// moment the loader cleared
+const SPOTLIGHT_AFTER_ARRIVAL = 3; // seconds from the arrival's start
 
 // The name's opacity at the low of each blink, relative to the spotlight's
 // strength - a pulse, never faint
@@ -137,6 +141,12 @@ function pickSpotlight(state, all) {
  */
 export function updateSpotlightCycle(state, pebbles, elapsedTime) {
     const spotlight = state.spotlight;
+
+    if (elapsedTime < state.arrivalStartedAt + SPOTLIGHT_AFTER_ARRIVAL) {
+        spotlight.pebble = null;
+        spotlight.nextAt = Math.max(spotlight.nextAt, elapsedTime);
+        return;
+    }
 
     if (spotlight.pebble) {
         /**

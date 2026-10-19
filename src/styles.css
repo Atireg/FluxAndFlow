@@ -673,6 +673,16 @@ canvas.webgl {
     transition: opacity 0.5s ease, visibility 0s;
 }
 
+/* Hidden behind the loader until it hands over, then in with the pebbles
+   rather than there at once as its paper clears */
+.loader:not(.is-handed-over) ~ #root .filter {
+    opacity: 0;
+}
+
+.loader.is-handed-over ~ #root .filter {
+    transition-duration: 2s;
+}
+
 .filter.is-hidden {
     opacity: 0;
     visibility: hidden;

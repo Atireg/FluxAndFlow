@@ -321,6 +321,8 @@ pebbles surface (they jumped as they compiled on their first frames).
 The scene's streams then take over the landing page's own particles where
 they are, easing from its pace to theirs, rather than new ones appearing
 as the old faded.
+Nor does anything pop in as the words fade: the orange glow and its name
+wait 3s for the pebbles to surface, and the filter fades in with them.
 
 **Playground**: empty pebbles hold nothing (the rock is gone from them);
 the double-click hint comes round every 20s rather than 8, on every

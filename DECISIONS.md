@@ -1362,6 +1362,13 @@ scene's started afresh at random places and faded in: the user saw new
 points and currents appear with the pebbles. With reduced motion the
 loader has no moving field and nothing is handed over.
 
+Its paper clearing at once also showed what had been running behind it:
+the spotlight's glow and name, mid-cycle, and the filter - they popped in
+as the words faded, which read as a jump. So the spotlight waits for the
+grid to surface (`SPOTLIGHT_AFTER_ARRIVAL`, 3s after the arrival starts -
+also on the way back from a project), and the filter stays hidden until
+the handover and then fades in over 2s (`.loader ~ #root .filter`).
+
 **They drift towards the pointer.** Asked for: while the mouse moves over
 the grid, or while a finger is down, the streams float slowly towards it,
 and go back to their own current once the mouse stops
