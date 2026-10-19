@@ -20,6 +20,9 @@ const STREAM_LIFE = [1.2, 3.6]; // seconds before a stream starts again elsewher
 const STREAM_FREQ = 0.09; // of the current's waves, per unit - the loader's, at the grid's scale
 const STREAM_ALPHA = 0.55; // a line's ink at its head
 const STREAM_FADE = 1.2; // seconds to come in or go
+// Taking over the loader's own particles as it leaves: from its pace, they
+// settle to the streams' own over this long
+const HANDOVER = 2.6; // seconds - the loader's exit
 const PART_REACH = 1.4; // within this many of a pebble's radii a stream turns aside
 const PART_TURN = 1.8; // how much of the drift into it is turned aside, at its edge
 // Towards the pointer: while the mouse moves over the grid or a finger is
@@ -94,10 +97,10 @@ export function createStreams(scene) {
     let started = false;
     let pull = 0; // 0..1, eased
     const pullTo = { x: 0, z: 0 };
+    let pace = 1; // the loader's speed over the streams', at the handover
+    let paceLeft = 0; // seconds until they're at their own
 
-    function spawn(i, randomAge) {
-        const x = (Math.random() * 2 - 1) * extent.x;
-        const z = (Math.random() * 2 - 1) * extent.z;
+    function spawn(i, randomAge, x = (Math.random() * 2 - 1) * extent.x, z = (Math.random() * 2 - 1) * extent.z) {
         for (let k = 0; k < STREAM_HISTORY; k++) {
             history[(i * STREAM_HISTORY + k) * 2] = x;
             history[(i * STREAM_HISTORY + k) * 2 + 1] = z;
@@ -108,6 +111,24 @@ export function createStreams(scene) {
     }
 
     return {
+        /**
+         * The loader's particles, taken over where they are as it leaves
+         * (`points`: [{ x, z }] on the streams' plane, `speed`: theirs, in
+         * units a second) - rather than new streams fading in among them
+         * while the old ones fade out.
+         */
+        takeOver(points, speed) {
+            if (!points.length) return;
+            for (let i = 0; i < STREAM_COUNT; i++) {
+                const point = points[i % points.length];
+                spawn(i, true, point.x, point.z);
+            }
+            started = true;
+            material.uniforms.uOpacity.value = 1;
+            pace = speed > 0 ? speed / STREAM_SPEED : 1;
+            paceLeft = HANDOVER;
+        },
+
         /**
          * One frame. `pebbles`: [{ x, z, r }] in the scene; `view`: the half
          * width and depth of the plane the camera sees ({ x, z }); `show`:
@@ -128,6 +149,8 @@ export function createStreams(scene) {
             }
             pull = pointer ? Math.min(pull + dt / PULL_IN, 1) : Math.max(pull - dt / PULL_OUT, 0);
             const pulling = smooth01(pull) * PULL_SHARE;
+            paceLeft = Math.max(paceLeft - dt, 0);
+            const speed = STREAM_SPEED * (1 + (pace - 1) * smooth01(paceLeft / HANDOVER));
             if (!started) {
                 for (let i = 0; i < STREAM_COUNT; i++) spawn(i, true);
                 started = true;
@@ -139,8 +162,8 @@ export function createStreams(scene) {
                 let z = history[head + 1];
 
                 const a = angle(x, z, t);
-                let vx = Math.cos(a) * STREAM_SPEED;
-                let vz = Math.sin(a) * STREAM_SPEED;
+                let vx = Math.cos(a) * speed;
+                let vz = Math.sin(a) * speed;
 
                 // Drawn slowly towards the pointer
                 if (pulling > 0) {

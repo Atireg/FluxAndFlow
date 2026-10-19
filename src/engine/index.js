@@ -135,10 +135,15 @@ export function createEngine({ canvas, source, ui }) {
 
     // Where a pointer event lands on the pebbles' plane - one raycast read by
     // both the flow and the streams
-    function pointerToGround(event) {
-        raycaster.setFromCamera(rig.pointerToNdc(event.clientX, event.clientY, pointer), rig.camera);
+    // Where a point on the screen, in pixels, falls on the ground plane (y = 0)
+    function groundAt(clientX, clientY) {
+        raycaster.setFromCamera(rig.pointerToNdc(clientX, clientY, pointer), rig.camera);
 
         return raycaster.ray.intersectPlane(groundPlane, groundHit) ? groundHit : null;
+    }
+
+    function pointerToGround(event) {
+        return groundAt(event.clientX, event.clientY);
     }
 
     function pebbleAt(event) {
@@ -394,9 +399,21 @@ export function createEngine({ canvas, source, ui }) {
         });
 
         // The pebbles surface as the loader starts to leave - or at once,
-        // should there be no loader
+        // should there be no loader - and the streams take over the loader's
+        // own particles where they are, at their pace (in pixels a second)
         on(window, 'fluxloader:leaving', () => {
             startArrival(state, grid.pebbles, clock.getElapsedTime() + ARRIVAL_AFTER_LOADER);
+
+            const handed = window.fluxLoader?.handOver?.();
+            if (!handed) return;
+            const onGround = (x, y) => {
+                const hit = groundAt(x, y);
+                return hit && { x: hit.x, z: hit.z };
+            };
+            const middle = onGround(window.innerWidth / 2, window.innerHeight / 2);
+            const across = onGround(window.innerWidth / 2 + 100, window.innerHeight / 2);
+            const unitsPerPixel = middle && across ? Math.hypot(across.x - middle.x, across.z - middle.z) / 100 : 0;
+            streams.takeOver(handed.points.map(([x, y]) => onGround(x, y)).filter(Boolean), handed.speed * unitsPerPixel);
         });
     }
 

@@ -19,6 +19,8 @@ export function createStreamsView({ scene, grid, state, rig }) {
     const pointer = { x: 0, z: 0, at: -Infinity, touching: false };
 
     return {
+        takeOver: (points, speed) => streams.takeOver(points, speed),
+
         trackPointer(hit) {
             pointer.x = hit.x;
             pointer.z = hit.z;

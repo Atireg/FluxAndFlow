@@ -123,6 +123,7 @@
       var shown = 0; // eased towards target, so the bar flows rather than jumps
       var lastFrame = null;
       var finishAt = null; // when the exit may start
+      var handedOver = false; // the scene's streams took the particles over as it left
       var warming = false; // the playground has been asked to compile ahead
       var warmed = false; // ...and says it has
       var leavingSince = null;
@@ -180,7 +181,7 @@
         var paced = startedAt === null ? 0 : target;
         shown += (paced - shown) * (1 - Math.exp(-dt / 180));
 
-        if (!still) drawField(now, dt / 16.7);
+        if (!still && !handedOver) drawField(now, dt / 16.7);
 
         var percent = Math.round(shown * 100);
         fill.style.transform = 'scaleX(' + shown + ')';
@@ -297,6 +298,21 @@
         warmed: function () {
           warmed = true;
           scheduleExit();
+        },
+        // As it leaves, the scene's streams (engine/streams.js) take its
+        // particles over where they are - its own field stops, and its paper
+        // clears at once (the site's is the same) - rather than the one set
+        // fading out while a new one fades in. Their places in pixels, and
+        // their speed in pixels a second.
+        handOver: function () {
+          if (still) return null;
+          handedOver = true;
+          root.classList.add('is-handed-over');
+          var flux = 0.3 + 0.7 * shown;
+          return {
+            points: particles.map(function (p) { return [p.x, p.y]; }),
+            speed: (0.5 + 1.7 * flux) * 60,
+          };
         },
       };
 

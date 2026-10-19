@@ -1336,8 +1336,8 @@ particles floating on around the pebbles - and then, not crossing them
 even seen from above, drawn on the plane through their middles. A first
 version kept the loader's 2D canvas running behind the WebGL canvas, the
 streams parting round the pebbles' circles on screen; they still read as
-passing through. Now, as the loader fades (`EXIT`, 2.6s, its own streams
-calming to `AMBIENT_*`), the same current carries on in the scene
+passing through. Now, as the loader fades (`EXIT`, 2.6s), the same current
+carries on in the scene
 (`src/engine/streams.js`, `createStreams`): `STREAM_COUNT` streams on the y = 0
 plane, each a fading line through its last `STREAM_HISTORY` points,
 shaded between the loader's two colours by the way it flows. They part
@@ -1350,6 +1350,17 @@ invisible ones would cut holes in the streams. They fill the plane the
 overhead camera sees, start with the arrival and fade out while a project
 is open. WebGL lines are one device pixel: thinner on a phone than the
 canvas's were.
+
+**The same particles, not new ones**: as the loader leaves, the scene's
+streams take its particles over where they are on screen
+(`fluxLoader.handOver()` gives their places and speed; `streams.takeOver`
+puts each on the plane under its pixel, at full opacity) and ease from the
+loader's pace to their own over `HANDOVER` (2.6s). The loader's field stops
+and its paper clears at once (`.is-handed-over` - the site's paper is the
+same), so only its words fade. Before, its streams faded out while the
+scene's started afresh at random places and faded in: the user saw new
+points and currents appear with the pebbles. With reduced motion the
+loader has no moving field and nothing is handed over.
 
 **They drift towards the pointer.** Asked for: while the mouse moves over
 the grid, or while a finger is down, the streams float slowly towards it,

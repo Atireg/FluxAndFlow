@@ -318,6 +318,9 @@ then "Welcome to the F&F playground" last.
 the currents run on, darker and faster, for 1.6s while the playground
 compiles what it will draw behind them; then the page fades and the
 pebbles surface (they jumped as they compiled on their first frames).
+The scene's streams then take over the landing page's own particles where
+they are, easing from its pace to theirs, rather than new ones appearing
+as the old faded.
 
 **Playground**: empty pebbles hold nothing (the rock is gone from them);
 the double-click hint comes round every 20s rather than 8, on every
