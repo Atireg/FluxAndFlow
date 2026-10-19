@@ -254,15 +254,20 @@ canvas.webgl {
     pointer-events: none;
 }
 
-/* Its particles handed to the scene's streams as it leaves: its own field
-   stops and its paper clears at once (the site's is the same paper), so the
-   streams carry on underneath while its words fade */
+/* Its particles handed to the scene's streams as it leaves: its paper clears
+   at once (the site's is the same paper) and its own field - painted on
+   paper of its own - fades over the streams carrying the same particles on,
+   while its words fade */
 .loader.is-handed-over {
     background: transparent;
 }
 
+.loader__field {
+    transition: opacity 0.9s ease; /* FIELD_FADE in index.html */
+}
+
 .loader.is-handed-over .loader__field {
-    visibility: hidden;
+    opacity: 0;
 }
 
 .loader__field {

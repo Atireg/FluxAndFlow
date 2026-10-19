@@ -1362,9 +1362,11 @@ canvas's were.
 streams take its particles over where they are on screen
 (`fluxLoader.handOver()` gives their places and speed; `streams.takeOver`
 puts each on the plane under its pixel, at full opacity) and ease from the
-loader's pace to their own over `HANDOVER` (2.6s). The loader's field stops
-and its paper clears at once (`.is-handed-over` - the site's paper is the
-same), so only its words fade. Before, its streams faded out while the
+loader's pace to their own over `HANDOVER` (2.6s). The loader's paper
+clears at once (`.is-handed-over` - the site's paper is the same) and its
+own field, painted on paper of its own, keeps flowing while it fades over
+them (`FIELD_FADE`, 0.9s): stopped in one frame, its long trails and
+denser particles vanished at once and the currents visibly jumped. Before, its streams faded out while the
 scene's started afresh at random places and faded in: the user saw new
 points and currents appear with the pebbles. With reduced motion the
 loader has no moving field and nothing is handed over.

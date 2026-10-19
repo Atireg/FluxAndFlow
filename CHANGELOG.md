@@ -328,6 +328,8 @@ landing page with everything shown (the thumbnails reach the GPU before
 they grow in), and the fading words sit on a layer of their own.
 The jump was the pebbles' own rise: it set off at full speed from the
 first frame. It now eases in and out (`smooth01`), starting from rest.
+And the landing page's own currents no longer vanish in one frame at the
+handover: they keep flowing as they fade over the scene's (0.9s).
 
 **Playground**: empty pebbles hold nothing (the rock is gone from them);
 the double-click hint comes round every 20s rather than 8, on every

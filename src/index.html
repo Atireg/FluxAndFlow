@@ -86,6 +86,10 @@
       // so the pebbles don't jump as they surface
       var LINGER = 1600; // ms
       var WARM_WAIT = 4000; // ms at most for the playground to say it's warmed
+      // Handed over, its own field keeps flowing while it fades, over the
+      // scene's streams taking the same particles on - a crossfade, rather
+      // than its long trails vanishing in one frame
+      var FIELD_FADE = 900; // ms - keep in step with .is-handed-over .loader__field
       var AMBIENT_FLUX = 0.4; // 0..1, as the loading flux, by the end of the exit
       var AMBIENT_ALPHA = 0.5; // a stream's ink by then
       var AMBIENT_SHARE = 0.85; // of the streams still drawn by then
@@ -123,7 +127,7 @@
       var shown = 0; // eased towards target, so the bar flows rather than jumps
       var lastFrame = null;
       var finishAt = null; // when the exit may start
-      var handedOver = false; // the scene's streams took the particles over as it left
+      var handedOver = null; // when the scene's streams took the particles over, as it left
       var warming = false; // the playground has been asked to compile ahead
       var warmed = false; // ...and says it has
       var leavingSince = null;
@@ -181,7 +185,7 @@
         var paced = startedAt === null ? 0 : target;
         shown += (paced - shown) * (1 - Math.exp(-dt / 180));
 
-        if (!still && !handedOver) drawField(now, dt / 16.7);
+        if (!still && (handedOver === null || now - handedOver < FIELD_FADE)) drawField(now, dt / 16.7);
 
         var percent = Math.round(shown * 100);
         fill.style.transform = 'scaleX(' + shown + ')';
@@ -300,13 +304,13 @@
           scheduleExit();
         },
         // As it leaves, the scene's streams (engine/streams.js) take its
-        // particles over where they are - its own field stops, and its paper
-        // clears at once (the site's is the same) - rather than the one set
-        // fading out while a new one fades in. Their places in pixels, and
+        // particles over where they are - its own field fades out over them
+        // (FIELD_FADE), and its paper clears at once (the site's is the
+        // same) - rather than a new set fading in at random places. Their places in pixels, and
         // their speed in pixels a second.
         handOver: function () {
           if (still) return null;
-          handedOver = true;
+          handedOver = performance.now();
           root.classList.add('is-handed-over');
           var flux = 0.3 + 0.7 * shown;
           return {
