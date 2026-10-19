@@ -33,6 +33,12 @@ const SCREEN_FLOAT = 0.1; // how far a point floats from its home, the same way
 const SCREEN_EVERY = 3; // one point in this many settles on the screen; the rest fade as usual
 const SCREEN_TRAIL = 2.5; // seconds back for the tails of the points floating on it
 const SCREEN_FILM_DIM = 1; // how much the points fade once a film plays under them: away altogether
+// While the film loads, the screen's points circle like a loading sign: an
+// arc of the circle, turning, brightest at its head (uSpinner)
+const SPINNER_RATE = 4.5; // radians a second
+const SPINNER_ARC = 4.7; // radians the arc spans, head to tail - three quarters of the circle
+const SPINNER_RADIUS = 0.55; // of the screen's shorter half
+const SPINNER_TRAIL = 0.15; // seconds back for their tails, rather than SCREEN_TRAIL
 // Points hold, swollen, at this share of the dissolve until the screen they're
 // to settle on has loaded - rather than falling towards nowhere
 const SCREEN_HOLD = 0.25;
@@ -46,6 +52,7 @@ uniform float uT;
 uniform float uSwell;
 uniform float uGround; // 1: the points fall and stay as a pile's surface (aGround)
 uniform float uScreen; // 1: ...or on a screen (uGround too), floating about on it
+uniform float uSpinner; // 1: ...circling like a loading sign, while its film loads
 uniform float uTime;
 uniform vec3 uScreenCentre; // the screen's middle, and the vectors to its right and top edges
 uniform vec3 uScreenU;
@@ -69,7 +76,20 @@ vec3 screenPoint(float time) {
     float pace = 0.18 + 0.2 * fract(aScreen.z * 7.31);
     vec2 drift = vec2(sin(time * pace + aScreen.z), cos(time * pace * 0.83 + aScreen.z * 1.7));
     vec2 at = aScreen.xy + ${SCREEN_FLOAT.toFixed(3)} * drift;
-    return uScreenCentre + uScreenU * at.x + uScreenV * at.y;
+    vec3 floating = uScreenCentre + uScreenU * at.x + uScreenV * at.y;
+
+    // Or on the loading circle: its place along the arc (0 the tail, 1 the
+    // head) from its phase, the circle round on the screen whatever its shape
+    float along = aScreen.z / 6.2831853;
+    float angle = -time * ${SPINNER_RATE.toFixed(2)} - along * ${SPINNER_ARC.toFixed(2)};
+    float radius = ${SPINNER_RADIUS.toFixed(2)} * min(length(uScreenU), length(uScreenV)) * (0.92 + 0.16 * fract(aScreen.z * 3.7));
+    vec3 circling = uScreenCentre + (normalize(uScreenU) * cos(angle) + normalize(uScreenV) * sin(angle)) * radius;
+    return mix(floating, circling, uSpinner);
+}
+
+// On the loading circle, fainter towards the arc's tail
+float spinnerInk() {
+    return mix(1.0, 0.15 + 0.85 * aScreen.z / 6.2831853, uSpinner * uScreen);
 }
 
 vec3 dissolvePosition(vec3 home, float T, float time, out float falling) {
@@ -95,7 +115,7 @@ vec3 dissolvePosition(vec3 home, float T, float time, out float falling) {
 float dissolveAlpha(float T, float falling) {
     float fading = 1.0 - smoothstep(0.55, 1.0, T);
     // (a pile's ground lighter once landed; a screen's points not)
-    return smoothstep(0.0, 0.12, T) * mix(fading, 1.0 - 0.45 * falling * (1.0 - uScreen), landsHere());
+    return smoothstep(0.0, 0.12, T) * mix(fading, 1.0 - 0.45 * falling * (1.0 - uScreen), landsHere()) * spinnerInk();
 }`;
 
 const dissolveVertexShader = `
@@ -137,7 +157,7 @@ void main() {
     float falling;
     float before;
     vec4 headView = modelViewMatrix * vec4(dissolvePosition(aHome, uT, uTime, falling), 1.0);
-    vec4 tailView = modelViewMatrix * vec4(dissolvePosition(aHome, max(uT - uTrailLag, 0.0), uTime - ${SCREEN_TRAIL.toFixed(2)}, before), 1.0);
+    vec4 tailView = modelViewMatrix * vec4(dissolvePosition(aHome, max(uT - uTrailLag, 0.0), uTime - mix(${SCREEN_TRAIL.toFixed(2)}, ${SPINNER_TRAIL.toFixed(2)}, uSpinner), before), 1.0);
 
     float settled = falling * landsHere() * (1.0 - uScreen);
     float width = uSize * (1.0 - 0.5 * settled) * uPixelsPerUnit / max(-headView.z, 0.001);
@@ -246,6 +266,7 @@ export function getDissolve(pebble) {
             ...pointInkUniforms(),
             uGround: { value: drop || screen ? 1 : 0 },
             uScreen: { value: screen ? 1 : 0 },
+            uSpinner: { value: 0 },
             uTime: { value: 0 },
             uScreenCentre: { value: new THREE.Vector3() },
             uScreenU: { value: new THREE.Vector3() },
@@ -324,6 +345,7 @@ export function updateDissolve({ state, renderer, camera, elapsedTime }) {
     uniforms.uTime.value = elapsedTime;
     // ...and down over a film playing on the screen under them (screenVideo.js)
     const film = screen ? detail.userData.screenFilmShown ?? 0 : 0;
+    uniforms.uSpinner.value = screen ? detail.userData.screenLoading ?? 0 : 0;
     uniforms.uOpacity.value = POINT_OPACITY * (1 - reveal) * (1 - SCREEN_FILM_DIM * film);
     uniforms.uFluxTime.value = state.dropStartedAt * PEBBLE_FLUX_SPEED;
     uniforms.uPixelsPerUnit.value = renderer.domElement.height

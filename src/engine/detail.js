@@ -6,7 +6,7 @@ import { loadPhysics, PILE_FADE_OUT, PILE_REPLAY_WAIT } from './pile.js';
 import { loadPointCloud } from './pointcloud/load.js';
 import { GATHER_DURATION } from './pointcloud/gather.js';
 import { getDissolve } from './pebbles/dissolve.js';
-import { holdScreenVideo, playScreenVideo } from './pointcloud/screenVideo.js';
+import { holdScreenVideo, playScreenVideo, primeScreenVideo, resetScreenSpin } from './pointcloud/screenVideo.js';
 import { armDrop, DROP_BOOM_HANG, DROP_OPEN_AFTER } from './pebbles/drop.js';
 import { startArrival } from './pebbles/arrival.js';
 import { restingFaceColor, restingRimColor } from './pebbles/materials.js';
@@ -119,11 +119,14 @@ export function createDetail({
      * A model with a film on its screen: played straight away - unless the
      * project fills the window with that screen (`view.fillScreen`), when the
      * whole device is shown first while the points settle on its screen, and
-     * the film waits for the camera to move in (maybeFillScreen)
+     * the film loads while the model turns, then waits for the camera to
+     * move in (maybeFillScreen)
      */
     function startScreen(model, project) {
         model.userData.screenFilled = false;
-        if (!project.view?.fillScreen) playScreenVideo(model, true);
+        resetScreenSpin(model);
+        if (project.view?.fillScreen) primeScreenVideo(model);
+        else playScreenVideo(model, true);
     }
 
     const zoomRaycaster = new THREE.Raycaster();
@@ -561,7 +564,8 @@ export function createDetail({
         maybeFillScreen(model, since) {
             const project = state.selected?.userData.project;
             if (!project?.view?.fillScreen || !model.userData.screen || model.userData.screenFilled) return;
-            if (since < FILL_SCREEN_AT) return;
+            // ...once the film has loaded and the model has turned to face the visitor
+            if (since < FILL_SCREEN_AT || !model.userData.screenSettled) return;
 
             model.userData.screenFilled = true;
             if (!isHeld(model)) playScreenVideo(model, true);

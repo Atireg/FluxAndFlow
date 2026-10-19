@@ -318,6 +318,12 @@ crescent moon in its pebble (`tools/models/moon.mjs`), and the user's text
 in its drawer - which can now hold bulleted lists (a `body` entry that is
 an array).
 
+**Loading, with a spinner**: kh ReUse's laptop (and phone) and Nap Nap
+Hooray's phone turn slowly while their film loads, the points on their
+screen circling like a loading sign; loaded, the device turns back to face
+the visitor before the camera moves in and the film plays. Nap Nap Hooray
+has no film yet, so its phone keeps turning. Its moon made smaller.
+
 **Landing page**: the three paragraphs fade in one after another, slowly,
 then "Welcome to the F&F playground" last.
 

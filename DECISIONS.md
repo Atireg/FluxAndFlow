@@ -856,9 +856,20 @@ project setting read by one code path, not a branch for the project:
   first). The user's recordings are copied as they came (H.264, metadata
   stripped, `faststart` so they stream at once). Headless Chromium here
   can't decode H.264, so they are checked with a WebM copy in `dist/`.
+- **While the film loads** (`screenVideo.js`), a model with a `screen` turns
+  slowly round (`SPIN_PERIOD` 8s a turn) and its screen's points circle like
+  a loading sign - an arc of three quarters of a circle turning, brightest at
+  its head (`uSpinner`, `SPINNER_*` in dissolve.js) - asked for by the user.
+  The film is primed to load (played unseen and paused at its start: a
+  phone's browser loads a film only when asked to play it), counted loaded at
+  `readyState` 3 or after `PRIME_WAIT` (8s); then the model finishes its turn
+  to face the visitor (slowing over `SPIN_SETTLE`) and the points leave the
+  circle for their float. With no film (Nap Nap Hooray, for now) it keeps
+  turning.
 - **`view.fillScreen`** opens it in two steps: the whole device first
-  (`zoom`, `lift`) while the points settle, then at `FILL_SCREEN_AT` (5s)
-  the camera moves in square-on to the screen (`frameOnScreen` in
+  (`zoom`, `lift`) while the points settle, then at `FILL_SCREEN_AT` (5s),
+  or once the film has loaded and the model faces the visitor again, the
+  camera moves in square-on to the screen (`frameOnScreen` in
   camera/framing.js) and the film starts. Its number is how far back from
   the screen's edges meeting the window's it stops - 1.2, so the device's
   own edges stay in view - framed into the band below the title bar

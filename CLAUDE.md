@@ -40,8 +40,9 @@ in a pull-out drawer.
 - **kh ReUse** (slot 3, the real world, `#kh-reuse`; write the name
   exactly so, and "knippershelbig" as one lowercase word): a laptop made in
   code, solid light grey, still, not orbitable. A third of the pebble's
-  points settle on its screen and float there with tails; 5s in, the
-  camera moves in square-on to the screen (its edges kept, its top below
+  points settle on its screen and circle there like a loading sign while
+  the laptop turns and its film loads; loaded, it turns back to face the
+  visitor, the points float, and the camera moves in square-on to the screen (its edges kept, its top below
   the title) and the user's recording plays there as the points fade. A
   double-click pauses the film. On a phone (under 860px) a phone instead,
   with the mobile recording. The About drawer shows the whole device. Its
@@ -49,9 +50,10 @@ in a pull-out drawer.
   screenshots (two desktop `wide`, three phone `pair`).
 - **Nap Nap Hooray** (slot 4, the real world, `#nap-nap-hooray`): the
   user's baby-sleep website, shown on the phone made in code (as kh ReUse's)
-  with the pebble's points floating on its screen - no recording yet (a
-  `screenVideo` once one comes, 390 x 664 to fit the screen). A crescent
-  moon (`moon.glb`) in its pebble. Drawer: the user's text, with two lists.
+  with the pebble's points circling on its screen like a loading sign and the
+  phone turning - no recording yet, so it keeps on (a `screenVideo` once one
+  comes, 390 x 664 to fit the screen). A crescent moon (`moon.glb`,
+  `thumbSize` 1.3) in its pebble. Drawer: the user's text, with two lists.
 - **Links**: each project's own address is `#<id>` (`#rock-print`).
 - **Drawer copy** is real for all four projects, approved by the user
   word for word; change it only on request.

@@ -63,9 +63,10 @@ export default defineProject({
         ],
     ],
 
-    // A crescent moon in its pebble
+    // A crescent moon in its pebble - smaller than the others' (1.9), its
+    // solid shape reads larger
     thumbModel: 'models/moon.glb',
-    thumbSize: 1.9,
+    thumbSize: 1.3,
     // A phone, drawn as itself in light grey, still and not orbitable, the
     // pebble's points settling on its screen - as kh ReUse's on a phone
     detailModel: 'models/phone.glb',

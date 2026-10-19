@@ -7,10 +7,21 @@ import { smooth01 } from '../ease.js';
  * showing a muted, looping <video>. Until its first frames have arrived the
  * screen stays bare and the points float alone; then the film fades in and
  * the points fade away over it (`screenFilmShown`, 0..1, read by the dissolve).
+ *
+ * Until the film has loaded, a model with a screen turns slowly round and the
+ * points on its screen circle like a loading sign (`screenLoading`, 1..0,
+ * read by the dissolve); loaded, it finishes its turn to face the visitor
+ * (`screenSettled`) - with no film at all it keeps turning.
  */
 const VIDEO_LIFT = 0.008; // in front of the screen's face, in fitted units - behind the points
 const VIDEO_INSET = 0.985; // a hair inside the screen's edges, clear of its rounding
 const VIDEO_FADE = 1.2; // seconds
+const SPIN_PERIOD = 8; // seconds a turn, while the film loads
+const SPIN_SETTLE = 1; // radians from facing the visitor that the turn starts to slow
+const LOADING_FADE = 0.8; // seconds for the points to leave the loading circle
+// The film counts as loaded at this, or this long after it was asked to load
+// - a browser that won't preload can't keep the visitor waiting forever
+const PRIME_WAIT = 8; // seconds
 
 export function addScreenVideo(group, screen, url) {
     const video = document.createElement('video');
@@ -47,11 +58,13 @@ export function addScreenVideo(group, screen, url) {
         texture.offset.set((1 - texture.repeat.x) / 2, (1 - texture.repeat.y) / 2);
     });
 
-    // Fades in once it's really playing, and stays - paused, on the frame it
-    // stopped at - until the project closes (playScreenVideo)
+    // Fades in once it's really playing - and asked to show, not just loading
+    // (primeScreenVideo) - and stays, paused on the frame it stopped at,
+    // until the project closes (playScreenVideo)
     group.userData.screenFilmSince = null;
+    group.userData.screenFilmOn = false;
     quad.onBeforeRender = () => {
-        if (!video.paused && video.readyState >= 2) group.userData.screenFilmSince ??= performance.now();
+        if (group.userData.screenFilmOn && !video.paused && video.readyState >= 2) group.userData.screenFilmSince ??= performance.now();
         const since = group.userData.screenFilmSince;
         material.opacity = since === null ? 0 : smooth01((performance.now() - since) / 1000 / VIDEO_FADE);
         group.userData.screenFilmShown = material.opacity;
@@ -67,11 +80,74 @@ export function playScreenVideo(model, playing) {
     const video = model?.userData.screenVideo;
     if (!video) return;
     if (playing) {
+        model.userData.screenFilmOn = true;
         video.play().catch(() => {}); // a refused autoplay leaves the points alone
     } else {
         video.pause();
         model.userData.screenFilmSince = null;
+        model.userData.screenFilmOn = false;
     }
+}
+
+/**
+ * Loaded, but not shown yet: played for a moment, unseen, and paused at its
+ * start - a phone's browser loads a film only once it is asked to play it
+ */
+export function primeScreenVideo(model) {
+    const video = model?.userData.screenVideo;
+    if (!video) return;
+    model.userData.screenPrimedAt ??= performance.now();
+    if (video.readyState >= 3) return;
+    video.addEventListener('playing', () => {
+        if (model.userData.screenFilmOn) return;
+        video.pause();
+        video.currentTime = 0;
+    }, { once: true });
+    video.play().catch(() => {});
+}
+
+function screenFilmReady(model) {
+    const video = model.userData.screenVideo;
+    if (!video) return false;
+    const primedAt = model.userData.screenPrimedAt;
+    return video.readyState >= 3 || (primedAt != null && performance.now() - primedAt > PRIME_WAIT * 1000);
+}
+
+// A new showing: turning and loading again, unless the film is already in
+export function resetScreenSpin(model) {
+    model.userData.screenSpin = 0;
+    model.userData.screenSettled = false;
+    model.userData.screenLoading = 1;
+}
+
+/**
+ * One frame of the turn while the film loads: the model's extra turn about
+ * its upright, in radians - 0 once it's loaded and has come round to face the
+ * visitor again, slowing over its last SPIN_SETTLE
+ */
+export function updateScreenSpin(model, dt) {
+    const data = model.userData;
+    if (!data.screen) return 0;
+
+    const ready = screenFilmReady(model);
+    const speed = (2 * Math.PI) / SPIN_PERIOD;
+    data.screenSpin ??= 0;
+    data.screenLoading ??= 1;
+    data.screenLoading = ready ? Math.max(data.screenLoading - dt / LOADING_FADE, 0) : 1;
+
+    if (!ready) {
+        data.screenSpin += speed * dt;
+        data.screenSettled = false;
+    } else if (!data.screenSettled) {
+        const target = Math.ceil(data.screenSpin / (2 * Math.PI) - 1e-6) * 2 * Math.PI;
+        const left = target - data.screenSpin;
+        data.screenSpin += Math.min(left, speed * dt * Math.max(Math.min(left / SPIN_SETTLE, 1), 0.15));
+        if (target - data.screenSpin < 1e-3) {
+            data.screenSpin = 0;
+            data.screenSettled = true;
+        }
+    }
+    return data.screenSpin;
 }
 
 // Paused by the visitor (`doubleClick: 'hold'`), staying on its frame - or going on

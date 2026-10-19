@@ -18,6 +18,7 @@ import { paintGlow } from './pebbles/materials.js';
 import { pebbleFluxTime, PEBBLE_FLUX_SPEED } from './pebbles/geometry.js';
 import { dropInProgress, placeDroppingPebble, updateDroppingPebble } from './pebbles/drop.js';
 import { updateDissolve } from './pebbles/dissolve.js';
+import { updateScreenSpin } from './pointcloud/screenVideo.js';
 import { GATHER_DURATION, GATHER_MAX_STEP, revealAt, setGather, setReveal } from './pointcloud/gather.js';
 import { trailResolution } from './pointcloud/trails.js';
 
@@ -231,7 +232,8 @@ export function createEngine({ canvas, source, ui }) {
                 pile?.step(frameTime, since);
                 // ...and a `still` one doesn't turn at all
                 const turning = project.still ? 0 : modelTurn(model, since);
-                model.rotation.y = modelStartYaw(project) + turning * DETAIL_ROTATE_SPEED;
+                // ...and a model with a screen turns round while its film loads
+                model.rotation.y = modelStartYaw(project) + turning * DETAIL_ROTATE_SPEED + updateScreenSpin(model, frameTime);
 
                 // A pile's ground (the pebble's dissolve, landed) turns with it
                 const dissolve = selected.userData.dissolve;
