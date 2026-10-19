@@ -90,7 +90,7 @@ export default defineProject({
     // next plays it on - hinted "pause", like Rock Print's turn
     doubleClick: 'hold',
     // The pebble's points settle onto the laptop's screen and circle there
-    // in the clouds' inks, over the film below
+    // in the clouds' inks, like a loading sign, until the film below has loaded
     screen: 'Screen',
     // The recorded film on the screen, under the points (muted, looping)
     screenVideo: 'videos/kh-reuse.mp4',
