@@ -21,7 +21,8 @@ in a pull-out drawer.
   the user's own words - change them only on request - fading in one by
   one over floating particles, then "Welcome to the F&F playground" last.
   The playground loads behind it: the welcome line is grey until it's
-  ready, then orange, and leads straight in.
+  ready, then orange. Followed, the currents run on darker and faster for
+  1.6s while the playground compiles its shaders, then the pebbles surface.
 - **Playground**: ten pebbles, a random size each visit, slowly changing
   shape; one at a time glows orange with its name on a string. A filter
   (research / teaching / the real world) brings one kind forward. An empty

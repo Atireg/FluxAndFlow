@@ -373,6 +373,26 @@ export function createEngine({ canvas, source, ui }) {
             onCanvasSelect(event);
         });
 
+        /**
+         * Asked by the loader once the way in is followed: every shader the
+         * playground will draw with - the pebbles, what's inside them, the
+         * streams, most of it still hidden - compiled now, behind the
+         * loader, rather than on the first frames of the pebbles' arrival,
+         * where it showed as a jump. Hidden objects are shown for the
+         * compile only (it skips what's hidden), then put back.
+         */
+        on(window, 'fluxloader:warming', () => {
+            const hidden = [];
+            scene.traverse((object) => {
+                if (object.visible) return;
+                hidden.push(object);
+                object.visible = true;
+            });
+            const compiled = rig.renderer.compileAsync(scene, rig.camera);
+            hidden.forEach((object) => { object.visible = false; });
+            compiled.finally(() => window.fluxLoader?.warmed());
+        });
+
         // The pebbles surface as the loader starts to leave - or at once,
         // should there be no loader
         on(window, 'fluxloader:leaving', () => {

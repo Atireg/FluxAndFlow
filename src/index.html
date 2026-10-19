@@ -80,6 +80,12 @@
       // its streams calm down to the pace of the scene's own, which carry on
       // among the pebbles
       var EXIT = 2600; // ms - keep in step with .loader.is-leaving in styles.css
+      // Followed, the way in doesn't leave at once: the currents run on,
+      // darker and faster, at least this long, while the playground compiles
+      // what it will draw behind them (engine/index.js, 'fluxloader:warming') -
+      // so the pebbles don't jump as they surface
+      var LINGER = 1600; // ms
+      var WARM_WAIT = 4000; // ms at most for the playground to say it's warmed
       var AMBIENT_FLUX = 0.4; // 0..1, as the loading flux, by the end of the exit
       var AMBIENT_ALPHA = 0.5; // a stream's ink by then
       var AMBIENT_SHARE = 0.85; // of the streams still drawn by then
@@ -117,6 +123,8 @@
       var shown = 0; // eased towards target, so the bar flows rather than jumps
       var lastFrame = null;
       var finishAt = null; // when the exit may start
+      var warming = false; // the playground has been asked to compile ahead
+      var warmed = false; // ...and says it has
       var leavingSince = null;
       var ambient = 0; // 0 loading .. 1 by the end of the exit
       var width = 0, height = 0, dpr = 1, particles = [];
@@ -263,10 +271,17 @@
       }
 
       // The exit may start once the catalog is in AND the visitor has
-      // followed the way in (or a link to a project)
+      // followed the way in (or a link to a project) AND the playground has
+      // compiled ahead - and not before LINGER has run
       function scheduleExit() {
         if (finishAt !== null || !loaded || startedAt === null) return;
-        finishAt = performance.now();
+        if (!warming) {
+          warming = true;
+          setTimeout(function () { window.fluxLoader.warmed(); }, WARM_WAIT);
+          window.dispatchEvent(new Event('fluxloader:warming'));
+        }
+        if (!warmed) return;
+        finishAt = Math.max(performance.now(), startedAt + LINGER);
       }
 
       window.fluxLoader = {
@@ -277,6 +292,10 @@
           loaded = true;
           target = 1;
           enter.disabled = false; // grey to orange: the way in is open
+          scheduleExit();
+        },
+        warmed: function () {
+          warmed = true;
           scheduleExit();
         },
       };

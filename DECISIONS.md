@@ -1285,7 +1285,13 @@ the text is read). The catalog loads underneath from the moment the page
 opens; the button is `disabled` and grey until `fluxLoader.finish()`, then
 turns orange, and following it goes straight into the exit - the page fades
 onto the playground as it surfaces (`scheduleExit`: once loaded and
-followed). There is no loading screen in between any more: a link to a
+followed). Followed, it doesn't leave at once: the currents run on, darker
+and faster (the loading flux at full), for at least `LINGER` (1.6s), while
+the playground compiles every shader it will draw behind them
+(`fluxloader:warming`, `renderer.compileAsync` with hidden objects shown for
+the compile, answered by `fluxLoader.warmed()`, `WARM_WAIT` at most).
+Compiled on the arrival's first frames instead, the pebbles jumped as they
+surfaced (the user noticed it). There is no loading screen in between any more: a link to a
 project (`#rock-print`), which skips the welcome, is the only way to see
 the progress line, while it loads.
 

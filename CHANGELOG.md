@@ -314,6 +314,11 @@ links. The model scripts are in `tools/models/` (`npm run models`).
 **Landing page**: the three paragraphs fade in one after another, slowly,
 then "Welcome to the F&F playground" last.
 
+**The way in without a jump**: "Welcome to the F&F playground" followed,
+the currents run on, darker and faster, for 1.6s while the playground
+compiles what it will draw behind them; then the page fades and the
+pebbles surface (they jumped as they compiled on their first frames).
+
 **Playground**: empty pebbles hold nothing (the rock is gone from them);
 the double-click hint comes round every 20s rather than 8, on every
 project.
