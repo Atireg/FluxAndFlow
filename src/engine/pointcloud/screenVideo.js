@@ -3,22 +3,22 @@ import { smooth01 } from '../ease.js';
 
 /**
  * A film playing on a solid model's screen (`screenVideo`, with `screen`):
- * a quad just in front of the screen's face, under the points floating on it,
+ * a quad just in front of the screen's face, behind the points circling on it,
  * showing a muted, looping <video>. Until its first frames have arrived the
- * screen stays bare and the points float alone; then the film fades in and
- * the points fade away over it (`screenFilmShown`, 0..1, read by the dissolve).
+ * screen stays bare; then the film fades in.
  *
  * Until the film has loaded, a model with a screen turns slowly round and the
- * points on its screen circle like a loading sign (`screenLoading`, 1..0,
- * read by the dissolve); loaded, it finishes its turn to face the visitor
- * (`screenSettled`) - with no film at all it keeps turning.
+ * points on its screen circle like a loading sign; loaded, the points fade
+ * away where they are (`screenLoading`, 1..0, read by the dissolve) and the
+ * model finishes its turn to face the visitor (`screenSettled`) - with no
+ * film at all it keeps turning.
  */
 const VIDEO_LIFT = 0.008; // in front of the screen's face, in fitted units - behind the points
 const VIDEO_INSET = 0.985; // a hair inside the screen's edges, clear of its rounding
 const VIDEO_FADE = 1.2; // seconds
 const SPIN_PERIOD = 8; // seconds a turn, while the film loads
 const SPIN_SETTLE = 1; // radians from facing the visitor that the turn starts to slow
-const LOADING_FADE = 0.8; // seconds for the points to leave the loading circle
+const LOADING_FADE = 0.8; // seconds for the loading circle's points to fade, once loaded
 // The film counts as loaded at this, or this long after it was asked to load
 // - a browser that won't preload can't keep the visitor waiting forever
 const PRIME_WAIT = 8; // seconds
@@ -71,7 +71,6 @@ export function addScreenVideo(group, screen, url) {
         if (group.userData.screenFilmOn && !video.paused && video.readyState >= 2) group.userData.screenFilmSince ??= performance.now();
         const since = group.userData.screenFilmSince;
         material.opacity = since === null ? 0 : smooth01((performance.now() - since) / 1000 / VIDEO_FADE);
-        group.userData.screenFilmShown = material.opacity;
     };
 
     group.add(quad);

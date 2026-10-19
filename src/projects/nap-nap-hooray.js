@@ -2,7 +2,7 @@ import { defineProject } from './schema.js';
 
 /**
  * Nap Nap Hooray - the user's baby-sleep website, shown on a phone made in
- * code (the same as kh ReUse's), the pebble's points floating on its screen
+ * code (the same as kh ReUse's), the pebble's points circling on its screen
  * until a recording of the site is there to play. A crescent moon in its
  * pebble. The models are made in code: tools/models/.
  */

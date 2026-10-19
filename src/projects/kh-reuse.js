@@ -89,7 +89,7 @@ export default defineProject({
     // A double-click (or double-tap) pauses the film on its screen, and the
     // next plays it on - hinted "pause", like Rock Print's turn
     doubleClick: 'hold',
-    // The pebble's points settle onto the laptop's screen and float there
+    // The pebble's points settle onto the laptop's screen and circle there
     // in the clouds' inks, over the film below
     screen: 'Screen',
     // The recorded film on the screen, under the points (muted, looping)

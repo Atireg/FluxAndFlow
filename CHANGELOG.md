@@ -325,6 +325,8 @@ the visitor before the camera moves in and the film plays. Nap Nap Hooray
 has no film yet, so its phone keeps turning. Its moon made smaller. The
 turn and the circle last at least 6s from opening, so they show on kh ReUse
 too when its film is in at once.
+Then, asked for, only the circle: once the film has loaded the points fade
+away where they are, rather than floating about the screen first.
 
 **Landing page**: the three paragraphs fade in one after another, slowly,
 then "Welcome to the F&F playground" last.

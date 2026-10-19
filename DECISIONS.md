@@ -830,8 +830,8 @@ kh ReUse: a laptop with a film on its screen
 --------------------------------------------
 
 The user asked for a 3D model, not a point cloud: a laptop, open, its
-screen to the visitor and not turning, the pebble's points floating on the
-screen, then the recording of the website playing there. Each step is a
+screen to the visitor and not turning, the pebble's points on the screen,
+then the recording of the website playing there. Each step is a
 project setting read by one code path, not a branch for the project:
 
 - **`solid`** draws a mesh `detailModel` as itself (`makeInkMaterial`, as
@@ -844,30 +844,31 @@ project setting read by one code path, not a branch for the project:
 - **`screen`** names the model's screen mesh, drawn in its own space - X
   across, Y up, Z out (`screenFrame` in pointcloud/load.js). The pebble's
   dissolve doesn't fade there: one point in three (`SCREEN_EVERY`) settles
-  onto the screen in the clouds' inks and floats about it slowly (`uScreen`
-  in pebbles/dissolve.js), keeping a tail that re-runs the float
-  `SCREEN_TRAIL` (2.5s) earlier - the dissolve's own 0.12s showed nothing at
-  that pace. Until the model has loaded the points hold, swollen, at
-  `SCREEN_HOLD`, rather than fall towards a screen not yet known.
+  onto the screen in the clouds' inks (`uScreen` in pebbles/dissolve.js) and
+  circles there like a loading sign while the film loads (below). Until the
+  model has loaded the points hold, swollen, at `SCREEN_HOLD`, rather than
+  fall towards a screen not yet known. They first floated about the screen
+  slowly, with long tails, and later floated on after the circle - asked
+  for, only the circle is left.
 - **`screenVideo`** plays a muted, looping `<video>` on a quad just in front
   of the screen (`pointcloud/screenVideo.js`, a VideoTexture, cropped to
-  fill if the shapes differ). It fades in once its first frames play, and
-  the points fade away over it (`SCREEN_FILM_DIM` 1 - a quarter was tried
-  first). The user's recordings are copied as they came (H.264, metadata
+  fill if the shapes differ). It fades in once its first frames play - the
+  points have gone by then. The user's recordings are copied as they came (H.264, metadata
   stripped, `faststart` so they stream at once). Headless Chromium here
   can't decode H.264, so they are checked with a WebM copy in `dist/`.
 - **While the film loads** (`screenVideo.js`), a model with a `screen` turns
   slowly round (`SPIN_PERIOD` 8s a turn) and its screen's points circle like
   a loading sign - an arc of three quarters of a circle turning, brightest at
-  its head (`uSpinner`, `SPINNER_*` in dissolve.js) - asked for by the user.
+  its head (`SPINNER_*` in dissolve.js), tails `SPINNER_TRAIL` long - asked
+  for by the user.
   The film is primed to load (played unseen and paused at its start: a
   phone's browser loads a film only when asked to play it), counted loaded at
   `readyState` 3 or after `PRIME_WAIT` (8s) - but never before `SPIN_AT_LEAST`
   (6s) from opening, so the turn and the circle are seen even with the film
   in at once (cached; the user saw no swirl on kh ReUse); then the model finishes its turn
-  to face the visitor (slowing over `SPIN_SETTLE`) and the points leave the
-  circle for their float. With no film (Nap Nap Hooray, for now) it keeps
-  turning.
+  to face the visitor (slowing over `SPIN_SETTLE`) while the points fade
+  away where they are in the circle (`LOADING_FADE`). With no film (Nap Nap
+  Hooray, for now) it keeps turning and circling.
 - **`view.fillScreen`** opens it in two steps: the whole device first
   (`zoom`, `lift`) while the points settle, then at `FILL_SCREEN_AT` (5s),
   or once the film has loaded and the model faces the visitor again, the
@@ -893,7 +894,7 @@ project setting read by one code path, not a branch for the project:
 
 Nap Nap Hooray, a website made for phones, uses the same phone and the
 same settings on every screen, without `phone`, `fillScreen` or a film so
-far: the points float on its bare screen until there's a recording.
+far: the points circle on its bare screen until there's a recording.
 
 The laptop, the phone, the pebbles' reuse sign and moon are placeholder geometry
 made in code (`tools/models/`, `npm run models`, sharing `glb.mjs`): rounded

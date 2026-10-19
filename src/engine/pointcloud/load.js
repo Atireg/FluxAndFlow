@@ -63,7 +63,7 @@ export function loadPointCloud({
                 const group = new THREE.Group();
                 group.add(new THREE.Mesh(sampled.userData.solid, material));
                 group.userData.solidMaterial = material;
-                // Where the pebble's points settle and float (`screen`)
+                // Where the pebble's points settle and circle (`screen`)
                 if (screen) group.userData.screen = screenFrame(original, screen, sampled.userData.fit);
                 // ...over a film playing on it (`screenVideo`)
                 if (screenVideo && group.userData.screen) addScreenVideo(group, group.userData.screen, screenVideo);
@@ -176,12 +176,12 @@ export function loadPointCloud({
     }, onProgress, onError);
 }
 
-const SCREEN_LIFT = 0.03; // how far in front of the screen its points float, in fitted units
+const SCREEN_LIFT = 0.03; // how far in front of the screen its points circle, in fitted units
 
 /**
  * A solid model's screen (`screen`, the name of one of its meshes, drawn in
  * its own space with X across, Y up and Z out towards the viewer), in the
- * fitted model's space: where its points float (just in front of its face),
+ * fitted model's space: where its points circle (just in front of its face),
  * its face's middle, the way out of it, and the vectors to its right and
  * top edges.
  */
