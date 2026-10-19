@@ -47,8 +47,13 @@ in a pull-out drawer.
   with the mobile recording. The About drawer shows the whole device. Its
   pebble holds a reuse sign. Drawer: the user's text, two links, five
   screenshots (two desktop `wide`, three phone `pair`).
+- **Nap Nap Hooray** (slot 4, the real world, `#nap-nap-hooray`): the
+  user's baby-sleep website, shown on the phone made in code (as kh ReUse's)
+  with the pebble's points floating on its screen - no recording yet (a
+  `screenVideo` once one comes, 390 x 664 to fit the screen). A crescent
+  moon (`moon.glb`) in its pebble. Drawer: the user's text, with two lists.
 - **Links**: each project's own address is `#<id>` (`#rock-print`).
-- **Drawer copy** is real for all three projects, approved by the user
+- **Drawer copy** is real for all four projects, approved by the user
   word for word; change it only on request.
 - **Waiting on the user**: picture captions/credits, model licensing,
   real-device and Safari checks.
@@ -87,7 +92,7 @@ demand for Emergent Space's physics. No test suite.
     npm install
     npm run dev      # dev server
     npm run build    # production build into dist/
-    npm run models   # rebuild static/models/{laptop,phone,reuse}.glb
+    npm run models   # rebuild static/models/{laptop,phone,reuse,moon}.glb
 
 React owns the page, the engine owns the canvas - read that entry in
 DECISIONS.md before moving anything across the line.
@@ -102,8 +107,8 @@ DECISIONS.md before moving anything across the line.
     src/engine/         the canvas - index.js assembles it and runs the render loop
     src/styles.css      all the CSS
     static/             models/, images/, videos/ - served as they are
-    tools/models/       the models made in code (kh ReUse's laptop, phone, reuse
-                        sign) and the glTF writer they share - `npm run models`
+    tools/models/       the models made in code (the laptop, the phone, the reuse
+                        sign, the moon) and the glTF writer they share - `npm run models`
 
 Inside `src/engine/`: `state.js` (shared mutable state), `constants.js`
 (the few shared numbers; its header maps the rest), `ease.js`, `colors.js`,
@@ -142,7 +147,8 @@ defineProject({
     title: 'Rock Print Pavilion',         // also the name on its pebble - keep it phone-short
     category: 'research',                 // 'research', 'teaching' or 'real-world' - required
     year: '', role: '', context: '',      // drawer rows, if non-empty - state the role accurately
-    body: [], credits: '',                // drawer text, [words](https://...) a link; nothing = no handle
+    body: [], credits: '',                // drawer text: paragraphs, or string arrays for a list;
+                                          // [words](https://...) a link; nothing = no handle
     thumbModel: 'models/rock.gltf',       // in the pebble; thumbSize: 1.9 fits the project's own
     detailModel: 'models/RockPrintStructureReduced.glb',  // opened on click: a cloud, or a mesh sampled to points (`points`)
     view: { elevation: 58, azimuth: 4, turn: 94, zoom: { stacked: 1.75, side: 1.4 },

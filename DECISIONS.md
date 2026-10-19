@@ -878,7 +878,11 @@ project setting read by one code path, not a branch for the project:
   new button or words. The tap hint, which otherwise picks a point of a
   cloud, picks a spot on the screen once the film plays.
 
-The laptop, the phone and the pebble's reuse sign are placeholder geometry
+Nap Nap Hooray, a website made for phones, uses the same phone and the
+same settings on every screen, without `phone`, `fillScreen` or a film so
+far: the points float on its bare screen until there's a recording.
+
+The laptop, the phone, the pebbles' reuse sign and moon are placeholder geometry
 made in code (`tools/models/`, `npm run models`, sharing `glb.mjs`): rounded
 boxes and bevelled extrusions, welded so the rounds shade smoothly. Each
 screen is shaped exactly like its film - 16:9 on the laptop, 390 x 664 on
@@ -1218,9 +1222,11 @@ the two-to-a-row layout is for the side drawer on a wide screen. A `pair`
 picture stays two to a row there too: a tall phone screenshot at full
 width would fill several screens (asked for, kh ReUse's three).
 
-**Links in the text**: a drawer paragraph's `[words](https://...)` becomes a
-link opening in a new tab (`withLinks` in ProjectDrawer.jsx) - the only
-markup `body` takes, so the copy stays plain strings.
+**Links and lists in the text**: a drawer paragraph's `[words](https://...)`
+becomes a link opening in a new tab (`withLinks` in ProjectDrawer.jsx), and
+a `body` entry that is itself an array of strings a bulleted list (Nap Nap
+Hooray's features and tech overview) - the only markup `body` takes, so
+the copy stays plain strings.
 
 **A click enlarges one** (asked for). Each picture is a button
 (`.drawer__enlarge`, a zoom-in cursor) that opens it in

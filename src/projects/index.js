@@ -22,6 +22,7 @@ import { EMPTY_SLOT_CATEGORIES, SLOT_COUNT, pebbleLabel } from './schema.js';
 import rockPrint from './rock-print.js';
 import emergentSpace from './emergent-space.js';
 import khReuse from './kh-reuse.js';
+import napNapHooray from './nap-nap-hooray.js';
 
 export { CATEGORIES, categoryLabel, hasDescription, metaRows } from './schema.js';
 
@@ -29,6 +30,7 @@ const catalog = [
     rockPrint,
     emergentSpace,
     khReuse,
+    napNapHooray,
 ];
 
 /**

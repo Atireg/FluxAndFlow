@@ -51,6 +51,8 @@ Next up (waiting on content or a check from the user)
         (muted autoplay), the two-step camera, the double-tap pause
     [ ] kh ReUse: confirm the knippershelbig link (www.knippershelbig.com,
         unreachable from the container)
+    [ ] Nap Nap Hooray (slot 4): a recording of the site for its phone's
+        screen (390 x 664, like kh ReUse's mobile one), and pictures, if wanted
     [ ] Emergent Space's drop on a phone: confirm it runs smoothly on a real
         device (it was only checked with software rendering here)
     [ ] The catalog's streams on a phone: WebGL draws them one device pixel
@@ -117,6 +119,8 @@ Content
         playing there as the camera moves in; a phone with the mobile
         recording on a phone; a double-click pauses the film; the user's
         drawer text and five screenshots; a reuse sign in its pebble
+    [x] Nap Nap Hooray (slot 4, the real world): the phone, the pebble's
+        points on its screen; the user's text, with lists; a moon in its pebble
 
 Catalog
     [x] Ten fixed slots (SLOT_COUNT), reachable on every viewport, with

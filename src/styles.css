@@ -939,6 +939,16 @@ canvas.webgl {
     margin: 0 0 1.25rem;
 }
 
+/* A list in the text (a `body` entry that is an array) */
+.drawer__body ul {
+    margin: -0.5rem 0 1.25rem;
+    padding-left: 1.2rem;
+}
+
+.drawer__body li {
+    margin: 0 0 0.4rem;
+}
+
 /* Films (ProjectVideo) above the pictures (ProjectImage), each a grid of
    figures - the films one to a row */
 .drawer__videos:empty,

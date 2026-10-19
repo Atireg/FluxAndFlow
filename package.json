@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "models": "node tools/models/laptop.mjs && node tools/models/phone.mjs && node tools/models/reuse.mjs"
+    "models": "node tools/models/laptop.mjs && node tools/models/phone.mjs && node tools/models/reuse.mjs && node tools/models/moon.mjs"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.4",

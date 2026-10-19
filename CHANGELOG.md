@@ -311,6 +311,13 @@ row. New project settings for all of it, no per-project code: `solid`,
 `view.drawer`; pictures' `pair`; drawer text's `[words](https://...)`
 links. The model scripts are in `tools/models/` (`npm run models`).
 
+**A fourth project, Nap Nap Hooray** (slot 4, the real world,
+`#nap-nap-hooray`): the user's baby-sleep website, on the phone made in
+code with the pebble's points floating on its screen (no recording yet), a
+crescent moon in its pebble (`tools/models/moon.mjs`), and the user's text
+in its drawer - which can now hold bulleted lists (a `body` entry that is
+an array).
+
 **Landing page**: the three paragraphs fade in one after another, slowly,
 then "Welcome to the F&F playground" last.
 

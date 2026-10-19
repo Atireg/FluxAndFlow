@@ -16,7 +16,8 @@
  *   year          \
  *   role           |  shown in the drawer if non-empty. State the role
  *   context        |  accurately - the page implies authorship
- *   body          /   array of paragraph strings; [words](https://...) is a link
+ *   body          /   array of paragraph strings, or of string arrays for a
+ *                      bulleted list; [words](https://...) is a link
  *   credits       collaborators, and any research group to credit
  *   category      'research', 'teaching' or 'real-world' - see CATEGORIES
  *   thumbModel    the small model shown in the catalog pebble
@@ -81,7 +82,7 @@ export function categoryLabel(id) {
  * than in blocks, so a kind brought forward isn't just a row.
  */
 export const EMPTY_SLOT_CATEGORIES = {
-    2: 'teaching', 4: 'real-world', 5: 'teaching',
+    2: 'teaching', 5: 'teaching',
     6: 'teaching', 7: 'real-world', 8: 'real-world', 9: 'teaching',
 };
 
@@ -301,8 +302,9 @@ export function defineProject(project) {
 
     const body = project.body ?? [];
 
-    if (!Array.isArray(body)) {
-        throw new Error(`Project "${id}": body should be an array of paragraph strings`);
+    const isText = (entry) => typeof entry === 'string';
+    if (!Array.isArray(body) || !body.every((entry) => isText(entry) || (Array.isArray(entry) && entry.every(isText)))) {
+        throw new Error(`Project "${id}": body should be an array of paragraph strings, or of string arrays for a list`);
     }
 
     const images = project.images ?? [];

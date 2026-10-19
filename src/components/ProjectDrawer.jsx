@@ -7,7 +7,8 @@ import ProjectVideo from './ProjectVideo.jsx';
 
 /**
  * A paragraph of the drawer's text, its [words](https://...) made links that
- * open in a new tab - the only markup a project's `body` takes
+ * open in a new tab - with lists (a `body` entry that is itself an array),
+ * the only markup a project's `body` takes
  */
 const LINK = /\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g;
 function withLinks(text) {
@@ -81,7 +82,9 @@ const ProjectDrawer = forwardRef(function ProjectDrawer({ project, open, onToggl
                 </dl>
 
                 <div className="drawer__body">
-                    {(project?.body ?? []).map((text, index) => <p key={index}>{withLinks(text)}</p>)}
+                    {(project?.body ?? []).map((entry, index) => (Array.isArray(entry)
+                        ? <ul key={index}>{entry.map((item, i) => <li key={i}>{withLinks(item)}</li>)}</ul>
+                        : <p key={index}>{withLinks(entry)}</p>))}
                 </div>
 
                 <div className="drawer__videos">
