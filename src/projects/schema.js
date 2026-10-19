@@ -37,7 +37,8 @@
  *                 narrow screen (the stacked layout, under 860px)
  *   orbit         false: the visitor can't orbit or wheel-zoom the view by hand
  *   screen        with solid: the name of the model's screen mesh (X across,
- *                 Y up, Z out of it); the pebble's points settle there and float
+ *                 Y up, Z out of it); the pebble's points circle there like a
+ *                 loading sign, and the model turns, until its film has loaded
  *   doubleClick   what a double-click/double-tap on the model does: 'zoom'
  *                 (the default) in and back out, 'hold' stops its turn until
  *                 the next, 'drop' drops it again (with a `drop`), 'none'

@@ -323,7 +323,7 @@ export function updateDissolve({ state, renderer, camera, elapsedTime }) {
         : 0;
 
     // Tails until everything has landed or gone - and on a screen, for good,
-    // behind the points floating there
+    // behind the points circling there
     points.userData.trails.visible = t < 1 || points.userData.screen;
 
     const uniforms = points.material.uniforms;

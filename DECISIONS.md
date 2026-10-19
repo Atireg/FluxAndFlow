@@ -210,8 +210,8 @@ Every ~5.3-5.6s one pebble glows orange and jumps, then the next.
 - **Showing that orange took two things.** Colours are given as raw screen
   values (`screenColor()`), because the renderer outputs linear values and a
   hex string is converted on the way in (it came out brick red). And the
-  face glows through its emissive colour, since the scene's cyan lights turn
-  an orange base green; the base is dimmed as the glow rises
+  face glows through its emissive colour (added on top of the graphite
+  shade, lit or not); the base is dimmed as the glow rises
   (`SPOTLIGHT_FACE_DIM`). Every reset of a face colour resets emissive too.
 
 

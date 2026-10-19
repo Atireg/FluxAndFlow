@@ -1,3 +1,4 @@
+import { DEVICE } from './devices.js';
 import { defineProject } from './schema.js';
 
 /**
@@ -67,13 +68,10 @@ export default defineProject({
     // solid shape reads larger
     thumbModel: 'models/moon.glb',
     thumbSize: 1.3,
-    // A phone, drawn as itself in light grey, still and not orbitable, the
-    // pebble's points settling on its screen - as kh ReUse's on a phone
+    // A phone, as kh ReUse's on a phone (devices.js): turning, the pebble's
+    // points circling on its screen, until there's a recording to play
     detailModel: 'models/phone.glb',
-    solid: { lit: [222, 222, 220], shade: [160, 160, 162] },
-    still: true,
-    orbit: false,
-    screen: 'Screen',
+    ...DEVICE,
     // Square-on from a little above (`turn: -90` undoes the detail view's
     // quarter turn); with the About drawer out, the whole phone above it
     view: { elevation: 15, turn: -90, zoom: { side: 1.1, stacked: 1.7 }, lift: { side: -0.03, stacked: 0.03 }, drawer: 'whole' },

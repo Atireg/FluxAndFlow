@@ -1,3 +1,4 @@
+import { DEVICE } from './devices.js';
 import { defineProject } from './schema.js';
 
 /**
@@ -80,18 +81,12 @@ export default defineProject({
     thumbModel: 'models/reuse.glb',
     thumbSize: 1.9,
     detailModel: 'models/laptop.glb',
-    // The mesh itself rather than points, in light grey (screen [r, g, b],
-    // where it faces the light and where it turns away), and no turn of its own
-    solid: { lit: [222, 222, 220], shade: [160, 160, 162] },
-    still: true,
-    // ...and the visitor can't orbit it: the screen stays square on
-    orbit: false,
+    // Drawn as itself in light grey, still, the pebble's points circling on
+    // its screen until the film there has loaded (devices.js)
+    ...DEVICE,
     // A double-click (or double-tap) pauses the film on its screen, and the
     // next plays it on - hinted "pause", like Rock Print's turn
     doubleClick: 'hold',
-    // The pebble's points settle onto the laptop's screen and circle there
-    // in the clouds' inks, like a loading sign, until the film below has loaded
-    screen: 'Screen',
     // The recorded film on the screen, under the points (muted, looping)
     screenVideo: 'videos/kh-reuse.mp4',
     // On a phone (under 860px), a phone instead of the laptop (its screen

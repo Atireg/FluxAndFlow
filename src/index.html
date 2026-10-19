@@ -76,9 +76,10 @@
       // in stays grey (disabled) until it's ready, then turns orange, and
       // following it goes straight to the playground. Only a link to a project
       // (#rock-print), which skips the landing page, shows the progress line.
-      // The exit: the loader fades onto the same paper the site sits on while
-      // its streams calm down to the pace of the scene's own, which carry on
-      // among the pebbles
+      // The exit: the loader fades onto the same paper the site sits on, and
+      // the scene's streams take its particles over where they are and carry
+      // them on among the pebbles (handOver); calming towards AMBIENT_* is for
+      // when nothing takes them over
       var EXIT = 2600; // ms - keep in step with .loader.is-leaving in styles.css
       // Followed, the way in doesn't leave at once: the currents run on,
       // darker and faster, at least this long, while the playground compiles

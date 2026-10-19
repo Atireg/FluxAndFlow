@@ -362,7 +362,9 @@ project.
 three models byte for byte; repeated code folded (the film-path check in
 schema.js, the tap hint's spot search in detail.js); the session's
 DECISIONS.md entries rewritten as one per subject, CLAUDE.md brought up to
-date.
+date. A second pass: the laptop and phone projects' shared settings in one
+place (`src/projects/devices.js`, `...DEVICE`), an unused easing removed,
+comments left over from the floating points and the cyan lights corrected.
 
 Checks were headless (software WebGL, both layouts, the films as WebM
 copies since this Chromium can't play H.264); no console errors in any run.

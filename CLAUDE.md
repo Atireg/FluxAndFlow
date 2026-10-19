@@ -42,8 +42,9 @@ in a pull-out drawer.
   code, solid light grey, still, not orbitable. A third of the pebble's
   points settle on its screen and circle there like a loading sign while
   the laptop turns and its film loads; loaded, it turns back to face the
-  visitor, the points fade where they are, and the camera moves in square-on to the screen (its edges kept, its top below
-  the title) and the user's recording plays there as the points fade. A
+  visitor, the points fade where they are, the camera moves in square-on
+  to the screen (its edges kept, its top below the title) and the user's
+  recording plays there. A
   double-click pauses the film. On a phone (under 860px) a phone instead,
   with the mobile recording. The About drawer shows the whole device. Its
   pebble holds a reuse sign. Drawer: the user's text, two links, five
@@ -105,7 +106,8 @@ DECISIONS.md before moving anything across the line.
     src/components/     the page's pieces: bar, drawer, DrawerFigure (+ ProjectImage,
                         ProjectVideo), ImageViewer (a picture enlarged), tags and
                         strings, tap hint, filter, fog
-    src/projects/       the content: one module per project + schema.js
+    src/projects/       the content: one module per project + schema.js; devices.js
+                        (`DEVICE`, the settings the laptop and phone projects share)
     src/engine/         the canvas - index.js assembles it and runs the render loop
     src/styles.css      all the CSS
     static/             models/, images/, videos/ - served as they are
@@ -166,7 +168,8 @@ defineProject({
 })
 ```
 
-A solid model with a film on its screen - `kh-reuse.js` is the example:
+A solid model with a film on its screen - `kh-reuse.js` is the example;
+`...DEVICE` (`devices.js`) gives the first four lines:
 
 ```js
     solid: { lit: [222, 222, 220], shade: [160, 160, 162] },  // the mesh itself, not points (or `true`: the inks)
@@ -216,7 +219,10 @@ A solid model with a film on its screen - `kh-reuse.js` is the example:
   `restingFace*`/`restingRimColor`, glow from `paintGlow`. One orange means
   "click me"; don't add others. A pebble's random size is baked into its
   geometry, never `scale`. Cube-era names remain (`CUBE_SIZE`,
-  `.cube-tag`, `userData.edges` = the rim).
+  `.cube-tag`, `userData.edges` = the rim). The face is a
+  MeshBasicMaterial, yet three.js still fills an `emissive` uniform for it
+  (`paintGlow` sets `material.emissive`): the shader declares one, or the
+  frame throws on `.value`.
 - **Faces write depth only when visible** - an invisible face would punch
   holes in the streams.
 - **The cloud loader re-skins every `Points`** in a model; anything else

@@ -14,12 +14,6 @@ export function smooth01(x) {
     return t * t * (3 - 2 * t);
 }
 
-// Fast, then settling to a stop
-export function easeOutCubic(x) {
-    const rest = 1 - clamp01(x);
-    return 1 - rest * rest * rest;
-}
-
 // Settling with a small overshoot past 1 first, `back` setting how far
 export function easeOutBack(x, back = 1.7) {
     const k = clamp01(x) - 1;

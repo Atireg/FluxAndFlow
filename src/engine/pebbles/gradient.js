@@ -20,7 +20,7 @@ import { PEBBLE_COLOR, screenColor } from '../colors.js';
  *
  * 2. **It is a multiplier, not a colour to mix to.** `paintGlow` dims the
  *    face's own colour to a tenth as the spotlight's orange rises (or the
- *    scene's cyan lights turn that orange green), and a visited pebble
+ *    grey washes the orange out to tan), and a visited pebble
  *    rests darker. Mixing towards an absolute colour would undo both -
  *    at the peak of a glow it put a brown back over a face that is
  *    supposed to have dropped out. Scaling the colour instead composes
