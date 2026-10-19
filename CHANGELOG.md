@@ -322,7 +322,9 @@ an array).
 Hooray's phone turn slowly while their film loads, the points on their
 screen circling like a loading sign; loaded, the device turns back to face
 the visitor before the camera moves in and the film plays. Nap Nap Hooray
-has no film yet, so its phone keeps turning. Its moon made smaller.
+has no film yet, so its phone keeps turning. Its moon made smaller. The
+turn and the circle last at least 6s from opening, so they show on kh ReUse
+too when its film is in at once.
 
 **Landing page**: the three paragraphs fade in one after another, slowly,
 then "Welcome to the F&F playground" last.

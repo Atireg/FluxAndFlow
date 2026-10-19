@@ -22,6 +22,10 @@ const LOADING_FADE = 0.8; // seconds for the points to leave the loading circle
 // The film counts as loaded at this, or this long after it was asked to load
 // - a browser that won't preload can't keep the visitor waiting forever
 const PRIME_WAIT = 8; // seconds
+// ...and never sooner than this after the model is shown, so the turn and
+// the loading circle are seen even when the film is in at once (cached) -
+// the pebble's points take 3.6s to reach the screen
+const SPIN_AT_LEAST = 6; // seconds
 
 export function addScreenVideo(group, screen, url) {
     const video = document.createElement('video');
@@ -109,12 +113,15 @@ export function primeScreenVideo(model) {
 function screenFilmReady(model) {
     const video = model.userData.screenVideo;
     if (!video) return false;
+    const now = performance.now();
+    if (now - (model.userData.screenShownAt ?? 0) < SPIN_AT_LEAST * 1000) return false;
     const primedAt = model.userData.screenPrimedAt;
-    return video.readyState >= 3 || (primedAt != null && performance.now() - primedAt > PRIME_WAIT * 1000);
+    return video.readyState >= 3 || (primedAt != null && now - primedAt > PRIME_WAIT * 1000);
 }
 
 // A new showing: turning and loading again, unless the film is already in
 export function resetScreenSpin(model) {
+    model.userData.screenShownAt = performance.now();
     model.userData.screenSpin = 0;
     model.userData.screenSettled = false;
     model.userData.screenLoading = 1;

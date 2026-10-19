@@ -862,7 +862,9 @@ project setting read by one code path, not a branch for the project:
   its head (`uSpinner`, `SPINNER_*` in dissolve.js) - asked for by the user.
   The film is primed to load (played unseen and paused at its start: a
   phone's browser loads a film only when asked to play it), counted loaded at
-  `readyState` 3 or after `PRIME_WAIT` (8s); then the model finishes its turn
+  `readyState` 3 or after `PRIME_WAIT` (8s) - but never before `SPIN_AT_LEAST`
+  (6s) from opening, so the turn and the circle are seen even with the film
+  in at once (cached; the user saw no swirl on kh ReUse); then the model finishes its turn
   to face the visitor (slowing over `SPIN_SETTLE`) and the points leave the
   circle for their float. With no film (Nap Nap Hooray, for now) it keeps
   turning.
