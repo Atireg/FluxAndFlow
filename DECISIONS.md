@@ -107,6 +107,18 @@ classes `.cube-tag` - cube-era names left as they are.
   shaded (`GRAPHITE_WEIGHT`, with an orange wash at the glow's peak) - so
   paintGlow, the fades and the arrival work unchanged. Before this: pale
   teal glass with teal rims.
+
+  **Lighter** (asked for - the pebbles "sometimes trembling, sometimes
+  jumping"): the face is an unlit MeshBasicMaterial doing only this shade -
+  it was a MeshStandardMaterial whose lighting was worked out each frame and
+  then thrown away; `emissive` kept as a property and a uniform of that name,
+  which three.js fills for any material that has one. The icosphere is
+  `PEBBLE_DETAIL` 8 (642 vertices) rather than 16 (2,562), smooth enough at
+  their size. And the shade and the rim read the waved surface's direction
+  (`pebbleNormal`, from two points beside each vertex in `addPebbleFlux`):
+  read off the resting shape, the light slid over the surface as the waves
+  moved under it, a likely source of the tremble. The lumps now show in the
+  shading too.
 - **Flux**: each pebble slowly changes shape, as asked - three broad waves
   rolling over its surface on its own seed (`addPebbleFlux`, in the vertex
   shader; `PEBBLE_FLUX` 30% of the radius - 9% and then 15% read as too

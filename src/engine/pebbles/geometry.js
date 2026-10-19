@@ -11,7 +11,7 @@ import { PEBBLE_RADIUS, PEBBLE_SQUASH } from '../constants.js';
  */
 const PEBBLE_LUMPS = 0.06; // how far the surface wanders from round
 const PEBBLE_STRETCH = 0.08; // how far each is drawn out along its own axes
-const PEBBLE_DETAIL = 16; // icosphere subdivisions - smooth, still cheap to raycast
+const PEBBLE_DETAIL = 8; // icosphere subdivisions - smooth at its size; 16 was four times the vertices for nothing
 
 /**
  * The flux: each pebble slowly changes shape - a few broad waves rolling
@@ -20,6 +20,12 @@ const PEBBLE_DETAIL = 16; // icosphere subdivisions - smooth, still cheap to ray
  * face and of the rim alike (the same function, so the rim stays on the
  * face) off one shared clock - a pure function of time, nothing stored.
  * Clicking and hovering still use the resting shape, near enough.
+ *
+ * The surface's direction (`pebbleNormal`) is worked out on the moving
+ * shape too, from two points just beside each vertex, so the shading and the
+ * rim follow the waves rather than sliding over them - read off the resting
+ * shape, the light swam across the surface as it moved, which read as a
+ * tremble.
  *
  * Any new pebble material needs addPebbleFlux too, or it will sit still
  * while the rest breathe.
@@ -42,6 +48,11 @@ float pebbleFlux(vec3 n) {
     return (sin(n.x * 2.3 + t + s) * cos(n.z * 2.1 - t * 0.73 + s * 1.3)
         + 0.6 * sin(n.y * 3.1 + n.x * 1.7 + t * 1.27 + s * 2.1)
         + 0.4 * cos(n.z * 2.7 - n.y * 1.9 - t * 0.91 + s * 0.7)) / 2.0;
+}
+
+// A point of the surface, moved by the waves
+vec3 pebbleFluxed(vec3 p, vec3 n) {
+    return p + n * pebbleFlux(normalize(p)) * uFluxAmount;
 }`;
 
 // How far a pebble of this size flexes, in world units - the dissolve's
@@ -73,6 +84,14 @@ export function addPebbleFlux(material, seed, size = 1) {
                 'float pebbleFluxHere = pebbleFlux(normalize(position));',
                 'transformed += normal * pebbleFluxHere * uFluxAmount;',
                 'vPebbleFlux = pebbleFluxHere;',
+                // The moved surface's direction, from two points beside this one
+                'vec3 pebbleSideA = normalize(cross(normal, abs(normal.y) < 0.9 ? vec3(0.0, 1.0, 0.0) : vec3(1.0, 0.0, 0.0)));',
+                'vec3 pebbleSideB = cross(normal, pebbleSideA);',
+                'float pebbleStep = 0.04 * length(position);',
+                'vec3 pebbleNormal = normalize(cross(',
+                '    pebbleFluxed(position + pebbleSideA * pebbleStep, normal) - transformed,',
+                '    pebbleFluxed(position + pebbleSideB * pebbleStep, normal) - transformed));',
+                'if (dot(pebbleNormal, normal) < 0.0) pebbleNormal = -pebbleNormal;',
             ].join('\n'));
     };
 

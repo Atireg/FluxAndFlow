@@ -12,9 +12,9 @@ import { GRADIENT_APPLY_GLSL, GRADIENT_GLSL, TONE_GLSL, gradientTint } from './g
 /**
  * How a pebble is painted.
  *
- * The face is a graphite shade (see addGraphite), not lit glass: its colour
- * is the graphite, its emissive the spotlight's orange, and its opacity how
- * heavily it's shaded. The rim is a fresnel-patched MeshBasicMaterial
+ * The face is a graphite shade (see addGraphite), not lit glass: an unlit
+ * material, its colour the graphite, its `emissive` the spotlight's orange,
+ * and its opacity how heavily it's shaded. The rim is a fresnel-patched MeshBasicMaterial
  * standing in for a box's edge lines, driven through `.material.color` and
  * `.opacity` exactly as those were.
  *
@@ -38,16 +38,29 @@ const GRAPHITE_WEIGHT = 4; // the opacity times this is how much it shades (rest
  * lit glass - the scene's cyan lights would tint it blue. Shaded from a
  * fixed light (upper left) and darker towards the silhouette, smoothly (it
  * was pencil hatching; the user kept the colour and dropped the strokes).
+ * On an unlit material: it was a MeshStandardMaterial whose lighting was
+ * worked out every frame and then thrown away for this shade.
  */
 export function addGraphite(material) {
+    // The spotlight's orange, as on a lit material: three.js copies
+    // `emissive` x `emissiveIntensity` into a uniform of that name each frame
+    // when the material has one - so the shader must have it too
+    material.emissive = new THREE.Color(0, 0, 0);
+    material.emissiveIntensity = 1;
+
     material.onBeforeCompile = (shader) => {
         shader.uniforms.uGradientTint = gradientTint;
+        shader.uniforms.emissive = { value: new THREE.Color(0, 0, 0) };
 
+        shader.vertexShader = shader.vertexShader
+            .replace('#include <common>', '#include <common>\nvarying vec3 vGraphiteNormal;')
+            // The moved surface's direction (addPebbleFlux), in view space
+            .replace('#include <project_vertex>', '#include <project_vertex>\nvGraphiteNormal = normalize(normalMatrix * pebbleNormal);');
         shader.fragmentShader = shader.fragmentShader
-            .replace('#include <common>', `#include <common>\n${GRADIENT_GLSL}`)
+            .replace('#include <common>', `#include <common>\nuniform vec3 emissive;\nvarying vec3 vGraphiteNormal;\n${GRADIENT_GLSL}`)
             .replace('#include <opaque_fragment>', [
                 // Light from the upper left, darker towards the silhouette
-                'vec3 graphiteNormal = normalize(normal);',
+                'vec3 graphiteNormal = normalize(vGraphiteNormal);',
                 'float graphiteLit = dot(graphiteNormal, normalize(vec3(-0.45, 0.55, 0.7))) * 0.5 + 0.5;',
                 'float graphiteEdge = 1.0 - abs(graphiteNormal.z);',
                 'float graphiteDark = clamp((1.0 - graphiteLit) * 1.1 + graphiteEdge * 0.5, 0.0, 1.0);',
@@ -57,7 +70,7 @@ export function addGraphite(material) {
                 GRADIENT_APPLY_GLSL,
                 // Graphite, turning the spotlight's orange as it glows, with a
                 // light wash of it filling in at the peak
-                'outgoingLight = diffuseColor.rgb + totalEmissiveRadiance;',
+                'outgoingLight = diffuseColor.rgb + emissive;',
                 // The material's own opacity, before the shading overwrites it
                 'float graphiteOpacity = diffuseColor.a;',
                 'float graphiteWash = smoothstep(0.15, 0.6, graphiteOpacity) * 0.35;',
@@ -83,7 +96,7 @@ function makeRimMaterial(color) {
     material.onBeforeCompile = (shader) => {
         shader.vertexShader = shader.vertexShader
             .replace('#include <common>', '#include <common>\nvarying vec3 vRimNormal;\nvarying vec3 vRimView;')
-            .replace('#include <project_vertex>', '#include <project_vertex>\nvRimNormal = normalize(normalMatrix * normal);\nvRimView = normalize(-mvPosition.xyz);');
+            .replace('#include <project_vertex>', '#include <project_vertex>\nvRimNormal = normalize(normalMatrix * pebbleNormal);\nvRimView = normalize(-mvPosition.xyz);');
         shader.fragmentShader = shader.fragmentShader
             .replace('#include <common>', '#include <common>\nvarying vec3 vRimNormal;\nvarying vec3 vRimView;')
             .replace('#include <opaque_fragment>', [
@@ -103,10 +116,8 @@ function makeRimMaterial(color) {
  * treatment.
  */
 export function makePebbleMaterials(seed, size) {
-    const face = addPebbleFlux(addGraphite(new THREE.MeshStandardMaterial({
+    const face = addPebbleFlux(addGraphite(new THREE.MeshBasicMaterial({
         color: PEBBLE_COLOR,
-        metalness: 0.2,
-        roughness: 0.6,
         transparent: true,
         opacity: FACE_OPACITY,
     })), seed, size);
@@ -137,10 +148,9 @@ const glowRimColor = new THREE.Color();
 
 /**
  * A pebble's colours for how orange the spotlight has made it, 0..1. At 0
- * it's its resting self. The face glows through its emissive colour rather
- * than its base colour: the base colour is lit by the scene's cyan lights,
- * which turn an orange green - and it's dimmed as the glow rises, or that
- * cyan-lit grey washes the orange out to tan.
+ * it's its resting self. The face glows through its `emissive` colour, added
+ * over its base colour (addGraphite) - which is dimmed as the glow rises, or
+ * the grey washes the orange out to tan.
  */
 export function paintGlow(pebble, amount, rimOpacity = 1) {
     const restOpacity = restingFaceOpacity(pebble);

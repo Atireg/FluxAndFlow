@@ -210,7 +210,8 @@ A solid model with a film on its screen - `kh-reuse.js` is the example:
   (`applyFocus`, `fadeFocus`) are laid over every mode afterwards; whatever
   a mode leaves unset must be reset first or it compounds. Exceptions with
   memory step in fixed increments (`FLOW_STEP`, `TAG_STEP`).
-- **Pebbles are graphite, not glass**: tone is in the alpha, colour is a
+- **Pebbles are graphite, not glass** - an unlit material with its own
+  shade (`addGraphite`); tone is in the alpha, colour is a
   multiplier (`pebbles/gradient.js`), resting looks come from
   `restingFace*`/`restingRimColor`, glow from `paintGlow`. One orange means
   "click me"; don't add others. A pebble's random size is baked into its

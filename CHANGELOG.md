@@ -328,6 +328,11 @@ too when its film is in at once.
 Then, asked for, only the circle: once the film has loaded the points fade
 away where they are, rather than floating about the screen first.
 
+**Lighter pebbles**: the face an unlit material doing only its graphite
+shade (it worked out the full scene lighting each frame and threw it away),
+a quarter of the vertices, and the shade following the moving shape rather
+than sliding over it - after the user saw them tremble and jump.
+
 **Landing page**: the three paragraphs fade in one after another, slowly,
 then "Welcome to the F&F playground" last.
 
