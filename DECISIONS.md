@@ -334,7 +334,9 @@ there the moment the loader faded (0.9s), and on the way back from a
 project every pebble faded in together over 0.7s. Now, both times, each
 pebble surfaces out of the paper on its own beat: from `ARRIVAL_DEPTH`
 below its place, at `ARRIVAL_SMALLEST` of its size and clear, eased up to
-itself over `ARRIVAL_DURATION` (3.2s - 1.6 was still too fast), each
+itself over `ARRIVAL_DURATION` (3.2s - 1.6 was still too fast), eased at
+both ends (`smooth01` - eased out only, it set off at full speed and read
+as a jump as the loader cleared), each
 setting off at a random moment within `ARRIVAL_STAGGER` (2.4s). Then, asked
 for too, what's inside them arrives one by one in a random order
 (`CONTENT_ARRIVAL_*`: the first 3.2s in, 0.35s apart, each growing in with

@@ -1,4 +1,4 @@
-import { easeOutBack, easeOutCubic } from '../ease.js';
+import { easeOutBack, smooth01 } from '../ease.js';
 /**
  * The arrival: whenever the grid comes into view - as the start-up loader
  * leaves, and on the way back from a project - each pebble surfaces out of
@@ -44,9 +44,11 @@ function contentArrivalOf(pebble, startedAt, elapsedTime) {
     return easeOutBack((elapsedTime - startedAt - (pebble.userData.contentArrivalDelay ?? 0)) / CONTENT_ARRIVAL_DURATION);
 }
 
-// How far a pebble has arrived, 0..1, eased to settle rather than stop
+// How far a pebble has arrived, 0..1, eased at both ends: it sets off from
+// rest and settles. Eased out only, it started at its fastest - a jump
+// rather than a rise, noticed as the loader cleared
 function arrivalOf(pebble, startedAt, elapsedTime) {
-    return easeOutCubic((elapsedTime - startedAt - (pebble.userData.arrivalDelay ?? 0)) / ARRIVAL_DURATION);
+    return smooth01((elapsedTime - startedAt - (pebble.userData.arrivalDelay ?? 0)) / ARRIVAL_DURATION);
 }
 
 // On top of the pebble's mode: smaller, lower and fainter until it's here
