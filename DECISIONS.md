@@ -1289,7 +1289,12 @@ followed). Followed, it doesn't leave at once: the currents run on, darker
 and faster (the loading flux at full), for at least `LINGER` (1.6s), while
 the playground compiles every shader it will draw behind them
 (`fluxloader:warming`, `renderer.compileAsync` with hidden objects shown for
-the compile, answered by `fluxLoader.warmed()`, `WARM_WAIT` at most).
+the compile, answered by `fluxLoader.warmed()`, `WARM_WAIT` at most), then
+draws the scene once with everything shown, so what is still hidden - the
+pebbles' thumbnails, the streams - is on the GPU before it first appears.
+The loader and its words sit on layers of their own (`will-change`), so the
+exit's fade and shrink only composite them rather than redraw the glowing
+text over the moving scene every frame.
 Compiled on the arrival's first frames instead, the pebbles jumped as they
 surfaced (the user noticed it). There is no loading screen in between any more: a link to a
 project (`#rock-print`), which skips the welcome, is the only way to see

@@ -383,19 +383,31 @@ export function createEngine({ canvas, source, ui }) {
          * playground will draw with - the pebbles, what's inside them, the
          * streams, most of it still hidden - compiled now, behind the
          * loader, rather than on the first frames of the pebbles' arrival,
-         * where it showed as a jump. Hidden objects are shown for the
-         * compile only (it skips what's hidden), then put back.
+         * where it showed as a jump - then drawn once, everything shown, so
+         * what's still hidden (the pebbles' thumbnails, the streams) is on
+         * the GPU too rather than uploaded the first time it appears. The
+         * loader's paper still covers the canvas. Hidden objects are shown
+         * for the compile and that one draw only (both skip what's hidden).
          */
         on(window, 'fluxloader:warming', () => {
-            const hidden = [];
-            scene.traverse((object) => {
-                if (object.visible) return;
-                hidden.push(object);
-                object.visible = true;
-            });
+            const showAll = () => {
+                const hidden = [];
+                scene.traverse((object) => {
+                    if (object.visible) return;
+                    hidden.push(object);
+                    object.visible = true;
+                });
+                return () => hidden.forEach((object) => { object.visible = false; });
+            };
+            let restore = showAll();
             const compiled = rig.renderer.compileAsync(scene, rig.camera);
-            hidden.forEach((object) => { object.visible = false; });
-            compiled.finally(() => window.fluxLoader?.warmed());
+            restore();
+            compiled.finally(() => {
+                restore = showAll();
+                rig.render();
+                restore();
+                window.fluxLoader?.warmed();
+            });
         });
 
         // The pebbles surface as the loader starts to leave - or at once,

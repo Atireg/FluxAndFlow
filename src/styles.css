@@ -244,6 +244,9 @@ canvas.webgl {
     /* The paper glow its words are lifted off the streams with */
     --loader-halo: var(--loader-bg, var(--bg));
     transition: opacity 2.6s ease-in-out; /* EXIT in index.html */
+    /* Its own layer from the start, so the exit's fade only composites it -
+       drawn once, not again every frame over the moving scene */
+    will-change: opacity;
 }
 
 .loader.is-leaving {
@@ -278,6 +281,9 @@ canvas.webgl {
     padding: 1.5rem 2rem;
     text-align: center;
     transition: transform 2.6s ease, opacity 1.4s ease 0.8s; /* lingers as the pebbles surface */
+    /* The words and their glow drawn once and only scaled and faded on the
+       way out, rather than redrawn each frame (see .loader) */
+    will-change: transform, opacity;
 }
 
 .loader.is-leaving .loader__mark {
