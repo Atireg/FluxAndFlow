@@ -879,8 +879,8 @@ project setting read by one code path, not a branch for the project:
   (6s) from opening, so the turn and the circle are seen even with the film
   in at once (cached; the user saw no swirl on kh ReUse); then the model finishes its turn
   to face the visitor (slowing over `SPIN_SETTLE`) while the points fade
-  away where they are in the circle (`LOADING_FADE`). With no film (Nap Nap
-  Hooray, for now) it keeps turning and circling.
+  away where they are in the circle (`LOADING_FADE`). With no `screenVideo`
+  it would keep turning and circling.
 - **`view.fillScreen`** opens it in two steps: the whole device first
   (`zoom`, `lift`) while the points settle, then at `FILL_SCREEN_AT` (5s),
   or once the film has loaded and the model faces the visitor again, the

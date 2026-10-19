@@ -373,3 +373,15 @@ Open at end of session (see README, "Next up"): kh ReUse on a real phone
 and in Safari - autoplay of the film, the two-step camera, the double-tap
 pause; the knippershelbig link (unreachable from the container); the rest
 as at the end of session 3.
+
+## Session 5 — 2026-10-19
+
+**Nap Nap Hooray's recording**: the user's film of the site now plays on
+its phone, as kh ReUse's does - the phone turns and the points circle while
+it loads, then the camera moves in square-on to the screen; a double-click
+pauses it. The upload (1170 x 1992, 10.5 MB) was the screen's shape exactly,
+so it was scaled to twice the screen (780 x 1328, 3.2 MB) rather than
+copied as it was.
+
+Open at end of session: as at the end of session 4; pictures for Nap Nap
+Hooray's drawer, if wanted.

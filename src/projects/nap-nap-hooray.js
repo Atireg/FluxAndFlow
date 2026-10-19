@@ -4,8 +4,8 @@ import { defineProject } from './schema.js';
 /**
  * Nap Nap Hooray - the user's baby-sleep website, shown on a phone made in
  * code (the same as kh ReUse's), the pebble's points circling on its screen
- * until a recording of the site is there to play. A crescent moon in its
- * pebble. The models are made in code: tools/models/.
+ * while the user's recording of the site loads, then playing there. A
+ * crescent moon in its pebble. The models are made in code: tools/models/.
  */
 export default defineProject({
     id: 'nap-nap-hooray',
@@ -69,10 +69,15 @@ export default defineProject({
     thumbModel: 'models/moon.glb',
     thumbSize: 1.3,
     // A phone, as kh ReUse's on a phone (devices.js): turning, the pebble's
-    // points circling on its screen, until there's a recording to play
+    // points circling on its screen, until its recording has loaded
     detailModel: 'models/phone.glb',
     ...DEVICE,
+    // A double-click (or double-tap) pauses the film, the next plays it on
+    doubleClick: 'hold',
+    // The user's recording of the site (390 x 664, as the screen; muted, looping)
+    screenVideo: 'videos/nap-nap-hooray.mp4',
     // Square-on from a little above (`turn: -90` undoes the detail view's
-    // quarter turn); with the About drawer out, the whole phone above it
-    view: { elevation: 15, turn: -90, zoom: { side: 1.1, stacked: 1.7 }, lift: { side: -0.03, stacked: 0.03 }, drawer: 'whole' },
+    // quarter turn); then, as the film starts, square-on to its screen
+    // (`fillScreen`, as kh ReUse); with the About drawer out, the whole phone
+    view: { elevation: 15, turn: -90, zoom: { side: 1.1, stacked: 1.7 }, lift: { side: -0.03, stacked: 0.03 }, fillScreen: 1.2, drawer: 'whole' },
 });
