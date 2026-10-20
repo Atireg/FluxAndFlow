@@ -37,8 +37,6 @@ export default defineProject({
         + 'and elements, and collect elements in a personal basket for reuse.',
         'Note: the data in this version of the website is fictional and serves '
         + 'only to demonstrate the platform.',
-        'Tech stack: React (Vite) frontend on Firebase Hosting, Node.js server '
-        + 'on Google Cloud Run, and a MongoDB Atlas database.',
         '👉 Live demo: [kh-reuse.web.app](https://kh-reuse.web.app/)',
         'Tech overview',
         [
