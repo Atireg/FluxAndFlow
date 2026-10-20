@@ -42,7 +42,7 @@ in a pull-out drawer.
   code, solid light grey, still, not orbitable. A third of the pebble's
   points settle on its screen and circle there like a loading sign while
   the laptop turns and its film loads; loaded, it turns back to face the
-  visitor, the points fade where they are, the camera moves in square-on
+  visitor, the points drift gently out and fade, the camera moves in square-on
   to the screen (its edges kept, its top below the title) and the user's
   recording plays there. A
   double-click pauses the film. On a phone (under 860px) a phone instead,
@@ -106,7 +106,7 @@ DECISIONS.md before moving anything across the line.
                         page's small words), links.js (`#<id>`, Back and Forward)
     src/components/     the page's pieces: bar, drawer, DrawerFigure (+ ProjectImage,
                         ProjectVideo), ImageViewer (a picture enlarged), tags and
-                        strings, tap hint, filter, fog
+                        strings, tap hint, filter
     src/projects/       the content: one module per project + schema.js; devices.js
                         (`DEVICE`, the settings the laptop and phone projects share)
     src/engine/         the canvas - index.js assembles it and runs the render loop
@@ -247,11 +247,10 @@ A solid model with a film on its screen - `kh-reuse.js` is the example;
   layout breakpoint is 860px. `DETAIL_MARGIN` differs with a phone's
   drawer parked or open - check both.
 - **The background is the page's CSS**, the renderer transparent: no
-  additive blending, colours through `screenColor()`. Scene fog is off;
-  the grey fog is a CSS layer.
+  additive blending, colours through `screenColor()`. No fog, in
+  the scene or on the page.
 - **Safari** can't be tested here. Keep GLSL inside defined behaviour (no
-  reversed `smoothstep`, no `pow(0, y)`), stack HTML by z-index (fog 0,
-  canvas 1, overlays 2, drawer 3), and select on `pointerup`, never
+  reversed `smoothstep`, no `pow(0, y)`), stack HTML by z-index (canvas 1, overlays 2, drawer 3), and select on `pointerup`, never
   `click`. Never leave a test switch reachable from the public address:
   Safari auto-completed an old `?cloudtest` and showed it for days.
 - **Nothing runs at module scope in `src/engine/`** - everything waits for

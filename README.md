@@ -174,7 +174,7 @@ Project view
         again, the fallen pile dissolving away first (`drop.closeUp`)
     [x] Points on the move (the gather, the dissolve, the fall into
         Emergent Space's ground) draw tapering tails, gone once they settle
-    [x] A grey fog rolls in behind the project
+    [x] A grey fog rolls in behind the project (removed later, asked for)
     [x] The About drawer: model moves left and stays whole on a wide screen,
         a close-up on a phone (Emergent Space: in on the pile in both);
         five pictures in each, Emergent Space's diagrams full width

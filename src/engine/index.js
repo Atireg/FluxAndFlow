@@ -37,7 +37,6 @@ import { trailResolution } from './pointcloud/trails.js';
  *   onProjectOpen(project)  a project has opened - show its bar and drawer
  *   onProjectClose()        back to the catalog
  *   onStatus(message|null)  what to say in the project bar
- *   onFog(boolean)          roll the grey fog in or out
  *   barFraction()           how much viewport height the bar takes, 0..0.5
  *   showTapHint(x, y, action) / hideTapHint()   action: the project's doubleClick
  *   onFocus(category)       the filter changed from the canvas (a sunk pebble clicked)
@@ -55,9 +54,8 @@ export function createEngine({ canvas, source, ui }) {
 
     /**
      * Scene fog is off: the original config was inverted (near beyond far),
-     * which rendered everything NEARER than 15 units fully fogged. The grey
-     * fog in the project view is a CSS layer behind the transparent canvas
-     * instead. See DECISIONS.md before re-adding it.
+     * which rendered everything NEARER than 15 units fully fogged. See
+     * DECISIONS.md before re-adding it.
      */
     scene.fog = null;
 

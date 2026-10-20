@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { PEBBLE_RIM_COLOR, pointInkUniforms, POINT_OPACITY } from '../colors.js';
 import { PILE_SURFACE_RADIUS } from '../pile.js';
+import { smooth01 } from '../ease.js';
 import { addTrails } from '../pointcloud/trails.js';
 import { revealAt } from '../pointcloud/gather.js';
 import { detailSince } from '../camera/framing.js';
@@ -31,12 +32,13 @@ const DISSOLVE_POINT_SIZE = 0.07; // world units across
 const DISSOLVE_TRAIL = 0.12; // seconds back for the dissolve's points
 const SCREEN_EVERY = 3; // one point in this many settles on the screen; the rest fade as usual
 // On the screen they circle like a loading sign: an arc of the circle,
-// turning, brightest at its head - and once the film has loaded they fade
-// away where they are (screenVideo.js's `screenLoading`)
+// turning, brightest at its head - and once the film has loaded they drift
+// gently outwards as they fade (screenVideo.js's `screenLoading`)
 const SPINNER_RATE = 4.5; // radians a second
 const SPINNER_ARC = 4.7; // radians the arc spans, head to tail - three quarters of the circle
 const SPINNER_RADIUS = 0.55; // of the screen's shorter half
 const SPINNER_TRAIL = 0.15; // seconds back for their tails
+const SPINNER_RELEASE = 0.7; // how far out they drift as they go, at most, as a share of the circle
 // Points hold, swollen, at this share of the dissolve until the screen they're
 // to settle on has loaded - rather than falling towards nowhere
 const SCREEN_HOLD = 0.25;
@@ -51,6 +53,7 @@ uniform float uSwell;
 uniform float uGround; // 1: the points fall and stay as a pile's surface (aGround)
 uniform float uScreen; // 1: ...or on a screen (uGround too), floating about on it
 uniform float uTime;
+uniform float uRelease; // 0..1 as the loading circle lets its points go
 uniform vec3 uScreenCentre; // the screen's middle, and the vectors to its right and top edges
 uniform vec3 uScreenU;
 uniform vec3 uScreenV;
@@ -72,7 +75,8 @@ float landsHere() {
 vec3 screenPoint(float time) {
     float along = aScreen / 6.2831853;
     float angle = -time * ${SPINNER_RATE.toFixed(2)} - along * ${SPINNER_ARC.toFixed(2)};
-    float radius = ${SPINNER_RADIUS.toFixed(2)} * min(length(uScreenU), length(uScreenV)) * (0.92 + 0.16 * fract(aScreen * 3.7));
+    float radius = ${SPINNER_RADIUS.toFixed(2)} * min(length(uScreenU), length(uScreenV)) * (0.92 + 0.16 * fract(aScreen * 3.7))
+        * (1.0 + uRelease * ${SPINNER_RELEASE.toFixed(2)} * (0.4 + 0.6 * fract(aScreen * 7.3)));
     return uScreenCentre + (normalize(uScreenU) * cos(angle) + normalize(uScreenV) * sin(angle)) * radius;
 }
 
@@ -254,6 +258,7 @@ export function getDissolve(pebble) {
             uGround: { value: drop || screen ? 1 : 0 },
             uScreen: { value: screen ? 1 : 0 },
             uTime: { value: 0 },
+            uRelease: { value: 0 },
             uScreenCentre: { value: new THREE.Vector3() },
             uScreenU: { value: new THREE.Vector3() },
             uScreenV: { value: new THREE.Vector3() },
@@ -329,9 +334,10 @@ export function updateDissolve({ state, renderer, camera, elapsedTime }) {
     const uniforms = points.material.uniforms;
     uniforms.uT.value = Math.min(t, 1);
     uniforms.uTime.value = elapsedTime;
-    // ...and on a screen, away where they are once its film has loaded (screenVideo.js)
-    const loading = screen ? detail.userData.screenLoading ?? 1 : 1;
-    uniforms.uOpacity.value = POINT_OPACITY * (1 - reveal) * loading;
+    // ...and on a screen, drifting out as they fade once its film has loaded (screenVideo.js)
+    const release = screen ? smooth01(1 - (detail.userData.screenLoading ?? 1)) : 0;
+    uniforms.uRelease.value = release;
+    uniforms.uOpacity.value = POINT_OPACITY * (1 - reveal) * (1 - release);
     uniforms.uFluxTime.value = state.dropStartedAt * PEBBLE_FLUX_SPEED;
     uniforms.uPixelsPerUnit.value = renderer.domElement.height
         / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov ?? 45) / 2));

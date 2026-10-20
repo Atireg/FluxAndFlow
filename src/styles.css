@@ -61,70 +61,6 @@ body {
 }
 
 /**
- * The fog that rolls in behind a project while it's open (toggled from
- * openProject/closeProject). Thicker at the edges than in the middle, so
- * the model sits in a clearing; two soft banks drift slowly across it so
- * it reads as fog rather than a flat tint. Slow to come in, quicker to
- * clear when going back to all projects.
- */
-.fog {
-    position: fixed;
-    inset: 0;
-    /* Explicitly under the canvas (z-index 1), not left to page order:
-       Safari has drawn an animating layer like this over a WebGL canvas */
-    z-index: 0;
-    overflow: hidden;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 1.2s ease;
-    background: radial-gradient(
-        ellipse 75% 70% at 50% 50%,
-        rgba(214, 216, 216, 0.55) 0%,
-        rgba(192, 196, 197, 0.88) 60%,
-        rgba(176, 181, 183, 1) 100%
-    );
-}
-
-.fog.is-in {
-    opacity: 1;
-    transition: opacity 3.2s ease-in-out;
-}
-
-.fog::before,
-.fog::after {
-    content: "";
-    position: absolute;
-    width: 90vmax;
-    height: 60vmax;
-    border-radius: 50%;
-    background: radial-gradient(closest-side, rgba(232, 233, 232, 0.7), rgba(232, 233, 232, 0));
-    animation: drift 26s ease-in-out infinite alternate;
-    animation-play-state: paused;
-}
-
-.fog::before {
-    left: -30vmax;
-    top: -10vmax;
-}
-
-.fog::after {
-    right: -35vmax;
-    bottom: -15vmax;
-    animation-duration: 34s;
-    animation-direction: alternate-reverse;
-}
-
-.fog.is-in::before,
-.fog.is-in::after {
-    animation-play-state: running;
-}
-
-@keyframes drift {
-    from { transform: translate(0, 0) scale(1); }
-    to   { transform: translate(18vmax, 8vmax) scale(1.15); }
-}
-
-/**
  * The double-tap hint over an open model: a white touch point with a black
  * outline, a little see-through, that fades in, presses twice with
  * a ring spreading from it each time, and fades out (2.2s). Its centre sits
@@ -218,7 +154,7 @@ body {
 canvas.webgl {
     position: fixed;
     inset: 0;
-    z-index: 1; /* above the fog (0); the overlays after it in the page sit above it */
+    z-index: 1; /* the overlays after it in the page sit above it */
     display: block;
     width: 100%;
     height: 100%;
@@ -1170,12 +1106,6 @@ canvas.webgl {
     /* The hint just appears and fades - no presses or rings */
     .tap-hint.is-showing .tap-hint__dot,
     .tap-hint.is-showing .tap-hint__ripple {
-        animation: none;
-    }
-
-    /* The fog still comes in, but holds still */
-    .fog::before,
-    .fog::after {
         animation: none;
     }
 

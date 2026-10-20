@@ -47,7 +47,7 @@ The project view: point cloud
 
 Page, colour and drawer
 - The whole site is paper
-- Scene fog is off; the grey fog is a page layer
+- Scene fog is off, and no fog layer
 - Faded faces don't write depth
 - No description, no drawer
 - The bar's title moves into the drawer on a phone
@@ -145,7 +145,7 @@ classes `.cube-tag` - cube-era names left as they are.
   `revealAt`) while the dissolve's fade out over the same second. If the
   model is still downloading, the dissolve simply runs on.
 - **No frame in the project view.** The pebble has dissolved; the project
-  stands alone in the fog. Framing still fits the invisible `CUBE_SIZE` box.
+  stands alone. Framing still fits the invisible `CUBE_SIZE` box.
 - **Visited pebbles stay darker**, like visited links: once its project has
   been opened (`markVisited` in `openProject`; "under construction" doesn't
   count), a pebble rests in deeper glass with a darker rim. Every state
@@ -878,8 +878,10 @@ project setting read by one code path, not a branch for the project:
   `readyState` 3 or after `PRIME_WAIT` (8s) - but never before `SPIN_AT_LEAST`
   (6s) from opening, so the turn and the circle are seen even with the film
   in at once (cached; the user saw no swirl on kh ReUse); then the model finishes its turn
-  to face the visitor (slowing over `SPIN_SETTLE`) while the points fade
-  away where they are in the circle (`LOADING_FADE`). With no `screenVideo`
+  to face the visitor (slowing over `SPIN_SETTLE`) while the points drift
+  gently out of the circle as they fade (`LOADING_FADE` 2.2s, eased,
+  `SPINNER_RELEASE`) - asked for over a quicker fade where they were - and
+  the film waits for them to be gone. With no `screenVideo`
   it would keep turning and circling.
 - **`view.fillScreen`** opens it in two steps: the whole device first
   (`zoom`, `lift`) while the points settle, then at `FILL_SCREEN_AT` (5s),
@@ -1164,8 +1166,7 @@ correct anyway:
   `pow()` at 0 are undefined and Safari's Metal backend needn't do what
   Chrome does (a NaN hides every point); both rewritten to identical,
   defined forms. Keep shader code inside what GLSL ES defines.
-- **Stacking by z-index, never page order.** The fog is under the canvas
-  (0 and 1); the catalog's tags and string and the tap hint are over it (2).
+- **Stacking by z-index, never page order.** The canvas is 1; the catalog's tags and string and the tap hint are over it (2).
   At equal z-index Safari drew the canvas over later layers - the hint
   showed behind the point cloud, the names behind the glass.
 - **Failures say so.** A failed model load or shader compile
@@ -1189,15 +1190,13 @@ Scene colours go through `screenColor()`. The loader's `palette.bg` must
 stay equal to `--bg`.
 
 
-Scene fog is off; the grey fog is a page layer
-----------------------------------------------
+Scene fog is off, and no fog layer
+----------------------------------
 
 `scene.fog` was `Fog(..., 15, 8)` - near beyond far, which fogged anything
 close to the camera; re-adding it needs near < far and a range for both
-views. The grey fog behind an open project is `.fog` (`components/Fog.jsx`), a CSS layer between
-the paper and the canvas (in over 3.2s, out over 1.2s): lighter in the
-middle, with two soft banks drifting. Scene fog would grey the model
-itself; a page layer touches nothing in the renderer.
+views. A grey CSS fog behind an open project was removed at the user's
+asking (see "Tried and removed"); a project opens straight onto the paper.
 
 
 Faded faces don't write depth
@@ -1674,3 +1673,6 @@ Site
   with a plain fade or a spreading pool of ink.
 - **Other loader palettes** (tide, ember, current, aurora, magma), via a
   since-removed `?loaderpreview`; **a 1.6s minimum** for the loader.
+- **A grey fog behind an open project**: a CSS layer under the canvas,
+  thicker at the edges, two soft banks drifting across it, rolling in as
+  the camera moved in. The user asked for no fog on any view.

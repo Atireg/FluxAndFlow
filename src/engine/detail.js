@@ -294,7 +294,7 @@ export function createDetail({
                  * the rest of the grid lines up into a lattice of rectangles
                  * behind the model rather than scattering into the distance,
                  * so it goes entirely - the clicked pebble included: it has
-                 * dissolved, and the project stands on its own in the fog.
+                 * dissolved, and the project stands on its own.
                  */
                 gsap.to([other.material, other.userData.edges.material], { opacity: 0, duration: 0.8, ease: 'power2.out' });
 
@@ -322,9 +322,6 @@ export function createDetail({
             // ...but the visitor may orbit it by hand - unless the project
             // holds its view (`orbit: false`)
             rig.controls.enabled = project.orbit;
-
-            // The grey fog rolls in behind the project as the camera moves in
-            ui.onFog(true);
 
             // The first double-tap hint waits until the points have gathered
             state.tapHintNext = GATHER_DURATION + TAP_HINT_AFTER_GATHER;
@@ -481,7 +478,6 @@ export function createDetail({
             ui.onStatus(null);
             rig.controls.autoRotate = false;
             rig.controls.enabled = false;
-            ui.onFog(false);
             ui.hideTapHint(true); // even mid-dissolve
             state.tapHintNext = Infinity;
 
@@ -564,8 +560,9 @@ export function createDetail({
         maybeFillScreen(model, since) {
             const project = state.selected?.userData.project;
             if (!project?.view?.fillScreen || !model.userData.screen || model.userData.screenFilled) return;
-            // ...once the film has loaded and the model has turned to face the visitor
-            if (since < FILL_SCREEN_AT || !model.userData.screenSettled) return;
+            // ...once the film has loaded, the model has turned to face the
+            // visitor and the loading circle's points have gone
+            if (since < FILL_SCREEN_AT || !model.userData.screenSettled || model.userData.screenLoading > 0) return;
 
             model.userData.screenFilled = true;
             if (!isHeld(model)) playScreenVideo(model, true);

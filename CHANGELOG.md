@@ -390,5 +390,12 @@ title rather than centring the screen below it, and comes in closer
 little closer and higher too (`zoom`, `lift`). Measured in both layouts:
 nothing reaches the title.
 
+**No fog**: the grey fog that rolled in behind an open project is gone, on
+every view (`Fog.jsx` and its CSS removed).
+
+**The loading circle lets go gently**: once a film has loaded, its points
+drift outwards as they fade (2.2s, eased) rather than fading where they
+are, and the film waits for them to be gone before it starts.
+
 Open at end of session: as at the end of session 4; pictures for Nap Nap
 Hooray's drawer, if wanted.

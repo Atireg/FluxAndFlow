@@ -7,7 +7,6 @@ import CatalogTags from '../components/CatalogTags.jsx';
 import TapHint from '../components/TapHint.jsx';
 import HintTag from '../components/HintTag.jsx';
 import CategoryFilter from '../components/CategoryFilter.jsx';
-import Fog from '../components/Fog.jsx';
 import VelocityTags from '../components/VelocityTags.jsx';
 import { emptyWords, hintWords } from './words.js';
 import { clearProjectLink, linkedProject, showProjectLink } from './links.js';
@@ -27,7 +26,7 @@ const nodesIn = (ref, selector) => [...(ref.current?.querySelectorAll(selector) 
  * `ui` object below: callbacks out of the engine, a handful of methods back
  * in. Nothing in the render loop goes through React state. See DECISIONS.md.
  *
- * Layers are stacked by z-index, never page order (fog 0, canvas 1, tags,
+ * Layers are stacked by z-index, never page order (canvas 1, tags,
  * string and tap hint 2, drawer 3) - Safari has drawn them the other way
  * round. The start-up loader stays inline in index.html, ahead of this
  * module, so it is on screen before React has even downloaded.
@@ -42,7 +41,6 @@ export default function App() {
     const canvasRef = useRef(null);
     const barRef = useRef(null);
     const drawerRef = useRef(null);
-    const fogRef = useRef(null);
     const tapHintRef = useRef(null);
     const hintStringRef = useRef(null);
     const hintTagRef = useRef(null);
@@ -92,10 +90,6 @@ export default function App() {
                 onEmptySlot: () => {
                     const tag = emptyTagRef.current;
                     if (tag) tag.textContent = emptyWords(tag.textContent);
-                },
-
-                onFog: (visible) => {
-                    fogRef.current?.classList.toggle('is-in', visible);
                 },
 
                 /**
@@ -228,8 +222,6 @@ export default function App() {
 
     return (
         <>
-            <Fog ref={fogRef} />
-
             <canvas className="webgl" ref={canvasRef} />
 
             <VelocityTags ref={velocityRef} />
