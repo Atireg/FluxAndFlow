@@ -397,5 +397,9 @@ every view (`Fog.jsx` and its CSS removed).
 drift outwards as they fade (2.2s, eased) rather than fading where they
 are, and the film waits for them to be gone before it starts.
 
+**Nap Nap Hooray's drawer** opens with a paragraph the user chose (option 2
+of three): having a baby as the busy, messy part of the real world, and the
+project built with the help of AI agents.
+
 Open at end of session: as at the end of session 4; pictures for Nap Nap
 Hooray's drawer, if wanted.

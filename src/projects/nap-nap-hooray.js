@@ -16,6 +16,9 @@ export default defineProject({
 
     // The drawer's text, the user's own word for word
     body: [
+        'Having a baby is part of the real world, and it is the moment the '
+        + 'real world turns busy, messy and complicated, with lots of flux and '
+        + 'flows. The author built this project with the kind help of AI agents.',
         'Nap Nap Hooray — “Every snooze, celebrated.”',
         'Nap Nap Hooray is a mobile-friendly website for logging and '
         + 'understanding a baby’s sleep: '
