@@ -70,6 +70,8 @@ const TURN_STOP = 3; // seconds the turn (and its floor) takes to slow to a stop
 // `view.fillScreen`: the whole device first, the points settling on its
 // screen (the dissolve takes 3.6s), then the move in on the screen
 const FILL_SCREEN_AT = 5; // seconds after the model is shown
+// How much of the loading circle's fade is left when the film starts over it
+const FILM_OVER_POINTS = 0.45;
 const FILL_SCREEN_DURATION = 2.4; // seconds the move in takes
 
 /**
@@ -561,8 +563,9 @@ export function createDetail({
             const project = state.selected?.userData.project;
             if (!project?.view?.fillScreen || !model.userData.screen || model.userData.screenFilled) return;
             // ...once the film has loaded, the model has turned to face the
-            // visitor and the loading circle's points have gone
-            if (since < FILL_SCREEN_AT || !model.userData.screenSettled || model.userData.screenLoading > 0) return;
+            // visitor and the loading circle's points are mostly gone - the
+            // film comes in as the last of them fade
+            if (since < FILL_SCREEN_AT || !model.userData.screenSettled || model.userData.screenLoading > FILM_OVER_POINTS) return;
 
             model.userData.screenFilled = true;
             if (!isHeld(model)) playScreenVideo(model, true);

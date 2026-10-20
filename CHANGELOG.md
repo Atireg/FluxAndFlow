@@ -416,5 +416,9 @@ pulled out. Measured at 375 x 667 and 390 x 844: clear in every step.
 white, with rounded corners, while its film loads, and the film plays
 clipped to the same corners.
 
+**No pause before the film**: it waited for the loading circle's points to
+be gone and then faded in over 1.2s; it now starts as the last of them
+fade and comes in over 0.7s.
+
 Open at end of session: as at the end of session 4; pictures for Nap Nap
 Hooray's drawer, if wanted.

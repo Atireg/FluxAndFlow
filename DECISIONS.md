@@ -881,7 +881,9 @@ project setting read by one code path, not a branch for the project:
   to face the visitor (slowing over `SPIN_SETTLE`) while the points drift
   gently out of the circle as they fade (`LOADING_FADE` 2.2s, eased,
   `SPINNER_RELEASE`) - asked for over a quicker fade where they were - and
-  the film waits for them to be gone. With no `screenVideo`
+  the film starts as the last of them fade (`FILM_OVER_POINTS`, the
+  film fading in over `VIDEO_FADE` 0.7s) - waiting for them to be gone
+  left too long a pause. With no `screenVideo`
   it would keep turning and circling.
 - **A white screen, rounded** (`addScreenPanel`): a white quad over the
   screen mesh, fading in with the model, and the film over it clipped to
