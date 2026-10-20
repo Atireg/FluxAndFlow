@@ -887,7 +887,9 @@ project setting read by one code path, not a branch for the project:
   it would keep turning and circling.
 - **A white screen, rounded** (`addScreenPanel`): a white quad over the
   screen mesh, fading in with the model, and the film over it clipped to
-  the same rounded corners (`SCREEN_CORNER`, one alpha mask for both). The
+  the same rounded corners (`SCREEN_CORNER`, worked out per pixel in the
+  shader, `roundCorners`, and smoothed over one; a 512px mask texture
+  showed its pixels close up on a sharp screen). The
   screen is part of the device's one grey mesh, so it is laid over rather
   than recoloured. Asked for: the grey screen read as switched off, and
   square film corners as pasted on.

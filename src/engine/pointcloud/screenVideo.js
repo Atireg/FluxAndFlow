@@ -42,25 +42,32 @@ function screenQuad(screen, lift, material) {
     geometry.setAttribute('uv', new THREE.Float32BufferAttribute([0, 0, 1, 0, 0, 1, 1, 1], 2));
     geometry.setIndex([0, 1, 2, 2, 1, 3]);
 
-    screen.mask ??= roundedMask(u.length() / v.length());
-    material.alphaMap = screen.mask;
+    roundCorners(material, u.length() / v.length());
     material.transparent = true;
     const quad = new THREE.Mesh(geometry, material);
     quad.raycast = () => {}; // the model's own screen answers a double-click
     return quad;
 }
 
-// White inside a rectangle of this shape with rounded corners, clear outside
-function roundedMask(shape) {
-    const canvas = document.createElement('canvas');
-    canvas.width = shape >= 1 ? 512 : Math.round(512 * shape);
-    canvas.height = shape >= 1 ? Math.round(512 / shape) : 512;
-    const context = canvas.getContext('2d');
-    context.fillStyle = '#fff';
-    context.beginPath();
-    context.roundRect(0, 0, canvas.width, canvas.height, SCREEN_CORNER * Math.min(canvas.width, canvas.height));
-    context.fill();
-    return new THREE.CanvasTexture(canvas);
+// Clear outside a rectangle of this shape (width / height) with rounded
+// corners, worked out per pixel and smoothed over one - a mask texture
+// showed its pixels, close up on a sharp screen
+function roundCorners(material, shape) {
+    material.onBeforeCompile = (shader) => {
+        shader.uniforms.uShape = { value: shape };
+        shader.uniforms.uCorner = { value: SCREEN_CORNER * Math.min(shape, 1) };
+        shader.vertexShader = shader.vertexShader
+            .replace('void main() {', 'varying vec2 vCornerUv;\nvoid main() {\n    vCornerUv = uv;');
+        shader.fragmentShader = shader.fragmentShader
+            .replace('void main() {', 'uniform float uShape;\nuniform float uCorner;\nvarying vec2 vCornerUv;\nvoid main() {')
+            .replace('#include <alphamap_fragment>', `
+    vec2 cornerHalf = vec2(uShape, 1.0) * 0.5;
+    vec2 cornerQ = abs((vCornerUv - 0.5) * vec2(uShape, 1.0)) - cornerHalf + uCorner;
+    float cornerD = length(max(cornerQ, 0.0)) + min(max(cornerQ.x, cornerQ.y), 0.0) - uCorner;
+    float cornerAa = max(fwidth(cornerD), 1e-5);
+    diffuseColor.a *= 1.0 - smoothstep(-cornerAa, cornerAa, cornerD);`);
+    };
+    material.customProgramCacheKey = () => `screen-corners-${shape.toFixed(3)}`;
 }
 
 /**

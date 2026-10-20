@@ -420,5 +420,8 @@ clipped to the same corners.
 be gone and then faded in over 1.2s; it now starts as the last of them
 fade and comes in over 0.7s.
 
+**Smooth screen corners**: the rounding was a 512px mask, pixelated close
+up on a sharp screen; it is now worked out per pixel in the shader.
+
 Open at end of session: as at the end of session 4; pictures for Nap Nap
 Hooray's drawer, if wanted.
