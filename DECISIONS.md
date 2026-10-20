@@ -888,7 +888,9 @@ project setting read by one code path, not a branch for the project:
   or once the film has loaded and the model faces the visitor again, the
   camera moves in square-on to the screen (`frameDevice` in
   camera/framing.js) and the film starts. It is framed into the band below
-  the title bar (`ui.barFraction()` plus `UNDER_BAR_GAP`) with the
+  the title bar (`ui.barFraction()` plus `UNDER_BAR_GAP`) - and, on a
+  phone, above the drawer's handle (`ui.handleFraction()`), and the drawer
+  too when it's out - with the
   device's own top at the top of that band - centring the screen there left
   the devices looking low, with room to spare under the title. Its number
   is how much room it leaves around the span from the device's top to the
@@ -897,8 +899,14 @@ project setting read by one code path, not a branch for the project:
   Filling the window outright came first; the user wanted the device seen
   whole, and its edges kept. **`view.drawer: 'whole'`**:
   with the About drawer out, the whole device again rather than a close-up,
-  fitted to its own outline - above the drawer on a phone,
-  `WHOLE_ABOVE_DRAWER_ZOOM` back so the handle doesn't cover it.
+  fitted to its own outline. **On a phone every device frame is
+  `frameDevice`**: the first step and the drawer-out one too fit the
+  device's own outline, centred between the title and the handle
+  (`DEVICE_WHOLE_MARGIN`). The pebble's `zoom` and `lift` fitted a tall
+  phone, and on a short one (375 x 667) the device ran under the handle and
+  up into the title; the drawer's handle covered its foot when pulled out.
+  The frame is worked out as the device will stand facing the visitor,
+  whatever its loading turn.
 - **`phone: { detailModel, screenVideo }`** shows a phone instead under
   860px, playing the mobile recording: a narrow screen shows a tall film
   better than a laptop's wide one. Chosen as the project opens
