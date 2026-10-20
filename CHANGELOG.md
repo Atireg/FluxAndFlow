@@ -441,5 +441,8 @@ with the About drawer open the phone (and kh ReUse's laptop, the same
 code) stays square-on, its screen parallel to the window, beside the
 drawer on a wide screen rather than seen from above.
 
+**Nap Nap Hooray's film swapped** for the user's orange version (1170 x
+1992, re-encoded at full size to 6.3 MB).
+
 Open at end of session: as at the end of session 4; pictures for Nap Nap
 Hooray's drawer, if wanted.
