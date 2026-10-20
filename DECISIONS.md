@@ -914,8 +914,11 @@ project setting read by one code path, not a branch for the project:
   Filling the window outright came first; the user wanted the device seen
   whole, and its edges kept. **`view.drawer: 'whole'`**:
   with the About drawer out, the whole device again rather than a close-up,
-  fitted to its own outline. **On a phone every device frame is
-  `frameDevice`**: the first step and the drawer-out one too fit the
+  fitted to its own outline, square-on - its screen parallel to the
+  window's, asked for over the view's angle from above - left of the drawer
+  on a wide screen, centred by where its corners land on screen (a laptop's
+  keyboard comes out towards the camera and looks larger).
+  **On a phone every device frame is `frameDevice`**: the first step and the drawer-out one too fit the
   device's own outline, centred between the title and the handle
   (`DEVICE_WHOLE_MARGIN`). The pebble's `zoom` and `lift` fitted a tall
   phone, and on a short one (375 x 667) the device ran under the handle and

@@ -435,5 +435,11 @@ Digital Technologies", in the same paragraph; and the user's "Tech
 overview" list added at the end of the drawer's text, the old one-line
 "Tech stack" sentence removed.
 
+**Nap Nap Hooray's drawer rows**: 2026, "Web developer using AI",
+"Sleepless nights and cranky days". **The drawer out, a device square-on**:
+with the About drawer open the phone (and kh ReUse's laptop, the same
+code) stays square-on, its screen parallel to the window, beside the
+drawer on a wide screen rather than seen from above.
+
 Open at end of session: as at the end of session 4; pictures for Nap Nap
 Hooray's drawer, if wanted.

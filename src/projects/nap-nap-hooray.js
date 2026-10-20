@@ -14,7 +14,10 @@ export default defineProject({
     // Research, teaching or the real world - its tag, and the catalog's filter
     category: 'real-world',
 
-    // The drawer's text, the user's own word for word
+    // The drawer's rows and text, the user's own word for word
+    year: '2026',
+    role: 'Web developer using AI',
+    context: 'Sleepless nights and cranky days',
     body: [
         'Having a baby is part of the real world, and it is the moment the '
         + 'real world turns busy, messy and complicated, with lots of flux and '

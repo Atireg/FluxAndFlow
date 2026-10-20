@@ -56,7 +56,8 @@ in a pull-out drawer.
   phone turning while the user's recording loads; then, as kh ReUse, square-on
   to the screen as it plays (`nap-nap-hooray.mp4`, 1170 x 1992, three
   times the screen's 390 x 664); a double-click pauses it. A crescent moon (`moon.glb`,
-  `thumbSize` 1.3) in its pebble. Drawer: the user's text, with two lists.
+  `thumbSize` 1.3) in its pebble. Drawer: 2026, "Web developer using AI",
+  "Sleepless nights and cranky days"; the user's text, with two lists.
 - **Links**: each project's own address is `#<id>` (`#rock-print`).
 - **Drawer copy** is real for all four projects, approved by the user
   word for word; change it only on request.
@@ -180,7 +181,7 @@ A solid model with a film on its screen - `kh-reuse.js` is the example;
     screenVideo: 'videos/x.mp4',          // a muted, looping film on it; the device turns and the points circle till it loads
     phone: { detailModel, screenVideo },  // shown instead under 860px
     view: { ..., fillScreen: 1.05,        // whole device first, then square-on to the screen at 5s, its top under the title
-            drawer: 'whole' },            // the whole model above the drawer on a phone, not a close-up
+            drawer: 'whole' },            // with the drawer out, the whole device square-on, not a close-up
     images: [{ ..., pair: true }],        // two to a row on a phone too (tall screenshots)
 ```
 
