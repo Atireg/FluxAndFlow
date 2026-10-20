@@ -468,5 +468,9 @@ where it had grown by accretion: one entry for the devices' shared
 behaviour, the shared helpers listed, and how films, canvas-only shots,
 bisecting and a user's screen recording are checked headless.
 
+**Nap Nap Hooray's opening paragraph**: "...built this project in
+collaboration with the sleep consultant Hristiana Yovkova-Arnaudova and the
+kind help of AI agents" (the user's words).
+
 Open at end of session: as at the end of session 4; a seventh Nap Nap
 Hooray picture, to come as a file.
