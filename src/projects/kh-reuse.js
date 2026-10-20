@@ -27,7 +27,9 @@ export default defineProject({
         + 'beams, timber and glass in circulation instead of sending them to '
         + 'landfill.',
         'It was made for [knippershelbig](https://www.knippershelbig.com/), '
-        + 'where the author is Head of Digital Technologies.',
+        + 'where the author is Head of Digital Technologies. '
+        + 'The author wrote both the frontend and the backend from scratch, '
+        + 'before AI tools were part of everyday development.',
         'Visitors can browse demolition projects, such as Stuttgart Rathaus and '
         + 'Kittler Schule Heilbronn, and see the elements recovered from each '
         + 'one. The element catalog can be filtered by material, profile type, '
@@ -37,8 +39,6 @@ export default defineProject({
         + 'only to demonstrate the platform.',
         'Tech stack: React (Vite) frontend on Firebase Hosting, Node.js server '
         + 'on Google Cloud Run, and a MongoDB Atlas database.',
-        'The author wrote both the frontend and the backend from scratch, '
-        + 'before AI tools were part of everyday development.',
         '👉 Live demo: [kh-reuse.web.app](https://kh-reuse.web.app/)',
     ],
 

@@ -233,9 +233,10 @@ A solid model with a film on its screen - `kh-reuse.js` is the example;
   the shader (`pointcloud/trails.js`); change the motion in `gather.glsl`
   or `DISSOLVE_GLSL` and the tails follow. A cloud's gather gives only
   every fifth point a tail (`GATHER_TRAIL_EVERY`) - more made it lag.
-- **The gather runs on its own clock** (`gatherTime`, at most
-  `GATHER_MAX_STEP` a frame) so a stalled frame holds it rather than
-  jumping it; everything else uses `detailSince(pebble, t)`.
+- **The gather and the pebbles' arrival run on their own clocks**
+  (`gatherTime`, at most `GATHER_MAX_STEP` a frame; `state.arrivalTime`,
+  `ARRIVAL_MAX_STEP`) so a stalled frame holds them rather than jumping
+  them; everything else uses `detailSince(pebble, t)`.
 - **The tap hint** (`tags.js`, `HINT_*`) pulses, then falls like a leaf;
   double-tapped it dissolves through an SVG filter on the dot and words
   only - on the full-screen string SVG it froze the page. Change its CSS

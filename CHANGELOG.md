@@ -423,5 +423,15 @@ fade and comes in over 0.7s.
 **Smooth screen corners**: the rounding was a 512px mask, pixelated close
 up on a sharp screen; it is now worked out per pixel in the shader.
 
+**No jump as the pebbles surface**: the user's screen recording showed the
+canvas stalling for about 0.6s as the landing page left, and every pebble
+then jumping to where its rise should have got to. The rise (and the
+orange glow waiting on it) now runs on its own clock, a frame's worth at
+most a frame, so a stall pauses it instead.
+
+**kh ReUse's drawer**: "The author wrote both the frontend and the backend
+from scratch, ..." moved, asked for, to follow the sentence ending "Head of
+Digital Technologies", in the same paragraph.
+
 Open at end of session: as at the end of session 4; pictures for Nap Nap
 Hooray's drawer, if wanted.

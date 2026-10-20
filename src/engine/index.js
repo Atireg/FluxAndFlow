@@ -10,7 +10,7 @@ import { createDetail } from './detail.js';
 import { createTags } from './tags.js';
 import { createStreamsView } from './streams-view.js';
 import { createFlow } from './pebbles/flow.js';
-import { applyArrival, ARRIVAL_AFTER_LOADER, startArrival } from './pebbles/arrival.js';
+import { advanceArrival, applyArrival, ARRIVAL_AFTER_LOADER, startArrival } from './pebbles/arrival.js';
 import { applyFocus, fadeFocus, inFocus, setFocus } from './pebbles/focus.js';
 import { initSpotlightCycle, updateSpotlightCycle } from './pebbles/spotlight.js';
 import { placeAtRest } from './pebbles/wander.js';
@@ -168,6 +168,7 @@ export function createEngine({ canvas, source, ui }) {
         // The gather's step: a slow phone keeps pace, a stall doesn't jump it
         const gatherStep = Math.min(elapsedTime - lastFrameTime, GATHER_MAX_STEP);
         lastFrameTime = elapsedTime;
+        advanceArrival(state, elapsedTime, frameTime);
 
         /**
          * The catalog's own motion - wander, the flow, the spotlight - only
@@ -182,7 +183,7 @@ export function createEngine({ canvas, source, ui }) {
             grid.pebbles.forEach((pebble) => catalog.updatePebble(pebble, elapsedTime));
             flow.update(frameTime);
             grid.pebbles.forEach(flow.apply);
-            grid.pebbles.forEach((pebble) => applyArrival(pebble, state.arrivalStartedAt, elapsedTime));
+            grid.pebbles.forEach((pebble) => applyArrival(pebble, state.arrivalTime));
             grid.pebbles.forEach((pebble) => applyFocus(pebble, grid.viewHeight, elapsedTime));
             grid.pebbles.forEach((pebble) => fadeFocus(pebble, elapsedTime));
         } else if (state.view === 'dropping') {
@@ -201,7 +202,7 @@ export function createEngine({ canvas, source, ui }) {
             });
             flow.update(frameTime);
             grid.pebbles.forEach(flow.apply);
-            grid.pebbles.forEach((pebble) => applyArrival(pebble, state.arrivalStartedAt, elapsedTime));
+            grid.pebbles.forEach((pebble) => applyArrival(pebble, state.arrivalTime));
             grid.pebbles.forEach((pebble) => applyFocus(pebble, grid.viewHeight, elapsedTime));
             grid.pebbles.forEach((pebble) => fadeFocus(pebble, elapsedTime));
         } else {

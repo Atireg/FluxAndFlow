@@ -353,7 +353,12 @@ setting off at a random moment within `ARRIVAL_STAGGER` (2.4s). Then, asked
 for too, what's inside them arrives one by one in a random order
 (`CONTENT_ARRIVAL_*`: the first 3.2s in, 0.35s apart, each growing in with
 a slight overshoot). Like the rest of a pebble's state it is a pure
-function of time (since `startArrival`), laid over whatever its mode has
+function of time - its own clock, `state.arrivalTime` from
+`startArrival`, moved on at most `ARRIVAL_MAX_STEP` a frame
+(`advanceArrival`), as the gather's is: on the scene's clock, a stall of
+half a second as the landing page left (on the user's machine, not
+reproducible headless) made every pebble jump at once to where it should
+have got to; the orange glow waits on the same clock - laid over whatever its mode has
 set by `applyArrival` - so the return no longer tweens opacity (GSAP's
 tween and the per-frame state fought, see `closeProject`); 'returning'
 paints the resting state each frame and the arrival scales it. The loader

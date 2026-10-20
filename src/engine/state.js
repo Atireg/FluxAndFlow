@@ -33,6 +33,9 @@ export function createState() {
 
         // The grid's arrival - hidden until the loader leaves
         arrivalStartedAt: Infinity,
+        // The arrival's own clock: seconds since it began, a frame's worth at
+        // most a frame (pebbles/arrival.js's advanceArrival)
+        arrivalTime: -Infinity,
 
         // One pebble at a time glows orange and jumps - see catalog.js
         spotlight: {

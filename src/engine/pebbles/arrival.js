@@ -6,6 +6,11 @@ import { easeOutBack, smooth01 } from '../ease.js';
  * the whole grid appearing at once. A pure function of the time since it
  * began, laid over whatever the pebble's mode has set.
  *
+ * It runs on its own clock (`state.arrivalTime`, advanced at most
+ * ARRIVAL_MAX_STEP a frame) rather than the scene's: a stalled frame - the
+ * landing page leaving, on a real machine - holds it, where the scene's clock
+ * made every pebble jump to where it should have got to meanwhile.
+ *
  * It multiplies opacity and scale - the content's too - AFTER the mode has
  * set them, so whatever a mode leaves unset must be reset by that mode
  * first, or it compounds.
@@ -14,6 +19,7 @@ const ARRIVAL_DURATION = 3.2; // seconds for one pebble to arrive - 1.6 was too 
 const ARRIVAL_STAGGER = 2.4; // seconds - the latest any pebble sets off
 const ARRIVAL_SMALLEST = 0.35; // the size it surfaces at, as a share of its own
 const ARRIVAL_DEPTH = 4; // units below its place it rises from
+const ARRIVAL_MAX_STEP = 1 / 20; // seconds the arrival moves on in one frame, at most
 
 // Then what's inside them - the rock, a project's model - one by one, in a
 // random order, once the pebbles have mostly surfaced
@@ -30,6 +36,7 @@ export const ARRIVAL_AFTER_LOADER = 0; // seconds into the loader's fade - they 
  */
 export function startArrival(state, pebbles, at) {
     state.arrivalStartedAt = at;
+    state.arrivalTime = 0;
 
     const order = pebbles.map((pebble, i) => i).sort(() => Math.random() - 0.5);
 
@@ -39,28 +46,34 @@ export function startArrival(state, pebbles, at) {
     });
 }
 
+// One frame of the arrival's clock, once it has begun
+export function advanceArrival(state, elapsedTime, frameTime) {
+    if (elapsedTime >= state.arrivalStartedAt) state.arrivalTime += Math.min(frameTime, ARRIVAL_MAX_STEP);
+}
+
 // How far a pebble's content has grown in, 0..1, overshooting a touch
-function contentArrivalOf(pebble, startedAt, elapsedTime) {
-    return easeOutBack((elapsedTime - startedAt - (pebble.userData.contentArrivalDelay ?? 0)) / CONTENT_ARRIVAL_DURATION);
+function contentArrivalOf(pebble, time) {
+    return easeOutBack((time - (pebble.userData.contentArrivalDelay ?? 0)) / CONTENT_ARRIVAL_DURATION);
 }
 
 // How far a pebble has arrived, 0..1, eased at both ends: it sets off from
 // rest and settles. Eased out only, it started at its fastest - a jump
 // rather than a rise, noticed as the loader cleared
-function arrivalOf(pebble, startedAt, elapsedTime) {
-    return smooth01((elapsedTime - startedAt - (pebble.userData.arrivalDelay ?? 0)) / ARRIVAL_DURATION);
+function arrivalOf(pebble, time) {
+    return smooth01((time - (pebble.userData.arrivalDelay ?? 0)) / ARRIVAL_DURATION);
 }
 
-// On top of the pebble's mode: smaller, lower and fainter until it's here
-export function applyArrival(pebble, startedAt, elapsedTime) {
+// On top of the pebble's mode: smaller, lower and fainter until it's here.
+// `time` is the arrival's own clock (state.arrivalTime)
+export function applyArrival(pebble, time) {
     const content = pebble.userData.content;
     if (content) {
-        const grown = contentArrivalOf(pebble, startedAt, elapsedTime);
+        const grown = contentArrivalOf(pebble, time);
         content.visible = grown > 0.01;
         if (grown !== 1) content.scale.multiplyScalar(Math.max(grown, 0.001));
     }
 
-    const k = arrivalOf(pebble, startedAt, elapsedTime);
+    const k = arrivalOf(pebble, time);
     // Only once it's mostly there does it hide the streams passing under it
     pebble.material.depthWrite = k > 0.3;
     if (k >= 1) return;
