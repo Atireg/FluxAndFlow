@@ -99,7 +99,9 @@ vec3 dissolvePosition(vec3 home, float T, float time, out float falling) {
     float puff = smoothstep(0.0, 0.3, T);
     vec3 swollen = start * (1.0 + uSwell * puff) + aDrift * puff;
     falling = clamp((T - 0.25 - aDelay * 0.35) / 0.35, 0.0, 1.0);
-    vec3 ground = mix(aGround, screenPoint(time), uScreen);
+    // Chosen, not mixed: with no screen its vectors are zero, normalize()
+    // gives NaN, and NaN times nothing is still NaN - the ground vanished
+    vec3 ground = uScreen > 0.5 ? screenPoint(time) : aGround;
     vec3 landed = mix(swollen, ground, falling * falling);
     return mix(p, landed, landsHere());
 }

@@ -448,4 +448,10 @@ drawer on a wide screen rather than seen from above.
 drawer, two to a row on a wide screen from the first (a new picture
 setting, `half`) and one to a row on a phone.
 
+**Emergent Space's ground back**: its pebble's points no longer settled
+into the ground under the aggregates - since the loading circle went in,
+which normalised a project's zero screen vectors into NaN and mixed that
+in at weight 0 (still NaN). Bisected headless; the ground is chosen with a
+condition now.
+
 Open at end of session: as at the end of session 4.

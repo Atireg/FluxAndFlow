@@ -1191,7 +1191,12 @@ correct anyway:
 - **No undefined GLSL.** A reversed `smoothstep(1.0, 0.01, x)` and a
   `pow()` at 0 are undefined and Safari's Metal backend needn't do what
   Chrome does (a NaN hides every point); both rewritten to identical,
-  defined forms. Keep shader code inside what GLSL ES defines.
+  defined forms. Keep shader code inside what GLSL ES defines. And never
+  blend a value away with `mix(..., 0.0)` when it can be NaN: NaN times
+  nothing is still NaN. The screens' loading circle did that -
+  `normalize()` of a project's zero screen vectors - and hid Emergent
+  Space's ground of fallen points everywhere, for a day; it is chosen with
+  a condition now.
 - **Stacking by z-index, never page order.** The canvas is 1; the catalog's tags and string and the tap hint are over it (2).
   At equal z-index Safari drew the canvas over later layers - the hint
   showed behind the point cloud, the names behind the glass.

@@ -255,7 +255,8 @@ A solid model with a film on its screen - `kh-reuse.js` is the example;
   additive blending, colours through `screenColor()`. No fog, in
   the scene or on the page.
 - **Safari** can't be tested here. Keep GLSL inside defined behaviour (no
-  reversed `smoothstep`, no `pow(0, y)`), stack HTML by z-index (canvas 1, overlays 2, drawer 3), and select on `pointerup`, never
+  reversed `smoothstep`, no `pow(0, y)`, no `normalize()` of what can be
+  zero - and choose, don't `mix(x, maybeNaN, 0.0)`: NaN times 0 is NaN), stack HTML by z-index (canvas 1, overlays 2, drawer 3), and select on `pointerup`, never
   `click`. Never leave a test switch reachable from the public address:
   Safari auto-completed an old `?cloudtest` and showed it for days.
 - **Nothing runs at module scope in `src/engine/`** - everything waits for
