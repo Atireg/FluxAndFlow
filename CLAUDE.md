@@ -57,7 +57,7 @@ in a pull-out drawer.
   to the screen as it plays (`nap-nap-hooray.mp4`, 1170 x 1992, three
   times the screen's 390 x 664); a double-click pauses it. A crescent moon (`moon.glb`,
   `thumbSize` 1.3) in its pebble. Drawer: 2026, "Web developer using AI",
-  "Sleepless nights and cranky days"; the user's text, with two lists; five
+  "Sleepless nights and cranky days"; the user's text, with two lists; six
   phone screenshots (two to a row on a wide screen, the first `half`).
 - **Links**: each project's own address is `#<id>` (`#rock-print`).
 - **Drawer copy** is real for all four projects, approved by the user

@@ -444,7 +444,7 @@ drawer on a wide screen rather than seen from above.
 **Nap Nap Hooray's film swapped** for the user's orange version (1170 x
 1992, re-encoded at full size to 6.3 MB).
 
-**Nap Nap Hooray's pictures**: five phone screenshots of the site in its
+**Nap Nap Hooray's pictures**: six phone screenshots of the site in its
 drawer, two to a row on a wide screen from the first (a new picture
 setting, `half`) and one to a row on a phone.
 

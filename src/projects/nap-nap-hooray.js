@@ -99,6 +99,11 @@ export default defineProject({
             alt: 'On a phone: wake and sleep windows over the last five days, and the naps history',
             ratio: '900 / 1948',
         },
+        {
+            src: 'images/nap-nap-hooray-06.jpg',
+            alt: 'On a phone: the sleep timeline of the last five days, with the good times to meet friends, and the form for adding a sleep',
+            ratio: '900 / 1948',
+        },
     ],
 
     // A crescent moon in its pebble - smaller than the others' (1.9), its
