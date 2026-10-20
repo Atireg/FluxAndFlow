@@ -40,6 +40,41 @@ export default defineProject({
         'Tech stack: React (Vite) frontend on Firebase Hosting, Node.js server '
         + 'on Google Cloud Run, and a MongoDB Atlas database.',
         '👉 Live demo: [kh-reuse.web.app](https://kh-reuse.web.app/)',
+        'Tech overview',
+        [
+            'Frontend: React 19 + Vite 6, with React Router 7 and plain CSS. The '
+            + 'layout is responsive: on phones and tablets the wide element table '
+            + 'becomes cards with collapsible sections, and on desktop the '
+            + 'add-element form flows into two or three aligned columns. '
+            + 'Stylesheets get new file names with each build, so a deploy never '
+            + 'mixes old styles with new code. Toast messages come from '
+            + 'react-toastify.',
+            'Backend: a small Node.js 22 HTTP server without a framework, '
+            + 'packaged with Docker and running on Google Cloud Run. Data lives in '
+            + 'MongoDB Atlas (free M0 cluster) in projects, elements, users, '
+            + 'baskets and sessions.',
+            'Accounts and access: email/password sign-up and login with sessions '
+            + 'stored in MongoDB. Guests can browse projects and elements. '
+            + 'Logged-in users can add projects and elements and collect elements '
+            + 'in a personal basket (“Warenkorb”). Only a record’s owner can edit '
+            + 'or delete it; the server checks this as well as the website.',
+            'Data rules: elements belong to a project and can be filtered by '
+            + 'material, profile type, profile and condition. Updates never '
+            + 'overwrite a record’s ID, owner or creation date.',
+            'Import/export: an Excel upload for adding elements in bulk exists in '
+            + 'the code, but it’s currently hidden.',
+            'Quality: ESLint. There are no automated unit tests yet. Changes are '
+            + 'checked in a real browser with Playwright at phone, tablet and '
+            + 'desktop widths against the live backend, and server changes are '
+            + 'tested against a stand-in database before deploying.',
+            'Hosting: the frontend is on Firebase Hosting, deployed by GitHub '
+            + 'Actions on every merge to main. The server is redeployed to Cloud '
+            + 'Run by hand (gcloud run deploy --source), and its database '
+            + 'connection string is set as an environment variable there.',
+            'Privacy: no database credentials or keys are stored in the '
+            + 'repository. The .env file holding the connection string is '
+            + 'excluded from git.',
+        ],
     ],
 
     // Screenshots: the two on a desktop across the drawer, then the three on

@@ -431,7 +431,8 @@ most a frame, so a stall pauses it instead.
 
 **kh ReUse's drawer**: "The author wrote both the frontend and the backend
 from scratch, ..." moved, asked for, to follow the sentence ending "Head of
-Digital Technologies", in the same paragraph.
+Digital Technologies", in the same paragraph; and the user's "Tech
+overview" list added at the end of the drawer's text.
 
 Open at end of session: as at the end of session 4; pictures for Nap Nap
 Hooray's drawer, if wanted.
