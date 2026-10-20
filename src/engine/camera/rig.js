@@ -20,6 +20,13 @@ export const CATALOG_FOV = 45;
 export function halfHeightAt(fov, distance) {
     return distance * Math.tan(THREE.MathUtils.degToRad(fov) / 2);
 }
+
+// Device pixels per CSS pixel, drawn at no more than 2 - a phone's 3x costs
+// more than it shows
+export function pixelRatio() {
+    return Math.min(window.devicePixelRatio || 1, 2);
+}
+
 export const DETAIL_FOV = { side: 45, stacked: 30 };
 
 /**
@@ -48,7 +55,7 @@ export function createCameraRig({ canvas, scene, screen, onShaderError }) {
 
     const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
     renderer.setSize(screen.width, screen.height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(pixelRatio());
 
     // A shader that won't compile draws nothing at all, silently. Say so in
     // the project bar, and keep the compiler's message for the console.
@@ -257,7 +264,7 @@ export function createCameraRig({ canvas, scene, screen, onShaderError }) {
             rig.refreshPointScale();
 
             renderer.setSize(screen.width, screen.height);
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.setPixelRatio(pixelRatio());
         },
 
         render() {

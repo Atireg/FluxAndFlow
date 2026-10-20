@@ -156,6 +156,19 @@ export function createEngine({ canvas, source, ui }) {
     let lastFrameTime = 0;
     let frameRequest = null;
 
+    /**
+     * Laid over whatever a pebble's mode has set, every frame, in this order:
+     * its arrival (catalog and returning only), then the filter's sink and
+     * fade
+     */
+    function layOver(elapsedTime, { arrival }) {
+        grid.pebbles.forEach((pebble) => {
+            if (arrival) applyArrival(pebble, state.arrivalTime);
+            applyFocus(pebble, grid.viewHeight, elapsedTime);
+            fadeFocus(pebble, elapsedTime);
+        });
+    }
+
     function animate() {
         frameRequest = requestAnimationFrame(animate);
 
@@ -183,13 +196,10 @@ export function createEngine({ canvas, source, ui }) {
             grid.pebbles.forEach((pebble) => catalog.updatePebble(pebble, elapsedTime));
             flow.update(frameTime);
             grid.pebbles.forEach(flow.apply);
-            grid.pebbles.forEach((pebble) => applyArrival(pebble, state.arrivalTime));
-            grid.pebbles.forEach((pebble) => applyFocus(pebble, grid.viewHeight, elapsedTime));
-            grid.pebbles.forEach((pebble) => fadeFocus(pebble, elapsedTime));
+            layOver(elapsedTime, { arrival: true });
         } else if (state.view === 'dropping') {
             grid.pebbles.forEach((pebble) => updateDroppingPebble(pebble, state, elapsedTime));
-            grid.pebbles.forEach((pebble) => applyFocus(pebble, grid.viewHeight, elapsedTime));
-            grid.pebbles.forEach((pebble) => fadeFocus(pebble, elapsedTime));
+            layOver(elapsedTime, { arrival: false });
             updateDissolve({ state, renderer: rig.renderer, camera: rig.camera, elapsedTime });
         } else if (state.view === 'returning') {
             // Back home before they fade in, wherever the drop left them -
@@ -202,9 +212,7 @@ export function createEngine({ canvas, source, ui }) {
             });
             flow.update(frameTime);
             grid.pebbles.forEach(flow.apply);
-            grid.pebbles.forEach((pebble) => applyArrival(pebble, state.arrivalTime));
-            grid.pebbles.forEach((pebble) => applyFocus(pebble, grid.viewHeight, elapsedTime));
-            grid.pebbles.forEach((pebble) => fadeFocus(pebble, elapsedTime));
+            layOver(elapsedTime, { arrival: true });
         } else {
             // The camera starts moving in before the drop has finished - the
             // rest of the fall plays out under openProject's fade

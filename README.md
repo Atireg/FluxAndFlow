@@ -32,8 +32,8 @@ TO DOs
 ======
 
 Next up (waiting on content or a check from the user)
-    [ ] Captions / photo credits for both projects' five pictures, if
-        wanted (the `caption` fields are empty)
+    [ ] Captions / photo credits for the drawers' pictures, if wanted (the
+        `caption` fields are empty)
     [ ] Check the licensing/attribution for the Rock Print and Emergent
         Space models now that the repository is public and the site serves
         them
@@ -47,13 +47,16 @@ Next up (waiting on content or a check from the user)
         Vimeo `videos`)
     [ ] More projects: each needs a slot, a .glb (point cloud or mesh) and
         a `view` - see CLAUDE.md
-    [ ] kh ReUse on a real phone and in Safari: the film starting by itself
-        (muted autoplay), the two-step camera, the double-tap pause
+    [ ] kh ReUse and Nap Nap Hooray on a real phone and in Safari: the film
+        starting by itself (muted autoplay), the two-step camera, the
+        double-tap pause, the pebbles' rise without a jump
     [ ] kh ReUse: confirm the knippershelbig link (www.knippershelbig.com,
         unreachable from the container)
     [x] Nap Nap Hooray (slot 4): a recording of the site for its phone's
         screen (390 x 664, like kh ReUse's mobile one)
     [x] Nap Nap Hooray: pictures in its drawer
+    [ ] Nap Nap Hooray: a seventh picture (Sleep per day / Number of naps),
+        sent inline - to come as a file
     [ ] Emergent Space's drop on a phone: confirm it runs smoothly on a real
         device (it was only checked with software rendering here)
     [ ] The catalog's streams on a phone: WebGL draws them one device pixel

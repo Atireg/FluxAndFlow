@@ -1,4 +1,4 @@
-import { DEVICE } from './devices.js';
+import { DEVICE, DEVICE_VIEW } from './devices.js';
 import { defineProject } from './schema.js';
 
 /**
@@ -125,11 +125,8 @@ export default defineProject({
     // On a phone (under 860px), a phone instead of the laptop (its screen
     // also 'Screen'), playing the mobile recording
     phone: { detailModel: 'models/phone.glb', screenVideo: 'videos/kh-reuse-mobile.mp4' },
-    // First the whole device, from a little above (`turn: -90` undoes the
-    // detail view's quarter turn, so its front faces the camera) while the
-    // points settle; then square-on to its screen as the film starts,
-    // `fillScreen` times as far back as would put the screen's edges at the
-    // window's - the device's own edges in view, its top below the title.
-    // With the About drawer out, the whole device again (`drawer: 'whole'`).
-    view: { elevation: 15, turn: -90, zoom: { side: 1.4, stacked: 1.85 }, lift: { side: 0.025, stacked: 0.07 }, fillScreen: 1.05, drawer: 'whole' },
+    // Seen as every device is (devices.js): the whole of it first, then in
+    // on its screen as the film starts; how close and how high the first
+    // view is, on a wide screen, is its own (on a phone it's fitted)
+    view: { ...DEVICE_VIEW, zoom: { side: 1.4, stacked: 1.85 }, lift: { side: 0.025, stacked: 0.07 } },
 });

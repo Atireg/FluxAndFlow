@@ -38,7 +38,7 @@ The project view: camera
 The project view: point cloud
 - Quantized, not Draco-compressed
 - A mesh becomes points as it loads
-- kh ReUse: a laptop with a film on its screen
+- The devices: a laptop and a phone with a film on the screen
 - Emergent Space: aggregates dropped with live physics
 - Point size, three sizes, three inks
 - Points gather out of a scattered cloud
@@ -843,8 +843,8 @@ drawn as the mesh itself (`drop.solid`, below); its sampled points are no
 longer seen.
 
 
-kh ReUse: a laptop with a film on its screen
---------------------------------------------
+The devices: a laptop and a phone with a film on the screen
+-----------------------------------------------------------
 
 The user asked for a 3D model, not a point cloud: a laptop, open, its
 screen to the visitor and not turning, the pebble's points on the screen,
@@ -1279,7 +1279,9 @@ On a phone (under 860px) every picture runs the full width, one after the
 other (asked for - two to a row, Rock Print's were too small to see);
 the two-to-a-row layout is for the side drawer on a wide screen. A `pair`
 picture stays two to a row there too: a tall phone screenshot at full
-width would fill several screens (asked for, kh ReUse's three).
+width would fill several screens (asked for, kh ReUse's three). A `half`
+picture keeps the first from spanning the drawer on a wide screen, so tall
+screenshots start two to a row (asked for, Nap Nap Hooray's).
 
 **Links and lists in the text**: a drawer paragraph's `[words](https://...)`
 becomes a link opening in a new tab (`withLinks` in ProjectDrawer.jsx), and
@@ -1580,8 +1582,11 @@ silently hid one of them before).
 The point is that the behaviour is uniform: there is no per-project branch
 anywhere in the engine. A project that wants to behave differently says so
 in its own file through `view`, `gather`, `drop`, `points`, `thumbSize`,
-`doubleClick`, `autoZoom` or `eyeLevel`, and the one code path reads it. Adding a project is: write the module, add
-it to the list.
+`doubleClick`, `autoZoom`, `eyeLevel`, `solid`, `screen`, `screenVideo`
+or `phone`, and the one code path reads it. Adding a project is: write the
+module, add it to the list. Settings several projects share live once,
+beside them, and are spread in: `src/projects/devices.js` (`DEVICE`,
+`DEVICE_VIEW`) for the devices.
 
 The engine does not import `src/projects/` at all. It is handed
 `catalogSource` - how many slots, what sits in each, the empty slot's

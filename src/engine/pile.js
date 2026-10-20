@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { smooth01 } from './ease.js';
+import { pixelRatio } from './camera/rig.js';
 
 /**
  * A pile: several copies of one crossed-rod aggregate dropped onto a
@@ -102,7 +103,7 @@ function makeContactMaterial() {
         uniforms: {
             uTime: { value: 0 },
             uShow: { value: 0 },
-            uSize: { value: CONTACT_PX * Math.min(window.devicePixelRatio || 1, 2) },
+            uSize: { value: CONTACT_PX * pixelRatio() },
             uInk: { value: CONTACT_INK },
         },
         vertexShader: `

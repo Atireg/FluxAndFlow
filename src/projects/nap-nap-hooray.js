@@ -1,4 +1,4 @@
-import { DEVICE } from './devices.js';
+import { DEVICE, DEVICE_VIEW } from './devices.js';
 import { defineProject } from './schema.js';
 
 /**
@@ -118,8 +118,7 @@ export default defineProject({
     doubleClick: 'hold',
     // The user's recording of the site (390 x 664, as the screen; muted, looping)
     screenVideo: 'videos/nap-nap-hooray.mp4',
-    // Square-on from a little above (`turn: -90` undoes the detail view's
-    // quarter turn); then, as the film starts, square-on to its screen
-    // (`fillScreen`, as kh ReUse); with the About drawer out, the whole phone
-    view: { elevation: 15, turn: -90, zoom: { side: 1.2, stacked: 1.85 }, lift: { side: -0.03, stacked: 0.07 }, fillScreen: 1.05, drawer: 'whole' },
+    // Seen as every device is (devices.js); how close and how high the first
+    // view is, on a wide screen, is its own (on a phone it's fitted)
+    view: { ...DEVICE_VIEW, zoom: { side: 1.2, stacked: 1.85 }, lift: { side: -0.03, stacked: 0.07 } },
 });

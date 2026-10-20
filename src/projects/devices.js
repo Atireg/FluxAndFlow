@@ -13,3 +13,17 @@ export const DEVICE = {
     orbit: false,
     screen: 'Screen',
 };
+
+/**
+ * ...and how they're seen: square-on from a little above (`turn: -90` undoes
+ * the detail view's quarter turn, so the front faces the camera), then in on
+ * the screen as the film starts (`fillScreen`), the whole device again with
+ * the About drawer out. Spread into a project's view with its own `zoom` and
+ * `lift`: `view: { ...DEVICE_VIEW, zoom, lift }`.
+ */
+export const DEVICE_VIEW = {
+    elevation: 15,
+    turn: -90,
+    fillScreen: 1.05,
+    drawer: 'whole',
+};

@@ -458,4 +458,15 @@ condition now.
 of three): the aggregates dropped with real-time physics in the browser,
 the arrows and dots measured live.
 
-Open at end of session: as at the end of session 4.
+**Cleanup** (asked for): repeated code folded into shared helpers - a
+box's corners (`boxCorners`, framing.js, used by the pebble's fit and the
+device's), the drawing's pixel ratio (`pixelRatio`, rig.js, used by the
+renderer twice and the pile's contact dots), the arrival, sink and fade
+laid over every pebble (`layOver`, index.js, three copies), and the
+devices' shared view (`DEVICE_VIEW`, devices.js). CLAUDE.md rewritten
+where it had grown by accretion: one entry for the devices' shared
+behaviour, the shared helpers listed, and how films, canvas-only shots,
+bisecting and a user's screen recording are checked headless.
+
+Open at end of session: as at the end of session 4; a seventh Nap Nap
+Hooray picture, to come as a file.

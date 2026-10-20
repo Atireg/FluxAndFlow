@@ -166,6 +166,15 @@ export function modelTurn(model, since) {
     return offset + before + slowing - (slowing * slowing) / (2 * stop.over);
 }
 
+// A box's eight corners
+function boxCorners(box) {
+    const corners = [];
+    for (const x of [box.min.x, box.max.x]) for (const y of [box.min.y, box.max.y]) for (const z of [box.min.z, box.max.z]) {
+        corners.push(new THREE.Vector3(x, y, z));
+    }
+    return corners;
+}
+
 // `view.drawer: 'whole'` on a narrow screen: the whole model above the
 // drawer, this far back from its plain fit so the handle doesn't cover it
 const WHOLE_ABOVE_DRAWER_ZOOM = 0.72;
@@ -208,15 +217,13 @@ export function createFraming({ rig, screen, state, grid, ui }) {
         let bottom = -upward.length();
         let side = across.length();
         let front = 0;
-        const corners = [];
-        for (const x of [box.min.x, box.max.x]) for (const y of [box.min.y, box.max.y]) for (const z of [box.min.z, box.max.z]) {
-            const corner = new THREE.Vector3(x, y, z).sub(centre);
-            corners.push(corner);
+        const corners = boxCorners(box).map((corner) => corner.sub(centre));
+        corners.forEach((corner) => {
             top = Math.max(top, corner.dot(upUnit));
             if (whole) bottom = Math.min(bottom, corner.dot(upUnit));
             side = Math.max(side, Math.abs(corner.dot(acrossUnit)));
             front = Math.max(front, corner.dot(out));
-        }
+        });
         model.rotation.y += spin;
         model.updateMatrixWorld(true);
 
@@ -457,10 +464,10 @@ export function createFraming({ rig, screen, state, grid, ui }) {
                 // Highest point of the pebble on screen, from its actual corners
                 const eye = center.clone().addScaledVector(toCamera, distance);
                 let top = -Infinity;
-                for (const sx of [-1, 1]) for (const sy of [-1, 1]) for (const sz of [-1, 1]) {
-                    const v = new THREE.Vector3(sx * half.x, sy * half.y, sz * half.z).add(center).sub(eye);
+                boxCorners(box).forEach((corner) => {
+                    const v = corner.sub(eye);
                     top = Math.max(top, v.dot(up) / (v.dot(forward) * tan));
-                }
+                });
                 ndcY = -Math.min(barShare, Math.max(0, top - (1 - 2 * barShare)));
             }
 

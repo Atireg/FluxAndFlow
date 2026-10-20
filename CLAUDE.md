@@ -37,33 +37,34 @@ in a pull-out drawer.
 - **Emergent Space** (slot 1): three aggregates dropped with live physics;
   velocity arrows, interlock dots, a close-up, then a new drop. A
   double-click drops again. One Vimeo film in its drawer.
+- **The devices** - kh ReUse and Nap Nap Hooray share one behaviour
+  (`src/projects/devices.js`): a device made in code, solid light grey,
+  still, not orbitable, its screen white with rounded corners. A third of
+  the pebble's points settle on the screen and circle there like a loading
+  sign while the device turns and its film loads; loaded, it turns back to
+  face the visitor, the points drift out and fade as the film fades in,
+  and the camera moves in square-on to the screen (its edges kept, its top
+  under the title). A double-click pauses the film. With the About drawer
+  out, the whole device, still square-on. On a phone every frame is fitted
+  between the title and the drawer's handle.
 - **kh ReUse** (slot 3, the real world, `#kh-reuse`; write the name
-  exactly so, and "knippershelbig" as one lowercase word): a laptop made in
-  code, solid light grey, still, not orbitable, its screen white with
-  rounded corners (the film rounded to match). A third of the pebble's
-  points settle on its screen and circle there like a loading sign while
-  the laptop turns and its film loads; loaded, it turns back to face the
-  visitor, the points drift gently out and fade, the camera moves in square-on
-  to the screen (its edges kept, its top below the title) and the user's
-  recording plays there. A
-  double-click pauses the film. On a phone (under 860px) a phone instead,
-  with the mobile recording. The About drawer shows the whole device. Its
-  pebble holds a reuse sign. Drawer: the user's text, two links, five
-  screenshots (two desktop `wide`, three phone `pair`).
+  exactly so, and "knippershelbig" as one lowercase word): a laptop, or a
+  phone under 860px, each with its own recording (2560 x 1440; 1170 x
+  1992). A reuse sign in its pebble. Drawer: the user's text with two links
+  and a Tech overview list; five screenshots (two desktop `wide`, three
+  phone `pair`).
 - **Nap Nap Hooray** (slot 4, the real world, `#nap-nap-hooray`): the
-  user's baby-sleep website, shown on the phone made in code (as kh ReUse's)
-  with the pebble's points circling on its screen like a loading sign and the
-  phone turning while the user's recording loads; then, as kh ReUse, square-on
-  to the screen as it plays (`nap-nap-hooray.mp4`, 1170 x 1992, three
-  times the screen's 390 x 664); a double-click pauses it. A crescent moon (`moon.glb`,
+  user's baby-sleep website on the phone (`nap-nap-hooray.mp4`, 1170 x
+  1992, three times the screen's 390 x 664). A crescent moon (`moon.glb`,
   `thumbSize` 1.3) in its pebble. Drawer: 2026, "Web developer using AI",
   "Sleepless nights and cranky days"; the user's text, with two lists; six
   phone screenshots (two to a row on a wide screen, the first `half`).
 - **Links**: each project's own address is `#<id>` (`#rock-print`).
 - **Drawer copy** is real for all four projects, approved by the user
   word for word; change it only on request.
-- **Waiting on the user**: picture captions/credits, model licensing,
-  real-device and Safari checks.
+- **Waiting on the user**: a seventh Nap Nap Hooray picture (Sleep per
+  day / Number of naps - sent inline, not as a file), picture
+  captions/credits, model licensing, real-device and Safari checks.
 
 ## Working with the user
 
@@ -173,7 +174,8 @@ defineProject({
 ```
 
 A solid model with a film on its screen - `kh-reuse.js` is the example;
-`...DEVICE` (`devices.js`) gives the first four lines:
+`...DEVICE` (`devices.js`) gives the first four lines, and
+`view: { ...DEVICE_VIEW, zoom, lift }` the view's shared part:
 
 ```js
     solid: { lit: [222, 222, 220], shade: [160, 160, 162] },  // the mesh itself, not points (or `true`: the inks)
@@ -181,7 +183,8 @@ A solid model with a film on its screen - `kh-reuse.js` is the example;
     screen: 'Screen',                     // the model's screen mesh (X across, Y up, Z out): white, rounded; the points circle there
     screenVideo: 'videos/x.mp4',          // a muted, looping film on it; the device turns and the points circle till it loads
     phone: { detailModel, screenVideo },  // shown instead under 860px
-    view: { ..., fillScreen: 1.05,        // whole device first, then square-on to the screen at 5s, its top under the title
+    view: { elevation: 15, turn: -90,     // square-on from a little above
+            fillScreen: 1.05,             // whole device first, then in on the screen as the film starts, its top under the title
             drawer: 'whole' },            // with the drawer out, the whole device square-on, not a close-up
     images: [{ ..., pair: true }],        // two to a row on a phone too (tall screenshots)
                                           // `half`: the first picture two to a row as well, not across
@@ -256,8 +259,9 @@ A solid model with a film on its screen - `kh-reuse.js` is the example;
   the scene or on the page.
 - **Safari** can't be tested here. Keep GLSL inside defined behaviour (no
   reversed `smoothstep`, no `pow(0, y)`, no `normalize()` of what can be
-  zero - and choose, don't `mix(x, maybeNaN, 0.0)`: NaN times 0 is NaN), stack HTML by z-index (canvas 1, overlays 2, drawer 3), and select on `pointerup`, never
-  `click`. Never leave a test switch reachable from the public address:
+  zero - and choose, don't `mix(x, maybeNaN, 0.0)`: NaN times 0 is NaN;
+  it hid Emergent Space's ground for a day), stack HTML by z-index (canvas
+  1, overlays 2, drawer 3), and select on `pointerup`, never `click`. Never leave a test switch reachable from the public address:
   Safari auto-completed an old `?cloudtest` and showed it for days.
 - **Nothing runs at module scope in `src/engine/`** - everything waits for
   `engine.start()`.
@@ -273,6 +277,9 @@ A solid model with a film on its screen - `kh-reuse.js` is the example;
 `engine/ease.js` for any 0..1 ramp; `rig.toScreen(vector)` for screen
 pixels (it projects in place - never project first);
 `rig.pointerToNdc` for a pointer; `halfHeightAt(fov, distance)`;
+`pixelRatio()` (camera/rig.js) for device pixels; `boxCorners(box)` and
+`frameDevice` (camera/framing.js) for anything framed by its outline;
+`layOver` (engine/index.js) for what's laid over a pebble's mode;
 `pickInk(tone)` in a points shader with `pointInkUniforms()`;
 `clickOnly(fn)` for a button over the canvas; `TagString`, `DrawerFigure`.
 
@@ -315,6 +322,17 @@ land in the repository.
   (empty once loaded), `.drawer.is-available`/`.is-open`,
   `.cube-tag--spotlight`, `.cube-tag--empty`, `.tap-hint.is-showing`,
   `.drawer__handle` (opens the drawer), `.drawer__image`.
+- **Films and screens**: the `<video>` elements aren't in the DOM - wrap
+  `document.createElement` in `addInitScript` to keep them and read
+  `paused`/`currentTime`. To see only the canvas (where a device sits, the
+  title and drawer drawn as lines over it), hide everything but the canvas
+  with an injected style and `screenshot({ omitBackground: true })`.
+- **When something used to work**, bisect: `git worktree add` an older
+  commit in the scratchpad, symlink `node_modules`, `npx vite build`, run
+  the same script against its `dist/`, count pixels; remove the worktrees.
+- **A user's screen recording** (a jump, a stall): `ffmpeg` the frames to
+  grey raw video and diff consecutive frames - a spike is the jump, a run
+  of frames with the canvas unchanged before it is a stall.
 - Visited pebbles persist in `localStorage` within a context; the pile's
   physics is tuned in Node; views are fitted by mask overlap in a
   throwaway build (see DECISIONS.md).
