@@ -53,8 +53,8 @@ in a pull-out drawer.
   user's baby-sleep website, shown on the phone made in code (as kh ReUse's)
   with the pebble's points circling on its screen like a loading sign and the
   phone turning while the user's recording loads; then, as kh ReUse, square-on
-  to the screen as it plays (`nap-nap-hooray.mp4`, 780 x 1328, twice the
-  screen's 390 x 664); a double-click pauses it. A crescent moon (`moon.glb`,
+  to the screen as it plays (`nap-nap-hooray.mp4`, 1170 x 1992, three
+  times the screen's 390 x 664); a double-click pauses it. A crescent moon (`moon.glb`,
   `thumbSize` 1.3) in its pebble. Drawer: the user's text, with two lists.
 - **Links**: each project's own address is `#<id>` (`#rock-print`).
 - **Drawer copy** is real for all four projects, approved by the user

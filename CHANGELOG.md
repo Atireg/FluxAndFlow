@@ -401,5 +401,10 @@ are, and the film waits for them to be gone before it starts.
 of three): having a baby as the busy, messy part of the real world, and the
 project built with the help of AI agents.
 
+**New films, sharper**: the user's new recordings for both projects - kh
+ReUse's desktop one at 2560 x 1440 (copied as it came, 4.3 MB), its phone
+one and Nap Nap Hooray's at 1170 x 1992, three times the phone's screen,
+re-encoded at full size to 7.3 and 6.4 MB (from 15.6 and 12.4).
+
 Open at end of session: as at the end of session 4; pictures for Nap Nap
 Hooray's drawer, if wanted.
