@@ -454,4 +454,8 @@ which normalised a project's zero screen vectors into NaN and mixed that
 in at weight 0 (still NaN). Bisected headless; the ground is chosen with a
 condition now.
 
+**Emergent Space's drawer** ends with a sentence the user chose (option 3
+of three): the aggregates dropped with real-time physics in the browser,
+the arrows and dots measured live.
+
 Open at end of session: as at the end of session 4.

@@ -30,6 +30,9 @@ export default defineProject({
         'The tools were simulation in FISH and Python, statistical analysis, '
         + '3D scanning, physical experiments, and a pneumatic system run '
         + 'directly from the simulation software.',
+        'On this page, the three aggregates are dropped with real-time physics '
+        + 'running in the browser; the arrows show how fast each is still '
+        + 'moving and the dots where they touch, both measured live.',
     ],
     credits: 'ITECH M.Sc. thesis, University of Stuttgart. Thesis advisers: '
         + 'Karola Dierichs, Ehsan Baharlou. Supervisor: Prof. Achim Menges. '
