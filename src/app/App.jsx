@@ -106,6 +106,16 @@ export default function App() {
                     return Math.min(bar.offsetHeight / window.innerHeight, 0.5);
                 },
 
+                // How much of the viewport height the drawer's handle takes
+                // (stacked, it sits above the drawer's top edge)
+                handleFraction: () => {
+                    const drawer = drawerRef.current;
+                    if (!drawer || !drawer.classList.contains('is-available')) return 0;
+
+                    const handle = drawer.querySelector('.drawer__handle');
+                    return handle ? Math.min(handle.offsetHeight / window.innerHeight, 0.3) : 0;
+                },
+
                 showTapHint: (x, y, action) => {
                     const hint = tapHintRef.current;
                     if (!hint) return;

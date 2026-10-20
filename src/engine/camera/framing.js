@@ -171,50 +171,69 @@ export function modelTurn(model, since) {
 const WHOLE_ABOVE_DRAWER_ZOOM = 0.72;
 // Room left beside a device's own sides when its screen fills the window
 const SCREEN_SIDE_MARGIN = 1.04;
+// Room around a whole device on a phone, between the title and the drawer
+const DEVICE_WHOLE_MARGIN = 1.1;
 
 export function createFraming({ rig, screen, state, grid, ui }) {
     // Clear space kept under the project's title bar, as a share of the height
     const UNDER_BAR_GAP = 0.03;
 
     /**
-     * A model's screen (see frameDetail's `fillScreen`) as large as the
-     * window below the title bar allows - `margin` times the room from the
-     * device's top down to the screen's bottom, the device's top just under
-     * the title and its sides kept in view (`SCREEN_SIDE_MARGIN`)
+     * A device with a screen (`screen`), framed by its own outline into the
+     * band between the title bar and the drawer's handle (parked or pulled
+     * out, stacked). `whole`: all of it, centred in that band, `margin` times
+     * its height. Otherwise its screen as large as the band allows (see
+     * frameDetail's `fillScreen`) - `margin` times the room from the device's
+     * top down to the screen's bottom, its top just under the title. Its sides
+     * always keep SCREEN_SIDE_MARGIN.
      */
-    function frameOnScreen(model, mode, duration, ease, margin) {
+    function frameDevice(model, mode, duration, ease, { margin, whole = false }) {
         const display = model.userData.screen;
+        // As it will stand facing the visitor, not part-way through the turn
+        // it makes while its film loads
+        const spin = model.userData.screenSpin ?? 0;
+        model.rotation.y -= spin;
         model.updateMatrixWorld(true);
         const centre = model.localToWorld(display.face.clone());
         const across = model.localToWorld(display.face.clone().add(display.u)).sub(centre);
         const upward = model.localToWorld(display.face.clone().add(display.v)).sub(centre);
         const out = across.clone().cross(upward).normalize();
 
-        // How far the device itself reaches above the screen's centre, and
-        // to either side of it
+        // How far the device itself reaches above and below the screen's
+        // centre, and to either side of it
         const box = new THREE.Box3().setFromObject(model);
         const upUnit = upward.clone().normalize();
         const acrossUnit = across.clone().normalize();
         let top = upward.length();
+        let bottom = -upward.length();
         let side = across.length();
         for (const x of [box.min.x, box.max.x]) for (const y of [box.min.y, box.max.y]) for (const z of [box.min.z, box.max.z]) {
             const corner = new THREE.Vector3(x, y, z).sub(centre);
             top = Math.max(top, corner.dot(upUnit));
+            if (whole) bottom = Math.min(bottom, corner.dot(upUnit));
             side = Math.max(side, Math.abs(corner.dot(acrossUnit)));
         }
+        model.rotation.y += spin;
+        model.updateMatrixWorld(true);
 
-        // The free band: from the bottom of the window up to just under the bar
+        // The free band, as shares of the window's height: below the bar,
+        // above the drawer's handle (and the drawer, when it's out)
         const below = Math.min(ui.barFraction() + UNDER_BAR_GAP, 0.5);
+        const above = mode === 'side' ? 0
+            : Math.min(getPanelLayout(state.drawerOpen).fraction + ui.handleFraction() + UNDER_BAR_GAP, 0.8);
+        const band = Math.max(1 - below - above, 0.15);
         const tan = Math.tan(THREE.MathUtils.degToRad(DETAIL_FOV[mode]) / 2);
         const distance = Math.max(
-            margin * (top + upward.length()) / (2 * (1 - below) * tan),
-            margin * across.length() / (tan * screen.aspect),
+            margin * (top - bottom) / (2 * band * tan),
+            whole ? 0 : margin * across.length() / (tan * screen.aspect),
             SCREEN_SIDE_MARGIN * side / (tan * screen.aspect),
         );
 
-        // The device's top at the top of that band
-        const raise = upUnit.multiplyScalar(top - (1 - 2 * below) * distance * tan);
-        const target = centre.clone().add(raise);
+        // All of it centred in the band, or its top at the band's top
+        const raise = whole
+            ? (top + bottom) / 2 - (above - below) * distance * tan
+            : top - (1 - 2 * below) * distance * tan;
+        const target = centre.clone().addScaledVector(upUnit, raise);
 
         rig.animateFov(DETAIL_FOV[mode], duration);
         rig.moveCamera(target.clone().addScaledVector(out, distance), target, duration, ease);
@@ -322,7 +341,14 @@ export function createFraming({ rig, screen, state, grid, ui }) {
             const shown = object.userData.detail;
             const fill = object.userData.project?.view?.fillScreen;
             if (fill && shown?.userData.screenFilled && !state.drawerOpen && !fit) {
-                frameOnScreen(shown, mode, duration, ease, fill === true ? 1 : fill);
+                frameDevice(shown, mode, duration, ease, { margin: fill === true ? 1 : fill });
+                return;
+            }
+            // On a phone, a device is framed by its own outline, clear of the
+            // title and the drawer's handle - the pebble's `zoom` and `lift`
+            // can't know a short screen from a tall one
+            if (shown?.userData.screen && !side && !state.drawerOpen && !fit) {
+                frameDevice(shown, mode, duration, ease, { margin: DEVICE_WHOLE_MARGIN, whole: true });
                 return;
             }
             // Or framed on a box of its own (`fit`, world space) - a pile's
@@ -459,6 +485,10 @@ export function createFraming({ rig, screen, state, grid, ui }) {
             // stacked, a little further back, clear of the drawer's handle
             const side = getPanelLayout(state.drawerOpen).mode === 'side';
             const model = pebble.userData.detail;
+            if (pebble.userData.project?.view?.drawer === 'whole' && model?.userData.screen && !side) {
+                frameDevice(model, 'stacked', options?.duration ?? 1.6, options?.ease, { margin: DEVICE_WHOLE_MARGIN, whole: true });
+                return;
+            }
             if (pebble.userData.project?.view?.drawer === 'whole' && model) {
                 framing.frameDetail(pebble, { ...options, fit: new THREE.Box3().setFromObject(model), fitZoom: side ? 1 : WHOLE_ABOVE_DRAWER_ZOOM });
                 return;

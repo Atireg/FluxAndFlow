@@ -38,6 +38,7 @@ import { trailResolution } from './pointcloud/trails.js';
  *   onProjectClose()        back to the catalog
  *   onStatus(message|null)  what to say in the project bar
  *   barFraction()           how much viewport height the bar takes, 0..0.5
+ *   handleFraction()        how much the drawer's handle takes, 0..0.3
  *   showTapHint(x, y, action) / hideTapHint()   action: the project's doubleClick
  *   onFocus(category)       the filter changed from the canvas (a sunk pebble clicked)
  *   onEmptySlot()           an empty pebble was clicked - its tag is about to show

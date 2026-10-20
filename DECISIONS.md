@@ -884,9 +884,9 @@ project setting read by one code path, not a branch for the project:
   the film waits for them to be gone. With no `screenVideo`
   it would keep turning and circling.
 - **`view.fillScreen`** opens it in two steps: the whole device first
-  (`zoom`, `lift`) while the points settle, then at `FILL_SCREEN_AT` (5s),
+  (`zoom`, `lift` on a wide screen) while the points settle, then at `FILL_SCREEN_AT` (5s),
   or once the film has loaded and the model faces the visitor again, the
-  camera moves in square-on to the screen (`frameOnScreen` in
+  camera moves in square-on to the screen (`frameDevice` in
   camera/framing.js) and the film starts. It is framed into the band below
   the title bar (`ui.barFraction()` plus `UNDER_BAR_GAP`) with the
   device's own top at the top of that band - centring the screen there left
