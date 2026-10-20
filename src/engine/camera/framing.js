@@ -169,15 +169,18 @@ export function modelTurn(model, since) {
 // `view.drawer: 'whole'` on a narrow screen: the whole model above the
 // drawer, this far back from its plain fit so the handle doesn't cover it
 const WHOLE_ABOVE_DRAWER_ZOOM = 0.72;
+// Room left beside a device's own sides when its screen fills the window
+const SCREEN_SIDE_MARGIN = 1.04;
 
 export function createFraming({ rig, screen, state, grid, ui }) {
     // Clear space kept under the project's title bar, as a share of the height
     const UNDER_BAR_GAP = 0.03;
 
     /**
-     * A model's screen (see frameDetail's `fillScreen`) filling the window
-     * below the title bar - `margin` times its own size, so the device's
-     * edges show and its top stays under the title
+     * A model's screen (see frameDetail's `fillScreen`) as large as the
+     * window below the title bar allows - `margin` times the room from the
+     * device's top down to the screen's bottom, the device's top just under
+     * the title and its sides kept in view (`SCREEN_SIDE_MARGIN`)
      */
     function frameOnScreen(model, mode, duration, ease, margin) {
         const display = model.userData.screen;
@@ -187,16 +190,30 @@ export function createFraming({ rig, screen, state, grid, ui }) {
         const upward = model.localToWorld(display.face.clone().add(display.v)).sub(centre);
         const out = across.clone().cross(upward).normalize();
 
+        // How far the device itself reaches above the screen's centre, and
+        // to either side of it
+        const box = new THREE.Box3().setFromObject(model);
+        const upUnit = upward.clone().normalize();
+        const acrossUnit = across.clone().normalize();
+        let top = upward.length();
+        let side = across.length();
+        for (const x of [box.min.x, box.max.x]) for (const y of [box.min.y, box.max.y]) for (const z of [box.min.z, box.max.z]) {
+            const corner = new THREE.Vector3(x, y, z).sub(centre);
+            top = Math.max(top, corner.dot(upUnit));
+            side = Math.max(side, Math.abs(corner.dot(acrossUnit)));
+        }
+
         // The free band: from the bottom of the window up to just under the bar
         const below = Math.min(ui.barFraction() + UNDER_BAR_GAP, 0.5);
         const tan = Math.tan(THREE.MathUtils.degToRad(DETAIL_FOV[mode]) / 2);
-        const distance = margin * Math.max(
-            upward.length() / ((1 - below) * tan),
-            across.length() / (tan * screen.aspect),
+        const distance = Math.max(
+            margin * (top + upward.length()) / (2 * (1 - below) * tan),
+            margin * across.length() / (tan * screen.aspect),
+            SCREEN_SIDE_MARGIN * side / (tan * screen.aspect),
         );
 
-        // Centred in that band: the camera raised by the bar's share
-        const raise = upward.clone().normalize().multiplyScalar(below * distance * tan);
+        // The device's top at the top of that band
+        const raise = upUnit.multiplyScalar(top - (1 - 2 * below) * distance * tan);
         const target = centre.clone().add(raise);
 
         rig.animateFov(DETAIL_FOV[mode], duration);

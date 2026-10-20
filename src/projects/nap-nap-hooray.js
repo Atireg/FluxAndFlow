@@ -79,5 +79,5 @@ export default defineProject({
     // Square-on from a little above (`turn: -90` undoes the detail view's
     // quarter turn); then, as the film starts, square-on to its screen
     // (`fillScreen`, as kh ReUse); with the About drawer out, the whole phone
-    view: { elevation: 15, turn: -90, zoom: { side: 1.1, stacked: 1.7 }, lift: { side: -0.03, stacked: 0.03 }, fillScreen: 1.2, drawer: 'whole' },
+    view: { elevation: 15, turn: -90, zoom: { side: 1.2, stacked: 1.85 }, lift: { side: -0.03, stacked: 0.07 }, fillScreen: 1.05, drawer: 'whole' },
 });

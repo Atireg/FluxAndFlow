@@ -885,12 +885,15 @@ project setting read by one code path, not a branch for the project:
   (`zoom`, `lift`) while the points settle, then at `FILL_SCREEN_AT` (5s),
   or once the film has loaded and the model faces the visitor again, the
   camera moves in square-on to the screen (`frameOnScreen` in
-  camera/framing.js) and the film starts. Its number is how far back from
-  the screen's edges meeting the window's it stops - 1.2, so the device's
-  own edges stay in view - framed into the band below the title bar
-  (`ui.barFraction()` plus `UNDER_BAR_GAP`), so the device's top always
-  clears the title. Filling the window outright came first; the user wanted
-  the device seen whole, and its edges kept. **`view.drawer: 'whole'`**:
+  camera/framing.js) and the film starts. It is framed into the band below
+  the title bar (`ui.barFraction()` plus `UNDER_BAR_GAP`) with the
+  device's own top at the top of that band - centring the screen there left
+  the devices looking low, with room to spare under the title. Its number
+  is how much room it leaves around the span from the device's top to the
+  screen's bottom (1.05), and the device's sides always keep
+  `SCREEN_SIDE_MARGIN` (the phone, on a phone, fills the width to that).
+  Filling the window outright came first; the user wanted the device seen
+  whole, and its edges kept. **`view.drawer: 'whole'`**:
   with the About drawer out, the whole device again rather than a close-up,
   fitted to its own outline - above the drawer on a phone,
   `WHOLE_ABOVE_DRAWER_ZOOM` back so the handle doesn't cover it.

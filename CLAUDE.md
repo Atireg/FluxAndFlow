@@ -178,7 +178,7 @@ A solid model with a film on its screen - `kh-reuse.js` is the example;
     screen: 'Screen',                     // the model's screen mesh (X across, Y up, Z out): the points circle there
     screenVideo: 'videos/x.mp4',          // a muted, looping film on it; the device turns and the points circle till it loads
     phone: { detailModel, screenVideo },  // shown instead under 860px
-    view: { ..., fillScreen: 1.2,         // whole device first, then square-on to the screen at 5s
+    view: { ..., fillScreen: 1.05,        // whole device first, then square-on to the screen at 5s, its top under the title
             drawer: 'whole' },            // the whole model above the drawer on a phone, not a close-up
     images: [{ ..., pair: true }],        // two to a row on a phone too (tall screenshots)
 ```

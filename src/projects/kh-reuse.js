@@ -98,5 +98,5 @@ export default defineProject({
     // `fillScreen` times as far back as would put the screen's edges at the
     // window's - the device's own edges in view, its top below the title.
     // With the About drawer out, the whole device again (`drawer: 'whole'`).
-    view: { elevation: 15, turn: -90, zoom: { side: 1.3, stacked: 1.7 }, lift: { side: 0, stacked: 0.03 }, fillScreen: 1.2, drawer: 'whole' },
+    view: { elevation: 15, turn: -90, zoom: { side: 1.4, stacked: 1.85 }, lift: { side: 0.025, stacked: 0.07 }, fillScreen: 1.05, drawer: 'whole' },
 });

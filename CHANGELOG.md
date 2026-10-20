@@ -383,5 +383,12 @@ pauses it. The upload (1170 x 1992, 10.5 MB) was the screen's shape exactly,
 so it was scaled to twice the screen (780 x 1328, 3.2 MB) rather than
 copied as it was.
 
+**Devices higher and closer**: kh ReUse's and Nap Nap Hooray's devices sat
+low. The close-up on the screen now puts the device's top just under the
+title rather than centring the screen below it, and comes in closer
+(`fillScreen` 1.05, the sides kept); the first, whole-device view is a
+little closer and higher too (`zoom`, `lift`). Measured in both layouts:
+nothing reaches the title.
+
 Open at end of session: as at the end of session 4; pictures for Nap Nap
 Hooray's drawer, if wanted.
