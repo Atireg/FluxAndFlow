@@ -14,7 +14,9 @@ import { smooth01 } from '../ease.js';
  * film at all it keeps turning.
  */
 const VIDEO_LIFT = 0.008; // in front of the screen's face, in fitted units - behind the points
+const PANEL_LIFT = 0.004; // the white screen under it
 const VIDEO_INSET = 0.985; // a hair inside the screen's edges, clear of its rounding
+const SCREEN_CORNER = 0.07; // the screen's (and film's) rounded corners, a share of its shorter side
 const VIDEO_FADE = 1.2; // seconds
 const SPIN_PERIOD = 8; // seconds a turn, while the film loads
 const SPIN_SETTLE = 1; // radians from facing the visitor that the turn starts to slow
@@ -27,6 +29,53 @@ const PRIME_WAIT = 8; // seconds
 // the pebble's points take 3.6s to reach the screen
 const SPIN_AT_LEAST = 6; // seconds
 
+// A flat, rounded rectangle on the screen's face, `lift` in front of it - a
+// quad with a rounded mask (the same for the white screen and the film)
+function screenQuad(screen, lift, material) {
+    const face = screen.face.clone().addScaledVector(screen.out, lift);
+    const u = screen.u.clone().multiplyScalar(VIDEO_INSET);
+    const v = screen.v.clone().multiplyScalar(VIDEO_INSET);
+    const corners = [[-1, -1], [1, -1], [-1, 1], [1, 1]]
+        .flatMap(([x, y]) => face.clone().addScaledVector(u, x).addScaledVector(v, y).toArray());
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(corners, 3));
+    geometry.setAttribute('uv', new THREE.Float32BufferAttribute([0, 0, 1, 0, 0, 1, 1, 1], 2));
+    geometry.setIndex([0, 1, 2, 2, 1, 3]);
+
+    screen.mask ??= roundedMask(u.length() / v.length());
+    material.alphaMap = screen.mask;
+    material.transparent = true;
+    const quad = new THREE.Mesh(geometry, material);
+    quad.raycast = () => {}; // the model's own screen answers a double-click
+    return quad;
+}
+
+// White inside a rectangle of this shape with rounded corners, clear outside
+function roundedMask(shape) {
+    const canvas = document.createElement('canvas');
+    canvas.width = shape >= 1 ? 512 : Math.round(512 * shape);
+    canvas.height = shape >= 1 ? Math.round(512 / shape) : 512;
+    const context = canvas.getContext('2d');
+    context.fillStyle = '#fff';
+    context.beginPath();
+    context.roundRect(0, 0, canvas.width, canvas.height, SCREEN_CORNER * Math.min(canvas.width, canvas.height));
+    context.fill();
+    return new THREE.CanvasTexture(canvas);
+}
+
+/**
+ * The screen itself, white with rounded corners, fading in with the model
+ * (its `solidMaterial`'s fade) - the film plays over it
+ */
+export function addScreenPanel(group, screen) {
+    const material = new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped: false });
+    const panel = screenQuad(screen, PANEL_LIFT, material);
+    panel.onBeforeRender = () => {
+        material.opacity = 1 - (group.userData.solidMaterial?.uniforms.uFade.value ?? 0);
+    };
+    group.add(panel);
+}
+
 export function addScreenVideo(group, screen, url) {
     const video = document.createElement('video');
     video.src = url;
@@ -38,24 +87,15 @@ export function addScreenVideo(group, screen, url) {
     // The film's colours as they are, like the scene's (see screenColor)
     const texture = new THREE.VideoTexture(video);
 
-    // Its corners on the screen's face, X across and Y up as the film runs
-    const face = screen.face.clone().addScaledVector(screen.out, VIDEO_LIFT);
-    const u = screen.u.clone().multiplyScalar(VIDEO_INSET);
-    const v = screen.v.clone().multiplyScalar(VIDEO_INSET);
-    const corners = [[-1, -1], [1, -1], [-1, 1], [1, 1]]
-        .flatMap(([x, y]) => face.clone().addScaledVector(u, x).addScaledVector(v, y).toArray());
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute('position', new THREE.Float32BufferAttribute(corners, 3));
-    geometry.setAttribute('uv', new THREE.Float32BufferAttribute([0, 0, 1, 0, 0, 1, 1, 1], 2));
-    geometry.setIndex([0, 1, 2, 2, 1, 3]);
-
-    const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, opacity: 0, toneMapped: false });
-    const quad = new THREE.Mesh(geometry, material);
-    quad.raycast = () => {}; // the model's own screen answers a double-click
+    // On the white screen, X across and Y up as the film runs, its corners
+    // rounded as the screen's
+    const material = new THREE.MeshBasicMaterial({ map: texture, opacity: 0, toneMapped: false });
+    const quad = screenQuad(screen, VIDEO_LIFT, material);
+    quad.renderOrder = 1;
 
     // Filling the screen, cropped rather than squeezed if the shapes differ
     video.addEventListener('loadedmetadata', () => {
-        const screenShape = u.length() / v.length();
+        const screenShape = screen.u.length() / screen.v.length();
         const filmShape = video.videoWidth / video.videoHeight;
         if (filmShape > screenShape) texture.repeat.set(screenShape / filmShape, 1);
         else texture.repeat.set(1, filmShape / screenShape);

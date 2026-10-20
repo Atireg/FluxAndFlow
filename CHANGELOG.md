@@ -412,5 +412,9 @@ out, the handle covered its foot. On a phone the device is now always
 fitted to its own outline between the title and the handle, parked or
 pulled out. Measured at 375 x 667 and 390 x 844: clear in every step.
 
+**White screens, rounded films**: every phone's and laptop's screen is
+white, with rounded corners, while its film loads, and the film plays
+clipped to the same corners.
+
 Open at end of session: as at the end of session 4; pictures for Nap Nap
 Hooray's drawer, if wanted.

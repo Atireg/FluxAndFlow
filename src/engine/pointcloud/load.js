@@ -6,7 +6,7 @@ import { createPile, findRods } from '../pile.js';
 import { addGatherAttributes, GATHER_DURATION, GATHER_SPREAD, GATHER_SWIRL, GATHER_TRAIL, GATHER_TRAIL_EVERY } from './gather.js';
 import { addTrails } from './trails.js';
 import { makeInkMaterial, pointsFromMeshes } from './mesh.js';
-import { addScreenVideo } from './screenVideo.js';
+import { addScreenPanel, addScreenVideo } from './screenVideo.js';
 
 import gatherGlsl from '../shaders/pointCloud/gather.glsl';
 import pointCloudVertexShader from '../shaders/pointCloud/vertex.glsl';
@@ -65,6 +65,8 @@ export function loadPointCloud({
                 group.userData.solidMaterial = material;
                 // Where the pebble's points settle and circle (`screen`)
                 if (screen) group.userData.screen = screenFrame(original, screen, sampled.userData.fit);
+                // ...a white screen, with rounded corners
+                if (group.userData.screen) addScreenPanel(group, group.userData.screen);
                 // ...over a film playing on it (`screenVideo`)
                 if (screenVideo && group.userData.screen) addScreenVideo(group, group.userData.screen, screenVideo);
                 parent.add(group);

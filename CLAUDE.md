@@ -39,7 +39,8 @@ in a pull-out drawer.
   double-click drops again. One Vimeo film in its drawer.
 - **kh ReUse** (slot 3, the real world, `#kh-reuse`; write the name
   exactly so, and "knippershelbig" as one lowercase word): a laptop made in
-  code, solid light grey, still, not orbitable. A third of the pebble's
+  code, solid light grey, still, not orbitable, its screen white with
+  rounded corners (the film rounded to match). A third of the pebble's
   points settle on its screen and circle there like a loading sign while
   the laptop turns and its film loads; loaded, it turns back to face the
   visitor, the points drift gently out and fade, the camera moves in square-on
@@ -175,7 +176,7 @@ A solid model with a film on its screen - `kh-reuse.js` is the example;
 ```js
     solid: { lit: [222, 222, 220], shade: [160, 160, 162] },  // the mesh itself, not points (or `true`: the inks)
     still: true, orbit: false,            // no turn; no orbiting or wheel-zoom by hand
-    screen: 'Screen',                     // the model's screen mesh (X across, Y up, Z out): the points circle there
+    screen: 'Screen',                     // the model's screen mesh (X across, Y up, Z out): white, rounded; the points circle there
     screenVideo: 'videos/x.mp4',          // a muted, looping film on it; the device turns and the points circle till it loads
     phone: { detailModel, screenVideo },  // shown instead under 860px
     view: { ..., fillScreen: 1.05,        // whole device first, then square-on to the screen at 5s, its top under the title

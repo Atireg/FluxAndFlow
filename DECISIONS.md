@@ -883,6 +883,12 @@ project setting read by one code path, not a branch for the project:
   `SPINNER_RELEASE`) - asked for over a quicker fade where they were - and
   the film waits for them to be gone. With no `screenVideo`
   it would keep turning and circling.
+- **A white screen, rounded** (`addScreenPanel`): a white quad over the
+  screen mesh, fading in with the model, and the film over it clipped to
+  the same rounded corners (`SCREEN_CORNER`, one alpha mask for both). The
+  screen is part of the device's one grey mesh, so it is laid over rather
+  than recoloured. Asked for: the grey screen read as switched off, and
+  square film corners as pasted on.
 - **`view.fillScreen`** opens it in two steps: the whole device first
   (`zoom`, `lift` on a wide screen) while the points settle, then at `FILL_SCREEN_AT` (5s),
   or once the film has loaded and the model faces the visitor again, the
