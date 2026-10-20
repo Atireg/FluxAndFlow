@@ -57,7 +57,8 @@ in a pull-out drawer.
   to the screen as it plays (`nap-nap-hooray.mp4`, 1170 x 1992, three
   times the screen's 390 x 664); a double-click pauses it. A crescent moon (`moon.glb`,
   `thumbSize` 1.3) in its pebble. Drawer: 2026, "Web developer using AI",
-  "Sleepless nights and cranky days"; the user's text, with two lists.
+  "Sleepless nights and cranky days"; the user's text, with two lists; five
+  phone screenshots (two to a row on a wide screen, the first `half`).
 - **Links**: each project's own address is `#<id>` (`#rock-print`).
 - **Drawer copy** is real for all four projects, approved by the user
   word for word; change it only on request.
@@ -183,6 +184,7 @@ A solid model with a film on its screen - `kh-reuse.js` is the example;
     view: { ..., fillScreen: 1.05,        // whole device first, then square-on to the screen at 5s, its top under the title
             drawer: 'whole' },            // with the drawer out, the whole device square-on, not a close-up
     images: [{ ..., pair: true }],        // two to a row on a phone too (tall screenshots)
+                                          // `half`: the first picture two to a row as well, not across
 ```
 
 - **Slots**: always `SLOT_COUNT` (10) pebbles; raise it before an eleventh

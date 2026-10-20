@@ -6,7 +6,8 @@ import DrawerFigure from './DrawerFigure.jsx';
  * One picture in the drawer, or an empty frame holding its place.
  *
  * The first picture spans the drawer's width and the rest sit two to a row
- * (styles.css), unless `wide` - diagrams whose text is unreadable at half.
+ * (styles.css), unless `wide` - diagrams whose text is unreadable at half -
+ * or the first is `half`, two to a row from the start.
  * An entry with no `src` is deliberate: a dashed frame keeping its place
  * until there is a file for it. A picture is a button: clicked, it opens
  * enlarged (`onEnlarge`, ImageViewer).
@@ -16,7 +17,7 @@ export default function ProjectImage({ image, onEnlarge }) {
 
     return (
         <DrawerFigure
-            className={`drawer__image${image.wide ? ' is-wide' : ''}${image.pair ? ' is-pair' : ''}${empty ? ' is-empty' : ''}`}
+            className={`drawer__image${image.wide ? ' is-wide' : ''}${image.pair ? ' is-pair' : ''}${image.half ? ' is-half' : ''}${empty ? ' is-empty' : ''}`}
             ratio={image.ratio}
             frameHidden={empty}
             caption={image.caption}

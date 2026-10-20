@@ -118,6 +118,9 @@ function normaliseImage(image, { id, index }) {
         // Two to a row on a phone too, where pictures otherwise run one to a
         // row - for tall phone screenshots, too big at full width
         pair: Boolean(image.pair),
+        // Half the drawer's width on a wide screen even as the first picture,
+        // which otherwise spans it - a row of tall screenshots from the start
+        half: Boolean(image.half),
     };
 }
 

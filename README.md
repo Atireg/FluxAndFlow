@@ -53,7 +53,7 @@ Next up (waiting on content or a check from the user)
         unreachable from the container)
     [x] Nap Nap Hooray (slot 4): a recording of the site for its phone's
         screen (390 x 664, like kh ReUse's mobile one)
-    [ ] Nap Nap Hooray: pictures in its drawer, if wanted
+    [x] Nap Nap Hooray: pictures in its drawer
     [ ] Emergent Space's drop on a phone: confirm it runs smoothly on a real
         device (it was only checked with software rendering here)
     [ ] The catalog's streams on a phone: WebGL draws them one device pixel
