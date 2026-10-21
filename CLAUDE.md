@@ -67,12 +67,14 @@ in a pull-out drawer.
   form them (`figure`), in three greys (`inks`). Turns slowly; a
   double-click stops it. Over a glass sheet, joint or support (named after
   the user's drawing, GS1-GS8) the part is picked out, the turn holds and a
-  card beside the pointer says what it is (`info`; a tap on a phone). No
-  drawer text or thumbnail yet (the default rock).
+  card beside the pointer says what it is (`info`; a tap on a phone).
+  Drawer: a YouTube film and five pictures (the pavilion at glasstec, the
+  joints, the joint in section); no text or thumbnail yet (the default rock).
 - **Links**: each project's own address is `#<id>` (`#rock-print`).
 - **Drawer copy** is real for the first four projects, approved by the user
   word for word; change it only on request.
-- **Waiting on the user**: Frameless Glass Structures' text, pictures,
+- **Waiting on the user**: Frameless Glass Structures' text (options
+  offered; www.knippershelbig.com is unreachable from the container) and
   thumbnail; a seventh Nap Nap Hooray picture (Sleep per
   day / Number of naps - sent inline, not as a file), picture
   captions/credits, model licensing, real-device and Safari checks.
@@ -180,7 +182,7 @@ defineProject({
     eyeLevel: 0.4,                        // with autoZoom: two of every three moves in are from inside
     // drop: { count: 3, size: 3, ground: -1.2, solid: true, contacts: true,
     //         closeUp: { hold: 5, after: 5 }, velocity: true },  // physics drop (Emergent Space)
-    videos: [{ vimeo: '294086902', title: '' }],  // Vimeo films above the pictures, by number
+    videos: [{ vimeo: '294086902', title: '' }],  // films above the pictures: a Vimeo number, or { youtube: 'JnKaReHR4So' }
     images: [{ src: 'images/x.jpg', alt: '', caption: '', ratio: '3 / 2', wide: false }],
 })
 ```
@@ -230,7 +232,8 @@ A model in parts (`frameless-glass.js`): `solid` gives the default look,
   `static/videos/`, H.264, no sound needed (it plays muted). Headless
   Chromium can't play H.264 - test with a WebM copy in `dist/`.
 - **Films** are Vimeo numbers (`vimeo.com/<number>`) - never paste a link's
-  `?turnstile=` part, it's one visitor's session. `ratio` defaults to 16 / 9.
+  `?turnstile=` part, it's one visitor's session - or YouTube ids
+  (`watch?v=<id>`), played from youtube-nocookie.com. `ratio` defaults to 16 / 9.
 - **Models** are `.glb` in `static/models/`. Read "Quantized, not
   Draco-compressed" before compressing a cloud.
 - **`drop`** only works with rod-built aggregates; read "Emergent Space:

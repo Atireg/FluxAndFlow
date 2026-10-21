@@ -142,12 +142,14 @@ function normaliseImage(image, { id, index }) {
  * player for screen readers; `ratio` is the film's width / height.
  */
 function normaliseVideo(video, { id, index }) {
-    if (!video || !/^\d+$/.test(String(video.vimeo ?? ''))) {
-        throw new Error(`Project "${id}": videos[${index}] needs a vimeo number, like '148494213'`);
+    const vimeo = /^\d+$/.test(String(video?.vimeo ?? ''));
+    const youtube = /^[\w-]{11}$/.test(String(video?.youtube ?? ''));
+    if (vimeo === youtube) {
+        throw new Error(`Project "${id}": videos[${index}] needs a vimeo number, like '148494213', or a youtube id, like 'JnKaReHR4So'`);
     }
 
     return {
-        vimeo: String(video.vimeo),
+        ...(vimeo ? { vimeo: String(video.vimeo) } : { youtube: String(video.youtube) }),
         title: video.title ?? '',
         caption: video.caption ?? '',
         ratio: video.ratio || '16 / 9',

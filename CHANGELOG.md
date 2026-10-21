@@ -497,6 +497,13 @@ picked out, the turn holds, and a card says what it is (`info`, `PartInfo`).
 Checked headless: the card follows the part, the turn holds while on it
 and goes on after.
 
+**Frameless Glass Structures' drawer**: the YouTube film (films can now be
+YouTube ids, from youtube-nocookie.com, beside Vimeo numbers) and five of
+the user's pictures - the pavilion, the ridge from below, a joint close up
+(two to a row), the sloping end and the joint's section drawing (across the
+drawer). Its text offered as options; the knippershelbig page it was to be
+drawn from is unreachable from the container.
+
 Open at end of session: as at the end of session 4; a seventh Nap Nap
-Hooray picture, to come as a file; Frameless Glass Structures' text,
-pictures and thumbnail.
+Hooray picture, to come as a file; Frameless Glass Structures' text and
+thumbnail.

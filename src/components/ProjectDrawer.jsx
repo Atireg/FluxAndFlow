@@ -88,7 +88,7 @@ const ProjectDrawer = forwardRef(function ProjectDrawer({ project, open, onToggl
                 </div>
 
                 <div className="drawer__videos">
-                    {(project?.videos ?? []).map((video) => <ProjectVideo key={video.vimeo} video={video} />)}
+                    {(project?.videos ?? []).map((video) => <ProjectVideo key={video.vimeo ?? video.youtube} video={video} />)}
                 </div>
 
                 <div className="drawer__images">

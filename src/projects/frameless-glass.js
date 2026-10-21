@@ -69,5 +69,40 @@ export default defineProject({
     doubleClick: 'hold',
     // Over a sheet, a joint or a support: what it is, the turn held
     info,
+
+    // The film, from YouTube, above the pictures in the drawer
+    videos: [
+        { youtube: 'JnKaReHR4So', title: 'Frameless Glass Structures - film' },
+    ],
+    // The pavilion at the fair, its joints close up, and the joint in section
+    images: [
+        {
+            src: 'images/frameless-glass-01.jpg',
+            alt: 'The glass pavilion at the fair: a pointed arch of glass sheets in front of white curtains, a visitor photographing it',
+            ratio: '1500 / 633',
+        },
+        {
+            src: 'images/frameless-glass-02.jpg',
+            alt: 'Looking up at four glass sheets meeting at the ridge, joined by slim steel profiles along their edges',
+            ratio: '900 / 1251',
+        },
+        {
+            src: 'images/frameless-glass-03.jpg',
+            alt: 'Close-up of two laminated glass sheets meeting at an angle, the bolted steel joint between their edges',
+            ratio: '900 / 529',
+        },
+        {
+            src: 'images/frameless-glass-04.jpg',
+            alt: 'One sloping end of the pavilion from below, glass sheets on their steel supports, the fair hall behind',
+            ratio: '1500 / 633',
+            wide: true,
+        },
+        {
+            src: 'images/frameless-glass-05.jpg',
+            alt: 'Drawing: section through the joint between two glass sheets, the steel profiles and their fixings',
+            ratio: '1500 / 882',
+            wide: true,
+        },
+    ],
     view: { elevation: 30, turn: 0, zoom: { side: 1.8, stacked: 1.6 } },
 });

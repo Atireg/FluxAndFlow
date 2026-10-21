@@ -55,8 +55,8 @@ Next up (waiting on content or a check from the user)
     [x] Nap Nap Hooray (slot 4): a recording of the site for its phone's
         screen (390 x 664, like kh ReUse's mobile one)
     [x] Nap Nap Hooray: pictures in its drawer
-    [ ] Frameless Glass Structures (slot 7): drawer text and pictures, a
-        thumbnail for its pebble (the default rock for now)
+    [ ] Frameless Glass Structures (slot 7): drawer text, and a thumbnail
+        for its pebble (the default rock for now)
     [ ] Nap Nap Hooray: a seventh picture (Sleep per day / Number of naps),
         sent inline - to come as a file
     [ ] Emergent Space's drop on a phone: confirm it runs smoothly on a real
