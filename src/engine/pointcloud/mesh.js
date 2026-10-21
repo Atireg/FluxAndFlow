@@ -83,8 +83,10 @@ export function pointsFromMeshes(root, total = MESH_SAMPLE_POINTS) {
     // How the file's own space was fitted, for finding a part of it again (`screen`)
     group.userData.fit = { centre, factor };
 
-    // And the meshes themselves, merged, for drawing them solid (`drop.solid`)
-    group.userData.solid = mergeGeometries(meshes.map((mesh) => {
+    // And the meshes themselves, fitted the same way, for drawing them solid:
+    // merged (`solid`, `drop.solid`), and each as a part named after its
+    // material (`parts`, `figure`)
+    const fitted = (mesh) => {
         const solid = new THREE.BufferGeometry();
         solid.setAttribute('position', mesh.geometry.attributes.position.clone());
         if (mesh.geometry.index) solid.setIndex(mesh.geometry.index.clone());
@@ -93,7 +95,10 @@ export function pointsFromMeshes(root, total = MESH_SAMPLE_POINTS) {
         solid.scale(factor, factor, factor);
         solid.computeVertexNormals();
         return solid;
-    }));
+    };
+    const solids = meshes.map(fitted);
+    group.userData.solid = mergeGeometries(solids);
+    group.userData.parts = meshes.map((mesh, i) => ({ name: mesh.material?.name || mesh.name, geometry: solids[i] }));
     return group;
 }
 
@@ -101,16 +106,24 @@ export function pointsFromMeshes(root, total = MESH_SAMPLE_POINTS) {
  * A solid model drawn in the inks rather than lit by the scene (whose cyan
  * lights would tint it): orange where it faces a fixed light from above,
  * deepening to the dark red where it turns away - like the points' inks,
- * laid on as shade. Opaque, so it hides what's behind it. A project's
- * `solid: { lit, shade }` gives its own pair, as screen [r, g, b].
+ * laid on as shade. Opaque, so it hides what's behind it - unless given an
+ * `opacity` under 1 (glass). A project's `solid: { lit, shade }` gives its
+ * own pair, as screen [r, g, b], and `parts` one for each of a model's parts.
  */
-export function makeInkMaterial({ lit, shade } = {}) {
+export function makeInkMaterial({ lit, shade, opacity = 1 } = {}) {
+    // See-through (`opacity` under 1, glass): both faces, and it doesn't hide
+    // what's behind it from the depth test
+    const clear = opacity < 1;
     return new THREE.ShaderMaterial({
+        transparent: clear,
+        depthWrite: !clear,
+        side: clear ? THREE.DoubleSide : THREE.FrontSide,
         uniforms: {
             uLit: { value: lit ? screenColor(...lit) : POINT_INKS[1].color },
             uShade: { value: shade ? screenColor(...shade) : POINT_INKS[0].color },
             // 0..1, how far it has dissolved away - see pile.js's fade
             uFade: { value: 0 },
+            uOpacity: { value: opacity },
         },
         vertexShader: `
 varying vec3 vNormal;
@@ -124,6 +137,7 @@ void main() {
 uniform vec3 uLit;
 uniform vec3 uShade;
 uniform float uFade;
+uniform float uOpacity;
 varying vec3 vNormal;
 varying vec3 vInkLocal;
 
@@ -140,8 +154,10 @@ float inkGrain(vec3 p) {
 
 void main() {
     if (inkGrain(floor(vInkLocal * 40.0)) < uFade) discard;
-    float light = max(dot(normalize(vNormal), normalize(vec3(-0.35, 0.8, 0.5))), 0.0);
-    gl_FragColor = vec4(mix(uShade, uLit, light), 1.0);
+    // (a see-through part's back faces lit as its own, turned towards us)
+    vec3 normal = normalize(vNormal) * (gl_FrontFacing ? 1.0 : -1.0);
+    float light = max(dot(normal, normalize(vec3(-0.35, 0.8, 0.5))), 0.0);
+    gl_FragColor = vec4(mix(uShade, uLit, light), uOpacity);
 }`,
     });
 }

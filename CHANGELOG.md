@@ -472,5 +472,16 @@ bisecting and a user's screen recording are checked headless.
 collaboration with the sleep consultant Hristiana Yovkova-Arnaudova and the
 kind help of AI agents" (the user's words).
 
+**A fifth project, Frameless Glass Structures** (slot 7, the real world,
+`#frameless-glass`): the user's Rhino 7 model of a glass pavilion, sent as
+OBJ + .mtl and converted by a new `tools/models/obj-to-glb.mjs` into seven
+parts named after its materials. Drawn solid, each part in its own look
+(new `parts` setting: metal graphite, plinth light, glass and fins
+see-through - a new `opacity` for the ink material); the person beside it
+not drawn but formed by the pebble's points as they fall (new `figure`
+setting), turning with the model. A proposal of looks; no drawer text,
+pictures or thumbnail yet.
+
 Open at end of session: as at the end of session 4; a seventh Nap Nap
-Hooray picture, to come as a file.
+Hooray picture, to come as a file; Frameless Glass Structures' text,
+pictures, thumbnail and looks.

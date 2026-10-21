@@ -31,6 +31,11 @@
  *   solid         a mesh detailModel only: drawn as the mesh itself in the
  *                 inks, not sampled into points; or { lit, shade } as screen
  *                 [r, g, b] for its own colour, lit side and turned away
+ *   parts         with solid: { [material name]: { lit, shade, opacity } } - a
+ *                 look for each of the model's parts (each its material's
+ *                 pieces); `opacity` under 1 is see-through, like glass
+ *   figure        with solid: the material name of a part not drawn - the
+ *                 pebble's points fall and form it instead (a person, say)
  *   still         the model doesn't turn by itself (it can still be orbited)
  *   screenVideo   with screen: a film (.mp4 in static/) playing on it, muted, looping
  *   phone         with screen: { detailModel, screenVideo } shown instead on a
@@ -84,7 +89,7 @@ export function categoryLabel(id) {
  */
 export const EMPTY_SLOT_CATEGORIES = {
     2: 'teaching', 5: 'teaching',
-    6: 'teaching', 7: 'real-world', 8: 'real-world', 9: 'teaching',
+    6: 'teaching', 8: 'real-world', 9: 'teaching',
 };
 
 const DEFAULT_IMAGE_RATIO = '3 / 2';
@@ -229,17 +234,40 @@ function normaliseAutoZoom(autoZoom, { id, drop }) {
     return autoZoom;
 }
 
+// A colour as screen [r, g, b], 0-255 - or left out
+const isRgb = (value) => value === undefined
+    || (Array.isArray(value) && value.length === 3 && value.every((n) => n >= 0 && n <= 255));
+
 // A solid model has no points to gather, sample or drop
 function normaliseSolid({ id, solid, gather, points, drop }) {
     if (!solid) return false;
     if (gather || points !== undefined || drop) throw new Error(`Project "${id}": solid can't go with gather, points or drop`);
     if (solid === true) return true;
-    const rgb = (value) => value === undefined
-        || (Array.isArray(value) && value.length === 3 && value.every((n) => n >= 0 && n <= 255));
-    if (typeof solid !== 'object' || !rgb(solid.lit) || !rgb(solid.shade)) {
+    if (typeof solid !== 'object' || !isRgb(solid.lit) || !isRgb(solid.shade)) {
         throw new Error(`Project "${id}": solid should be true or { lit, shade } as [r, g, b], 0-255`);
     }
     return { lit: solid.lit, shade: solid.shade };
+}
+
+// A look for each part of a solid model, by its material's name
+function normaliseParts({ id, parts, solid }) {
+    if (parts === undefined) return undefined;
+    if (!solid) throw new Error(`Project "${id}": parts needs solid`);
+    if (!parts || typeof parts !== 'object') throw new Error(`Project "${id}": parts should be { [material name]: { lit, shade, opacity } }`);
+    return Object.fromEntries(Object.entries(parts).map(([name, look]) => {
+        const ok = look && typeof look === 'object' && isRgb(look.lit) && isRgb(look.shade)
+            && (look.opacity === undefined || (look.opacity > 0 && look.opacity <= 1));
+        if (!ok) throw new Error(`Project "${id}": parts["${name}"] should be { lit, shade } as [r, g, b], 0-255, and an opacity over 0, to 1`);
+        return [name, { lit: look.lit, shade: look.shade, opacity: look.opacity ?? 1 }];
+    }));
+}
+
+function normaliseFigure({ id, figure, solid, screen }) {
+    if (figure === undefined) return undefined;
+    if (!figure || typeof figure !== 'string') throw new Error(`Project "${id}": figure should be the material name of a part of the model`);
+    if (!solid) throw new Error(`Project "${id}": figure needs solid`);
+    if (screen) throw new Error(`Project "${id}": the pebble's points go to a screen or a figure, not both`);
+    return figure;
 }
 
 function normaliseScreen({ id, screen, solid }) {
@@ -344,6 +372,8 @@ export function defineProject(project) {
         gather: Boolean(project.gather),
         points: project.points,
         solid: normaliseSolid(project),
+        parts: normaliseParts(project),
+        figure: normaliseFigure(project),
         still: Boolean(project.still),
         orbit: project.orbit !== false,
         screen: normaliseScreen(project),

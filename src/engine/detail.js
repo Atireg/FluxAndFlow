@@ -389,6 +389,8 @@ export function createDetail({
                 points: project.points,
                 drop: project.drop,
                 solid: project.solid,
+                parts: project.parts,
+                figure: project.figure,
                 screen: project.screen,
                 screenVideo: source.screenVideo && assetUrl(source.screenVideo),
                 // Say so rather than leave "Loading model" up forever, and

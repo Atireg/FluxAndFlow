@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { PEBBLE_RIM_COLOR, pointInkUniforms, POINT_OPACITY } from '../colors.js';
 import { PILE_SURFACE_RADIUS } from '../pile.js';
 import { smooth01 } from '../ease.js';
+import { MeshSurfaceSampler } from 'three/examples/jsm/math/MeshSurfaceSampler.js';
 import { addTrails } from '../pointcloud/trails.js';
 import { revealAt } from '../pointcloud/gather.js';
 import { detailSince } from '../camera/framing.js';
@@ -50,8 +51,10 @@ const SCREEN_HOLD = 0.25;
 const DISSOLVE_GLSL = `
 uniform float uT;
 uniform float uSwell;
-uniform float uGround; // 1: the points fall and stay as a pile's surface (aGround)
-uniform float uScreen; // 1: ...or on a screen (uGround too), floating about on it
+uniform float uGround; // 1: the points fall and stay - as a pile's surface or a figure (aGround)
+uniform mat4 uGroundMatrix; // aGround into the pebble's space: the model's matrix, for a figure
+uniform float uFine; // 1: landed, they're fainter too - a pile's ground, not a figure (both finer)
+uniform float uScreen; // 1: ...or on a screen (uGround too), circling there
 uniform float uTime;
 uniform float uRelease; // 0..1 as the loading circle lets its points go
 uniform vec3 uScreenCentre; // the screen's middle, and the vectors to its right and top edges
@@ -101,7 +104,7 @@ vec3 dissolvePosition(vec3 home, float T, float time, out float falling) {
     falling = clamp((T - 0.25 - aDelay * 0.35) / 0.35, 0.0, 1.0);
     // Chosen, not mixed: with no screen its vectors are zero, normalize()
     // gives NaN, and NaN times nothing is still NaN - the ground vanished
-    vec3 ground = uScreen > 0.5 ? screenPoint(time) : aGround;
+    vec3 ground = uScreen > 0.5 ? screenPoint(time) : (uGroundMatrix * vec4(aGround, 1.0)).xyz;
     vec3 landed = mix(swollen, ground, falling * falling);
     return mix(p, landed, landsHere());
 }
@@ -110,7 +113,7 @@ vec3 dissolvePosition(vec3 home, float T, float time, out float falling) {
 float dissolveAlpha(float T, float falling) {
     float fading = 1.0 - smoothstep(0.55, 1.0, T);
     // (a pile's ground lighter once landed; a screen's points not)
-    return smoothstep(0.0, 0.12, T) * mix(fading, 1.0 - 0.45 * falling * (1.0 - uScreen), landsHere()) * spinnerInk();
+    return smoothstep(0.0, 0.12, T) * mix(fading, 1.0 - 0.45 * falling * uFine, landsHere()) * spinnerInk();
 }`;
 
 const dissolveVertexShader = `
@@ -202,6 +205,8 @@ export function getDissolve(pebble) {
     const stays = new Float32Array(DISSOLVE_POINTS);
     const v = new THREE.Vector3();
     const screen = Boolean(pebble.userData.project?.screen);
+    // ...or a figure, every point landing on it once its model is in (`figure`)
+    const figure = Boolean(pebble.userData.project?.figure);
 
     // A project dropped onto a surface (`drop`) gets its surface from these:
     // each point's place on a disc on the ground, in the grey ink
@@ -257,7 +262,9 @@ export function getDissolve(pebble) {
             uSize: { value: DISSOLVE_POINT_SIZE },
             uRim: { value: PEBBLE_RIM_COLOR },
             ...pointInkUniforms(),
-            uGround: { value: drop || screen ? 1 : 0 },
+            uGround: { value: drop || screen || figure ? 1 : 0 },
+            uGroundMatrix: { value: new THREE.Matrix4() },
+            uFine: { value: drop ? 1 : 0 },
             uScreen: { value: screen ? 1 : 0 },
             uTime: { value: 0 },
             uRelease: { value: 0 },
@@ -270,9 +277,10 @@ export function getDissolve(pebble) {
             uFluxAmount: { value: fluxAmount(pebble.userData.size) },
         },
     }));
-    // Points that stay once they've landed, on a pile's ground or a screen
-    points.userData.ground = Boolean(drop || screen);
+    // Points that stay once they've landed, on a pile's ground, a screen or a figure
+    points.userData.ground = Boolean(drop || screen || figure);
     points.userData.screen = screen;
+    points.userData.figure = figure;
     points.visible = false;
     points.renderOrder = 2;
     points.raycast = () => {}; // never something to click on
@@ -310,14 +318,16 @@ export function updateDissolve({ state, renderer, camera, elapsedTime }) {
     let t = (elapsedTime - state.dropStartedAt - points.userData.waited) / DISSOLVE_DURATION;
     const ground = points.userData.ground;
 
-    // Points bound for a screen wait for it, then carry on from there
+    // Points bound for a screen or a figure wait for it, then carry on from there
     const screen = points.userData.screen && shown ? detail.userData.screen : null;
-    if (points.userData.screen) {
-        if (!screen && t > SCREEN_HOLD) {
+    const figure = points.userData.figure && shown ? detail.userData.figure : null;
+    if (points.userData.screen || points.userData.figure) {
+        if (!screen && !figure && t > SCREEN_HOLD) {
             points.userData.waited += (t - SCREEN_HOLD) * DISSOLVE_DURATION;
             t = SCREEN_HOLD;
         }
         if (screen) placeScreen(points.material.uniforms, screen, detail);
+        if (figure) placeFigure(points, figure, detail);
     }
 
     points.visible = ground || t < 1;
@@ -343,6 +353,27 @@ export function updateDissolve({ state, renderer, camera, elapsedTime }) {
     uniforms.uFluxTime.value = state.dropStartedAt * PEBBLE_FLUX_SPEED;
     uniforms.uPixelsPerUnit.value = renderer.domElement.height
         / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov ?? 45) / 2));
+}
+
+// The figure the points form: a place on its surface for each, the first time
+// (in the model's space), and the model's matrix to carry them with it as it turns
+function placeFigure(points, figure, model) {
+    if (points.userData.figureFrom !== figure) {
+        points.userData.figureFrom = figure;
+        const sampler = new MeshSurfaceSampler(new THREE.Mesh(figure)).build();
+        const grounds = points.geometry.attributes.aGround;
+        const at = new THREE.Vector3();
+        for (let i = 0; i < grounds.count; i++) {
+            sampler.sample(at);
+            grounds.setXYZ(i, at.x, at.y, at.z);
+        }
+        grounds.needsUpdate = true;
+        // The tails share the array, not the attribute
+        const tails = points.userData.trails.geometry.attributes.aGround;
+        if (tails) tails.needsUpdate = true;
+    }
+    model.updateMatrix();
+    points.material.uniforms.uGroundMatrix.value.copy(model.matrix);
 }
 
 // The model's screen, from its own space into the pebble's (the dissolve's)

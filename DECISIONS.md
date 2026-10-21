@@ -39,6 +39,7 @@ The project view: point cloud
 - Quantized, not Draco-compressed
 - A mesh becomes points as it loads
 - The devices: a laptop and a phone with a film on the screen
+- Frameless Glass Structures: parts in their own looks, a figure of points
 - Emergent Space: aggregates dropped with live physics
 - Point size, three sizes, three inks
 - Points gather out of a scattered cloud
@@ -841,6 +842,34 @@ of what a sampled cloud would weigh (Rock Print's 78k quantized points are
 point cloud is left exactly as it is. Emergent Space's aggregates are now
 drawn as the mesh itself (`drop.solid`, below); its sampled points are no
 longer seen.
+
+
+Frameless Glass Structures: parts in their own looks, a figure of points
+-----------------------------------------------------------------------
+
+The user's Rhino 7 model of a glass pavilion (no glTF export in Rhino 7):
+exported as OBJ with its .mtl, converted here by
+`tools/models/obj-to-glb.mjs` - every piece using a material merged into
+one part named after it (seven parts, 3.2 MB; the object names hadn't come
+through, all `object_N`, and a few curves are left out). Normals are
+creased at 30 degrees so the flat panels keep their edges. Rhino users
+should name materials, which survive an OBJ or glTF export; layer names
+may not.
+
+Drawn `solid`, but no longer as one merged mesh when a project gives
+`parts`: each part (by material name) gets its own `makeInkMaterial` look,
+`{ lit, shade, opacity }` - under 1 it's see-through, both faces, behind
+the opaque parts and not writing depth (glass; 0.14, as 0.3 stacked into
+frosted white). All share one fade uniform, so they come in together.
+
+`figure` names a part that isn't drawn: the pebble's dissolve lands every
+one of its points on it (asked for: the person, formed from the
+playground's points). Its places are sampled on the part's surface the
+first time the model is shown, in the model's space, and carried into the
+pebble's by `uGroundMatrix` (the model's matrix) each frame, so the figure
+turns with the model. Landed points are finer, as a pile's ground, but not
+fainter (`uFine` only for a pile). Tones random, as the clouds'. Until the
+model is in, the points hold swollen, as for a screen.
 
 
 The devices: a laptop and a phone with a film on the screen

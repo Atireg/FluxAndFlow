@@ -12,8 +12,7 @@
  * the one declaration, because the engine and the UI both read the
  * normalised project rather than reaching for fields of their own. There is
  * no per-project branch anywhere: a project that wants different behaviour
- * says so in its own file through `view`, `gather`, `drop`, `points`,
- * `doubleClick`, `autoZoom` or `eyeLevel`.
+ * says so in its own file through its settings (schema.js lists them all).
  *
  * Slots with no project listed here render as empty pebbles, holding
  * nothing and answering a click with "under construction".
@@ -23,6 +22,7 @@ import rockPrint from './rock-print.js';
 import emergentSpace from './emergent-space.js';
 import khReuse from './kh-reuse.js';
 import napNapHooray from './nap-nap-hooray.js';
+import framelessGlass from './frameless-glass.js';
 
 export { CATEGORIES, categoryLabel, hasDescription, metaRows } from './schema.js';
 
@@ -31,6 +31,7 @@ const catalog = [
     emergentSpace,
     khReuse,
     napNapHooray,
+    framelessGlass,
 ];
 
 /**

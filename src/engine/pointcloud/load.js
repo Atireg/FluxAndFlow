@@ -38,6 +38,8 @@ export function loadPointCloud({
     points,
     drop,
     solid = false,
+    parts,
+    figure,
     screen,
     screenVideo,
 }) {
@@ -58,11 +60,29 @@ export function loadPointCloud({
 
             // The mesh itself in the inks, no points (its reveal fades it in)
             if (solid) {
-                const material = makeInkMaterial(solid === true ? {} : solid);
-                material.uniforms.uFade.value = 1;
+                const look = solid === true ? {} : solid;
                 const group = new THREE.Group();
-                group.add(new THREE.Mesh(sampled.userData.solid, material));
-                group.userData.solidMaterial = material;
+                // Each part in its own look (`parts`, by material name, the
+                // rest in the project's), all fading in together on one
+                // uniform - or the whole model merged in one. The `figure`
+                // part isn't drawn: the pebble's points form it (dissolve.js)
+                const fade = { value: 1 };
+                const pieces = parts || figure
+                    ? sampled.userData.parts
+                    : [{ name: '', geometry: sampled.userData.solid }];
+                pieces.forEach(({ name, geometry }) => {
+                    if (name === figure) {
+                        group.userData.figure = geometry;
+                        return;
+                    }
+                    const material = makeInkMaterial(parts?.[name] ?? look);
+                    material.uniforms.uFade = fade;
+                    const mesh = new THREE.Mesh(geometry, material);
+                    mesh.name = name;
+                    if (material.transparent) mesh.renderOrder = 1; // after the opaque parts
+                    group.add(mesh);
+                    group.userData.solidMaterial ??= material;
+                });
                 // Where the pebble's points settle and circle (`screen`)
                 if (screen) group.userData.screen = screenFrame(original, screen, sampled.userData.fit);
                 // ...a white screen, with rounded corners

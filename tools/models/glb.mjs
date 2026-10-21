@@ -1,7 +1,8 @@
 /**
  * What the model scripts beside this share: welding a mesh, and writing
  * meshes out as a binary glTF (.glb) in static/models/ - positions, normals
- * and 16-bit indices, one node per mesh, a node's `matrix` if it has one.
+ * and indices (16-bit, or 32 for a big mesh), one node per mesh, a node's
+ * `matrix` if it has one, and a named material if it says which.
  * Run from the repository root: `npm run models`.
  */
 import { mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
@@ -19,7 +20,7 @@ export function weld(geometry, tolerance = 1e-4) {
 
 const pad = (n) => (n + 3) & ~3;
 
-// meshes: [{ name, geometry (indexed, welded), matrix? (16 numbers) }]
+// meshes: [{ name, geometry (indexed, welded), matrix? (16 numbers), material? (a name) }]
 export function writeGlb(fileName, meshes, generator) {
     const chunks = [];
     const bufferViews = [];
@@ -37,14 +38,20 @@ export function writeGlb(fileName, meshes, generator) {
         geometry.computeBoundingBox();
         const { min, max } = geometry.boundingBox;
         const count = geometry.getAttribute('position').count;
-        const indices = new Uint16Array(geometry.index.array);
+        const indices = count > 65535 ? new Uint32Array(geometry.index.array) : new Uint16Array(geometry.index.array);
         const first = accessors.length;
         accessors.push(
             { bufferView: addView(new Float32Array(geometry.getAttribute('position').array), 34962), componentType: 5126, count, type: 'VEC3', min: min.toArray(), max: max.toArray() },
             { bufferView: addView(new Float32Array(geometry.getAttribute('normal').array), 34962), componentType: 5126, count, type: 'VEC3' },
-            { bufferView: addView(indices, 34963), componentType: 5123, count: indices.length, type: 'SCALAR' },
+            { bufferView: addView(indices, 34963), componentType: count > 65535 ? 5125 : 5123, count: indices.length, type: 'SCALAR' },
         );
         return { name, primitives: [{ attributes: { POSITION: first, NORMAL: first + 1 }, indices: first + 2 }] };
+    });
+
+    // Named materials, one per name, for the site to tell the parts apart
+    const materialNames = [...new Set(meshes.map((mesh) => mesh.material).filter(Boolean))];
+    meshes.forEach(({ material }, i) => {
+        if (material) gltfMeshes[i].primitives[0].material = materialNames.indexOf(material);
     });
 
     const bin = Buffer.concat(chunks);
@@ -54,6 +61,7 @@ export function writeGlb(fileName, meshes, generator) {
         scenes: [{ nodes: meshes.map((_, i) => i) }],
         nodes: meshes.map(({ name, matrix }, i) => ({ mesh: i, name, ...(matrix ? { matrix } : {}) })),
         meshes: gltfMeshes,
+        ...(materialNames.length ? { materials: materialNames.map((name) => ({ name })) } : {}),
         buffers: [{ byteLength: bin.length }],
         bufferViews,
         accessors,
