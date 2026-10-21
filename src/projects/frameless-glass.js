@@ -48,6 +48,16 @@ export default defineProject({
     // Research, teaching or the real world - its tag, and the catalog's filter
     category: 'real-world',
 
+    // The drawer's text, as the user chose it (option 1 of three)
+    body: [
+        'Frameless Glass Structures is a pavilion of glass and almost nothing '
+        + 'else. Eight laminated glass sheets fold into a pointed arch, about '
+        + '6.7 m long and 3.3 m wide, and carry themselves: there is no frame. '
+        + 'Slim steel profiles join the sheets edge to edge, at angles between '
+        + '153° and 167°, and the glass does the structural work. It was shown '
+        + 'at glasstec in Düsseldorf.',
+    ],
+
     detailModel: 'models/frameless-glass.glb',
     // The model itself, the parts by their Rhino material names; anything
     // not listed in `solid`'s light grey
