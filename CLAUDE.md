@@ -64,8 +64,8 @@ in a pull-out drawer.
   (`frameless-glass.glb`, seven parts named after its Rhino materials),
   each part in its own look (`parts`: graphite metal, light plinth, clear
   glass); the person beside it isn't drawn - the pebble's points fall and
-  form them (`figure`). Turns slowly. No drawer text or thumbnail yet (the
-  default rock).
+  form them (`figure`). Turns slowly; a double-click stops it. No drawer
+  text or thumbnail yet (the default rock).
 - **Links**: each project's own address is `#<id>` (`#rock-print`).
 - **Drawer copy** is real for the first four projects, approved by the user
   word for word; change it only on request.

@@ -482,6 +482,12 @@ not drawn but formed by the pebble's points as they fall (new `figure`
 setting), turning with the model. A proposal of looks; no drawer text,
 pictures or thumbnail yet.
 
+**Frameless Glass Structures, first round**: the person's points finer
+(a quarter of their size once landed); the four steel pieces along the
+ridge of the sloping ends (Custom 7 and 8, taken for glass fins) in the
+steel's look; a double-click stops its turn. The timber's look offered as
+options.
+
 Open at end of session: as at the end of session 4; a seventh Nap Nap
 Hooray picture, to come as a file; Frameless Glass Structures' text,
 pictures, thumbnail and looks.

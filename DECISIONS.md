@@ -867,8 +867,9 @@ one of its points on it (asked for: the person, formed from the
 playground's points). Its places are sampled on the part's surface the
 first time the model is shown, in the model's space, and carried into the
 pebble's by `uGroundMatrix` (the model's matrix) each frame, so the figure
-turns with the model. Landed points are finer, as a pile's ground, but not
-fainter (`uFine` only for a pile). Tones random, as the clouds'. Until the
+turns with the model. Landed points are finer than a pile's ground
+(`FIGURE_POINT_SIZE` 0.25 of their size against `GROUND_POINT_SIZE` 0.5 -
+at 0.5 the person read as blobs) and not fainter (`uFine` only for a pile). Tones random, as the clouds'. Until the
 model is in, the points hold swollen, as for a screen.
 
 

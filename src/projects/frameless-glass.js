@@ -22,10 +22,13 @@ export default defineProject({
         Plaster: { lit: [226, 222, 214], shade: [176, 170, 162] },
         Glass: { lit: [236, 242, 244], shade: [196, 208, 214], opacity: 0.14 },
         'Custom (2)': { lit: [236, 242, 244], shade: [196, 208, 214], opacity: 0.14 },
-        'Custom (7)': { lit: [226, 236, 240], shade: [180, 196, 204], opacity: 0.24 },
-        'Custom (8)': { lit: [226, 236, 240], shade: [180, 196, 204], opacity: 0.24 },
+        // The steel along the ridge of the sloping ends, as the rest
+        'Custom (7)': { lit: [118, 116, 114], shade: [52, 51, 54] },
+        'Custom (8)': { lit: [118, 116, 114], shade: [52, 51, 54] },
     },
     // The person: the pebble's points form them
     figure: 'People_ZIM',
+    // A double-click (or double-tap) stops its turn, the next sets it going
+    doubleClick: 'hold',
     view: { elevation: 30, turn: 0, zoom: { side: 1.8, stacked: 1.6 } },
 });

@@ -31,6 +31,8 @@ const DISSOLVE_SWELL = 0.55; // how far the cloud swells past the pebble's surfa
 const DISSOLVE_DRIFT = 0.9; // units each point also wanders off on its own
 const DISSOLVE_POINT_SIZE = 0.07; // world units across
 const DISSOLVE_TRAIL = 0.12; // seconds back for the dissolve's points
+const GROUND_POINT_SIZE = 0.5; // a landed point, as a share of its size - a pile's ground
+const FIGURE_POINT_SIZE = 0.25; // ...and a figure's, finer so it reads as a shape (0.5 was blobs)
 const SCREEN_EVERY = 3; // one point in this many settles on the screen; the rest fade as usual
 // On the screen they circle like a loading sign: an arc of the circle,
 // turning, brightest at its head - and once the film has loaded they drift
@@ -53,7 +55,8 @@ uniform float uT;
 uniform float uSwell;
 uniform float uGround; // 1: the points fall and stay - as a pile's surface or a figure (aGround)
 uniform mat4 uGroundMatrix; // aGround into the pebble's space: the model's matrix, for a figure
-uniform float uFine; // 1: landed, they're fainter too - a pile's ground, not a figure (both finer)
+uniform float uFine; // 1: landed, they're fainter too - a pile's ground, not a figure
+uniform float uLanded; // the size a landed point keeps: finer still on a figure
 uniform float uScreen; // 1: ...or on a screen (uGround too), circling there
 uniform float uTime;
 uniform float uRelease; // 0..1 as the loading circle lets its points go
@@ -131,7 +134,7 @@ void main() {
     gl_Position = projectionMatrix * mv;
     // Landed, they're finer and fainter - a ground, not a cloud
     float settled = falling * landsHere() * (1.0 - uScreen);
-    gl_PointSize = uSize * (1.0 - 0.5 * settled) * uPixelsPerUnit / max(-mv.z, 0.001);
+    gl_PointSize = uSize * (1.0 - (1.0 - uLanded) * settled) * uPixelsPerUnit / max(-mv.z, 0.001);
 
     vAlpha = dissolveAlpha(uT, falling);
     vInk = smoothstep(0.1, 0.6, uT);
@@ -158,7 +161,7 @@ void main() {
     vec4 tailView = modelViewMatrix * vec4(dissolvePosition(aHome, max(uT - uTrailLag, 0.0), uTime - ${SPINNER_TRAIL.toFixed(2)}, before), 1.0);
 
     float settled = falling * landsHere() * (1.0 - uScreen);
-    float width = uSize * (1.0 - 0.5 * settled) * uPixelsPerUnit / max(-headView.z, 0.001);
+    float width = uSize * (1.0 - (1.0 - uLanded) * settled) * uPixelsPerUnit / max(-headView.z, 0.001);
     float moving;
     gl_Position = trailCorner(headView, tailView, width, moving);
 
@@ -265,6 +268,7 @@ export function getDissolve(pebble) {
             uGround: { value: drop || screen || figure ? 1 : 0 },
             uGroundMatrix: { value: new THREE.Matrix4() },
             uFine: { value: drop ? 1 : 0 },
+            uLanded: { value: figure ? FIGURE_POINT_SIZE : GROUND_POINT_SIZE },
             uScreen: { value: screen ? 1 : 0 },
             uTime: { value: 0 },
             uRelease: { value: 0 },
