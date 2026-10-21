@@ -38,6 +38,7 @@
  *                 pebble's points fall and form it instead (a person, say)
  *   section       with solid: a plane across the model's length the visitor
  *                 slides (a slider over the model), its parts cut away beyond it
+ *   notice        a short line under the title in the bar, in orange
  *   floor         with solid: a floor at the model's foot, a figure set down onto it
  *   info          with solid: { [part name]: { title, lines } } - shown beside
  *                 the pointer over that part of the model (the part's name
@@ -420,6 +421,7 @@ export function defineProject(project) {
         info: normaliseInfo(project),
         section: normaliseSection(project),
         floor: normaliseFloor(project),
+        notice: typeof project.notice === 'string' ? project.notice : '',
         still: Boolean(project.still),
         orbit: project.orbit !== false,
         screen: normaliseScreen(project),

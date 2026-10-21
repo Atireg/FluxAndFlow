@@ -60,7 +60,8 @@ in a pull-out drawer.
   "Sleepless nights and cranky days"; the user's text, with two lists; six
   phone screenshots (two to a row on a wide screen, the first `half`).
 - **Frameless Glass Structures** (slot 7, the real world,
-  `#frameless-glass`): the user's Rhino model of a glass pavilion
+  `#frameless-glass`; under its title, in orange, "This part of the website
+  is still under construction." - `notice`): the user's Rhino model of a glass pavilion
   (`frameless-glass.glb`, seven parts named after its Rhino materials),
   each part in its own look (`parts`: light matt-grey steel, oak timber,
   clear glass, each sheet's upper ply outlined thin black); the person beside it isn't drawn - the pebble's points fall and
@@ -175,6 +176,7 @@ defineProject({
     title: 'Rock Print Pavilion',         // also the name on its pebble - keep it phone-short
     category: 'research',                 // 'research', 'teaching' or 'real-world' - required
     year: '', role: '', context: '',      // drawer rows, if non-empty - state the role accurately
+    notice: '',                           // a small orange line under the title in the bar, if non-empty
     body: [], credits: '',                // drawer text: paragraphs, or string arrays for a list;
                                           // [words](https://...) a link; nothing = no handle
     thumbModel: 'models/rock.gltf',       // in the pebble; thumbSize: 1.9 fits the project's own

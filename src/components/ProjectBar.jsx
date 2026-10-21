@@ -32,6 +32,8 @@ const ProjectBar = forwardRef(function ProjectBar({ project, status, onClose }, 
                 {project?.title ?? ''}
                 {project && <>{' '}<span className="bar__category">{categoryLabel(project.category)}</span></>}
             </h1>
+            {/* A word about the project as it stands (its `notice`) */}
+            {project?.notice && <p className="bar__notice">{project.notice}</p>}
             <p className="bar__status" role="status">{status ?? ''}</p>
         </header>
     );

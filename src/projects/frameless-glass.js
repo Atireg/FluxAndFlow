@@ -45,6 +45,8 @@ export default defineProject({
     id: 'frameless-glass',
     slot: 7,
     title: 'Frameless Glass Structures',
+    // Under the title, in orange (the user's words)
+    notice: 'This part of the website is still under construction.',
     // Research, teaching or the real world - its tag, and the catalog's filter
     category: 'real-world',
 

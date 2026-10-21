@@ -521,7 +521,9 @@ outlined in thin black (marked by the model's script, drawn by the site).
 The section's direction flipped: the other part is kept. The floor moved
 down to the foundations' underside, the person set down onto it. And it
 stands still: no turn (`still`), a double-click zooms. Its drawer text:
-option 1 of the three offered.
+option 1 of the three offered. Under its title, a small orange line (a
+project's new `notice`): "This part of the website is still under
+construction."
 
 Open at end of session: as at the end of session 4; a seventh Nap Nap
 Hooray picture, to come as a file; Frameless Glass Structures' year,

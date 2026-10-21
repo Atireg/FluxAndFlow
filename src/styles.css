@@ -767,6 +767,14 @@ body.drawer-open .section-slider {
     transition: opacity 0.3s ease, visibility 0s;
 }
 
+/* A project's `notice` under its title: small, in the warm orange */
+.bar__notice {
+    margin: 0.35rem 0 0;
+    font-size: 0.75rem;
+    letter-spacing: 0.02em;
+    color: var(--warm);
+}
+
 .bar__status:not(:empty) {
     display: flex;
     align-items: center;
