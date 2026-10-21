@@ -17,13 +17,18 @@ import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import { mergeGeometries, mergeVertices, toCreasedNormals } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { writeGlb } from './glb.mjs';
 
-// labelOf({ name, material, centre, size }) -> a part's name, or null for its material's
+/**
+ * labelOf(piece, pieces) -> a part's name, or { name, edges: true } for a part
+ * whose edges the site outlines, or null for its material's name. A piece is
+ * { name, material, centre, size, geometry } in the file's own space; all of
+ * them come along, for a label that compares a piece with others.
+ */
 export function objToGlb(source, fileName, labelOf = () => null) {
     const root = new OBJLoader().parse(readFileSync(source, 'utf8'));
     root.updateMatrixWorld(true);
 
-    // Each part's pieces, positions only, in the file's own space
-    const parts = new Map();
+    // Every piece, positions only, in the file's own space
+    const pieces = [];
     root.traverse((child) => {
         if (!child.isMesh) return;
         const material = (Array.isArray(child.material) ? child.material[0] : child.material).name || 'default';
@@ -32,22 +37,25 @@ export function objToGlb(source, fileName, labelOf = () => null) {
         geometry.applyMatrix4(child.matrixWorld);
         geometry.computeBoundingBox();
         const box = geometry.boundingBox;
-        const name = labelOf({
-            name: child.name,
-            material,
-            centre: box.getCenter(new THREE.Vector3()),
-            size: box.getSize(new THREE.Vector3()),
-        }) ?? material;
-        const key = `${name}\u0000${material}`;
-        if (!parts.has(key)) parts.set(key, { name, material, pieces: [] });
-        parts.get(key).pieces.push(geometry);
+        pieces.push({ name: child.name, material, centre: box.getCenter(new THREE.Vector3()), size: box.getSize(new THREE.Vector3()), geometry });
     });
 
-    const meshes = [...parts.values()].map(({ name, material, pieces }) => {
-        const creased = toCreasedNormals(mergeGeometries(pieces), Math.PI / 6);
+    // ...merged into parts
+    const parts = new Map();
+    pieces.forEach((piece) => {
+        const label = labelOf(piece, pieces);
+        const name = (typeof label === 'object' ? label?.name : label) ?? piece.material;
+        const edges = Boolean(label?.edges);
+        const key = `${name}\u0000${piece.material}\u0000${edges}`;
+        if (!parts.has(key)) parts.set(key, { name, material: piece.material, edges, geometries: [] });
+        parts.get(key).geometries.push(piece.geometry);
+    });
+
+    const meshes = [...parts.values()].map(({ name, material, edges, geometries }) => {
+        const creased = toCreasedNormals(mergeGeometries(geometries), Math.PI / 6);
         // The part's name kept as written - three.js makes repeated node
         // names unique as it loads, so the name itself can't be relied on
-        return { name, material, extras: { part: name }, geometry: mergeVertices(creased, 1e-3) };
+        return { name, material, extras: { part: name, ...(edges ? { edges } : {}) }, geometry: mergeVertices(creased, 1e-3) };
     });
 
     writeGlb(fileName, meshes, 'tools/models/obj-to-glb.mjs');

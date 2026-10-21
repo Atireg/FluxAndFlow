@@ -63,7 +63,7 @@ in a pull-out drawer.
   `#frameless-glass`): the user's Rhino model of a glass pavilion
   (`frameless-glass.glb`, seven parts named after its Rhino materials),
   each part in its own look (`parts`: light matt-grey steel, oak timber,
-  clear glass); the person beside it isn't drawn - the pebble's points fall and
+  clear glass, each sheet's upper ply outlined thin black); the person beside it isn't drawn - the pebble's points fall and
   form them (`figure`), in three greys (`inks`). Turns slowly; a
   double-click stops it. Over a glass sheet, joint or support (named after
   the user's drawing, GS1-GS8) the part is picked out, the turn holds and a
@@ -226,6 +226,8 @@ A model in parts (`frameless-glass.js`): `solid` gives the default look,
   To name parts of their own (for `info`), a script per model passes
   `labelOf` (`tools/models/frameless-glass.mjs`); the name travels in the
   node's glTF extras (`userData.part`), as three.js renames repeated nodes.
+  `{ name, edges: true }` marks a part the site outlines in thin black
+  (`makeEdgeMaterial`, cut by the section like the parts).
 - **Slots**: always `SLOT_COUNT` (10) pebbles; raise it before an eleventh
   project. Empty slots stand in for the other kinds
   (`EMPTY_SLOT_CATEGORIES`) - take a slot out once a project fills it.

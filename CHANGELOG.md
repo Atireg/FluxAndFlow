@@ -516,7 +516,8 @@ And a floor (`floor`): a soft disc at the person's feet, fading into the
 paper, a faint shadow under them - they no longer float. Then the steel
 lighter grey and flatter (no dark gaps between the sheets), and zoomed
 right in the model no longer breaks: the near plane follows the camera
-(`keepNear`) rather than staying at 1.
+(`keepNear`) rather than staying at 1. And each glass sheet's upper ply
+outlined in thin black (marked by the model's script, drawn by the site).
 
 Open at end of session: as at the end of session 4; a seventh Nap Nap
 Hooray picture, to come as a file; Frameless Glass Structures' text and

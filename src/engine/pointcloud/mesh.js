@@ -103,6 +103,8 @@ export function pointsFromMeshes(root, total = MESH_SAMPLE_POINTS) {
     group.userData.parts = meshes.map((mesh, i) => ({
         material: mesh.material?.name || mesh.name,
         part: mesh.userData.part ?? mesh.name,
+        // its edges outlined (`edges` in the file's extras - a sheet's upper ply)
+        edges: Boolean(mesh.userData.edges),
         geometry: solids[i],
     }));
     return group;
@@ -176,6 +178,33 @@ void main() {
     // Picked out: deeper, and glass less clear
     vec3 ink = mix(uShade, uLit, light) * (1.0 - 0.3 * uHighlight);
     gl_FragColor = vec4(ink, mix(uOpacity, max(uOpacity, 0.45), uHighlight));
+}`,
+    });
+}
+
+/**
+ * Thin lines in an ink for a solid model's outlines (a part's `edges`, the
+ * section's cut), fading in with it and cut by its section like its parts:
+ * `fade` and `clip` are the model's own uniforms
+ */
+export function makeEdgeMaterial(ink, { fade, clip }) {
+    return new THREE.ShaderMaterial({
+        transparent: true,
+        uniforms: { uInk: { value: ink }, uFade: fade, uClip: clip },
+        vertexShader: `
+varying float vAlong;
+void main() {
+    vAlong = position.z;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}`,
+        fragmentShader: `
+uniform vec3 uInk;
+uniform float uFade;
+uniform float uClip;
+varying float vAlong;
+void main() {
+    if (vAlong > uClip) discard;
+    gl_FragColor = vec4(uInk, 1.0 - uFade);
 }`,
     });
 }

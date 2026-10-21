@@ -916,7 +916,11 @@ as on a stand. Not cut by the section; never hovered.
 
 The steel then made lighter and flatter (asked for: less shiny, and the
 joints between the sheets not reading as dark gaps): lit 204, shade 168,
-against 118 / 52. The looks were chosen by the user: steel
+against 118 / 52. Each sheet's upper ply outlined in thin black (asked for): the script
+finds the ply furthest out along the sheet's facing and marks it in the
+file (`edges` in its extras); the site draws its EdgesGeometry (faces
+meeting at over 25 degrees) in a line material that fades in with the
+model and is cut by its section. The looks were chosen by the user: steel
 graphite (the ridge pieces too, Custom 7 and 8, first taken for glass
 fins), the timber (Rhino's "Plaster") warm oak of four offered (pale ash,
 charred, as points). Tones random, as the clouds'. Until the

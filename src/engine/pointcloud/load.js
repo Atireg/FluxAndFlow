@@ -5,7 +5,7 @@ import { POINT_INKS, POINT_SIZES, pointInkUniforms, screenColor, THUMB_INK_COLOR
 import { createPile, findRods } from '../pile.js';
 import { addGatherAttributes, GATHER_DURATION, GATHER_SPREAD, GATHER_SWIRL, GATHER_TRAIL, GATHER_TRAIL_EVERY } from './gather.js';
 import { addTrails } from './trails.js';
-import { CLIP_NONE, makeInkMaterial, pointsFromMeshes } from './mesh.js';
+import { CLIP_NONE, makeEdgeMaterial, makeInkMaterial, pointsFromMeshes } from './mesh.js';
 import { addScreenPanel, addScreenVideo } from './screenVideo.js';
 
 import gatherGlsl from '../shaders/pointCloud/gather.glsl';
@@ -16,6 +16,9 @@ import trailCornerGlsl from '../shaders/trail/corner.glsl';
 import trailGatherVertexShader from '../shaders/trail/gatherVertex.glsl';
 import trailGatherFragmentShader from '../shaders/trail/gatherFragment.glsl';
 import inkGlsl from '../shaders/pointCloud/ink.glsl';
+
+// Degrees between two faces for their shared edge to be outlined (a part's `edges`)
+const EDGE_ANGLE = 25;
 
 /**
  * Load a project's detail model as a cloud of points.
@@ -74,7 +77,8 @@ export function loadPointCloud({
                 const pieces = parts || figure
                     ? sampled.userData.parts
                     : [{ material: '', part: '', geometry: sampled.userData.solid }];
-                pieces.forEach(({ material: lookName, part, geometry }) => {
+                const edgeMaterial = makeEdgeMaterial(screenColor(18, 18, 20), { fade, clip });
+                pieces.forEach(({ material: lookName, part, edges, geometry }) => {
                     if (lookName === figure) {
                         group.userData.figure = geometry;
                         return;
@@ -87,6 +91,14 @@ export function loadPointCloud({
                     mesh.name = part;
                     if (material.transparent) mesh.renderOrder = 1; // after the opaque parts
                     group.add(mesh);
+                    // A part's outline in thin black (a glass sheet's upper ply),
+                    // where its faces meet at more than EDGE_ANGLE
+                    if (edges) {
+                        const outline = new THREE.LineSegments(new THREE.EdgesGeometry(geometry, EDGE_ANGLE), edgeMaterial);
+                        outline.raycast = () => {};
+                        outline.renderOrder = 2; // over the see-through parts
+                        group.add(outline);
+                    }
                     group.userData.solidMaterial ??= material;
                 });
                 if (section) addSection(group, clip);
@@ -251,7 +263,7 @@ function screenFrame(root, name, { centre, factor }) {
  */
 function addSection(group, clip) {
     const box = new THREE.Box3();
-    const meshes = [...group.children];
+    const meshes = group.children.filter((child) => child.isMesh);
     meshes.forEach((mesh) => {
         mesh.geometry.computeBoundingBox();
         box.union(mesh.geometry.boundingBox);
