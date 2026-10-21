@@ -523,7 +523,10 @@ down to the foundations' underside, the person set down onto it. And it
 stands still: no turn (`still`), a double-click zooms. Its drawer text:
 option 1 of the three offered. Under its title, a small orange line (a
 project's new `notice`): "This part of the website is still under
-construction."
+construction." And a `tour` as it opens: one full turn, the chosen view
+(the desktop's now too), then the cut slides to just past the middle as the
+camera closes in square-on on the ridge joint; the visitor's own moves stop
+it.
 
 Open at end of session: as at the end of session 4; a seventh Nap Nap
 Hooray picture, to come as a file; Frameless Glass Structures' year,

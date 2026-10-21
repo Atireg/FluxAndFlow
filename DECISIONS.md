@@ -922,7 +922,19 @@ file (`edges` in its extras); the site draws its EdgesGeometry (faces
 meeting at over 25 degrees) in a line material that fades in with the
 model and is cut by its section. It stands still (asked for: no turn at all) - the phone's starting
 `turn` taking in the 27 degrees it had turned by when the user chose that
-view. The looks were chosen by the user: steel
+view. **The tour** (asked for: a camera path each time it opens): one full
+turn, the view, then the cut and the move in on the middle's ridge joint,
+square-on so the joint's profile faces the visitor. The turn is the
+model's, eased, on top of its yaw (`tourSpin`) - the camera going round it
+reads the same, and the person and floor turn with it; the move in is one
+`moveCamera` (`frameSection`: centred on the focus part where the cut will
+rest, from the side cut away, `reach` of the parts' breadth across - the
+floor discs left out, they're far wider). The slider follows the cut
+(`ui.onSection`). Anything the visitor does with it stops the tour where it
+is, so it never takes the model back from them. The desktop view is the
+phone's now, so the turn ends where the close-up starts on both.
+
+The looks were chosen by the user: steel
 graphite (the ridge pieces too, Custom 7 and 8, first taken for glass
 fins), the timber (Rhino's "Plaster") warm oak of four offered (pale ash,
 charred, as points). Tones random, as the clouds'. Until the

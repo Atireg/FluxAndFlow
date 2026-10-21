@@ -73,8 +73,13 @@ in a pull-out drawer.
   part cut away, each part's cut edges traced in black (the joints read
   as in a drawing) and a faint outline at the cut (`section`). It stands
   on a soft floor at the foot of its foundations, the person set down onto
-  it, a faint shadow under them (`floor`). On a phone it opens steeply from above, its length up the screen (the
-  user's screenshot). Drawer: the user's chosen text (one paragraph), a YouTube film and five
+  it, a faint shadow under them (`floor`). Its view, on both layouts, is
+  steeply from above, its length up the screen (the user's screenshot).
+  As it opens it plays a `tour`: one full turn round it (10s), a moment at
+  that view, then the section slides to just past the middle as the camera
+  closes in square-on to the cut on the ridge joint GS2_GS6 (6s), the
+  slider following; the slider, a double-click, the drawer or orbiting by
+  hand stops it where it is. Drawer: the user's chosen text (one paragraph), a YouTube film and five
   pictures (the pavilion at glasstec, the joints, the joint in section); no
   year, role or context rows or thumbnail yet (the default rock).
 - **Links**: each project's own address is `#<id>` (`#rock-print`).
@@ -221,6 +226,7 @@ A model in parts (`frameless-glass.js`): `solid` gives the default look,
     info: { GS1: { title, lines: [] } },  // by part name: a card over it, the turn held
     section: true,                        // a slider cuts the model across its length (z in its own space)
     floor: true,                          // soft ground at the model's foot, the figure set down on it, its shadow
+    tour: { orbit: 10, cut: 0.48, focus: 'GS2_GS6', reach: 0.25, over: 6 },  // played as it opens - see schema.js
 ```
 
 - **Models from Rhino** come as OBJ + .mtl (Rhino 7 has no glTF export):
@@ -311,6 +317,10 @@ A model in parts (`frameless-glass.js`): `solid` gives the default look,
   Safari auto-completed an old `?cloudtest` and showed it for days.
 - **Nothing runs at module scope in `src/engine/`** - everything waits for
   `engine.start()`.
+- **A `tour` turns the model, not the camera** (`tourSpin`, detail.js),
+  which reads the same - the inks are lit from the view - then closes in
+  with `framing.frameSection`; the visitor's slider, double-click, drawer
+  or orbiting stops it (`stopTour`).
 - **A model's turn holds for reasons** (`setHold`, framing.js): 'click'
   (`doubleClick: 'hold'`) and 'hover' (a part with `info`); it turns
   again once neither holds it.

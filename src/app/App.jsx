@@ -45,6 +45,7 @@ export default function App() {
     const drawerRef = useRef(null);
     const tapHintRef = useRef(null);
     const partInfoRef = useRef(null);
+    const sectionRef = useRef(null);
     const hintStringRef = useRef(null);
     const hintTagRef = useRef(null);
     const hintDissolveRef = useRef(null);
@@ -161,6 +162,11 @@ export default function App() {
                     const top = y + card.offsetHeight + gap > window.innerHeight ? y - card.offsetHeight - gap : y;
                     card.style.transform = `translate(${left}px, ${top}px)`;
                     card.classList.add('is-showing');
+                },
+
+                // A `tour` moved the section: the slider follows it
+                onSection: (share) => {
+                    if (sectionRef.current) sectionRef.current.value = String(Math.round(share * 1000));
                 },
 
                 hidePartInfo: () => {
@@ -282,7 +288,7 @@ export default function App() {
             <PartInfo ref={partInfoRef} />
 
             {project?.section && (
-                <SectionSlider key={project.id} onSlide={(share) => engineRef.current?.setSection(share)} />
+                <SectionSlider key={project.id} ref={sectionRef} onSlide={(share) => engineRef.current?.setSection(share)} />
             )}
 
             <CategoryFilter focus={focus} hidden={Boolean(project)} onChoose={chooseFocus} />

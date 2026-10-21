@@ -515,6 +515,41 @@ export function createFraming({ rig, screen, state, grid, ui }) {
         },
 
         /**
+         * A `tour`'s close-up: square-on to the model's section where it
+         * will rest (`cut`, a share of its length as `setSection` takes it),
+         * from the side cut away, centred on the part named `focus` where
+         * the cut passes through it - `reach` of the model's breadth across
+         * the window. The model must be still where it will stay.
+         */
+        frameSection(model, { focus, cut, reach, duration }) {
+            const section = model.userData.section;
+            if (!section) return;
+
+            const box = new THREE.Box3();
+            const all = new THREE.Box3();
+            // (its parts only - not the floor under it)
+            model.children.forEach((child) => {
+                if (!child.isMesh || !child.material.uniforms?.uHighlight) return;
+                child.geometry.computeBoundingBox();
+                all.union(child.geometry.boundingBox);
+                if (child.name === focus) box.union(child.geometry.boundingBox);
+            });
+            if (box.isEmpty()) return;
+
+            const z = section.to - (section.to - section.from) * cut;
+            const centre = box.getCenter(new THREE.Vector3());
+            model.updateMatrixWorld(true);
+            const target = model.localToWorld(new THREE.Vector3(centre.x, centre.y, z));
+            const along = model.localToWorld(new THREE.Vector3(centre.x, centre.y, z + 1)).sub(target).normalize();
+            const breadth = model.localToWorld(new THREE.Vector3(all.max.x, 0, 0))
+                .distanceTo(model.localToWorld(new THREE.Vector3(all.min.x, 0, 0)));
+
+            const tan = Math.tan(THREE.MathUtils.degToRad(rig.perspectiveCamera.fov) / 2);
+            const distance = (reach * breadth) / 2 / (tan * screen.aspect);
+            rig.moveCamera(target.clone().addScaledVector(along, -distance), target, duration, 'power2.inOut');
+        },
+
+        /**
          * The frame while the drawer is open. On a wide screen the drawer sits
          * beside the model, so the whole piece is framed into the space to its
          * left (frameDetail already fits into whatever the drawer leaves

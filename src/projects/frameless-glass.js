@@ -120,5 +120,11 @@ export default defineProject({
             wide: true,
         },
     ],
-    view: { elevation: { side: 30, stacked: 62 }, turn: { side: 0, stacked: 72 }, zoom: { side: 1.8, stacked: 2.1 }, lift: { stacked: 0.09 } },
+    // Steeply from above, its length up the screen, on both layouts (the
+    // user's chosen view) - where the tour's turn ends
+    view: { elevation: 62, turn: 72, zoom: { side: 1.8, stacked: 2.1 }, lift: { stacked: 0.09 } },
+    // As it opens: one full turn round it, then the section slides to just
+    // past the middle as the camera closes in square-on to the ridge joint
+    // there (GS2_GS6), its profile facing the visitor
+    tour: { orbit: 10, cut: 0.48, focus: 'GS2_GS6', reach: 0.25, over: 6 },
 });

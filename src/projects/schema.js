@@ -38,6 +38,11 @@
  *                 pebble's points fall and form it instead (a person, say)
  *   section       with solid: a plane across the model's length the visitor
  *                 slides (a slider over the model), its parts cut away beyond it
+ *   tour          with section: { orbit, cut, focus, reach, over } - played as it
+ *                 opens: one full turn in `orbit` seconds, then over `over` the
+ *                 section slides to `cut` (a share of the length) and the
+ *                 camera closes in square-on to it, on the part `focus`,
+ *                 `reach` of the model's breadth across the window
  *   notice        a short line under the title in the bar, in orange
  *   floor         with solid: a floor at the model's foot, a figure set down onto it
  *   info          with solid: { [part name]: { title, lines } } - shown beside
@@ -290,6 +295,16 @@ function normaliseSection({ id, section, solid }) {
     return section;
 }
 
+function normaliseTour({ id, tour, section }) {
+    if (tour === undefined) return undefined;
+    const { orbit, cut, focus, reach, over } = tour ?? {};
+    if (!section) throw new Error(`Project "${id}": tour needs section`);
+    if (!(orbit > 0) || !(cut >= 0 && cut < 1) || typeof focus !== 'string' || !(reach > 0) || !(over > 0)) {
+        throw new Error(`Project "${id}": tour should be { orbit, cut (0..1), focus (a part's name), reach, over }`);
+    }
+    return { orbit, cut, focus, reach, over };
+}
+
 function normaliseFloor({ id, floor, solid }) {
     if (floor === undefined) return false;
     if (floor !== true && floor !== false) throw new Error(`Project "${id}": floor should be true or false`);
@@ -422,6 +437,7 @@ export function defineProject(project) {
         section: normaliseSection(project),
         floor: normaliseFloor(project),
         notice: typeof project.notice === 'string' ? project.notice : '',
+        tour: normaliseTour(project),
         still: Boolean(project.still),
         orbit: project.orbit !== false,
         screen: normaliseScreen(project),

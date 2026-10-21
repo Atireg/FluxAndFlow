@@ -41,6 +41,7 @@ import { trailResolution } from './pointcloud/trails.js';
  *   barFraction()           how much viewport height the bar takes, 0..0.5
  *   handleFraction()        how much the drawer's handle takes, 0..0.3
  *   showPartInfo(info, x, y) / hidePartInfo()   a model's part under the pointer (`info`)
+ *   onSection(share)        a `tour` moved the section - the slider follows
  *   showTapHint(x, y, action) / hideTapHint()   action: the project's doubleClick
  *   onFocus(category)       the filter changed from the canvas (a sunk pebble clicked)
  *   onEmptySlot()           an empty pebble was clicked - its tag is about to show
@@ -243,7 +244,9 @@ export function createEngine({ canvas, source, ui }) {
                 // ...and a `still` one doesn't turn at all
                 const turning = project.still ? 0 : modelTurn(model, since);
                 // ...and a model with a screen turns round while its film loads
-                model.rotation.y = modelStartYaw(project) + turning * DETAIL_ROTATE_SPEED + updateScreenSpin(model, frameTime);
+                // ...and a `tour` turns it once round as it starts
+                model.rotation.y = modelStartYaw(project) + turning * DETAIL_ROTATE_SPEED + updateScreenSpin(model, frameTime)
+                    + detail.tourSpin(model);
 
                 // A pile's ground (the pebble's dissolve, landed) turns with it
                 const dissolve = selected.userData.dissolve;
@@ -261,6 +264,7 @@ export function createEngine({ canvas, source, ui }) {
                 setGather(model, model.userData.gatherTime / GATHER_DURATION);
                 setReveal(model, revealAt(since));
 
+                detail.updateTour(model, since);
                 detail.keepNear();
                 detail.updateHover(model, since);
                 detail.maybeShowTapHint(model, since);
@@ -547,6 +551,7 @@ export function createEngine({ canvas, source, ui }) {
         // A project's section (`section`): cut its model at `share` of its
         // length, 0..1 - 1 cuts nothing
         setSection(share) {
+            detail.stopTour(); // the visitor's own, from here on
             setSection(state.selected?.userData.detail, share);
         },
 
@@ -580,6 +585,7 @@ export function createEngine({ canvas, source, ui }) {
          */
         setDrawerOpen(open, { reframe = true } = {}) {
             state.drawerOpen = open;
+            detail.stopTour();
 
             if (!reframe || !state.selected) return;
 

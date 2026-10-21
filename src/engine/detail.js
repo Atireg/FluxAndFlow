@@ -3,7 +3,7 @@ import { gsap } from 'gsap';
 import { assetUrl } from './assets.js';
 import { getPanelLayout, layoutMode } from './layout.js';
 import { loadPhysics, PILE_FADE_OUT, PILE_REPLAY_WAIT } from './pile.js';
-import { loadPointCloud } from './pointcloud/load.js';
+import { loadPointCloud, setSection } from './pointcloud/load.js';
 import { GATHER_DURATION } from './pointcloud/gather.js';
 import { getDissolve } from './pebbles/dissolve.js';
 import { holdScreenVideo, playScreenVideo, primeScreenVideo, resetScreenSpin } from './pointcloud/screenVideo.js';
@@ -11,6 +11,7 @@ import { armDrop, DROP_BOOM_HANG, DROP_OPEN_AFTER } from './pebbles/drop.js';
 import { startArrival } from './pebbles/arrival.js';
 import { restingFaceColor, restingRimColor } from './pebbles/materials.js';
 import { detailSince, DETAIL_ROTATE_SPEED, isHeld, isHeldBy, modelStartYaw, modelTurn, setHold } from './camera/framing.js';
+import { smooth01 } from './ease.js';
 import { findInsideSpot } from './camera/inside.js';
 import { DETAIL_FOV, halfHeightAt } from './camera/rig.js';
 
@@ -96,6 +97,8 @@ const INSIDE_MOVE = 2.4; // seconds to walk in - a longer way than to a point
 const INSIDE_FOV = 65; // degrees - a wider lens than outside, the way eyes take in a room
 const INSIDE_WIDTH = 55; // degrees across at least, so a tall phone screen still sees between the columns
 const INSIDE_FOV_MAX = 90; // degrees - the most the lens widens for that
+const TOUR_AFTER = 1.5; // seconds after the model is shown that a `tour` sets off
+const TOUR_PAUSE = 1; // seconds it rests at the view between the turn and the move in
 const NEAR_SHARE = 0.05; // the near plane, as a share of the way to what the camera looks at
 const NEAR_LEAST = 0.02; // ...and no nearer than this
 const INSIDE_NEAR = 0.05; // the camera's near plane while standing among the points (1 otherwise clips the nearest columns)
@@ -115,6 +118,24 @@ export function createDetail({
     const hover = { x: null, y: null, moved: false, mesh: null };
     const hoverRay = new THREE.Raycaster();
     const hoverNdc = new THREE.Vector2();
+
+    /**
+     * A project's `tour`, played each time it opens: one full turn of the
+     * model, eased (a turn of the model reads as the camera going round it -
+     * the inks are lit from the view), a moment at its view, then the section
+     * slides to `cut` as the camera closes in square-on to the cut, on the
+     * part `focus`. Whatever the visitor does with it - the slider, a
+     * double-click, the drawer, orbiting by hand - stops it where it is.
+     */
+    const tour = { model: null, spin: 0, moved: false, stopped: true };
+
+    function startTour(model, project) {
+        Object.assign(tour, { model, spin: 0, moved: false, stopped: !project.tour });
+        if (project.tour) {
+            setSection(model, 1);
+            ui.onSection?.(1);
+        }
+    }
 
     function pickPart(mesh, model, since) {
         if (mesh === hover.mesh) return;
@@ -391,6 +412,7 @@ export function createDetail({
                 pebble.userData.detail.userData.gatherTime = 0;
                 pebble.userData.detailRotateStartTime = clock.getElapsedTime();
                 startScreen(pebble.userData.detail, project);
+                startTour(pebble.userData.detail, project);
                 ui.onStatus(null);
                 framing.frameDetail(pebble, { ease });
                 return;
@@ -442,6 +464,7 @@ export function createDetail({
                     // first frame
                     prepareShaders(model);
                     startScreen(model, project);
+                    startTour(model, project);
 
                     ui.onStatus(null);
                     model.userData.gatherTime = 0;
@@ -808,6 +831,7 @@ export function createDetail({
         // `doubleClick` says
         doubleClick(clientX, clientY) {
             if (state.view !== 'detail' || !state.selected) return;
+            tour.stopped = true;
 
             // A hint on screen has done its job: it dissolves
             ui.dissolveTapHint();
@@ -816,6 +840,40 @@ export function createDetail({
             if (action === 'zoom') detail.toggleZoom(clientX, clientY);
             else if (action === 'hold') detail.toggleHold();
             else if (action === 'drop') detail.replayDrop();
+        },
+
+        // The tour's turn of the model, radians, on top of its own
+        tourSpin(model) {
+            return tour.model === model ? tour.spin : 0;
+        },
+
+        stopTour() {
+            tour.stopped = true;
+        },
+
+        // One frame of the tour, `since` the model was shown
+        updateTour(model, since) {
+            const plan = state.selected?.userData.project?.tour;
+            if (!plan || tour.model !== model || tour.stopped) return;
+            if (rig.visitorOrbiting) {
+                tour.stopped = true;
+                return;
+            }
+
+            const t = since - TOUR_AFTER;
+            if (t < 0) return;
+            tour.spin = 2 * Math.PI * smooth01(t / plan.orbit);
+
+            const closing = t - plan.orbit - TOUR_PAUSE;
+            if (closing < 0) return;
+            const share = 1 - (1 - plan.cut) * smooth01(closing / plan.over);
+            setSection(model, share);
+            ui.onSection?.(share);
+            if (!tour.moved) {
+                tour.moved = true;
+                framing.frameSection(model, { focus: plan.focus, cut: plan.cut, reach: plan.reach, duration: plan.over });
+            }
+            if (closing >= plan.over) tour.stopped = true;
         },
 
         // Where the pointer is over the model now (null: off it, or gone)
