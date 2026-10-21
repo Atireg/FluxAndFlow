@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { gsap } from 'gsap';
 import { CUBE_SIZE, PEBBLE_RADIUS, SPACING } from '../constants.js';
-import { getPanelLayout } from '../layout.js';
+import { getPanelLayout, perLayout } from '../layout.js';
 import { GATHER_DURATION } from '../pointcloud/gather.js';
 import { smooth01 } from '../ease.js';
 import {
@@ -99,7 +99,7 @@ const PILE_DRAWER_ZOOM = { side: 1, stacked: 2.2 };
  * with no roll. Azimuth turns the grid by that much on the way in and out,
  * so keep it small - see DECISIONS.md.
  */
-function viewDirection(project, { elevation: elevationDeg = project?.view?.elevation ?? 0 } = {}) {
+function viewDirection(project, { elevation: elevationDeg = perLayout(project?.view?.elevation, 0) } = {}) {
     const elevation = THREE.MathUtils.degToRad(elevationDeg);
     const azimuth = THREE.MathUtils.degToRad(project?.view?.azimuth ?? 0);
 
@@ -160,7 +160,7 @@ export function setHold(model, reason, holding, since) {
 // Where a project's model starts its slow rotation: the quarter turn above,
 // plus the project's own `view.turn`
 export function modelStartYaw(project) {
-    return DETAIL_MODEL_YAW + THREE.MathUtils.degToRad(project?.view?.turn ?? 0);
+    return DETAIL_MODEL_YAW + THREE.MathUtils.degToRad(perLayout(project?.view?.turn, 0));
 }
 
 /**
@@ -427,9 +427,8 @@ export function createFraming({ rig, screen, state, grid, ui }) {
             const halfH = halfExtentAlong(up, half);
             const halfD = halfExtentAlong(forward, half);
 
-            const perLayout = (value, fallback) => (typeof value === 'object' ? value[mode] : value) ?? fallback;
-            const zoom = perLayout(fit ? fitZoom : ownView.zoom, 1);
-            const lift = perLayout(ownView.lift, 0);
+            const zoom = perLayout(fit ? fitZoom : ownView.zoom, 1, mode);
+            const lift = perLayout(ownView.lift, 0, mode);
             let margin = side
                 ? DETAIL_MARGIN.side
                 : (state.drawerOpen ? DETAIL_MARGIN.stackedOpen : DETAIL_MARGIN.stackedParked);

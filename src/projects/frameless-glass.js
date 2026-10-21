@@ -104,5 +104,5 @@ export default defineProject({
             wide: true,
         },
     ],
-    view: { elevation: 30, turn: 0, zoom: { side: 1.8, stacked: 1.6 } },
+    view: { elevation: { side: 30, stacked: 62 }, turn: { side: 0, stacked: 45 }, zoom: { side: 1.8, stacked: 2.1 }, lift: { stacked: 0.09 } },
 });

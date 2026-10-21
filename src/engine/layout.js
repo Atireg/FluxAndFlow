@@ -19,3 +19,8 @@ export function getPanelLayout(drawerOpen) {
 
     return { mode, fraction: drawerOpen ? PANEL_FRACTION[mode] : 0 };
 }
+
+// A project's view setting given once, or per layout as { side, stacked }
+export function perLayout(value, fallback, mode = layoutMode()) {
+    return (value !== null && typeof value === 'object' ? value[mode] : value) ?? fallback;
+}

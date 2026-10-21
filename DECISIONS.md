@@ -887,6 +887,11 @@ Raycast once a frame while the pointer moved, not per event. The drawing's
 second support reads "GS2_UK" where it sits under GS5 - named by the sheet
 here (GS1, GS4, GS5, GS8_UK).
 
+On a phone it opens as the user's screenshot of it: from 62 degrees up
+rather than 30, turned so its length runs up the narrow screen, closer and
+higher - so a view's `elevation` and `turn` can now be given per layout,
+like `zoom` and `lift` (`perLayout`, layout.js).
+
 The looks were chosen by the user: steel
 graphite (the ridge pieces too, Custom 7 and 8, first taken for glass
 fins), the timber (Rhino's "Plaster") warm oak of four offered (pale ash,

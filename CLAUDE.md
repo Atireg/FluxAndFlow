@@ -68,7 +68,8 @@ in a pull-out drawer.
   double-click stops it. Over a glass sheet, joint or support (named after
   the user's drawing, GS1-GS8) the part is picked out, the turn holds and a
   card beside the pointer says what it is (`info`; a tap on a phone).
-  Drawer: a YouTube film and five pictures (the pavilion at glasstec, the
+  On a phone it opens steeply from above, its length up the screen (the
+  user's screenshot). Drawer: a YouTube film and five pictures (the pavilion at glasstec, the
   joints, the joint in section); no text or thumbnail yet (the default rock).
 - **Links**: each project's own address is `#<id>` (`#rock-print`).
 - **Drawer copy** is real for the first four projects, approved by the user
@@ -175,7 +176,8 @@ defineProject({
     thumbModel: 'models/rock.gltf',       // in the pebble; thumbSize: 1.9 fits the project's own
     detailModel: 'models/RockPrintStructureReduced.glb',  // opened on click: a cloud, or a mesh sampled to points (`points`)
     view: { elevation: 58, azimuth: 4, turn: 94, zoom: { stacked: 1.75, side: 1.4 },
-            lift: { stacked: 0.14, side: 0 }, sway: 13 },  // camera angle; give every new model one
+            lift: { stacked: 0.14, side: 0 }, sway: 13 },  // camera angle; give every new model one -
+                                          // elevation, turn, zoom, lift: a number, or { side, stacked }
     gather: true,                         // points gather from a scattered swirl on open
     doubleClick: 'hold',                  // 'zoom' (default), 'hold', 'drop' (with `drop`), 'none'
     autoZoom: 10,                         // camera moves in / out by itself every 10s (not with `drop`)

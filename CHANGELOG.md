@@ -504,6 +504,10 @@ the user's pictures - the pavilion, the ridge from below, a joint close up
 drawer). Its text offered as options; the knippershelbig page it was to be
 drawn from is unreachable from the container.
 
+**Frameless Glass Structures on a phone** opens as the user's screenshot:
+from high above, its length up the screen, larger and higher (a view's
+`elevation` and `turn` can now be per layout).
+
 Open at end of session: as at the end of session 4; a seventh Nap Nap
 Hooray picture, to come as a file; Frameless Glass Structures' text and
 thumbnail.

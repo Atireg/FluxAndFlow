@@ -160,10 +160,10 @@ function normaliseVideo(video, { id, index }) {
  * A project's camera angle, in degrees. Left out, the project is framed
  * square-on by the detail view's default.
  *
- *   elevation  above the horizon
+ *   elevation  above the horizon; a number, or per layout { side, stacked }
  *   azimuth    around the model - keep it small (see DECISIONS.md)
  *   turn       how far the model is spun round when it first appears, before
- *              its slow rotation carries on from there
+ *              its slow rotation carries on from there; number or per layout
  *   zoom       closer than fitting the pebble; a number, or per layout
  *   lift       raised on screen, as a share of its height; number or per layout
  *   sway       the camera nods this many degrees up and back down, slowly
