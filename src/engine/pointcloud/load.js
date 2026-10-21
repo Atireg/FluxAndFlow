@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { gltfLoader } from '../assets.js';
 import { MESH_FIT_SIZE } from '../constants.js';
-import { POINT_INKS, POINT_SIZES, pointInkUniforms, THUMB_INK_COLOR } from '../colors.js';
+import { POINT_INKS, POINT_SIZES, pointInkUniforms, screenColor, THUMB_INK_COLOR } from '../colors.js';
 import { createPile, findRods } from '../pile.js';
 import { addGatherAttributes, GATHER_DURATION, GATHER_SPREAD, GATHER_SWIRL, GATHER_TRAIL, GATHER_TRAIL_EVERY } from './gather.js';
 import { addTrails } from './trails.js';
@@ -244,15 +244,29 @@ function screenFrame(root, name, { centre, factor }) {
 /**
  * A model's section (`section`): its parts cut away beyond a plane across
  * its length (z, its own space), moved by the visitor (setSection, engine),
- * and a thin outline of the model's breadth and height where it cuts
+ * a thin outline of the model's breadth and height where it cuts, and each
+ * part's own cut edges traced in black - the joints read as in a drawing
  */
 function addSection(group, clip) {
     const box = new THREE.Box3();
-    group.children.forEach((mesh) => {
+    const meshes = [...group.children];
+    meshes.forEach((mesh) => {
         mesh.geometry.computeBoundingBox();
         box.union(mesh.geometry.boundingBox);
     });
     if (box.isEmpty()) return;
+
+    // The cut edges, worked out again whenever the section moves
+    const cut = new THREE.LineSegments(
+        new THREE.BufferGeometry(),
+        // black, like a section drawing
+        new THREE.LineBasicMaterial({ color: screenColor(18, 18, 20) }),
+    );
+    cut.frustumCulled = false;
+    cut.raycast = () => {};
+    cut.visible = false;
+    cut.renderOrder = 2; // over the see-through parts
+    group.add(cut);
 
     const { min, max } = box;
     const outline = new THREE.LineLoop(
@@ -265,7 +279,34 @@ function addSection(group, clip) {
     outline.visible = false;
     outline.raycast = () => {}; // never something to hover
     group.add(outline);
-    group.userData.section = { clip, outline, from: min.z, to: max.z };
+    group.userData.section = { clip, outline, cut, meshes, from: min.z, to: max.z };
+}
+
+// Each triangle the plane z passes through gives one segment of the cut
+function traceCut(meshes, z) {
+    const points = [];
+    const a = new THREE.Vector3();
+    const b = new THREE.Vector3();
+    const c = new THREE.Vector3();
+    const crossing = (p, q) => new THREE.Vector3().lerpVectors(p, q, (z - p.z) / (q.z - p.z));
+    meshes.forEach(({ geometry }) => {
+        const { min, max } = geometry.boundingBox;
+        if (z < min.z || z > max.z) return;
+        const position = geometry.attributes.position;
+        const index = geometry.index;
+        const count = index ? index.count : position.count;
+        for (let i = 0; i < count; i += 3) {
+            a.fromBufferAttribute(position, index ? index.getX(i) : i);
+            b.fromBufferAttribute(position, index ? index.getX(i + 1) : i + 1);
+            c.fromBufferAttribute(position, index ? index.getX(i + 2) : i + 2);
+            const ends = [];
+            if ((a.z - z) * (b.z - z) < 0) ends.push(crossing(a, b));
+            if ((b.z - z) * (c.z - z) < 0) ends.push(crossing(b, c));
+            if ((c.z - z) * (a.z - z) < 0) ends.push(crossing(c, a));
+            if (ends.length === 2) points.push(ends[0], ends[1]);
+        }
+    });
+    return points;
 }
 
 // Cut a model at `share` of its length (0..1; 1, or more, cuts nothing)
@@ -276,4 +317,9 @@ export function setSection(model, share) {
     section.clip.value = share >= 1 ? CLIP_NONE : z;
     section.outline.position.z = z;
     section.outline.visible = share < 1;
+    section.cut.visible = share < 1;
+    if (share < 1) {
+        section.cut.geometry.dispose();
+        section.cut.geometry = new THREE.BufferGeometry().setFromPoints(traceCut(section.meshes, z));
+    }
 }

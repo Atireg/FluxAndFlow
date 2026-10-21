@@ -900,7 +900,10 @@ drives `engine.setSection(share)` directly, not through React state, which
 sets one `uClip` shared by the model's ink materials: a fragment beyond it
 along the model's own z (its length, as fitted) is discarded - cheaper and
 simpler than three.js's clipping planes in a ShaderMaterial. A thin outline
-of the model's breadth and height marks the cut. Hover ignores parts cut
+of the model's breadth and height marks the cut, and each part's own cut
+is traced in black (asked for, so the joint's detail reads): every
+triangle the plane passes through gives a segment (`traceCut`), worked out
+again as the slider moves - parts whose extent the plane misses skipped. Hover ignores parts cut
 away. The person (the pebble's points) isn't cut.
 
 The looks were chosen by the user: steel

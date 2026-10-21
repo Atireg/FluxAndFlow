@@ -69,7 +69,8 @@ in a pull-out drawer.
   the user's drawing, GS1-GS8) the part is picked out, the turn holds and a
   card beside the pointer says what it is (`info`; a tap on a phone).
   A slider at the foot ("section") cuts it across its length, the far
-  part cut away and an outline at the cut (`section`). On a phone it opens steeply from above, its length up the screen (the
+  part cut away, each part's cut edges traced in black (the joints read
+  as in a drawing) and a faint outline at the cut (`section`). On a phone it opens steeply from above, its length up the screen (the
   user's screenshot). Drawer: a YouTube film and five pictures (the pavilion at glasstec, the
   joints, the joint in section); no text or thumbnail yet (the default rock).
 - **Links**: each project's own address is `#<id>` (`#rock-print`).
