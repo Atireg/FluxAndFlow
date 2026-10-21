@@ -261,6 +261,7 @@ export function createEngine({ canvas, source, ui }) {
                 setGather(model, model.userData.gatherTime / GATHER_DURATION);
                 setReveal(model, revealAt(since));
 
+                detail.keepNear();
                 detail.updateHover(model, since);
                 detail.maybeShowTapHint(model, since);
                 detail.maybeRepeatDrop(model, since);

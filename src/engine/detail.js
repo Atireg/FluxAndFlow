@@ -96,6 +96,8 @@ const INSIDE_MOVE = 2.4; // seconds to walk in - a longer way than to a point
 const INSIDE_FOV = 65; // degrees - a wider lens than outside, the way eyes take in a room
 const INSIDE_WIDTH = 55; // degrees across at least, so a tall phone screen still sees between the columns
 const INSIDE_FOV_MAX = 90; // degrees - the most the lens widens for that
+const NEAR_SHARE = 0.05; // the near plane, as a share of the way to what the camera looks at
+const NEAR_LEAST = 0.02; // ...and no nearer than this
 const INSIDE_NEAR = 0.05; // the camera's near plane while standing among the points (1 otherwise clips the nearest columns)
 const INSIDE_PAN = 0.35; // radians the gaze drifts either side of its line, slowly
 const INSIDE_PAN_PERIOD = 18; // seconds for one look left, right and back
@@ -583,6 +585,21 @@ export function createDetail({
             if (drop?.repeat && since - pile.settledAt >= drop.repeat) detail.replayDrop();
         },
 
+        /**
+         * The near plane in step with how close the camera is: a twentieth
+         * of the way to what it looks at, the usual one (rig.baseNear) at
+         * most - zoomed right in by hand, a fixed plane sliced the model
+         * open. Not while standing inside a cloud, which sets its own.
+         */
+        keepNear() {
+            if (autoZoom.inside || rig.orientationLocked) return;
+            const camera = rig.perspectiveCamera;
+            const near = Math.min(Math.max(camera.position.distanceTo(rig.controls.target) * NEAR_SHARE, NEAR_LEAST), rig.baseNear);
+            if (Math.abs(near - camera.near) < 1e-4) return;
+            camera.near = near;
+            camera.updateProjectionMatrix();
+        },
+
         // A project's `autoZoom`, a step each frame
         // `since` is seconds since the model was shown: `view.fillScreen`'s
         // move in on the screen, and its film starting with it
@@ -631,12 +648,6 @@ export function createDetail({
                     points.localToWorld(rig.camera.position.copy(position));
                     points.localToWorld(rig.controls.target.copy(position).addScaledVector(gaze, autoZoom.reach));
                 }
-            }
-
-            // Back to the usual near plane once it has walked out
-            if (!autoZoom.inside && !rig.orientationLocked && rig.perspectiveCamera.near !== rig.baseNear) {
-                rig.perspectiveCamera.near = rig.baseNear;
-                rig.perspectiveCamera.updateProjectionMatrix();
             }
 
             if (since < autoZoom.next) return;

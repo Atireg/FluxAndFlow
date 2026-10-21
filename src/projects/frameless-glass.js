@@ -53,14 +53,14 @@ export default defineProject({
     // not listed in `solid`'s light grey
     solid: { lit: [222, 222, 220], shade: [160, 160, 162] },
     parts: {
-        Metal: { lit: [118, 116, 114], shade: [52, 51, 54] },
+        Metal: { lit: [204, 204, 202], shade: [168, 168, 168] },
         // The timber (Plaster in Rhino): warm oak
         Plaster: { lit: [214, 178, 132], shade: [146, 104, 66] },
         Glass: { lit: [236, 242, 244], shade: [196, 208, 214], opacity: 0.14 },
         'Custom (2)': { lit: [236, 242, 244], shade: [196, 208, 214], opacity: 0.14 },
         // The steel along the ridge of the sloping ends, as the rest
-        'Custom (7)': { lit: [118, 116, 114], shade: [52, 51, 54] },
-        'Custom (8)': { lit: [118, 116, 114], shade: [52, 51, 54] },
+        'Custom (7)': { lit: [204, 204, 202], shade: [168, 168, 168] },
+        'Custom (8)': { lit: [204, 204, 202], shade: [168, 168, 168] },
     },
     // The person: the pebble's points form them, in three greys
     figure: 'People_ZIM',

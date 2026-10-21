@@ -62,8 +62,8 @@ in a pull-out drawer.
 - **Frameless Glass Structures** (slot 7, the real world,
   `#frameless-glass`): the user's Rhino model of a glass pavilion
   (`frameless-glass.glb`, seven parts named after its Rhino materials),
-  each part in its own look (`parts`: graphite steel, oak timber, clear
-  glass); the person beside it isn't drawn - the pebble's points fall and
+  each part in its own look (`parts`: light matt-grey steel, oak timber,
+  clear glass); the person beside it isn't drawn - the pebble's points fall and
   form them (`figure`), in three greys (`inks`). Turns slowly; a
   double-click stops it. Over a glass sheet, joint or support (named after
   the user's drawing, GS1-GS8) the part is picked out, the turn holds and a
@@ -288,6 +288,10 @@ A model in parts (`frameless-glass.js`): `solid` gives the default look,
   point will be (`worldAhead`) then follow it (`follow`). The nod never
   tips the camera within `SWAY_POLE` of straight down - over the pole the
   controls flipped it and the screen shook.
+- **The near plane follows the camera** in a project (`keepNear`,
+  detail.js): a twentieth of the way to its target, 1 at most - a fixed 1
+  sliced a model open when zoomed right in. Standing inside a cloud sets
+  its own (`INSIDE_NEAR`).
 - **Two lenses**: `CATALOG_FOV` 45, `DETAIL_FOV` 45 side / 30 stacked; the
   layout breakpoint is 860px. `DETAIL_MARGIN` differs with a phone's
   drawer parked or open - check both.

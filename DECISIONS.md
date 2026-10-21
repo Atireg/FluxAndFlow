@@ -914,7 +914,9 @@ not a slab), and a fainter, darker one just under the figure as its
 contact shadow (`softDisc`). The plinth's lowest centimetres sit under it,
 as on a stand. Not cut by the section; never hovered.
 
-The looks were chosen by the user: steel
+The steel then made lighter and flatter (asked for: less shiny, and the
+joints between the sheets not reading as dark gaps): lit 204, shade 168,
+against 118 / 52. The looks were chosen by the user: steel
 graphite (the ridge pieces too, Custom 7 and 8, first taken for glass
 fins), the timber (Rhino's "Plaster") warm oak of four offered (pale ash,
 charred, as points). Tones random, as the clouds'. Until the
