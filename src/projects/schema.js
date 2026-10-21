@@ -36,6 +36,10 @@
  *                 pieces); `opacity` under 1 is see-through, like glass
  *   figure        with solid: the material name of a part not drawn - the
  *                 pebble's points fall and form it instead (a person, say)
+ *   info          with solid: { [part name]: { title, lines } } - shown beside
+ *                 the pointer over that part of the model (the part's name
+ *                 from the file, tools/models/obj-to-glb.mjs), the model's
+ *                 turn held while it's there
  *   inks          three [r, g, b] for the pebble's points as it dissolves,
  *                 instead of the clouds' dark red, orange and grey
  *   still         the model doesn't turn by itself (it can still be orbited)
@@ -264,6 +268,15 @@ function normaliseParts({ id, parts, solid }) {
     }));
 }
 
+function normaliseInfo({ id, info, solid }) {
+    if (info === undefined) return undefined;
+    if (!solid) throw new Error(`Project "${id}": info needs solid`);
+    const ok = info && typeof info === 'object' && Object.values(info).every((about) => about
+        && typeof about.title === 'string' && Array.isArray(about.lines) && about.lines.every((line) => typeof line === 'string'));
+    if (!ok) throw new Error(`Project "${id}": info should be { [part name]: { title, lines: [strings] } }`);
+    return info;
+}
+
 function normaliseInks({ id, inks }) {
     if (inks === undefined) return undefined;
     if (!Array.isArray(inks) || inks.length !== 3 || !inks.every((ink) => ink && isRgb(ink))) {
@@ -385,6 +398,7 @@ export function defineProject(project) {
         parts: normaliseParts(project),
         figure: normaliseFigure(project),
         inks: normaliseInks(project),
+        info: normaliseInfo(project),
         still: Boolean(project.still),
         orbit: project.orbit !== false,
         screen: normaliseScreen(project),

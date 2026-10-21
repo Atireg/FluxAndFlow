@@ -69,16 +69,17 @@ export function loadPointCloud({
                 const fade = { value: 1 };
                 const pieces = parts || figure
                     ? sampled.userData.parts
-                    : [{ name: '', geometry: sampled.userData.solid }];
-                pieces.forEach(({ name, geometry }) => {
-                    if (name === figure) {
+                    : [{ material: '', part: '', geometry: sampled.userData.solid }];
+                pieces.forEach(({ material: lookName, part, geometry }) => {
+                    if (lookName === figure) {
                         group.userData.figure = geometry;
                         return;
                     }
-                    const material = makeInkMaterial(parts?.[name] ?? look);
+                    const material = makeInkMaterial(parts?.[lookName] ?? look);
                     material.uniforms.uFade = fade;
                     const mesh = new THREE.Mesh(geometry, material);
-                    mesh.name = name;
+                    // Its own name, for a project's `info` (see detail.js's hover)
+                    mesh.name = part;
                     if (material.transparent) mesh.renderOrder = 1; // after the opaque parts
                     group.add(mesh);
                     group.userData.solidMaterial ??= material;

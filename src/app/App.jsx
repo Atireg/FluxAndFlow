@@ -5,6 +5,7 @@ import ProjectBar from '../components/ProjectBar.jsx';
 import ProjectDrawer from '../components/ProjectDrawer.jsx';
 import CatalogTags from '../components/CatalogTags.jsx';
 import TapHint from '../components/TapHint.jsx';
+import PartInfo from '../components/PartInfo.jsx';
 import HintTag from '../components/HintTag.jsx';
 import CategoryFilter from '../components/CategoryFilter.jsx';
 import VelocityTags from '../components/VelocityTags.jsx';
@@ -42,6 +43,7 @@ export default function App() {
     const barRef = useRef(null);
     const drawerRef = useRef(null);
     const tapHintRef = useRef(null);
+    const partInfoRef = useRef(null);
     const hintStringRef = useRef(null);
     const hintTagRef = useRef(null);
     const hintDissolveRef = useRef(null);
@@ -135,6 +137,33 @@ export default function App() {
 
                 hideTapHint: () => {
                     tapHintRef.current?.classList.remove('is-showing');
+                },
+
+                // A model's part under the pointer: its title and lines,
+                // beside the pointer - rewritten only when the part changes
+                showPartInfo: (info, x, y) => {
+                    const card = partInfoRef.current;
+                    if (!card) return;
+                    if (card.dataset.part !== info.title) {
+                        card.dataset.part = info.title;
+                        card.querySelector('.part-info__title').textContent = info.title;
+                        card.querySelector('.part-info__lines').replaceChildren(...info.lines.map((line) => {
+                            const item = document.createElement('li');
+                            item.textContent = line;
+                            return item;
+                        }));
+                    }
+                    // Kept on screen: left of the pointer near the right
+                    // edge, above it near the bottom
+                    const gap = 32;
+                    const left = Math.min(x, window.innerWidth - card.offsetWidth - gap);
+                    const top = y + card.offsetHeight + gap > window.innerHeight ? y - card.offsetHeight - gap : y;
+                    card.style.transform = `translate(${left}px, ${top}px)`;
+                    card.classList.add('is-showing');
+                },
+
+                hidePartInfo: () => {
+                    partInfoRef.current?.classList.remove('is-showing');
                 },
 
                 overlays: {
@@ -249,6 +278,7 @@ export default function App() {
               */}
             <HintTag stringRef={hintStringRef} tagRef={hintTagRef} dissolveRef={hintDissolveRef} />
             <TapHint ref={tapHintRef} />
+            <PartInfo ref={partInfoRef} />
 
             <CategoryFilter focus={focus} hidden={Boolean(project)} onChoose={chooseFocus} />
 

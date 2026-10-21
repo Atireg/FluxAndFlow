@@ -98,7 +98,13 @@ export function pointsFromMeshes(root, total = MESH_SAMPLE_POINTS) {
     };
     const solids = meshes.map(fitted);
     group.userData.solid = mergeGeometries(solids);
-    group.userData.parts = meshes.map((mesh, i) => ({ name: mesh.material?.name || mesh.name, geometry: solids[i] }));
+    // (`material` the look's name; `part` its own, from the file's extras -
+    // a glass sheet, a joint - for a project's `info`)
+    group.userData.parts = meshes.map((mesh, i) => ({
+        material: mesh.material?.name || mesh.name,
+        part: mesh.userData.part ?? mesh.name,
+        geometry: solids[i],
+    }));
     return group;
 }
 
@@ -124,6 +130,8 @@ export function makeInkMaterial({ lit, shade, opacity = 1 } = {}) {
             // 0..1, how far it has dissolved away - see pile.js's fade
             uFade: { value: 0 },
             uOpacity: { value: opacity },
+            // 0..1, picked out under the pointer (a part with `info`)
+            uHighlight: { value: 0 },
         },
         vertexShader: `
 varying vec3 vNormal;
@@ -138,6 +146,7 @@ uniform vec3 uLit;
 uniform vec3 uShade;
 uniform float uFade;
 uniform float uOpacity;
+uniform float uHighlight;
 varying vec3 vNormal;
 varying vec3 vInkLocal;
 
@@ -157,7 +166,9 @@ void main() {
     // (a see-through part's back faces lit as its own, turned towards us)
     vec3 normal = normalize(vNormal) * (gl_FrontFacing ? 1.0 : -1.0);
     float light = max(dot(normal, normalize(vec3(-0.35, 0.8, 0.5))), 0.0);
-    gl_FragColor = vec4(mix(uShade, uLit, light), uOpacity);
+    // Picked out: deeper, and glass less clear
+    vec3 ink = mix(uShade, uLit, light) * (1.0 - 0.3 * uHighlight);
+    gl_FragColor = vec4(ink, mix(uOpacity, max(uOpacity, 0.45), uHighlight));
 }`,
     });
 }

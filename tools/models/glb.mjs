@@ -20,7 +20,8 @@ export function weld(geometry, tolerance = 1e-4) {
 
 const pad = (n) => (n + 3) & ~3;
 
-// meshes: [{ name, geometry (indexed, welded), matrix? (16 numbers), material? (a name) }]
+// meshes: [{ name, geometry (indexed, welded), matrix? (16 numbers), material? (a name),
+//           extras? (an object, read back as the mesh's userData) }]
 export function writeGlb(fileName, meshes, generator) {
     const chunks = [];
     const bufferViews = [];
@@ -59,7 +60,7 @@ export function writeGlb(fileName, meshes, generator) {
         asset: { version: '2.0', generator },
         scene: 0,
         scenes: [{ nodes: meshes.map((_, i) => i) }],
-        nodes: meshes.map(({ name, matrix }, i) => ({ mesh: i, name, ...(matrix ? { matrix } : {}) })),
+        nodes: meshes.map(({ name, matrix, extras }, i) => ({ mesh: i, name, ...(matrix ? { matrix } : {}), ...(extras ? { extras } : {}) })),
         meshes: gltfMeshes,
         ...(materialNames.length ? { materials: materialNames.map((name) => ({ name })) } : {}),
         buffers: [{ byteLength: bin.length }],

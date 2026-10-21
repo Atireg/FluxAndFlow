@@ -871,7 +871,23 @@ turns with the model. Landed points are finer than a pile's ground
 (`FIGURE_POINT_SIZE` 0.25 of their size against `GROUND_POINT_SIZE` 0.5 -
 at 0.5 the person read as blobs) and not fainter (`uFine` only for a pile).
 A project's `inks` give the pebble's points three colours of its own (the
-person in three greys, asked for). The looks were chosen by the user: steel
+person in three greys, asked for). **Hovering a part** (asked for): the user's drawing names the eight
+sheets GS1-GS8, the joints between them (an upper and a lower steel profile
+across the ridge, `_O`/`_U`; the ridge's own steel along it) with their
+angles, and supports at the bottom edges (`_UK`). A script for this model,
+`tools/models/frameless-glass.mjs`, names the pieces by where they sit (the
+model is symmetric; which end is row 1 is a choice) and carries the name in
+glTF extras. The angles were checked against the model's own planes (153
+across, 165 and 168 along) and the drawing's values used. Over a part with
+`info` a mouse picks it out (`uHighlight`: deeper, glass less clear),
+holds the turn (`setHold(model, 'hover')`, alongside a double-click's
+'click') and shows a card beside the pointer (`PartInfo`, written through
+refs as it changes with the pointer); a finger taps a part, and off it.
+Raycast once a frame while the pointer moved, not per event. The drawing's
+second support reads "GS2_UK" where it sits under GS5 - named by the sheet
+here (GS1, GS4, GS5, GS8_UK).
+
+The looks were chosen by the user: steel
 graphite (the ridge pieces too, Custom 7 and 8, first taken for glass
 fins), the timber (Rhino's "Plaster") warm oak of four offered (pale ash,
 charred, as points). Tones random, as the clouds'. Until the

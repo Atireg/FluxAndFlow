@@ -10,7 +10,7 @@ import { holdScreenVideo, playScreenVideo, primeScreenVideo, resetScreenSpin } f
 import { armDrop, DROP_BOOM_HANG, DROP_OPEN_AFTER } from './pebbles/drop.js';
 import { startArrival } from './pebbles/arrival.js';
 import { restingFaceColor, restingRimColor } from './pebbles/materials.js';
-import { detailSince, DETAIL_ROTATE_SPEED, isHeld, modelStartYaw, modelTurn } from './camera/framing.js';
+import { detailSince, DETAIL_ROTATE_SPEED, isHeld, isHeldBy, modelStartYaw, modelTurn, setHold } from './camera/framing.js';
 import { findInsideSpot } from './camera/inside.js';
 import { DETAIL_FOV, halfHeightAt } from './camera/rig.js';
 
@@ -103,6 +103,25 @@ const INSIDE_PAN_PERIOD = 18; // seconds for one look left, right and back
 export function createDetail({
     state, grid, rig, framing, screen, clock, visited, perlinTexture, ui,
 }) {
+    /**
+     * A part of a solid model under the pointer (`info`): picked out, the
+     * model's turn held while it's there, and what the project says about it
+     * shown beside the pointer. A mouse hovers; a finger taps a part, and
+     * taps off it to let go. Looked for once a frame while the pointer has
+     * moved, not on every event.
+     */
+    const hover = { x: null, y: null, moved: false, mesh: null };
+    const hoverRay = new THREE.Raycaster();
+    const hoverNdc = new THREE.Vector2();
+
+    function pickPart(mesh, model, since) {
+        if (mesh === hover.mesh) return;
+        if (hover.mesh) hover.mesh.material.uniforms.uHighlight.value = 0;
+        if (mesh) mesh.material.uniforms.uHighlight.value = 1;
+        hover.mesh = mesh;
+        if (model) setHold(model, 'hover', Boolean(mesh), since);
+    }
+
     /**
      * Compiles a newly loaded model's shaders now - the points' and their
      * tails', which are hidden until the gather draws them - rather than
@@ -455,6 +474,10 @@ export function createDetail({
         closeProject() {
             if (state.view !== 'detail') return;
 
+            pickPart(null, state.selected?.userData.detail, 0);
+            hover.x = null;
+            ui.hidePartInfo();
+
             const pebble = state.selected;
             state.selected = null;
             closeUp.phase = 'idle';
@@ -782,6 +805,32 @@ export function createDetail({
             else if (action === 'drop') detail.replayDrop();
         },
 
+        // Where the pointer is over the model now (null: off it, or gone)
+        pointAt(x, y) {
+            hover.x = x;
+            hover.y = y;
+            hover.moved = true;
+        },
+
+        // One frame of the hover: the part under the pointer, if it moved
+        updateHover(model, since) {
+            const info = state.selected?.userData.project?.info;
+            if (!info || !hover.moved) return;
+            hover.moved = false;
+
+            let mesh = null;
+            if (hover.x !== null && !rig.visitorOrbiting) {
+                hoverRay.setFromCamera(rig.pointerToNdc(hover.x, hover.y, hoverNdc), rig.camera);
+                mesh = hoverRay.intersectObject(model, true)
+                    .find((hit) => hit.object.isMesh && hit.object.material.uniforms?.uHighlight)?.object ?? null;
+            }
+            pickPart(mesh, model, since);
+
+            const about = mesh && info[mesh.name];
+            if (about) ui.showPartInfo(about, hover.x, hover.y);
+            else ui.hidePartInfo();
+        },
+
         /**
          * `doubleClick: 'hold'`: stop the model's turn where it is - and the
          * camera's nod with it - or start it again from there
@@ -791,19 +840,13 @@ export function createDetail({
             if (!model) return;
 
             const since = detailSince(state.selected, clock.getElapsedTime());
-            const held = (model.userData.held ??= { total: 0, at: null });
-            if (held.at === null) {
-                held.at = since;
-                holdScreenVideo(model, true);
-            } else {
-                holdScreenVideo(model, false);
-                held.total += since - held.at;
-                held.at = null;
+            const holding = !isHeldBy(model, 'click');
+            setHold(model, 'click', holding, since);
+            holdScreenVideo(model, holding);
 
-                // The timed zoom waits a full round after it turns again
-                const every = state.selected.userData.project?.autoZoom;
-                if (every) autoZoom.next = since + every;
-            }
+            // The timed zoom waits a full round after it turns again
+            const every = state.selected.userData.project?.autoZoom;
+            if (!holding && !isHeld(model) && every) autoZoom.next = since + every;
         },
 
         toggleZoom(clientX, clientY) {

@@ -1,9 +1,44 @@
 import { defineProject } from './schema.js';
 
 /**
+ * What hovering over a part says, from the user's drawing: the eight glass
+ * sheets GS1-GS8 (GS1-GS4 one side of the ridge, GS5-GS8 the other, rows 1
+ * and 4 the sloping ends), the joints between them with their angles -
+ * across the ridge an upper and a lower steel profile (_O, _U), along it the
+ * ridge's steel - and the supports at the sloping ends' bottom edges (_UK).
+ * The part names are the model's (tools/models/frameless-glass.mjs).
+ */
+const ACROSS = [['GS1', 'GS2'], ['GS2', 'GS3'], ['GS3', 'GS4'], ['GS5', 'GS6'], ['GS6', 'GS7'], ['GS7', 'GS8']];
+const ALONG = [['GS1', 'GS5', 167], ['GS2', 'GS6', 165], ['GS3', 'GS7', 165], ['GS4', 'GS8', 167]];
+const ACROSS_ANGLE = 153;
+const SUPPORTED = ['GS1', 'GS4', 'GS5', 'GS8'];
+const SUPPORT_ANGLE = 156;
+
+const info = {};
+ACROSS.forEach(([a, b]) => {
+    info[`${a}_${b}`] = {
+        title: `Joint ${a}_${b}`,
+        lines: [`Between glass sheets ${a} and ${b}`, `Angle ${ACROSS_ANGLE}°`, 'Steel profiles above and below the glass (_O, _U)'],
+    };
+});
+ALONG.forEach(([a, b, angle]) => {
+    info[`${a}_${b}`] = { title: `Joint ${a}_${b}`, lines: [`Along the ridge, between ${a} and ${b}`, `Angle ${angle}°`] };
+});
+SUPPORTED.forEach((sheet) => {
+    info[`${sheet}_UK`] = { title: `Support ${sheet}_UK`, lines: [`Under the bottom edge of ${sheet}`, `Angle ${SUPPORT_ANGLE}°`] };
+});
+['GS1', 'GS2', 'GS3', 'GS4', 'GS5', 'GS6', 'GS7', 'GS8'].forEach((sheet) => {
+    const joints = [...ACROSS, ...ALONG].filter((pair) => pair.includes(sheet)).map(([a, b]) => `${a}_${b}`);
+    info[sheet] = {
+        title: `Glass sheet ${sheet}`,
+        lines: [`Joints: ${joints.join(', ')}`, ...(SUPPORTED.includes(sheet) ? [`Support: ${sheet}_UK`] : [])],
+    };
+});
+
+/**
  * Frameless Glass Structures - a glass pavilion from the user's Rhino model
- * (glasstec.obj, converted by tools/models/obj-to-glb.mjs, one part per
- * material). Drawn as itself, each part in its own look; the person beside
+ * (glasstec.obj, converted by tools/models/frameless-glass.mjs: its sheets,
+ * joints and supports named, the rest a part per material). Drawn as itself, each part in its own look; the person beside
  * it isn't drawn - the pebble's points fall and form them instead.
  */
 export default defineProject({
@@ -32,5 +67,7 @@ export default defineProject({
     inks: [[176, 174, 170], [128, 126, 123], [80, 79, 78]],
     // A double-click (or double-tap) stops its turn, the next sets it going
     doubleClick: 'hold',
+    // Over a sheet, a joint or a support: what it is, the turn held
+    info,
     view: { elevation: 30, turn: 0, zoom: { side: 1.8, stacked: 1.6 } },
 });

@@ -39,6 +39,7 @@ import { trailResolution } from './pointcloud/trails.js';
  *   onStatus(message|null)  what to say in the project bar
  *   barFraction()           how much viewport height the bar takes, 0..0.5
  *   handleFraction()        how much the drawer's handle takes, 0..0.3
+ *   showPartInfo(info, x, y) / hidePartInfo()   a model's part under the pointer (`info`)
  *   showTapHint(x, y, action) / hideTapHint()   action: the project's doubleClick
  *   onFocus(category)       the filter changed from the canvas (a sunk pebble clicked)
  *   onEmptySlot()           an empty pebble was clicked - its tag is about to show
@@ -259,6 +260,7 @@ export function createEngine({ canvas, source, ui }) {
                 setGather(model, model.userData.gatherTime / GATHER_DURATION);
                 setReveal(model, revealAt(since));
 
+                detail.updateHover(model, since);
                 detail.maybeShowTapHint(model, since);
                 detail.maybeRepeatDrop(model, since);
                 detail.maybeAutoZoom(model, since);
@@ -324,8 +326,19 @@ export function createEngine({ canvas, source, ui }) {
             state.hovered = pebbleAt(event);
         });
 
-        // Leaving the window lets go of the pebble it was over
-        on(document.documentElement, 'mouseleave', () => { state.hovered = null; });
+        // Leaving the window lets go of the pebble it was over, or a model's part
+        on(document.documentElement, 'mouseleave', () => {
+            state.hovered = null;
+            detail.pointAt(null, null);
+        });
+
+        // A model's part under a mouse (`info`); over anything else on the
+        // page (the bar, the drawer), off it
+        on(window, 'mousemove', (event) => {
+            if (state.view !== 'detail') return;
+            if (event.target === canvas) detail.pointAt(event.clientX, event.clientY);
+            else detail.pointAt(null, null);
+        });
 
         // Pointer, not mouse, so a finger dragged across the grid stirs it too
         on(window, 'pointermove', (event) => {
@@ -368,6 +381,11 @@ export function createEngine({ canvas, source, ui }) {
         });
 
         on(canvas, 'pointerup', (event) => {
+            // A finger's tap on a model's part shows it, a tap off it lets go
+            if (event.pointerType !== 'mouse' && !wasDrag(event) && state.view === 'detail') {
+                detail.pointAt(event.clientX, event.clientY);
+            }
+
             // The model's double-tap zoom
             if (event.pointerType !== 'mouse' && !wasDrag(event)) {
                 // The event's own time, not when it was handled - a busy frame

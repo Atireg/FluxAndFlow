@@ -122,9 +122,11 @@ export function detailSince(pebble, elapsedTime) {
 }
 
 /**
- * How long a model's turn has been held still (a project's `doubleClick:
- * 'hold'`), by `since`: `model.userData.held` is { total, at } - the time
- * held before, and when the current hold began, or null while turning
+ * How long a model's turn has been held still, by `since`:
+ * `model.userData.held` is { total, at, by } - the time held before, when
+ * the current hold began (null while turning), and what holds it: 'click'
+ * (a project's `doubleClick: 'hold'`), 'hover' (a part under the pointer).
+ * It turns again once nothing does.
  */
 function heldFor(model, since) {
     const held = model.userData.held;
@@ -134,6 +136,25 @@ function heldFor(model, since) {
 
 export function isHeld(model) {
     return model.userData.held?.at != null;
+}
+
+export function isHeldBy(model, reason) {
+    return Boolean(model.userData.held?.by.has(reason));
+}
+
+// Hold the model's turn for `reason`, or let go of it; true if that changed
+// whether it turns
+export function setHold(model, reason, holding, since) {
+    const held = (model.userData.held ??= { total: 0, at: null, by: new Set() });
+    const was = held.at !== null;
+    if (holding) held.by.add(reason);
+    else held.by.delete(reason);
+    if (held.by.size && !was) held.at = since;
+    if (!held.by.size && was) {
+        held.total += since - held.at;
+        held.at = null;
+    }
+    return was !== (held.at !== null);
 }
 
 // Where a project's model starts its slow rotation: the quarter turn above,

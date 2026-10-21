@@ -64,8 +64,11 @@ in a pull-out drawer.
   (`frameless-glass.glb`, seven parts named after its Rhino materials),
   each part in its own look (`parts`: graphite steel, oak timber, clear
   glass); the person beside it isn't drawn - the pebble's points fall and
-  form them (`figure`), in three greys (`inks`). Turns slowly; a double-click stops it. No drawer
-  text or thumbnail yet (the default rock).
+  form them (`figure`), in three greys (`inks`). Turns slowly; a
+  double-click stops it. Over a glass sheet, joint or support (named after
+  the user's drawing, GS1-GS8) the part is picked out, the turn holds and a
+  card beside the pointer says what it is (`info`; a tap on a phone). No
+  drawer text or thumbnail yet (the default rock).
 - **Links**: each project's own address is `#<id>` (`#rock-print`).
 - **Drawer copy** is real for the first four projects, approved by the user
   word for word; change it only on request.
@@ -205,11 +208,15 @@ A model in parts (`frameless-glass.js`): `solid` gives the default look,
     parts: { Metal: { lit, shade }, Glass: { lit, shade, opacity: 0.14 } },  // by material name; opacity < 1 see-through
     figure: 'People_ZIM',                 // a part not drawn: the pebble's points form it
     inks: [[176, 174, 170], [128, 126, 123], [80, 79, 78]],  // the pebble's points' three inks, not the clouds'
+    info: { GS1: { title, lines: [] } },  // by part name: a card over it, the turn held
 ```
 
 - **Models from Rhino** come as OBJ + .mtl (Rhino 7 has no glTF export):
   `node tools/models/obj-to-glb.mjs model.obj name.glb` merges each
   material's pieces into one part named after it. Ask for named materials.
+  To name parts of their own (for `info`), a script per model passes
+  `labelOf` (`tools/models/frameless-glass.mjs`); the name travels in the
+  node's glTF extras (`userData.part`), as three.js renames repeated nodes.
 - **Slots**: always `SLOT_COUNT` (10) pebbles; raise it before an eleventh
   project. Empty slots stand in for the other kinds
   (`EMPTY_SLOT_CATEGORIES`) - take a slot out once a project fills it.
@@ -285,6 +292,9 @@ A model in parts (`frameless-glass.js`): `solid` gives the default look,
   Safari auto-completed an old `?cloudtest` and showed it for days.
 - **Nothing runs at module scope in `src/engine/`** - everything waits for
   `engine.start()`.
+- **A model's turn holds for reasons** (`setHold`, framing.js): 'click'
+  (`doubleClick: 'hold'`) and 'hover' (a part with `info`); it turns
+  again once neither holds it.
 - **A project can have two models** (`phone`): `pebble.userData.details`
   keeps each once loaded, `pebble.userData.detail` is the one shown -
   chosen as the project opens, so read `detail`, never assume one model.

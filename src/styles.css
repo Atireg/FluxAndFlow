@@ -582,6 +582,42 @@ canvas.webgl {
 /* The live speed beside each moving aggregate (a project's `drop.velocity`),
    placed and written by the engine every frame. Small and quiet, with a
    paper halo so it reads over the orange aggregates as well as the ground */
+/* A model's part under the pointer (PartInfo, the engine's hover): a small
+   card on the paper, just below and right of the pointer */
+.part-info {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 2; /* above the canvas (1), like the tags */
+    pointer-events: none;
+    margin: 1rem 0 0 1rem;
+    padding: 0.55rem 0.75rem 0.6rem;
+    max-width: 16rem;
+    background: var(--panel-bg);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 0.4rem;
+    font-size: 0.78rem;
+    line-height: 1.4;
+    color: var(--ink);
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
+.part-info.is-showing {
+    opacity: 1;
+}
+
+.part-info__title {
+    margin: 0 0 0.2rem;
+    font-weight: 600;
+}
+
+.part-info__lines {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
 .velocity-tag {
     position: fixed;
     top: 0;

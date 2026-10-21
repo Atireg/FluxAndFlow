@@ -489,6 +489,14 @@ steel's look; a double-click stops its turn. Then the person in three
 greys (a project's own `inks` for its pebble's points) and the timber warm
 oak (option 1 of four).
 
+**Hover over Frameless Glass Structures' parts**: from the user's drawing
+- eight glass sheets GS1-GS8, the joints with their angles, the supports.
+The model is converted again with each named (`tools/models/frameless-glass.mjs`
+over a refactored `obj-to-glb.mjs`); over a part (a tap on a phone) it's
+picked out, the turn holds, and a card says what it is (`info`, `PartInfo`).
+Checked headless: the card follows the part, the turn holds while on it
+and goes on after.
+
 Open at end of session: as at the end of session 4; a seventh Nap Nap
 Hooray picture, to come as a file; Frameless Glass Structures' text,
 pictures and thumbnail.
