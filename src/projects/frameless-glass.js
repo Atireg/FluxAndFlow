@@ -65,8 +65,8 @@ export default defineProject({
     // The person: the pebble's points form them, in three greys
     figure: 'People_ZIM',
     inks: [[176, 174, 170], [128, 126, 123], [80, 79, 78]],
-    // A double-click (or double-tap) stops its turn, the next sets it going
-    doubleClick: 'hold',
+    // Standing still (asked for); a double-click zooms in and back out
+    still: true,
     // Over a sheet, a joint or a support: what it is, the turn held
     info,
     // A cut across its length, slid by the visitor
@@ -108,5 +108,5 @@ export default defineProject({
             wide: true,
         },
     ],
-    view: { elevation: { side: 30, stacked: 62 }, turn: { side: 0, stacked: 45 }, zoom: { side: 1.8, stacked: 2.1 }, lift: { stacked: 0.09 } },
+    view: { elevation: { side: 30, stacked: 62 }, turn: { side: 0, stacked: 72 }, zoom: { side: 1.8, stacked: 2.1 }, lift: { stacked: 0.09 } },
 });

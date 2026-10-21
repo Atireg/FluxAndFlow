@@ -64,8 +64,8 @@ in a pull-out drawer.
   (`frameless-glass.glb`, seven parts named after its Rhino materials),
   each part in its own look (`parts`: light matt-grey steel, oak timber,
   clear glass, each sheet's upper ply outlined thin black); the person beside it isn't drawn - the pebble's points fall and
-  form them (`figure`), in three greys (`inks`). Turns slowly; a
-  double-click stops it. Over a glass sheet, joint or support (named after
+  form them (`figure`), in three greys (`inks`). Stands still
+  (`still`); a double-click zooms. Over a glass sheet, joint or support (named after
   the user's drawing, GS1-GS8) the part is picked out, the turn holds and a
   card beside the pointer says what it is (`info`; a tap on a phone).
   A slider at the foot ("section") cuts it across its length, the far
