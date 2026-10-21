@@ -62,15 +62,15 @@ in a pull-out drawer.
 - **Frameless Glass Structures** (slot 7, the real world,
   `#frameless-glass`): the user's Rhino model of a glass pavilion
   (`frameless-glass.glb`, seven parts named after its Rhino materials),
-  each part in its own look (`parts`: graphite metal, light plinth, clear
+  each part in its own look (`parts`: graphite steel, oak timber, clear
   glass); the person beside it isn't drawn - the pebble's points fall and
-  form them (`figure`). Turns slowly; a double-click stops it. No drawer
+  form them (`figure`), in three greys (`inks`). Turns slowly; a double-click stops it. No drawer
   text or thumbnail yet (the default rock).
 - **Links**: each project's own address is `#<id>` (`#rock-print`).
 - **Drawer copy** is real for the first four projects, approved by the user
   word for word; change it only on request.
 - **Waiting on the user**: Frameless Glass Structures' text, pictures,
-  thumbnail and looks (proposed, not yet approved); a seventh Nap Nap Hooray picture (Sleep per
+  thumbnail; a seventh Nap Nap Hooray picture (Sleep per
   day / Number of naps - sent inline, not as a file), picture
   captions/credits, model licensing, real-device and Safari checks.
 
@@ -204,6 +204,7 @@ A model in parts (`frameless-glass.js`): `solid` gives the default look,
 ```js
     parts: { Metal: { lit, shade }, Glass: { lit, shade, opacity: 0.14 } },  // by material name; opacity < 1 see-through
     figure: 'People_ZIM',                 // a part not drawn: the pebble's points form it
+    inks: [[176, 174, 170], [128, 126, 123], [80, 79, 78]],  // the pebble's points' three inks, not the clouds'
 ```
 
 - **Models from Rhino** come as OBJ + .mtl (Rhino 7 has no glTF export):

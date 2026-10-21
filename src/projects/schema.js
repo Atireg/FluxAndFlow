@@ -36,6 +36,8 @@
  *                 pieces); `opacity` under 1 is see-through, like glass
  *   figure        with solid: the material name of a part not drawn - the
  *                 pebble's points fall and form it instead (a person, say)
+ *   inks          three [r, g, b] for the pebble's points as it dissolves,
+ *                 instead of the clouds' dark red, orange and grey
  *   still         the model doesn't turn by itself (it can still be orbited)
  *   screenVideo   with screen: a film (.mp4 in static/) playing on it, muted, looping
  *   phone         with screen: { detailModel, screenVideo } shown instead on a
@@ -262,6 +264,14 @@ function normaliseParts({ id, parts, solid }) {
     }));
 }
 
+function normaliseInks({ id, inks }) {
+    if (inks === undefined) return undefined;
+    if (!Array.isArray(inks) || inks.length !== 3 || !inks.every((ink) => ink && isRgb(ink))) {
+        throw new Error(`Project "${id}": inks should be three [r, g, b], 0-255`);
+    }
+    return inks;
+}
+
 function normaliseFigure({ id, figure, solid, screen }) {
     if (figure === undefined) return undefined;
     if (!figure || typeof figure !== 'string') throw new Error(`Project "${id}": figure should be the material name of a part of the model`);
@@ -374,6 +384,7 @@ export function defineProject(project) {
         solid: normaliseSolid(project),
         parts: normaliseParts(project),
         figure: normaliseFigure(project),
+        inks: normaliseInks(project),
         still: Boolean(project.still),
         orbit: project.orbit !== false,
         screen: normaliseScreen(project),

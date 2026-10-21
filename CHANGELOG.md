@@ -485,9 +485,10 @@ pictures or thumbnail yet.
 **Frameless Glass Structures, first round**: the person's points finer
 (a quarter of their size once landed); the four steel pieces along the
 ridge of the sloping ends (Custom 7 and 8, taken for glass fins) in the
-steel's look; a double-click stops its turn. The timber's look offered as
-options.
+steel's look; a double-click stops its turn. Then the person in three
+greys (a project's own `inks` for its pebble's points) and the timber warm
+oak (option 1 of four).
 
 Open at end of session: as at the end of session 4; a seventh Nap Nap
 Hooray picture, to come as a file; Frameless Glass Structures' text,
-pictures, thumbnail and looks.
+pictures and thumbnail.

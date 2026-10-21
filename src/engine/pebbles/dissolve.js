@@ -264,7 +264,7 @@ export function getDissolve(pebble) {
             uPixelsPerUnit: { value: 1 },
             uSize: { value: DISSOLVE_POINT_SIZE },
             uRim: { value: PEBBLE_RIM_COLOR },
-            ...pointInkUniforms(),
+            ...pointInkUniforms(pebble.userData.project?.inks),
             uGround: { value: drop || screen || figure ? 1 : 0 },
             uGroundMatrix: { value: new THREE.Matrix4() },
             uFine: { value: drop ? 1 : 0 },

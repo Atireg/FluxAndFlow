@@ -54,9 +54,10 @@ export const POINT_SIZES = [0.6, 1, 1.6];
 export const POINT_OPACITY = 0.6;
 
 // The uniforms shaders/pointCloud/ink.glsl declares, fresh for each material
-export function pointInkUniforms() {
+// ...or three of a project's own (`inks`, as screen [r, g, b])
+export function pointInkUniforms(inks) {
     return {
-        uInks: { value: POINT_INKS.map((ink) => ink.color) },
+        uInks: { value: inks ? inks.map((rgb) => screenColor(...rgb)) : POINT_INKS.map((ink) => ink.color) },
         uOpacity: { value: POINT_OPACITY },
     };
 }

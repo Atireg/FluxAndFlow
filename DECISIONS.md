@@ -869,7 +869,12 @@ first time the model is shown, in the model's space, and carried into the
 pebble's by `uGroundMatrix` (the model's matrix) each frame, so the figure
 turns with the model. Landed points are finer than a pile's ground
 (`FIGURE_POINT_SIZE` 0.25 of their size against `GROUND_POINT_SIZE` 0.5 -
-at 0.5 the person read as blobs) and not fainter (`uFine` only for a pile). Tones random, as the clouds'. Until the
+at 0.5 the person read as blobs) and not fainter (`uFine` only for a pile).
+A project's `inks` give the pebble's points three colours of its own (the
+person in three greys, asked for). The looks were chosen by the user: steel
+graphite (the ridge pieces too, Custom 7 and 8, first taken for glass
+fins), the timber (Rhino's "Plaster") warm oak of four offered (pale ash,
+charred, as points). Tones random, as the clouds'. Until the
 model is in, the points hold swollen, as for a screen.
 
 
