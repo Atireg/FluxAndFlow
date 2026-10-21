@@ -71,6 +71,8 @@ export default defineProject({
     info,
     // A cut across its length, slid by the visitor
     section: true,
+    // Ground under it, so the person stands on something
+    floor: true,
 
     // The film, from YouTube, above the pictures in the drawer
     videos: [

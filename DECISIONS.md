@@ -906,6 +906,14 @@ triangle the plane passes through gives a segment (`traceCut`), worked out
 again as the slider moves - parts whose extent the plane misses skipped. Hover ignores parts cut
 away. The person (the pebble's points) isn't cut.
 
+**A floor** (asked for: the person looked as if floating): the person's
+feet are 18 cm above the model's foot - they stand on an exhibition floor
+the model doesn't have - so `floor: true` lays a disc at the figure's
+feet, a shade darker than the paper, fading into it at the edge (ground,
+not a slab), and a fainter, darker one just under the figure as its
+contact shadow (`softDisc`). The plinth's lowest centimetres sit under it,
+as on a stand. Not cut by the section; never hovered.
+
 The looks were chosen by the user: steel
 graphite (the ridge pieces too, Custom 7 and 8, first taken for glass
 fins), the timber (Rhino's "Plaster") warm oak of four offered (pale ash,

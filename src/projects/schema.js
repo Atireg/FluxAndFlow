@@ -38,6 +38,7 @@
  *                 pebble's points fall and form it instead (a person, say)
  *   section       with solid: a plane across the model's length the visitor
  *                 slides (a slider over the model), its parts cut away beyond it
+ *   floor         with solid: a floor under the model, at a figure's feet
  *   info          with solid: { [part name]: { title, lines } } - shown beside
  *                 the pointer over that part of the model (the part's name
  *                 from the file, tools/models/obj-to-glb.mjs), the model's
@@ -288,6 +289,13 @@ function normaliseSection({ id, section, solid }) {
     return section;
 }
 
+function normaliseFloor({ id, floor, solid }) {
+    if (floor === undefined) return false;
+    if (floor !== true && floor !== false) throw new Error(`Project "${id}": floor should be true or false`);
+    if (floor && !solid) throw new Error(`Project "${id}": floor needs solid`);
+    return floor;
+}
+
 function normaliseInks({ id, inks }) {
     if (inks === undefined) return undefined;
     if (!Array.isArray(inks) || inks.length !== 3 || !inks.every((ink) => ink && isRgb(ink))) {
@@ -411,6 +419,7 @@ export function defineProject(project) {
         inks: normaliseInks(project),
         info: normaliseInfo(project),
         section: normaliseSection(project),
+        floor: normaliseFloor(project),
         still: Boolean(project.still),
         orbit: project.orbit !== false,
         screen: normaliseScreen(project),

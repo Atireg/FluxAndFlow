@@ -41,6 +41,7 @@ export function loadPointCloud({
     parts,
     figure,
     section,
+    floor,
     screen,
     screenVideo,
 }) {
@@ -89,6 +90,7 @@ export function loadPointCloud({
                     group.userData.solidMaterial ??= material;
                 });
                 if (section) addSection(group, clip);
+                if (floor) addFloor(group, fade);
                 // Where the pebble's points settle and circle (`screen`)
                 if (screen) group.userData.screen = screenFrame(original, screen, sampled.userData.fit);
                 // ...a white screen, with rounded corners
@@ -322,4 +324,74 @@ export function setSection(model, share) {
         section.cut.geometry.dispose();
         section.cut.geometry = new THREE.BufferGeometry().setFromPoints(traceCut(section.meshes, z));
     }
+}
+
+/**
+ * A floor under a solid model (`floor`), so a figure beside it stands on
+ * something: a disc a little wider than the model, at the figure's feet (or
+ * the model's foot), a shade darker than the paper and fading out into it at
+ * its edge - ground, not a slab. Fades in with the model.
+ */
+function addFloor(group, fade) {
+    const box = new THREE.Box3();
+    group.children.forEach((child) => {
+        if (!child.isMesh) return;
+        child.geometry.computeBoundingBox();
+        box.union(child.geometry.boundingBox);
+    });
+    if (box.isEmpty()) return;
+
+    const figure = group.userData.figure;
+    if (figure) figure.computeBoundingBox();
+    const level = figure ? figure.boundingBox.min.y : box.min.y;
+    const size = box.getSize(new THREE.Vector3());
+    const radius = 0.75 * Math.max(size.x, size.z);
+
+    const centre = box.getCenter(new THREE.Vector3());
+    group.add(softDisc(radius, screenColor(222, 218, 210), 1, centre.x, level, centre.z, fade));
+
+    // ...and a faint shadow under the figure's feet, where it touches it
+    if (figure) {
+        const feet = figure.boundingBox;
+        const footprint = feet.getSize(new THREE.Vector3());
+        const at = feet.getCenter(new THREE.Vector3());
+        group.add(softDisc(0.6 * Math.max(footprint.x, footprint.z), screenColor(150, 146, 140), 0.45, at.x, level + 0.001, at.z, fade));
+    }
+}
+
+// A disc on the ground, `ink` at its middle fading out to nothing at its edge
+function softDisc(radius, ink, strength, x, y, z, fade) {
+    const disc = new THREE.Mesh(
+        new THREE.CircleGeometry(radius, 64).rotateX(-Math.PI / 2),
+        new THREE.ShaderMaterial({
+            transparent: true,
+            depthWrite: false,
+            uniforms: {
+                uInk: { value: ink },
+                uStrength: { value: strength },
+                uRadius: { value: radius },
+                uFade: fade,
+            },
+            vertexShader: `
+varying vec2 vAt;
+void main() {
+    vAt = position.xz;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}`,
+            fragmentShader: `
+uniform vec3 uInk;
+uniform float uStrength;
+uniform float uRadius;
+uniform float uFade;
+varying vec2 vAt;
+void main() {
+    float r = length(vAt) / uRadius;
+    gl_FragColor = vec4(uInk, uStrength * (1.0 - smoothstep(0.45, 1.0, r)) * (1.0 - uFade));
+}`,
+        }),
+    );
+    disc.position.set(x, y, z);
+    disc.renderOrder = -1; // under everything on it
+    disc.raycast = () => {}; // never something to hover
+    return disc;
 }

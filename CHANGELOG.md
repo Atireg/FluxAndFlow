@@ -512,6 +512,8 @@ from high above, its length up the screen, larger and higher (a view's
 the window moves a cut across the pavilion's length (`section`); the far
 part is cut away, an outline marks the cut, hover skips what's cut. Then
 each part's cut edges traced in black, so the connection detail reads.
+And a floor (`floor`): a soft disc at the person's feet, fading into the
+paper, a faint shadow under them - they no longer float.
 
 Open at end of session: as at the end of session 4; a seventh Nap Nap
 Hooray picture, to come as a file; Frameless Glass Structures' text and
