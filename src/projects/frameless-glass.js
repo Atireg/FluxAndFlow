@@ -126,5 +126,5 @@ export default defineProject({
     // As it opens: one full turn round it, then the section slides to just
     // past the middle as the camera closes in square-on to the ridge joint
     // there (GS2_GS6), its profile facing the visitor
-    tour: { orbit: 10, cut: 0.48, focus: 'GS2_GS6', reach: 0.25, over: 6 },
+    tour: { orbit: 16, cut: 0.48, focus: 'GS2_GS6', reach: 0.25, over: 8 },
 });

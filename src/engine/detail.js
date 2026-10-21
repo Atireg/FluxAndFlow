@@ -99,6 +99,8 @@ const INSIDE_WIDTH = 55; // degrees across at least, so a tall phone screen stil
 const INSIDE_FOV_MAX = 90; // degrees - the most the lens widens for that
 const TOUR_AFTER = 1.5; // seconds after the model is shown that a `tour` sets off
 const TOUR_PAUSE = 1; // seconds it rests at the view between the turn and the move in
+const TOUR_APPROACH = 3; // seconds to come round square-on to the section where it starts
+const TOUR_WIDE = 1.15; // ...seeing this much of the model's breadth across, before closing in
 const NEAR_SHARE = 0.05; // the near plane, as a share of the way to what the camera looks at
 const NEAR_LEAST = 0.02; // ...and no nearer than this
 const INSIDE_NEAR = 0.05; // the camera's near plane while standing among the points (1 otherwise clips the nearest columns)
@@ -122,9 +124,9 @@ export function createDetail({
     /**
      * A project's `tour`, played each time it opens: one full turn of the
      * model, eased (a turn of the model reads as the camera going round it -
-     * the inks are lit from the view), a moment at its view, then the section
-     * slides to `cut` as the camera closes in square-on to the cut, on the
-     * part `focus`. Whatever the visitor does with it - the slider, a
+     * the inks are lit from the view), a moment at its view, then round to
+     * face the section square-on where it starts, and along with it as it
+     * slides to `cut`, closing in on the part `focus`. Whatever the visitor does with it - the slider, a
      * double-click, the drawer, orbiting by hand - stops it where it is.
      */
     const tour = { model: null, spin: 0, moved: false, stopped: true };
@@ -864,16 +866,23 @@ export function createDetail({
             if (t < 0) return;
             tour.spin = 2 * Math.PI * smooth01(t / plan.orbit);
 
+            // Square-on to the section where it starts, the whole cut in view...
             const closing = t - plan.orbit - TOUR_PAUSE;
             if (closing < 0) return;
-            const share = 1 - (1 - plan.cut) * smooth01(closing / plan.over);
-            setSection(model, share);
-            ui.onSection?.(share);
             if (!tour.moved) {
                 tour.moved = true;
-                framing.frameSection(model, { focus: plan.focus, cut: plan.cut, reach: plan.reach, duration: plan.over });
+                framing.frameSection(model, { focus: plan.focus, share: 1, reach: TOUR_WIDE, duration: TOUR_APPROACH });
             }
-            if (closing >= plan.over) tour.stopped = true;
+
+            // ...then along with it as it slides to `cut`, closing in on `focus`
+            const following = closing - TOUR_APPROACH;
+            if (following < 0) return;
+            const k = smooth01(following / plan.over);
+            const share = 1 - (1 - plan.cut) * k;
+            setSection(model, share);
+            ui.onSection?.(share);
+            framing.frameSection(model, { focus: plan.focus, share, reach: TOUR_WIDE + (plan.reach - TOUR_WIDE) * k });
+            if (following >= plan.over) tour.stopped = true;
         },
 
         // Where the pointer is over the model now (null: off it, or gone)

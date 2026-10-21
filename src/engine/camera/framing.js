@@ -515,19 +515,19 @@ export function createFraming({ rig, screen, state, grid, ui }) {
         },
 
         /**
-         * A `tour`'s close-up: square-on to the model's section where it
-         * will rest (`cut`, a share of its length as `setSection` takes it),
-         * from the side cut away, centred on the part named `focus` where
-         * the cut passes through it - `reach` of the model's breadth across
-         * the window. The model must be still where it will stay.
+         * Square-on to the model's section at `share` (as `setSection` takes
+         * it), from the side cut away, centred on the part named `focus`
+         * where the cut passes through it, `reach` of the parts' breadth
+         * across the window - over `duration` seconds, or this frame (0), as
+         * a `tour` follows the cut along. The model must stay where it is.
          */
-        frameSection(model, { focus, cut, reach, duration }) {
+        frameSection(model, { focus, share, reach, duration = 0 }) {
             const section = model.userData.section;
             if (!section) return;
 
+            // (its parts only - not the floor under it)
             const box = new THREE.Box3();
             const all = new THREE.Box3();
-            // (its parts only - not the floor under it)
             model.children.forEach((child) => {
                 if (!child.isMesh || !child.material.uniforms?.uHighlight) return;
                 child.geometry.computeBoundingBox();
@@ -536,7 +536,7 @@ export function createFraming({ rig, screen, state, grid, ui }) {
             });
             if (box.isEmpty()) return;
 
-            const z = section.to - (section.to - section.from) * cut;
+            const z = section.to - (section.to - section.from) * share;
             const centre = box.getCenter(new THREE.Vector3());
             model.updateMatrixWorld(true);
             const target = model.localToWorld(new THREE.Vector3(centre.x, centre.y, z));
@@ -546,7 +546,9 @@ export function createFraming({ rig, screen, state, grid, ui }) {
 
             const tan = Math.tan(THREE.MathUtils.degToRad(rig.perspectiveCamera.fov) / 2);
             const distance = (reach * breadth) / 2 / (tan * screen.aspect);
-            rig.moveCamera(target.clone().addScaledVector(along, -distance), target, duration, 'power2.inOut');
+            const position = target.clone().addScaledVector(along, -distance);
+            if (duration > 0) rig.moveCamera(position, target, duration, 'power2.inOut');
+            else rig.placeCamera(position, target);
         },
 
         /**

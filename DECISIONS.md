@@ -926,10 +926,13 @@ view. **The tour** (asked for: a camera path each time it opens): one full
 turn, the view, then the cut and the move in on the middle's ridge joint,
 square-on so the joint's profile faces the visitor. The turn is the
 model's, eased, on top of its yaw (`tourSpin`) - the camera going round it
-reads the same, and the person and floor turn with it; the move in is one
-`moveCamera` (`frameSection`: centred on the focus part where the cut will
-rest, from the side cut away, `reach` of the parts' breadth across - the
-floor discs left out, they're far wider). The slider follows the cut
+reads the same, and the person and floor turn with it; then (asked for: the
+camera following the cut, parallel to it) round to face the section
+square-on where it starts, the whole breadth in view (`TOUR_APPROACH`,
+`TOUR_WIDE`), and along with it each frame as it slides in, closing to
+`reach` (`frameSection`, placed with `rig.placeCamera`: centred on the
+focus part at the cut, from the side cut away - the floor discs left out of
+the breadth, they're far wider). The turn slowed to 16s. The slider follows the cut
 (`ui.onSection`). Anything the visitor does with it stops the tour where it
 is, so it never takes the model back from them. The desktop view is the
 phone's now, so the turn ends where the close-up starts on both.

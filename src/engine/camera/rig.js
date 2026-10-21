@@ -196,6 +196,17 @@ export function createCameraRig({ canvas, scene, screen, onShaderError }) {
          * (closing, 1.1s) and drags the camera back towards where it was
          * heading.
          */
+        // Straight there this frame, no tween - for a camera driven frame by frame
+        placeCamera(position, target) {
+            const camera = rig.camera;
+            gsap.killTweensOf([camera.position, controls.target, orientation]);
+            orientationLocked = false;
+            camera.position.copy(position);
+            controls.target.copy(target);
+            camera.lookAt(target);
+            controls.update();
+        },
+
         moveCamera(position, target, duration, ease = 'power2.inOut') {
             const camera = rig.camera;
             gsap.killTweensOf([camera.position, controls.target, orientation]);
