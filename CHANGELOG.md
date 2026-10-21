@@ -520,8 +520,9 @@ right in the model no longer breaks: the near plane follows the camera
 outlined in thin black (marked by the model's script, drawn by the site).
 The section's direction flipped: the other part is kept. The floor moved
 down to the foundations' underside, the person set down onto it. And it
-stands still: no turn (`still`), a double-click zooms.
+stands still: no turn (`still`), a double-click zooms. Its drawer text:
+option 1 of the three offered.
 
 Open at end of session: as at the end of session 4; a seventh Nap Nap
-Hooray picture, to come as a file; Frameless Glass Structures' text and
-thumbnail.
+Hooray picture, to come as a file; Frameless Glass Structures' year,
+role, context and thumbnail.

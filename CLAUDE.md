@@ -73,14 +73,14 @@ in a pull-out drawer.
   as in a drawing) and a faint outline at the cut (`section`). It stands
   on a soft floor at the foot of its foundations, the person set down onto
   it, a faint shadow under them (`floor`). On a phone it opens steeply from above, its length up the screen (the
-  user's screenshot). Drawer: a YouTube film and five pictures (the pavilion at glasstec, the
-  joints, the joint in section); no text or thumbnail yet (the default rock).
+  user's screenshot). Drawer: the user's chosen text (one paragraph), a YouTube film and five
+  pictures (the pavilion at glasstec, the joints, the joint in section); no
+  year, role or context rows or thumbnail yet (the default rock).
 - **Links**: each project's own address is `#<id>` (`#rock-print`).
-- **Drawer copy** is real for the first four projects, approved by the user
+- **Drawer copy** is real for all five projects, approved by the user
   word for word; change it only on request.
-- **Waiting on the user**: Frameless Glass Structures' text (options
-  offered; www.knippershelbig.com is unreachable from the container) and
-  thumbnail; a seventh Nap Nap Hooray picture (Sleep per
+- **Waiting on the user**: Frameless Glass Structures' year, role,
+  context and thumbnail; a seventh Nap Nap Hooray picture (Sleep per
   day / Number of naps - sent inline, not as a file), picture
   captions/credits, model licensing, real-device and Safari checks.
 
