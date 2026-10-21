@@ -323,11 +323,12 @@ function traceCut(meshes, z) {
     return points;
 }
 
-// Cut a model at `share` of its length (0..1; 1, or more, cuts nothing)
+// Cut a model at `share` of its length (0..1; 1, or more, cuts nothing),
+// from its far end (z's top) back - the part kept is the one beyond the cut
 export function setSection(model, share) {
     const section = model?.userData.section;
     if (!section) return;
-    const z = section.from + (section.to - section.from) * Math.min(Math.max(share, 0), 1);
+    const z = section.to - (section.to - section.from) * Math.min(Math.max(share, 0), 1);
     section.clip.value = share >= 1 ? CLIP_NONE : z;
     section.outline.position.z = z;
     section.outline.visible = share < 1;

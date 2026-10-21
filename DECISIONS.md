@@ -897,8 +897,9 @@ moved by the visitor): `section: true` puts a slider at the foot of the
 window (`SectionSlider`, its word in words.js; above the drawer's handle on
 a phone, hidden with the drawer out there, beside it on a wide screen). It
 drives `engine.setSection(share)` directly, not through React state, which
-sets one `uClip` shared by the model's ink materials: a fragment beyond it
-along the model's own z (its length, as fitted) is discarded - cheaper and
+sets one `uClip` shared by the model's ink materials: a fragment short of it
+along the model's own z (its length, as fitted) is discarded (flipped, asked
+for: the part beyond the cut is kept) - cheaper and
 simpler than three.js's clipping planes in a ShaderMaterial. A thin outline
 of the model's breadth and height marks the cut, and each part's own cut
 is traced in black (asked for, so the joint's detail reads): every

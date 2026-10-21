@@ -835,10 +835,10 @@ export function createDetail({
             if (hover.x !== null && !rig.visitorOrbiting) {
                 hoverRay.setFromCamera(rig.pointerToNdc(hover.x, hover.y, hoverNdc), rig.camera);
                 // (not a part cut away by the section - it's still there to hit)
-                const clip = model.userData.section?.clip.value ?? Infinity;
+                const clip = model.userData.section?.clip.value ?? -Infinity;
                 mesh = hoverRay.intersectObject(model, true)
                     .find((hit) => hit.object.isMesh && hit.object.material.uniforms?.uHighlight
-                        && model.worldToLocal(hit.point.clone()).z <= clip)?.object ?? null;
+                        && model.worldToLocal(hit.point.clone()).z >= clip)?.object ?? null;
             }
             pickPart(mesh, model, since);
 
