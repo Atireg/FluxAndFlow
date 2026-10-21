@@ -508,6 +508,10 @@ drawn from is unreachable from the container.
 from high above, its length up the screen, larger and higher (a view's
 `elevation` and `turn` can now be per layout).
 
+**A section through Frameless Glass Structures**: a slider at the foot of
+the window moves a cut across the pavilion's length (`section`); the far
+part is cut away, an outline marks the cut, hover skips what's cut.
+
 Open at end of session: as at the end of session 4; a seventh Nap Nap
 Hooray picture, to come as a file; Frameless Glass Structures' text and
 thumbnail.

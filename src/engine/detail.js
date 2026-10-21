@@ -410,6 +410,7 @@ export function createDetail({
                 solid: project.solid,
                 parts: project.parts,
                 figure: project.figure,
+                section: project.section,
                 screen: project.screen,
                 screenVideo: source.screenVideo && assetUrl(source.screenVideo),
                 // Say so rather than leave "Loading model" up forever, and
@@ -821,8 +822,11 @@ export function createDetail({
             let mesh = null;
             if (hover.x !== null && !rig.visitorOrbiting) {
                 hoverRay.setFromCamera(rig.pointerToNdc(hover.x, hover.y, hoverNdc), rig.camera);
+                // (not a part cut away by the section - it's still there to hit)
+                const clip = model.userData.section?.clip.value ?? Infinity;
                 mesh = hoverRay.intersectObject(model, true)
-                    .find((hit) => hit.object.isMesh && hit.object.material.uniforms?.uHighlight)?.object ?? null;
+                    .find((hit) => hit.object.isMesh && hit.object.material.uniforms?.uHighlight
+                        && model.worldToLocal(hit.point.clone()).z <= clip)?.object ?? null;
             }
             pickPart(mesh, model, since);
 

@@ -892,6 +892,17 @@ rather than 30, turned so its length runs up the narrow screen, closer and
 higher - so a view's `elevation` and `turn` can now be given per layout,
 like `zoom` and `lift` (`perLayout`, layout.js).
 
+**A section** (asked for: a clipping plane parallel to the short side,
+moved by the visitor): `section: true` puts a slider at the foot of the
+window (`SectionSlider`, its word in words.js; above the drawer's handle on
+a phone, hidden with the drawer out there, beside it on a wide screen). It
+drives `engine.setSection(share)` directly, not through React state, which
+sets one `uClip` shared by the model's ink materials: a fragment beyond it
+along the model's own z (its length, as fitted) is discarded - cheaper and
+simpler than three.js's clipping planes in a ShaderMaterial. A thin outline
+of the model's breadth and height marks the cut. Hover ignores parts cut
+away. The person (the pebble's points) isn't cut.
+
 The looks were chosen by the user: steel
 graphite (the ridge pieces too, Custom 7 and 8, first taken for glass
 fins), the timber (Rhino's "Plaster") warm oak of four offered (pale ash,

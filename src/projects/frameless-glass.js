@@ -69,6 +69,8 @@ export default defineProject({
     doubleClick: 'hold',
     // Over a sheet, a joint or a support: what it is, the turn held
     info,
+    // A cut across its length, slid by the visitor
+    section: true,
 
     // The film, from YouTube, above the pictures in the drawer
     videos: [

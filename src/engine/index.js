@@ -19,6 +19,7 @@ import { pebbleFluxTime, PEBBLE_FLUX_SPEED } from './pebbles/geometry.js';
 import { dropInProgress, placeDroppingPebble, updateDroppingPebble } from './pebbles/drop.js';
 import { updateDissolve } from './pebbles/dissolve.js';
 import { updateScreenSpin } from './pointcloud/screenVideo.js';
+import { setSection } from './pointcloud/load.js';
 import { GATHER_DURATION, GATHER_MAX_STEP, revealAt, setGather, setReveal } from './pointcloud/gather.js';
 import { trailResolution } from './pointcloud/trails.js';
 
@@ -542,6 +543,12 @@ export function createEngine({ canvas, source, ui }) {
          * link to it. Only from the playground; false if there's no such
          * project or it can't open now.
          */
+        // A project's section (`section`): cut its model at `share` of its
+        // length, 0..1 - 1 cuts nothing
+        setSection(share) {
+            setSection(state.selected?.userData.detail, share);
+        },
+
         openProject(id) {
             if (state.view !== 'catalog') return false;
             const pebble = grid.pebbles.find((candidate) => candidate.userData.project?.id === id);

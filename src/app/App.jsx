@@ -6,6 +6,7 @@ import ProjectDrawer from '../components/ProjectDrawer.jsx';
 import CatalogTags from '../components/CatalogTags.jsx';
 import TapHint from '../components/TapHint.jsx';
 import PartInfo from '../components/PartInfo.jsx';
+import SectionSlider from '../components/SectionSlider.jsx';
 import HintTag from '../components/HintTag.jsx';
 import CategoryFilter from '../components/CategoryFilter.jsx';
 import VelocityTags from '../components/VelocityTags.jsx';
@@ -279,6 +280,10 @@ export default function App() {
             <HintTag stringRef={hintStringRef} tagRef={hintTagRef} dissolveRef={hintDissolveRef} />
             <TapHint ref={tapHintRef} />
             <PartInfo ref={partInfoRef} />
+
+            {project?.section && (
+                <SectionSlider key={project.id} onSlide={(share) => engineRef.current?.setSection(share)} />
+            )}
 
             <CategoryFilter focus={focus} hidden={Boolean(project)} onChoose={chooseFocus} />
 

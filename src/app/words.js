@@ -7,6 +7,9 @@
 // What an empty pebble says when clicked, one at random
 const EMPTY_WORDS = ['under\nconstruction', 'still\nsettling', 'yet to\ntake shape', 'a grain\nnot yet fallen'];
 
+// Beside the slider that cuts a model across its length (a project's `section`)
+export const SECTION_WORD = 'section';
+
 // What a double-tap does, by the project's `doubleClick`
 const HINT_ACTIONS = { zoom: 'zoom', hold: 'pause', drop: 'drop again' };
 

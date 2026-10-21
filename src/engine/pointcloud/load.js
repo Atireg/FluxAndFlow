@@ -1,11 +1,11 @@
 import * as THREE from 'three';
 import { gltfLoader } from '../assets.js';
 import { MESH_FIT_SIZE } from '../constants.js';
-import { POINT_INKS, POINT_SIZES, pointInkUniforms } from '../colors.js';
+import { POINT_INKS, POINT_SIZES, pointInkUniforms, THUMB_INK_COLOR } from '../colors.js';
 import { createPile, findRods } from '../pile.js';
 import { addGatherAttributes, GATHER_DURATION, GATHER_SPREAD, GATHER_SWIRL, GATHER_TRAIL, GATHER_TRAIL_EVERY } from './gather.js';
 import { addTrails } from './trails.js';
-import { makeInkMaterial, pointsFromMeshes } from './mesh.js';
+import { CLIP_NONE, makeInkMaterial, pointsFromMeshes } from './mesh.js';
 import { addScreenPanel, addScreenVideo } from './screenVideo.js';
 
 import gatherGlsl from '../shaders/pointCloud/gather.glsl';
@@ -40,6 +40,7 @@ export function loadPointCloud({
     solid = false,
     parts,
     figure,
+    section,
     screen,
     screenVideo,
 }) {
@@ -67,6 +68,8 @@ export function loadPointCloud({
                 // uniform - or the whole model merged in one. The `figure`
                 // part isn't drawn: the pebble's points form it (dissolve.js)
                 const fade = { value: 1 };
+                // ...and cut on one uniform too (`section`, see addSection)
+                const clip = { value: CLIP_NONE };
                 const pieces = parts || figure
                     ? sampled.userData.parts
                     : [{ material: '', part: '', geometry: sampled.userData.solid }];
@@ -77,6 +80,7 @@ export function loadPointCloud({
                     }
                     const material = makeInkMaterial(parts?.[lookName] ?? look);
                     material.uniforms.uFade = fade;
+                    material.uniforms.uClip = clip;
                     const mesh = new THREE.Mesh(geometry, material);
                     // Its own name, for a project's `info` (see detail.js's hover)
                     mesh.name = part;
@@ -84,6 +88,7 @@ export function loadPointCloud({
                     group.add(mesh);
                     group.userData.solidMaterial ??= material;
                 });
+                if (section) addSection(group, clip);
                 // Where the pebble's points settle and circle (`screen`)
                 if (screen) group.userData.screen = screenFrame(original, screen, sampled.userData.fit);
                 // ...a white screen, with rounded corners
@@ -234,4 +239,41 @@ function screenFrame(root, name, { centre, factor }) {
         u: fitted(half.x, 0, 0).sub(middle),
         v: fitted(0, half.y, 0).sub(middle),
     };
+}
+
+/**
+ * A model's section (`section`): its parts cut away beyond a plane across
+ * its length (z, its own space), moved by the visitor (setSection, engine),
+ * and a thin outline of the model's breadth and height where it cuts
+ */
+function addSection(group, clip) {
+    const box = new THREE.Box3();
+    group.children.forEach((mesh) => {
+        mesh.geometry.computeBoundingBox();
+        box.union(mesh.geometry.boundingBox);
+    });
+    if (box.isEmpty()) return;
+
+    const { min, max } = box;
+    const outline = new THREE.LineLoop(
+        new THREE.BufferGeometry().setFromPoints([
+            new THREE.Vector3(min.x, min.y, 0), new THREE.Vector3(max.x, min.y, 0),
+            new THREE.Vector3(max.x, max.y, 0), new THREE.Vector3(min.x, max.y, 0),
+        ]),
+        new THREE.LineBasicMaterial({ color: THUMB_INK_COLOR, transparent: true, opacity: 0.5 }),
+    );
+    outline.visible = false;
+    outline.raycast = () => {}; // never something to hover
+    group.add(outline);
+    group.userData.section = { clip, outline, from: min.z, to: max.z };
+}
+
+// Cut a model at `share` of its length (0..1; 1, or more, cuts nothing)
+export function setSection(model, share) {
+    const section = model?.userData.section;
+    if (!section) return;
+    const z = section.from + (section.to - section.from) * Math.min(Math.max(share, 0), 1);
+    section.clip.value = share >= 1 ? CLIP_NONE : z;
+    section.outline.position.z = z;
+    section.outline.visible = share < 1;
 }

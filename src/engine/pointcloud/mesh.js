@@ -116,6 +116,9 @@ export function pointsFromMeshes(root, total = MESH_SAMPLE_POINTS) {
  * `opacity` under 1 (glass). A project's `solid: { lit, shade }` gives its
  * own pair, as screen [r, g, b], and `parts` one for each of a model's parts.
  */
+// A clip beyond anything: nothing cut
+export const CLIP_NONE = 1e6;
+
 export function makeInkMaterial({ lit, shade, opacity = 1 } = {}) {
     // See-through (`opacity` under 1, glass): both faces, and it doesn't hide
     // what's behind it from the depth test
@@ -132,6 +135,9 @@ export function makeInkMaterial({ lit, shade, opacity = 1 } = {}) {
             uOpacity: { value: opacity },
             // 0..1, picked out under the pointer (a part with `info`)
             uHighlight: { value: 0 },
+            // Cut away beyond this along the model's length (z, its own
+            // space) - a project's `section`
+            uClip: { value: CLIP_NONE },
         },
         vertexShader: `
 varying vec3 vNormal;
@@ -147,6 +153,7 @@ uniform vec3 uShade;
 uniform float uFade;
 uniform float uOpacity;
 uniform float uHighlight;
+uniform float uClip;
 varying vec3 vNormal;
 varying vec3 vInkLocal;
 
@@ -162,7 +169,7 @@ float inkGrain(vec3 p) {
 }
 
 void main() {
-    if (inkGrain(floor(vInkLocal * 40.0)) < uFade) discard;
+    if (inkGrain(floor(vInkLocal * 40.0)) < uFade || vInkLocal.z > uClip) discard;
     // (a see-through part's back faces lit as its own, turned towards us)
     vec3 normal = normalize(vNormal) * (gl_FrontFacing ? 1.0 : -1.0);
     float light = max(dot(normal, normalize(vec3(-0.35, 0.8, 0.5))), 0.0);

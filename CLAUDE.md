@@ -68,7 +68,8 @@ in a pull-out drawer.
   double-click stops it. Over a glass sheet, joint or support (named after
   the user's drawing, GS1-GS8) the part is picked out, the turn holds and a
   card beside the pointer says what it is (`info`; a tap on a phone).
-  On a phone it opens steeply from above, its length up the screen (the
+  A slider at the foot ("section") cuts it across its length, the far
+  part cut away and an outline at the cut (`section`). On a phone it opens steeply from above, its length up the screen (the
   user's screenshot). Drawer: a YouTube film and five pictures (the pavilion at glasstec, the
   joints, the joint in section); no text or thumbnail yet (the default rock).
 - **Links**: each project's own address is `#<id>` (`#rock-print`).
@@ -213,6 +214,7 @@ A model in parts (`frameless-glass.js`): `solid` gives the default look,
     figure: 'People_ZIM',                 // a part not drawn: the pebble's points form it
     inks: [[176, 174, 170], [128, 126, 123], [80, 79, 78]],  // the pebble's points' three inks, not the clouds'
     info: { GS1: { title, lines: [] } },  // by part name: a card over it, the turn held
+    section: true,                        // a slider cuts the model across its length (z in its own space)
 ```
 
 - **Models from Rhino** come as OBJ + .mtl (Rhino 7 has no glTF export):

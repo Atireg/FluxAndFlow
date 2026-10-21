@@ -36,6 +36,8 @@
  *                 pieces); `opacity` under 1 is see-through, like glass
  *   figure        with solid: the material name of a part not drawn - the
  *                 pebble's points fall and form it instead (a person, say)
+ *   section       with solid: a plane across the model's length the visitor
+ *                 slides (a slider over the model), its parts cut away beyond it
  *   info          with solid: { [part name]: { title, lines } } - shown beside
  *                 the pointer over that part of the model (the part's name
  *                 from the file, tools/models/obj-to-glb.mjs), the model's
@@ -279,6 +281,13 @@ function normaliseInfo({ id, info, solid }) {
     return info;
 }
 
+function normaliseSection({ id, section, solid }) {
+    if (section === undefined) return false;
+    if (section !== true && section !== false) throw new Error(`Project "${id}": section should be true or false`);
+    if (section && !solid) throw new Error(`Project "${id}": section needs solid`);
+    return section;
+}
+
 function normaliseInks({ id, inks }) {
     if (inks === undefined) return undefined;
     if (!Array.isArray(inks) || inks.length !== 3 || !inks.every((ink) => ink && isRgb(ink))) {
@@ -401,6 +410,7 @@ export function defineProject(project) {
         figure: normaliseFigure(project),
         inks: normaliseInks(project),
         info: normaliseInfo(project),
+        section: normaliseSection(project),
         still: Boolean(project.still),
         orbit: project.orbit !== false,
         screen: normaliseScreen(project),
