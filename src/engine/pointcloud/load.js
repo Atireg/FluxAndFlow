@@ -341,8 +341,8 @@ export function setSection(model, share) {
 
 /**
  * A floor under a solid model (`floor`), so a figure beside it stands on
- * something: a disc a little wider than the model, at the figure's feet (or
- * the model's foot), a shade darker than the paper and fading out into it at
+ * something: a disc a little wider than the model, at the model's foot (the
+ * foundations' underside), the figure set down onto it, a shade darker than the paper and fading out into it at
  * its edge - ground, not a slab. Fades in with the model.
  */
 function addFloor(group, fade) {
@@ -354,9 +354,15 @@ function addFloor(group, fade) {
     });
     if (box.isEmpty()) return;
 
+    // At the foot of the foundations - the figure set down onto it, standing
+    // there rather than on the floor the model left out (asked for)
+    const level = box.min.y;
     const figure = group.userData.figure;
-    if (figure) figure.computeBoundingBox();
-    const level = figure ? figure.boundingBox.min.y : box.min.y;
+    if (figure) {
+        figure.computeBoundingBox();
+        figure.translate(0, level - figure.boundingBox.min.y, 0);
+        figure.computeBoundingBox();
+    }
     const size = box.getSize(new THREE.Vector3());
     const radius = 0.75 * Math.max(size.x, size.z);
 

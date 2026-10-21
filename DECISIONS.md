@@ -909,11 +909,10 @@ away. The person (the pebble's points) isn't cut.
 
 **A floor** (asked for: the person looked as if floating): the person's
 feet are 18 cm above the model's foot - they stand on an exhibition floor
-the model doesn't have - so `floor: true` lays a disc at the figure's
-feet, a shade darker than the paper, fading into it at the edge (ground,
+the model doesn't have - so `floor: true` lays a disc - first at the figure's feet; then, asked
+for, at the foot of the foundations, the figure set down onto it - a shade darker than the paper, fading into it at the edge (ground,
 not a slab), and a fainter, darker one just under the figure as its
-contact shadow (`softDisc`). The plinth's lowest centimetres sit under it,
-as on a stand. Not cut by the section; never hovered.
+contact shadow (`softDisc`). Not cut by the section; never hovered.
 
 The steel then made lighter and flatter (asked for: less shiny, and the
 joints between the sheets not reading as dark gaps): lit 204, shade 168,

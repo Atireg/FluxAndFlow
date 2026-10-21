@@ -38,7 +38,7 @@
  *                 pebble's points fall and form it instead (a person, say)
  *   section       with solid: a plane across the model's length the visitor
  *                 slides (a slider over the model), its parts cut away beyond it
- *   floor         with solid: a floor under the model, at a figure's feet
+ *   floor         with solid: a floor at the model's foot, a figure set down onto it
  *   info          with solid: { [part name]: { title, lines } } - shown beside
  *                 the pointer over that part of the model (the part's name
  *                 from the file, tools/models/obj-to-glb.mjs), the model's

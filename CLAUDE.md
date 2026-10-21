@@ -71,7 +71,8 @@ in a pull-out drawer.
   A slider at the foot ("section") cuts it across its length, the far
   part cut away, each part's cut edges traced in black (the joints read
   as in a drawing) and a faint outline at the cut (`section`). It stands
-  on a soft floor at the person's feet, a faint shadow under them (`floor`). On a phone it opens steeply from above, its length up the screen (the
+  on a soft floor at the foot of its foundations, the person set down onto
+  it, a faint shadow under them (`floor`). On a phone it opens steeply from above, its length up the screen (the
   user's screenshot). Drawer: a YouTube film and five pictures (the pavilion at glasstec, the
   joints, the joint in section); no text or thumbnail yet (the default rock).
 - **Links**: each project's own address is `#<id>` (`#rock-print`).
@@ -217,7 +218,7 @@ A model in parts (`frameless-glass.js`): `solid` gives the default look,
     inks: [[176, 174, 170], [128, 126, 123], [80, 79, 78]],  // the pebble's points' three inks, not the clouds'
     info: { GS1: { title, lines: [] } },  // by part name: a card over it, the turn held
     section: true,                        // a slider cuts the model across its length (z in its own space)
-    floor: true,                          // soft ground at the figure's feet, and its shadow
+    floor: true,                          // soft ground at the model's foot, the figure set down on it, its shadow
 ```
 
 - **Models from Rhino** come as OBJ + .mtl (Rhino 7 has no glTF export):
