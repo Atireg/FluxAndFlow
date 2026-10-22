@@ -14,7 +14,7 @@ export default defineProject({
     // The drawer's rows and text; anything left empty is skipped. State
     // the role accurately - the page implies authorship of what it shows.
     year: '2018',
-    role: 'Project lead, with Petrus Aejmelaeus-Lindström',
+    role: 'Project lead',
     context: 'Gramazio Kohler Research, ETH Zurich, for "Hello, Robot." '
         + 'at the Gewerbemuseum Winterthur',
     body: [
@@ -30,9 +30,7 @@ export default defineProject({
         'It was shown from 4 October to 4 November 2018 in the exhibition '
         + '"Hello, Robot. Design between Human and Machine", as part of the '
         + 'research project Design and Robotic Fabrication of Jammed '
-        + 'Architectural Structures. It follows the first Rock Print, made '
-        + 'with MIT\'s Self-Assembly Lab for the 2015 Chicago Architecture '
-        + 'Biennial.',
+        + 'Architectural Structures.',
     ],
     credits: 'Gramazio Kohler Research, ETH Zurich. Petrus '
         + 'Aejmelaeus-Lindström and Gergana Rusenova (project lead), Hannes '

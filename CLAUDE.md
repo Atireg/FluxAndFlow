@@ -37,7 +37,7 @@ in a pull-out drawer.
   from it, swinging (`src/components/PathView.jsx`). Each dot a milestone
   from the user's CV (`src/app/path.js`), labelled under it - only the
   year on a phone. Put there "for now"; the user may reword them.
-- **Rock Print Pavilion** (slot 0): a point cloud that gathers out of a
+- **Rock Print Pavilion** (slot 0; role "Project lead" alone): a point cloud that gathers out of a
   scattered swirl, turns and nods; every 10s the camera moves in by itself,
   in turn on a point, from inside at eye height, and from there facing back.
   A double-click pauses it. Two Vimeo films in its drawer.
@@ -231,6 +231,7 @@ A solid model with a film on its screen - `kh-reuse.js` is the example;
             drawer: 'whole' },            // with the drawer out, the whole device square-on, not a close-up
     images: [{ ..., pair: true }],        // two to a row on a phone too (tall screenshots)
                                           // `half`: the first picture two to a row as well, not across
+                                          // `after: n`: in the text, after body[n], not below it
 ```
 
 A model in parts (`frameless-glass.js`): `solid` gives the default look,

@@ -570,7 +570,11 @@ Branch `claude/loving-ramanujan-stqa6z`, not merged.
   noise for wind, gusts crossing the line, threads of different lengths, a
   swing to and from the visitor too, a jolt as the line moves. Then each
   dot a milestone from the user's CV, labelled under it (only the year on a
-  phone).
+  phone). Merged.
+- **Rock Print Pavilion**: the role is "Project lead" alone; the drawer's
+  last sentence (the first Rock Print, with MIT) taken out.
+- **Pictures in the text**: an image's `after: n` places it after that
+  paragraph.
 
 Open at end of session: as at the end of session 5; the path's ten
 milestones checked by the user.

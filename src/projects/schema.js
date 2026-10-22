@@ -143,6 +143,9 @@ function normaliseImage(image, { id, index }) {
         // Half the drawer's width on a wide screen even as the first picture,
         // which otherwise spans it - a row of tall screenshots from the start
         half: Boolean(image.half),
+        // Shown in the text, after body[after], rather than with the rest
+        // below it
+        after: Number.isInteger(image.after) ? image.after : null,
     };
 }
 
@@ -409,6 +412,12 @@ export function defineProject(project) {
     if (!Array.isArray(images)) {
         throw new Error(`Project "${id}": images should be an array`);
     }
+
+    images.forEach((image, index) => {
+        if (image?.after != null && !(Number.isInteger(image.after) && image.after >= 0 && image.after < body.length)) {
+            throw new Error(`Project "${id}": images[${index}].after should be the index of a body entry (0..${body.length - 1})`);
+        }
+    });
 
     const videos = project.videos ?? [];
 

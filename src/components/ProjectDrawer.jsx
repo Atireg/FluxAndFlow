@@ -41,6 +41,10 @@ const ProjectDrawer = forwardRef(function ProjectDrawer({ project, open, onToggl
     const available = hasDescription(project);
     const rows = metaRows(project);
     const [enlarged, setEnlarged] = useState(null);
+    const images = project?.images ?? [];
+    const pictures = (some) => some.map((image) => (
+        <ProjectImage key={image.src || `empty-${images.indexOf(image)}`} image={image} onEnlarge={() => setEnlarged(image)} />
+    ));
 
     // An enlarged picture goes with the drawer, and with the project
     useEffect(() => {
@@ -81,10 +85,18 @@ const ProjectDrawer = forwardRef(function ProjectDrawer({ project, open, onToggl
                     ])}
                 </dl>
 
+                {/* Pictures with an `after` sit in the text, after that entry */}
                 <div className="drawer__body">
-                    {(project?.body ?? []).map((entry, index) => (Array.isArray(entry)
-                        ? <ul key={index}>{entry.map((item, i) => <li key={i}>{withLinks(item)}</li>)}</ul>
-                        : <p key={index}>{withLinks(entry)}</p>))}
+                    {(project?.body ?? []).map((entry, index) => [
+                        Array.isArray(entry)
+                            ? <ul key={index}>{entry.map((item, i) => <li key={i}>{withLinks(item)}</li>)}</ul>
+                            : <p key={index}>{withLinks(entry)}</p>,
+                        images.some((image) => image.after === index) && (
+                            <div className="drawer__images drawer__images--in-text" key={`images-${index}`}>
+                                {pictures(images.filter((image) => image.after === index))}
+                            </div>
+                        ),
+                    ])}
                 </div>
 
                 <div className="drawer__videos">
@@ -92,9 +104,7 @@ const ProjectDrawer = forwardRef(function ProjectDrawer({ project, open, onToggl
                 </div>
 
                 <div className="drawer__images">
-                    {(project?.images ?? []).map((image, index) => (
-                        <ProjectImage key={image.src || `empty-${index}`} image={image} onEnlarge={() => setEnlarged(image)} />
-                    ))}
+                    {pictures(images.filter((image) => image.after === null))}
                 </div>
 
                 <p className="drawer__credits">{project?.credits ?? ''}</p>

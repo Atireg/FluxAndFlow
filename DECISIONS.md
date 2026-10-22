@@ -1445,6 +1445,10 @@ every width (`nowrap`, ellipsis if ever too long).
 Drawer pictures
 ---------------
 
+A picture with `after: n` sits in the text after `body[n]` (asked for: the
+pictures distributed through the text, each by what it shows), in a grid
+of its own laid out by the same rules; the rest stay below the text.
+
 `images` entries (`{ src, alt, caption, ratio, wide, pair }`) render as figures
 under the text (`components/ProjectImage.jsx`, in the frame it shares with
 the films, `DrawerFigure.jsx`): the first full width, the rest two to a row

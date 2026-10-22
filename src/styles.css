@@ -1109,6 +1109,11 @@ body.drawer-open .section-slider {
     margin: 1.5rem 0 0;
 }
 
+/* Pictures in the text (an image's `after`), spaced like a paragraph */
+.drawer__images--in-text {
+    margin: 1.25rem 0;
+}
+
 /* The way to the film that always works, full screen on a phone included */
 .drawer__video-link,
 .drawer__link {
