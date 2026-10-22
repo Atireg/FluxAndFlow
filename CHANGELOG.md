@@ -583,7 +583,10 @@ Branch `claude/loving-ramanujan-stqa6z`, not merged.
   tap hint and a card with details and a picture from the CV drops from it
   like the hint's leaf, settling under it; let go, it falls away.
 - **The path on a phone**: the line runs down the screen, the dots flying
-  from it like flags, fluttering, each labelled beside it.
+  from it like flags, fluttering, each labelled beside it. Merged.
+- **The streams in the wind**: in the path view the background's streams
+  blow left to right with the wind, in gusts (`setWind`), and no longer part
+  round the faded-out pebbles.
 
 Open at end of session: as at the end of session 5; the path's ten
 milestones checked by the user.

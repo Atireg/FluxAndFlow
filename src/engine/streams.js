@@ -33,6 +33,11 @@ const PULL_SHARE = 0.85; // how much of a stream's way the pull takes over, at f
 const PULL_SLOW = 2; // units - within this of the pointer they slow, rather than swarm it
 const PULL_IN = 0.8; // seconds for the pull to take hold
 const PULL_OUT = 1.6; // seconds to let go
+// With the page's wind (setWind): the streams turn to blow across the screen
+// with it, gusting, still braided a little by their own current
+const WIND_SHARE = 0.75; // how much of a stream's way the wind takes over
+const WIND_SPEED = 1.2; // of STREAM_SPEED, at an average gust
+const WIND_IN = 1.5; // seconds for it to take hold, or to drop
 
 // The loader's two flow colours, a stream shaded between them by the way it
 // flows (index.html's palette)
@@ -99,6 +104,7 @@ export function createStreams(scene) {
     const pullTo = { x: 0, z: 0 };
     let pace = 1; // the loader's speed over the streams', at the handover
     let paceLeft = 0; // seconds until they're at their own
+    let blowing = 0; // how far the wind has taken hold, 0..1
 
     function spawn(i, randomAge, x = (Math.random() * 2 - 1) * extent.x, z = (Math.random() * 2 - 1) * extent.z) {
         for (let k = 0; k < STREAM_HISTORY; k++) {
@@ -133,9 +139,10 @@ export function createStreams(scene) {
          * One frame. `pebbles`: [{ x, z, r }] in the scene; `view`: the half
          * width and depth of the plane the camera sees ({ x, z }); `show`:
          * whether they belong on screen (the catalog) - they fade in and out;
-         * `pointer`: { x, z } on their plane while it should draw them, or null.
+         * `pointer`: { x, z } on their plane while it should draw them, or null;
+         * `wind`: { x, z } the way it blows on their plane, `on` while it does.
          */
-        update(dt, t, pebbles, view, show, pointer) {
+        update(dt, t, pebbles, view, show, pointer, wind) {
             const target = show ? 1 : 0;
             const opacity = material.uniforms.uOpacity;
             opacity.value += Math.sign(target - opacity.value) * Math.min(Math.abs(target - opacity.value), dt / STREAM_FADE);
@@ -148,7 +155,9 @@ export function createStreams(scene) {
                 pullTo.z = pointer.z;
             }
             pull = pointer ? Math.min(pull + dt / PULL_IN, 1) : Math.max(pull - dt / PULL_OUT, 0);
-            const pulling = smooth01(pull) * PULL_SHARE;
+            blowing = wind?.on ? Math.min(blowing + dt / WIND_IN, 1) : Math.max(blowing - dt / WIND_IN, 0);
+            const windShare = smooth01(blowing) * WIND_SHARE;
+            const pulling = smooth01(pull) * PULL_SHARE * (1 - windShare);
             paceLeft = Math.max(paceLeft - dt, 0);
             const speed = STREAM_SPEED * (1 + (pace - 1) * smooth01(paceLeft / HANDOVER));
             if (!started) {
@@ -164,6 +173,14 @@ export function createStreams(scene) {
                 const a = angle(x, z, t);
                 let vx = Math.cos(a) * speed;
                 let vz = Math.sin(a) * speed;
+
+                // Blown across the screen, in gusts that cross it from the left
+                if (windShare > 0) {
+                    const gust = WIND_SPEED * STREAM_SPEED
+                        * (1 + 0.35 * Math.sin(t * 0.31 - x * 0.05) + 0.15 * Math.sin(t * 0.83 + z * 0.07));
+                    vx += (wind.x * gust - vx) * windShare;
+                    vz += (wind.z * gust - vz) * windShare;
+                }
 
                 // Drawn slowly towards the pointer
                 if (pulling > 0) {

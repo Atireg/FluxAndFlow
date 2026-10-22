@@ -1,6 +1,7 @@
 import { PEBBLE_RADIUS } from './constants.js';
 import { halfHeightAt } from './camera/rig.js';
 import { createStreams } from './streams.js';
+import { isGone } from './pebbles/focus.js';
 
 /**
  * The loader's streams, carried on among the pebbles (streams.js): they live
@@ -14,6 +15,7 @@ export function createStreamsView({ scene, grid, state, rig }) {
     const streams = createStreams(scene);
     const pebbleCircles = [];
     const view = { x: 20, z: 20 };
+    const wind = { x: 1, z: 0, on: false };
 
     // Where the pointer is on the streams' plane, for them to drift towards
     const pointer = { x: 0, z: 0, at: -Infinity, touching: false };
@@ -34,15 +36,17 @@ export function createStreamsView({ scene, grid, state, rig }) {
         update(dt, elapsedTime) {
             const show = state.view === 'catalog' || state.view === 'returning';
 
-            grid.pebbles.forEach((pebble, i) => {
-                pebbleCircles[i] = {
+            // Round the pebbles on screen - not those the filter has faded out
+            pebbleCircles.length = 0;
+            grid.pebbles.forEach((pebble) => {
+                if (isGone(pebble, elapsedTime)) return;
+                pebbleCircles.push({
                     x: pebble.position.x,
                     z: pebble.position.z,
                     // its lumps and stretch reach a little past the radius
                     r: PEBBLE_RADIUS * pebble.userData.size * pebble.scale.x * 1.1,
-                };
+                });
             });
-            pebbleCircles.length = grid.pebbles.length;
 
             // The plane the overhead camera sees, so streams fill the screen
             let seen = null;
@@ -56,6 +60,13 @@ export function createStreamsView({ scene, grid, state, rig }) {
             const moving = performance.now() / 1000 - pointer.at < STREAM_POINTER_IDLE;
             const pull = state.view === 'catalog' && (moving || pointer.touching) ? pointer : null;
 
+            // The page's wind blows to the screen's right, on the streams' plane
+            const camera = rig.camera.matrixWorld.elements;
+            const across = Math.hypot(camera[0], camera[2]) || 1;
+            wind.x = camera[0] / across;
+            wind.z = camera[2] / across;
+            wind.on = state.wind;
+
             streams.update(
                 dt,
                 elapsedTime,
@@ -63,6 +74,7 @@ export function createStreamsView({ scene, grid, state, rig }) {
                 seen,
                 show && state.arrivalStartedAt <= elapsedTime,
                 pull,
+                wind,
             );
         },
     };

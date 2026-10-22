@@ -245,6 +245,11 @@ export default function App() {
         engineRef.current?.closeProject();
     }, []);
 
+    // The path's wind blows the streams too, while it's on screen
+    useEffect(() => {
+        engineRef.current?.setWind(focus === PATH_VIEW.id && !project);
+    }, [focus, project]);
+
     const chooseFocus = useCallback((category) => {
         engineRef.current?.setFocus(category);
         setFocus(category);

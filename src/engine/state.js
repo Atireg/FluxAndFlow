@@ -22,6 +22,8 @@ export function createState() {
         // The kind of project the catalog has brought forward, or null for
         // all of them - see pebbles/focus.js
         focus: null,
+        // The page's wind (setWind): the streams blow across the screen with it
+        wind: false,
 
         // Whether a double-click/tap has zoomed in on the model. Any
         // re-framing (drawer, resize, a new project) clears it.

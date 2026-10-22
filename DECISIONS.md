@@ -589,6 +589,15 @@ the screen, the dots were 33px apart there, room for a year only. A card
 stops short of the foot of the screen, over its dot if need be, and a tap
 on it closes it.
 
+The background's streams go with the wind (asked for: "more or less"):
+while the path is on screen the page tells the engine (`setWind`, generic -
+a wind across the screen, left to right), and over `WIND_IN` the streams
+turn to blow that way, in gusts that cross from the left, `WIND_SHARE` of
+their way the wind's and the rest still their own braided current, so they
+don't run in ruled lines. The pointer's pull gives way to it. They no
+longer part round pebbles the filter has faded out of sight (`isGone`) -
+they turned aside round nothing.
+
 Hovered (tapped on a touch screen), a dot presses twice like the tap hint
 - its own keyframes, played once and quicker (1.2s), rings and all - and on
 the second press (`DROP_AFTER`) a card drops from it on a string: the

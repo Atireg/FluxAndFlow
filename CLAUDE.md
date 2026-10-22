@@ -39,8 +39,9 @@ in a pull-out drawer.
   line runs down the left edge and the dots fly from it like flags, each
   labelled beside it. Hovered or tapped, a dot presses twice like the tap
   hint and a card drops from it on a string (details and a picture, both
-  from the CV; `static/images/path-*.jpg`). Put there "for now"; the user
-  may reword them.
+  from the CV; `static/images/path-*.jpg`). The streams behind blow with
+  the wind, left to right (`engine.setWind`). Put there "for now"; the
+  user may reword them.
 - **Rock Print Pavilion** (slot 0; role "Project lead" alone): a point cloud that gathers out of a
   scattered swirl, turns and nods; every 10s the camera moves in by itself,
   in turn on a point, from inside at eye height, and from there facing back.
