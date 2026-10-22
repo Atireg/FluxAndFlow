@@ -17,6 +17,10 @@ import { smooth01 } from '../ease.js';
  * of time since the choice: each pebble keeps where it was heading from and
  * to (`userData.focus`), so changing the choice mid-move carries on from
  * where it got to rather than jumping.
+ *
+ * Bringing forward a kind no pebble is of (the page's path view) sinks them
+ * all and fades them out completely, thumbnails too (`gone`), and they can't
+ * be picked till they're back.
  */
 const FOCUS_SCALE = 0.5; // a sunk pebble looks this share of its size
 const FOCUS_TIME = 1.4; // seconds to sink or rise
@@ -30,15 +34,33 @@ function sunk(pebble, elapsedTime) {
     return focus.from + (focus.to - focus.from) * smooth01((elapsedTime - focus.at) / FOCUS_TIME);
 }
 
+// How far faded out of sight it is now, 0 to 1 (gone)
+function goneBy(pebble, elapsedTime) {
+    const focus = pebble.userData.focus;
+    if (!focus) return 0;
+
+    return focus.goneFrom + (focus.goneTo - focus.goneFrom) * smooth01((elapsedTime - focus.at) / FOCUS_TIME);
+}
+
+// Whether it has faded far enough to be passed over by the pointer
+export function isGone(pebble, elapsedTime) {
+    return goneBy(pebble, elapsedTime) > 0.5;
+}
+
 /**
  * Bring `category` forward (null for all of them): every pebble starts
  * towards its new depth from wherever it is now
  */
 export function setFocus(state, pebbles, category, elapsedTime) {
     state.focus = category;
+    const none = Boolean(category) && !pebbles.some((pebble) => pebble.userData.category === category);
     pebbles.forEach((pebble) => {
         const to = category && pebble.userData.category !== category ? 1 : 0;
-        pebble.userData.focus = { from: sunk(pebble, elapsedTime), to, at: elapsedTime };
+        pebble.userData.focus = {
+            from: sunk(pebble, elapsedTime), to,
+            goneFrom: goneBy(pebble, elapsedTime), goneTo: none ? 1 : 0,
+            at: elapsedTime,
+        };
     });
 }
 
@@ -71,8 +93,20 @@ export function applyFocus(pebble, viewHeight, elapsedTime) {
  * set from scratch each time, so it never compounds.
  */
 export function fadeFocus(pebble, elapsedTime) {
-    const fade = sunk(pebble, elapsedTime) * (1 - FOCUS_INK);
+    const gone = goneBy(pebble, elapsedTime);
+    const fade = 1 - (1 - sunk(pebble, elapsedTime) * (1 - FOCUS_INK)) * (1 - gone);
     pebble.userData.contentInk?.color.copy(THUMB_INK_COLOR).lerp(PAPER_COLOR, fade);
+
+    // The opaque thumbnail, all paper by now, would still cover the streams:
+    // hidden, and shown again only if it was hidden here
+    const content = pebble.userData.content;
+    if (content && gone >= 0.99 && content.visible) {
+        content.visible = false;
+        pebble.userData.goneContent = true;
+    } else if (content && gone < 0.99 && pebble.userData.goneContent) {
+        content.visible = true;
+        pebble.userData.goneContent = false;
+    }
     if (fade <= 0) return;
 
     pebble.material.opacity *= 1 - fade;
