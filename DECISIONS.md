@@ -904,7 +904,13 @@ simpler than three.js's clipping planes in a ShaderMaterial. A thin outline
 of the plane marks the cut - a third wider and higher than the model, and
 (asked for) shown only while the visitor handles the model (pressing on
 it, the wheel) or the slider, fading out 0.6s after (`fadeSectionOutline`);
-the tour's own cut shows none - and each part's own cut
+the tour's own cut shows none - the parts' cut faces filled orange (asked
+for), the usual stencil capping: every part drawn unseen with its back
+faces adding one and its front faces taking one away, so only where the
+plane opened a part does a ray meet more inside than outside; a sheet at
+the cut is drawn there (behind the black lines by a polygon offset). Over
+working out each cut's polygons from `traceCut` and triangulating them,
+which would rebuild geometry on every step of the slider - and each part's own cut
 is traced in black (asked for, so the joint's detail reads): every
 triangle the plane passes through gives a segment (`traceCut`), worked out
 again as the slider moves - parts whose extent the plane misses skipped. Hover ignores parts cut

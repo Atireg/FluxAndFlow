@@ -70,8 +70,8 @@ in a pull-out drawer.
   the user's drawing, GS1-GS8) the part is picked out, the turn holds and a
   card beside the pointer says what it is (`info`; a tap on a phone).
   A slider at the foot ("section") cuts it across its length, the far
-  part cut away, each part's cut edges traced in black (the joints read
-  as in a drawing) and a faint outline of the plane, wider than the model,
+  part cut away, each part's cut faces filled orange and their edges
+  traced in black (the joints read as in a drawing) and a faint outline of the plane, wider than the model,
   shown only while the visitor handles the model or the slider (`section`). It stands
   on a soft floor at the foot of its foundations, the person set down onto
   it, a faint shadow under them (`floor`). Its view, on both layouts, is
@@ -326,6 +326,10 @@ A model in parts (`frameless-glass.js`): `solid` gives the default look,
   the cut at `side`/`above` with `framing.frameSection` (moved there, then placed each
   frame, `rig.placeCamera`); the visitor's slider, double-click, drawer
   or orbiting stops it (`stopTour`).
+- **A section's orange fill uses the stencil** (the renderer is made with
+  `stencil: true`): each part drawn unseen, back faces counting up, front
+  down, then a sheet at the cut where the count isn't 0 (`makeCutCounter`,
+  `makeCutFill`, mesh.js). It needs closed parts; an open one fills wrongly.
 - **A model's turn holds for reasons** (`setHold`, framing.js): 'click'
   (`doubleClick: 'hold'`) and 'hover' (a part with `info`); it turns
   again once neither holds it.

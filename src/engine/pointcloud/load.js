@@ -1,11 +1,11 @@
 import * as THREE from 'three';
 import { gltfLoader } from '../assets.js';
 import { MESH_FIT_SIZE } from '../constants.js';
-import { POINT_INKS, POINT_SIZES, pointInkUniforms, screenColor, THUMB_INK_COLOR } from '../colors.js';
+import { POINT_INKS, POINT_SIZES, pointInkUniforms, screenColor, SPOTLIGHT_GLOW_COLOR, THUMB_INK_COLOR } from '../colors.js';
 import { createPile, findRods } from '../pile.js';
 import { addGatherAttributes, GATHER_DURATION, GATHER_SPREAD, GATHER_SWIRL, GATHER_TRAIL, GATHER_TRAIL_EVERY } from './gather.js';
 import { addTrails } from './trails.js';
-import { CLIP_NONE, makeEdgeMaterial, makeInkMaterial, pointsFromMeshes } from './mesh.js';
+import { CLIP_NONE, makeCutCounter, makeCutFill, makeEdgeMaterial, makeInkMaterial, pointsFromMeshes } from './mesh.js';
 import { addScreenPanel, addScreenVideo } from './screenVideo.js';
 import { smooth01 } from '../ease.js';
 
@@ -102,7 +102,7 @@ export function loadPointCloud({
                     }
                     group.userData.solidMaterial ??= material;
                 });
-                if (section) addSection(group, clip);
+                if (section) addSection(group, { clip, fade });
                 if (floor) addFloor(group, fade);
                 // Where the pebble's points settle and circle (`screen`)
                 if (screen) group.userData.screen = screenFrame(original, screen, sampled.userData.fit);
@@ -266,10 +266,10 @@ const SECTION_PLANE_FADE = 0.8; // ...and fades over
  * its length (z, its own space), moved by the visitor (setSection, engine),
  * a thin outline of the plane, wider and higher than the model, shown only
  * while the visitor handles the model or the slider (fadeSectionOutline),
- * and each part's own cut edges traced in black - the joints read as in a
- * drawing
+ * each part's own cut edges traced in black - the joints read as in a
+ * drawing - and the parts' cut faces filled in orange (makeCutFill)
  */
-function addSection(group, clip) {
+function addSection(group, { clip, fade }) {
     const box = new THREE.Box3();
     const meshes = group.children.filter((child) => child.isMesh);
     meshes.forEach((mesh) => {
@@ -303,7 +303,31 @@ function addSection(group, clip) {
     outline.visible = false;
     outline.raycast = () => {}; // never something to hover
     group.add(outline);
-    group.userData.section = { clip, outline, cut, meshes, from: min.z, to: max.z };
+
+    // The cut faces: each part counted into the stencil, then the plane
+    // filled where it cuts one
+    const counters = [THREE.BackSide, THREE.FrontSide].map((side) => makeCutCounter(clip, side));
+    meshes.forEach((mesh) => counters.forEach((material) => {
+        const counter = new THREE.Mesh(mesh.geometry, material);
+        counter.position.copy(mesh.position);
+        counter.quaternion.copy(mesh.quaternion);
+        counter.scale.copy(mesh.scale);
+        counter.raycast = () => {};
+        counter.frustumCulled = false;
+        counter.renderOrder = 1;
+        group.add(counter);
+    }));
+    const fill = new THREE.Mesh(
+        new THREE.PlaneGeometry(max.x - min.x + 2 * pad, max.y - min.y + pad),
+        makeCutFill(SPOTLIGHT_GLOW_COLOR, { fade }),
+    );
+    fill.geometry.translate((min.x + max.x) / 2, min.y + (max.y - min.y + pad) / 2, 0);
+    fill.visible = false;
+    fill.raycast = () => {};
+    fill.renderOrder = 1.5; // after the count, before the cut's black lines
+    group.add(fill);
+
+    group.userData.section = { clip, outline, fill, cut, meshes, from: min.z, to: max.z };
 }
 
 // Each triangle the plane z passes through gives one segment of the cut
@@ -341,6 +365,8 @@ export function setSection(model, share) {
     const z = section.to - (section.to - section.from) * Math.min(Math.max(share, 0), 1);
     section.clip.value = share >= 1 ? CLIP_NONE : z;
     section.outline.position.z = z;
+    section.fill.position.z = z;
+    section.fill.visible = share < 1;
     section.cut.visible = share < 1;
     if (share < 1) {
         section.cut.geometry.dispose();

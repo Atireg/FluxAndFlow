@@ -208,3 +208,73 @@ void main() {
 }`,
     });
 }
+
+/**
+ * A section's fill (`section`), done the usual way with the stencil: each
+ * part drawn unseen twice, its back faces counting up and its front faces
+ * down (makeCutCounter) - where the plane has cut a closed part open, a ray
+ * meets more of its inside than its outside - then a sheet at the cut drawn
+ * only where the count isn't 0 (makeCutFill), which puts it back to 0
+ */
+export function makeCutCounter(clip, side) {
+    return new THREE.ShaderMaterial({
+        side,
+        colorWrite: false,
+        depthWrite: false,
+        depthTest: false,
+        stencilWrite: true,
+        stencilFunc: THREE.AlwaysStencilFunc,
+        stencilZPass: side === THREE.BackSide ? THREE.IncrementWrapStencilOp : THREE.DecrementWrapStencilOp,
+        uniforms: { uClip: clip },
+        vertexShader: `
+varying float vAlong;
+void main() {
+    vAlong = position.z;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}`,
+        fragmentShader: `
+uniform float uClip;
+varying float vAlong;
+void main() {
+    if (vAlong < uClip) discard;
+    gl_FragColor = vec4(0.0);
+}`,
+    });
+}
+
+export function makeCutFill(ink, { fade }) {
+    return new THREE.ShaderMaterial({
+        side: THREE.DoubleSide,
+        // just behind the cut's black lines, which lie in the same plane
+        polygonOffset: true,
+        polygonOffsetFactor: 1,
+        polygonOffsetUnits: 1,
+        stencilWrite: true,
+        stencilRef: 0,
+        stencilFunc: THREE.NotEqualStencilFunc,
+        stencilFail: THREE.ReplaceStencilOp,
+        stencilZFail: THREE.ReplaceStencilOp,
+        stencilZPass: THREE.ReplaceStencilOp,
+        uniforms: { uInk: { value: ink }, uFade: fade },
+        vertexShader: `
+varying vec3 vLocal;
+void main() {
+    vLocal = position;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}`,
+        fragmentShader: `
+uniform vec3 uInk;
+uniform float uFade;
+varying vec3 vLocal;
+// (the parts' grain, so it dissolves with them)
+float inkGrain(vec3 p) {
+    p = fract(p * 0.3183099 + 0.1);
+    p *= 17.0;
+    return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
+}
+void main() {
+    if (inkGrain(floor(vLocal * 40.0)) < uFade) discard;
+    gl_FragColor = vec4(uInk, 1.0);
+}`,
+    });
+}
