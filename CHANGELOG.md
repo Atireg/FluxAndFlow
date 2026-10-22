@@ -578,7 +578,10 @@ Branch `claude/loving-ramanujan-stqa6z`, not merged.
   paragraph.
 - **kh ReUse and Nap Nap Hooray**: their drawer text shortened, the tech
   lists most (approved), and each picture placed by the paragraph about
-  what it shows.
+  what it shows. Merged.
+- **The path's cards**: hovered or tapped, a dot presses twice like the
+  tap hint and a card with details and a picture from the CV drops from it
+  like the hint's leaf, settling under it; let go, it falls away.
 
 Open at end of session: as at the end of session 5; the path's ten
 milestones checked by the user.

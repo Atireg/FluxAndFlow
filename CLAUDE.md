@@ -36,7 +36,10 @@ in a pull-out drawer.
   washing line moving in the wind with ten of the tap hint's dots hanging
   from it, swinging (`src/components/PathView.jsx`). Each dot a milestone
   from the user's CV (`src/app/path.js`), labelled under it - only the
-  year on a phone. Put there "for now"; the user may reword them.
+  year on a phone. Hovered or tapped, a dot presses twice like the tap
+  hint and a card drops from it on a string (details and a picture, both
+  from the CV; `static/images/path-*.jpg`). Put there "for now"; the user
+  may reword them.
 - **Rock Print Pavilion** (slot 0; role "Project lead" alone): a point cloud that gathers out of a
   scattered swirl, turns and nods; every 10s the camera moves in by itself,
   in turn on a point, from inside at eye height, and from there facing back.

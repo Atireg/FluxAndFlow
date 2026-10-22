@@ -579,7 +579,21 @@ Each dot is a milestone of the user's career and education, oldest first
 (`MILESTONES`, app/path.js), taken from their CV in its own words: years,
 role or degree, place, in a label under the dot that moves with it. On a
 phone the dots are about 33px apart, too close for more than the first
-year. It moves every frame, so it is drawn through refs by its
+year.
+
+Hovered (tapped on a touch screen), a dot presses twice like the tap hint
+- its own keyframes, played once and quicker (1.2s), rings and all - and on
+the second press (`DROP_AFTER`) a card drops from it on a string: the
+milestone's picture, years, role, place and a few lines of details, from
+the CV (asked for: "details and images ... make them drop similar to the
+pulsing dots"). It drifts side to side as it drops, like the hint's falling
+leaf, but settles hanging under the dot rather than falling off the screen;
+only once let go does it fall on and fade (`LET_GO`), as the hint does.
+The pictures are the CV's own, ~370px across - enough for a card 17rem
+wide. The pointer gets `LEAVE_GRACE` to cross from a dot to its card, so a
+card can be read with the pointer on it. The label under a dot fades while
+its card is out - the card says the same. The card is drawn by the same
+frame loop, through refs. It moves every frame, so it is drawn through refs by its
 own frame loop, running only while the view is on screen - not the
 engine's, which owns only the canvas. Still with reduced motion. The dots
 hold nothing yet: what each stands for comes from the user.

@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { assetUrl } from '../engine/assets.js';
 import { PATH_VIEW } from '../app/words.js';
 import { MILESTONES } from '../app/path.js';
 
@@ -12,6 +13,12 @@ import { MILESTONES } from '../app/path.js';
  * is smooth noise, not waves, with gusts that cross the line from the left;
  * each thread a little longer or shorter, so no two dots keep time. Under
  * each dot, moving with it, its milestone (app/path.js).
+ *
+ * Hovered (tapped on a touch screen), a dot presses twice like the tap hint,
+ * rings spreading from it, and on the second press a card with the
+ * milestone's details and picture drops from it on a string, drifting side
+ * to side like the hint's falling leaf until it settles hanging under the
+ * dot. Let go, the card falls on away and fades, as the hint does.
  *
  * Moves every frame, so never through React state: its own frame loop
  * writes the SVG through refs, and only while it is on screen.
@@ -27,6 +34,14 @@ const PUSH = 5; // how far the wind pushes a dot round
 const TURBULENCE = 5; // how hard the eddies push a dot to and fro
 const GUST_CROSSING = 1.4; // seconds a gust takes to cross the line
 const MAX_STEP = 1 / 30; // a stalled frame holds the swing rather than flinging it
+const DROP_AFTER = 0.55; // seconds from the hover to the second press, when the card drops
+const DROP_EASE = 0.35; // seconds it takes to settle, roughly
+const DROP_HANG = 1.3; // the card's string, in dot sizes
+const DROP_SWAY = 1.4; // its drift either side as it drops, in dot sizes
+const DROP_SWAY_PERIOD = 1.6; // seconds, one drift there and back
+const DROP_TILT = 0.12; // radians it tilts by as it drifts
+const LET_GO = 0.6; // seconds a card takes to fall away and fade once let go
+const LEAVE_GRACE = 250; // ms the pointer has to cross from a dot to its card
 
 // A fixed 0..1 for each whole number, for the noise and the threads
 function hash(n) {
@@ -78,8 +93,16 @@ export default function PathView({ shown }) {
         const labels = [...svg.parentNode.querySelectorAll('.path-view__label')];
         const [glow, line] = svg.querySelectorAll('.path-view__line path');
         const knots = svg.querySelectorAll('.path-view__end');
+        const cards = [...svg.parentNode.querySelectorAll('.path-view__card')];
         const dots = [...svg.querySelectorAll('.path-view__dot')].map((group, i) => ({
-            thread: group.querySelector('line'),
+            group,
+            card: cards[i],
+            hit: group.querySelector('.path-view__hit'),
+            hang: group.querySelector('.path-view__hang'),
+            openAt: null, // seconds, when it was hovered
+            closeAt: null, // seconds, when it was let go
+            leaving: 0, // the timer that lets go of it
+            thread: group.querySelector('.path-view__thread'),
             peg: group.querySelector('.path-view__peg'),
             dot: group.querySelector('.path-view__ball'),
             length: 1 + THREAD_SPREAD * (hash(i + 7) * 2 - 1),
@@ -94,6 +117,98 @@ export default function PathView({ shown }) {
 
         let frame = 0;
         let last = performance.now();
+        const seconds = () => performance.now() / 1000;
+
+        // Hovered or tapped: press twice (the CSS restarted), then drop the card
+        const open = (hung) => {
+            clearTimeout(hung.leaving);
+            if (hung.openAt !== null && hung.closeAt === null) return;
+            hung.openAt = seconds();
+            hung.closeAt = null;
+            hung.group.classList.remove('is-pressed');
+            void hung.group.getBoundingClientRect();
+            hung.group.classList.add('is-pressed');
+        };
+        const close = (hung) => {
+            clearTimeout(hung.leaving);
+            if (hung.openAt === null || hung.closeAt !== null) return;
+            hung.closeAt = seconds();
+        };
+        const leave = (hung) => {
+            clearTimeout(hung.leaving);
+            hung.leaving = setTimeout(() => close(hung), LEAVE_GRACE);
+        };
+        const listeners = [];
+        const on = (target, type, handler) => {
+            target.addEventListener(type, handler);
+            listeners.push(() => target.removeEventListener(type, handler));
+        };
+        dots.forEach((hung) => {
+            [hung.hit, hung.card].forEach((target) => {
+                on(target, 'pointerenter', (event) => { if (event.pointerType === 'mouse') open(hung); });
+                on(target, 'pointerleave', (event) => { if (event.pointerType === 'mouse') leave(hung); });
+            });
+            // A touch has no hover: a tap opens it, another closes it
+            on(hung.hit, 'pointerup', (event) => {
+                if (event.pointerType === 'mouse') return;
+                const opened = hung.openAt !== null && hung.closeAt === null;
+                dots.forEach(close);
+                if (!opened) open(hung);
+            });
+        });
+        // A tap anywhere else lets go of them all
+        on(document, 'pointerup', (event) => {
+            if (event.pointerType === 'mouse' || event.target.closest?.('.path-view__hit, .path-view__card')) return;
+            dots.forEach(close);
+        });
+
+        /**
+         * The card, `since` its dot's second press: dropping from under the
+         * dot (`bottomX`, `bottomY`) on its string and settling, drifting
+         * side to side as it goes; let go, falling on and fading. Kept
+         * inside the screen's margins, its string tied where it can reach.
+         */
+        const dropCard = (hung, bottomX, bottomY, size, margin, width, label) => {
+            const card = hung.card.style;
+            const now = seconds();
+            const since = hung.openAt === null ? -1 : now - hung.openAt - DROP_AFTER;
+            const gone = hung.closeAt !== null ? (now - hung.closeAt) / LET_GO : 0;
+
+            if (since < 0 || gone >= 1) {
+                if (gone >= 1) {
+                    hung.openAt = null;
+                    hung.closeAt = null;
+                    hung.group.classList.remove('is-pressed');
+                }
+                card.visibility = 'hidden';
+                hung.hang.style.visibility = 'hidden';
+                label.opacity = '';
+                return;
+            }
+
+            const fade = still ? 1 : Math.exp(-since / (DROP_SWAY_PERIOD * 0.5));
+            const phase = (since / DROP_SWAY_PERIOD) * Math.PI * 2;
+            const settle = still ? 1 : 1 - Math.exp(-since / DROP_EASE);
+            const away = gone * gone * size * 6;
+            const cardWidth = hung.card.offsetWidth;
+            const swayX = DROP_SWAY * size * Math.sin(phase) * fade;
+            const leftX = Math.min(Math.max(bottomX + swayX - cardWidth / 2, margin), width - margin - cardWidth);
+            const topY = bottomY + DROP_HANG * size * settle + away;
+            const tilt = DROP_TILT * Math.cos(phase) * fade;
+
+            card.visibility = 'visible';
+            card.opacity = String(Math.min(since / 0.25, 1) * (1 - gone));
+            card.transform = `translate(${leftX.toFixed(1)}px, ${topY.toFixed(1)}px) rotate(${tilt.toFixed(3)}rad)`;
+            // The label under the dot says the same: out of the card's way
+            label.opacity = String(Math.max(0, 1 - Math.min(since / 0.25, 1) * (1 - gone)));
+
+            const tieX = Math.min(Math.max(bottomX + swayX, leftX + 12), leftX + cardWidth - 12);
+            hung.hang.style.visibility = gone > 0 ? 'hidden' : 'visible';
+            hung.hang.setAttribute('x1', bottomX);
+            hung.hang.setAttribute('y1', bottomY);
+            hung.hang.setAttribute('x2', tieX);
+            hung.hang.setAttribute('y2', topY);
+        };
 
         const draw = (now) => {
             const t = still ? 0 : now / 1000;
@@ -175,17 +290,39 @@ export default function PathView({ shown }) {
                 hung.dot.setAttribute('r', size / 2);
                 hung.dot.style.strokeWidth = Math.max(1.5, size * 0.08);
 
+                const cx = x + across * toDot;
+                const cy = y + down * toDot;
+                hung.hit.setAttribute('cx', cx);
+                hung.hit.setAttribute('cy', cy);
+                hung.hit.setAttribute('r', size * 0.9);
+                hung.group.querySelectorAll('.path-view__ripple').forEach((ring) => {
+                    ring.setAttribute('cx', cx);
+                    ring.setAttribute('cy', cy);
+                    ring.setAttribute('r', size * 1.35);
+                    ring.style.strokeWidth = Math.max(1.5, size * 0.08);
+                });
+
                 const label = labels[i].style;
                 label.width = `${labelWidth}px`;
-                label.transform = `translate(${(x + across * toDot - labelWidth / 2).toFixed(1)}px, `
-                    + `${(y + down * toDot + size * 0.75).toFixed(1)}px)`;
+                label.transform = `translate(${(cx - labelWidth / 2).toFixed(1)}px, `
+                    + `${(cy + size * 0.75).toFixed(1)}px)`;
+
+                dropCard(hung, cx, cy + size / 2, size, margin, width, label);
             });
 
             frame = requestAnimationFrame(draw);
         };
 
         frame = requestAnimationFrame(draw);
-        return () => cancelAnimationFrame(frame);
+        return () => {
+            cancelAnimationFrame(frame);
+            listeners.forEach((off) => off());
+            dots.forEach((hung) => {
+                clearTimeout(hung.leaving);
+                hung.card.style.visibility = 'hidden';
+                hung.group.classList.remove('is-pressed');
+            });
+        };
     }, [shown]);
 
     return (
@@ -200,9 +337,13 @@ export default function PathView({ shown }) {
                 <circle className="path-view__end" r="2.5" />
                 {Array.from({ length: DOT_COUNT }, (_, i) => (
                     <g className="path-view__dot" key={i}>
-                        <line />
+                        <line className="path-view__thread" />
+                        <line className="path-view__hang" />
                         <circle className="path-view__peg" r="1.8" />
+                        <circle className="path-view__ripple" />
+                        <circle className="path-view__ripple path-view__ripple--second" />
                         <circle className="path-view__ball" />
+                        <circle className="path-view__hit" />
                     </g>
                 ))}
             </svg>
@@ -213,6 +354,17 @@ export default function PathView({ shown }) {
                     <span className="path-view__what">{what}</span>
                     <span className="path-view__where">{where}</span>
                 </p>
+            ))}
+            {MILESTONES.map(({ when, what, where, details, image }) => (
+                <article className="path-view__card" key={`card-${when}${what}`}>
+                    {image && (
+                        <img src={assetUrl(image.src)} alt={image.alt} style={{ aspectRatio: image.ratio }} />
+                    )}
+                    <p className="path-view__card-when">{when}</p>
+                    <h3 className="path-view__card-what">{what}</h3>
+                    <p className="path-view__card-where">{where}</p>
+                    <p className="path-view__card-details">{details}</p>
+                </article>
             ))}
         </div>
     );
