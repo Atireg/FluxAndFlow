@@ -90,7 +90,12 @@ in a pull-out drawer.
   plate nearest it (z 227-278 mm in the file: `cut` 0.472) - closing in on the ridge joint GS2_GS6 where it's cut, from 45
   degrees above and a little from the side, the ridge running up the screen (8s; the
   user's second screenshot), the slider following; the slider, a double-click, the drawer or orbiting by
-  hand stops it where it is. Drawer: the user's chosen text (one paragraph), a YouTube film and five
+  hand stops it where it is. With the drawer out, the part the section
+  keeps, from where it's cut, almost square-on (`view.drawer: { side,
+  above, zoom }` - the user's screenshot). Drawer: the user's ZIM research
+  text, rephrased (four paragraphs - the intro, then Construction,
+  Geometry, Thermal analysis - and the funding line as `credits`;
+  approved), a YouTube film and five
   pictures (the pavilion at glasstec, the joints, the joint in section); no
   year, role or context rows or thumbnail yet (the default rock).
 - **Links**: each project's own address is `#<id>` (`#rock-print`).
@@ -331,15 +336,15 @@ A model in parts (`frameless-glass.js`): `solid` gives the default look,
 - **A `tour` turns the model, not the camera** (`tourSpin`, detail.js),
   which reads the same - the inks are lit from the view - by about once
   round, ending with the cut's side to the camera (`tourTurn`), then follows
-  the cut at `side`/`above` with `framing.frameSection` (moved there, then placed each
-  frame, `rig.placeCamera`); the visitor's slider, double-click, drawer
+  the cut at `side`/`above` with `framing.frameSection` - placed every frame
+  on the tour's own clock (`rig.placeCamera`), the move down to it too: a
+  tween for that, cut short where the following took over, made it jump; the visitor's slider, double-click, drawer
   or orbiting stops it (`stopTour`).
-- **A section's orange fill uses the stencil** (the renderer is made with
-  `stencil: true`): each part drawn unseen, back faces counting up, front
-  down, then a sheet at the cut where the count isn't 0 (`makeCutCounter`,
-  `makeCutFill`, mesh.js). It needs closed parts; an open one fills wrongly,
-  so the sheet is sized to what the cut crosses (`setSection`) - a full
-  plane once filled a patch above the model through a gap in a part.
+- **A section's orange fill is its cut outlines, triangulated**
+  (`cutFaces`, `joinLoops`, load.js), rebuilt with the black cut lines on
+  each step. Not the stencil: the model's parts aren't all closed, and
+  stencil capping filled a whole glass panel through a gap. An outline
+  that doesn't close is left unfilled.
 - **A model's turn holds for reasons** (`setHold`, framing.js): 'click'
   (`doubleClick: 'hold'`) and 'hover' (a part with `info`); it turns
   again once neither holds it.
@@ -361,8 +366,8 @@ pixels (it projects in place - never project first);
 `pickInk(tone)` in a points shader with `pointInkUniforms()`;
 `clickOnly(fn)` for a button over the canvas; `TagString`, `DrawerFigure`;
 `sectionAt(section, share)` (pointcloud/load.js) for where a section cuts,
-`setSection` to cut there; `INK_GRAIN_GLSL` and `ALONG_VERTEX_GLSL`
-(pointcloud/mesh.js) in a solid model's shaders.
+`setSection` to cut there; `INK_GRAIN_GLSL` (pointcloud/mesh.js) in a
+solid model's shaders.
 
 ## After every fixed issue
 

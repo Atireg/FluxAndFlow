@@ -130,7 +130,7 @@ export function createDetail({
      * `focus`. Whatever the visitor does with it - the slider, a
      * double-click, the drawer, orbiting by hand - stops it where it is.
      */
-    const tour = { model: null, spin: 0, turn: 0, moved: false, stopped: true };
+    const tour = { model: null, spin: 0, turn: 0, moved: false, from: null, stopped: true };
 
     // The turn, radians: once round, give or take what brings the cut's
     // side round to the camera - so the move down after it needn't swing
@@ -887,14 +887,27 @@ export function createDetail({
             const { focus, side, above } = plan;
             const closing = t - plan.orbit - TOUR_PAUSE;
             if (closing < 0) return;
+            // (frame by frame on the tour's own clock, from wherever the
+            // camera was - a tween of its own, cut short where the following
+            // took over, made the camera jump on a slow frame)
             if (!tour.moved) {
                 tour.moved = true;
-                framing.frameSection(model, { focus, side, above, share: 1, reach: TOUR_WIDE, duration: TOUR_APPROACH });
+                tour.from = { position: rig.camera.position.clone(), target: rig.controls.target.clone() };
+            }
+            if (closing < TOUR_APPROACH) {
+                const k = smooth01(closing / TOUR_APPROACH);
+                const to = framing.frameSection(model, { focus, side, above, share: 1, reach: TOUR_WIDE, place: false });
+                if (to) {
+                    rig.placeCamera(
+                        tour.from.position.clone().lerp(to.position, k),
+                        tour.from.target.clone().lerp(to.target, k),
+                    );
+                }
+                return;
             }
 
             // ...then along with it as it slides to `cut`, closing in on `focus`
             const following = closing - TOUR_APPROACH;
-            if (following < 0) return;
             const k = smooth01(following / plan.over);
             const share = 1 - (1 - plan.cut) * k;
             cutAt(model, share);

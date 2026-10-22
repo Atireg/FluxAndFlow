@@ -134,14 +134,6 @@ float inkGrain(vec3 p) {
 }
 `;
 
-// How far along the model's length (its own z) - what a section cuts by
-const ALONG_VERTEX_GLSL = `
-varying float vAlong;
-void main() {
-    vAlong = position.z;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-}`;
-
 export function makeInkMaterial({ lit, shade, opacity = 1 } = {}) {
     // See-through (`opacity` under 1, glass): both faces, and it doesn't hide
     // what's behind it from the depth test
@@ -202,7 +194,12 @@ export function makeEdgeMaterial(ink, { fade, clip }) {
     return new THREE.ShaderMaterial({
         transparent: true,
         uniforms: { uInk: { value: ink }, uFade: fade, uClip: clip },
-        vertexShader: ALONG_VERTEX_GLSL,
+        vertexShader: `
+varying float vAlong;
+void main() {
+    vAlong = position.z;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}`,
         fragmentShader: `
 uniform vec3 uInk;
 uniform float uFade;
@@ -215,34 +212,8 @@ void main() {
     });
 }
 
-/**
- * A section's fill (`section`), done the usual way with the stencil: each
- * part drawn unseen twice, its back faces counting up and its front faces
- * down (makeCutCounter) - where the plane has cut a closed part open, a ray
- * meets more of its inside than its outside - then a sheet at the cut drawn
- * only where the count isn't 0 (makeCutFill), which puts it back to 0
- */
-export function makeCutCounter(clip, side) {
-    return new THREE.ShaderMaterial({
-        side,
-        colorWrite: false,
-        depthWrite: false,
-        depthTest: false,
-        stencilWrite: true,
-        stencilFunc: THREE.AlwaysStencilFunc,
-        stencilZPass: side === THREE.BackSide ? THREE.IncrementWrapStencilOp : THREE.DecrementWrapStencilOp,
-        uniforms: { uClip: clip },
-        vertexShader: ALONG_VERTEX_GLSL,
-        fragmentShader: `
-uniform float uClip;
-varying float vAlong;
-void main() {
-    if (vAlong < uClip) discard;
-    gl_FragColor = vec4(0.0);
-}`,
-    });
-}
-
+// A section's cut faces (cutFaces, load.js): flat orange, dissolving with
+// the parts
 export function makeCutFill(ink, { fade }) {
     return new THREE.ShaderMaterial({
         side: THREE.DoubleSide,
@@ -250,12 +221,6 @@ export function makeCutFill(ink, { fade }) {
         polygonOffset: true,
         polygonOffsetFactor: 1,
         polygonOffsetUnits: 1,
-        stencilWrite: true,
-        stencilRef: 0,
-        stencilFunc: THREE.NotEqualStencilFunc,
-        stencilFail: THREE.ReplaceStencilOp,
-        stencilZFail: THREE.ReplaceStencilOp,
-        stencilZPass: THREE.ReplaceStencilOp,
         uniforms: { uInk: { value: ink }, uFade: fade },
         vertexShader: `
 varying vec3 vLocal;

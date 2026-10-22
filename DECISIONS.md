@@ -943,15 +943,17 @@ of the plane marks the cut - a third wider and higher than the model, and
 (asked for) shown only while the visitor handles the model (pressing on
 it, the wheel) or the slider, fading out 0.6s after (`fadeSectionOutline`);
 the tour's own cut shows none - the parts' cut faces filled orange (asked
-for), the usual stencil capping: every part drawn unseen with its back
-faces adding one and its front faces taking one away, so only where the
-plane opened a part does a ray meet more inside than outside; a sheet at
-the cut is drawn there (behind the black lines by a polygon offset), sized
-each time to the box of the cut's own segments - a sheet the plane's whole
-size filled a patch above the model once the camera came closer, a ray
-there meeting a part that isn't quite closed. Over
-working out each cut's polygons from `traceCut` and triangulating them,
-which would rebuild geometry on every step of the slider - and each part's own cut
+for): each part's cut segments (`traceCut`) joined end to end into closed
+outlines (`joinLoops`, ends within a hundred-thousandth of the model's size
+the same point), an outline inside another a hole in it, triangulated
+(`cutFaces`) and drawn just behind the black lines (a polygon offset) -
+worked out again with the cut edges at each step of the slider. First it
+was stencil capping (each part drawn unseen, back faces counting up and
+front faces down, a sheet at the cut where the count wasn't 0): cheap, but
+the model's parts aren't all closed, and a ray through a gap counted as
+cut - a patch above the model, then a whole glass panel filled orange
+(the user's screenshot). Outlines that don't close are simply left
+unfilled, so nothing is filled the cut doesn't pass through - and each part's own cut
 is traced in black (asked for, so the joint's detail reads): every
 triangle the plane passes through gives a segment (`traceCut`), worked out
 again as the slider moves - parts whose extent the plane misses skipped. Hover ignores parts cut
@@ -1005,7 +1007,18 @@ middle of the trapezoid connection plates) `cut` 0.472: the ridge joint
 GS2_GS6 has four plates along it (dense clusters of its vertices at z
 227-278, 640-692, 1054-1093 and 1468-1519 mm, the model 9 m long), and
 0.48 fell 5 cm short of the nearest; 0.5 is the gap between the rows,
-where the ridge profile isn't, only the cross joints.
+where the ridge profile isn't, only the cross joints. The move down to the
+section is placed frame by frame too (from the camera where it was to
+`frameSection`'s pose, `place: false` giving it without moving there),
+not a 3s tween: the following starts on the tour's clock, and on a slow
+frame it cut the tween short and the camera jumped (the user saw it just
+before the close-up settled). With the drawer out
+(asked for, with a screenshot): the part the section keeps, seen from where
+it's cut - `view.drawer: { side: 6, above: 8, zoom }`, framed by
+`frameDetail` on the kept part's box (the parts' box from the cut on)
+along a direction of its own (`toCamera`, from `towardSection`, which the
+tour's `frameSection` shares) - beside the drawer, or above it on a phone,
+smaller there (`zoom.stacked` 1.1) to clear the handle.
 
 The looks were chosen by the user: steel
 graphite (the ridge pieces too, Custom 7 and 8, first taken for glass

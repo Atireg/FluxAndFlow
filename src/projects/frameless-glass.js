@@ -52,13 +52,37 @@ export default defineProject({
 
     // The drawer's text, as the user chose it (option 1 of three)
     body: [
-        'Frameless Glass Structures is a pavilion of glass and almost nothing '
-        + 'else. Eight laminated glass sheets fold into a pointed arch, about '
-        + '6.7 m long and 3.3 m wide, and carry themselves: there is no frame. '
-        + 'Slim steel profiles join the sheets edge to edge, at angles between '
-        + '153° and 167°, and the glass does the structural work. It was shown '
-        + 'at glasstec in Düsseldorf.',
+        'In most façades, glass only fills the openings: it closes the space, '
+        + 'while a separate substructure carries the loads. The result is a '
+        + 'resource-heavy construction that leaves the structural potential of '
+        + 'the glass unused. Within the ZIM research project “Frameless Glass '
+        + 'Construction”, a linear connection detail was developed for '
+        + 'horizontal and vertical glass shells that lets the glass itself '
+        + 'carry load - a step towards resource-efficient glass shell '
+        + 'structures. A first prototype, a self-supporting, thermally '
+        + 'insulated double-glazed shell, was shown at glasstec in 2024.',
+        'Construction. A thin linear steel profile is laminated between the '
+        + 'two inner panes. The detail keeps material to a minimum while '
+        + 'passing part of the load into the glass and the PVB interlayer. '
+        + 'Neighbouring elements are joined by point bolt connections; an '
+        + 'oversized hole on one side of each bolt takes up the tolerances of '
+        + 'assembly, so the parts can be adjusted as they go together.',
+        'Geometry. A parametric tool generates the shell from the rules of '
+        + 'translation surfaces, which guarantee a form made entirely of flat '
+        + 'glass panels. It links directly to the structural analysis '
+        + 'software, so each design decision can be checked as it is made, and '
+        + 'it produces the 3D models and shop drawings for every part - steel '
+        + 'fittings, glass panels and bolts - each labelled for assembly. It '
+        + 'works for any shell geometry, across many kinds of architecture.',
+        'Thermal analysis. Simulations test how the steel-glass connection '
+        + 'behaves in different climates. At high temperatures steel, glass and '
+        + 'the PVB interlayer expand at different rates, which could lead to '
+        + 'delamination; the aim is to confirm that the connection keeps its '
+        + 'structural integrity and carries its load in extreme heat, so it can '
+        + 'be used safely in façades and roofs.',
     ],
+    credits: 'Funded by the Federal Ministry for Economic Affairs and Climate '
+        + 'Action on the basis of a resolution of the German Bundestag.',
 
     detailModel: 'models/frameless-glass.glb',
     // The model itself, the parts by their Rhino material names; anything
@@ -122,7 +146,7 @@ export default defineProject({
     ],
     // Steeply from above, its length up the screen, on both layouts (the
     // user's chosen view) - where the tour's turn ends
-    view: { elevation: 62, turn: 72, zoom: { side: 1.8, stacked: 2.1 }, lift: { stacked: 0.09 } },
+    view: { elevation: 62, turn: 72, zoom: { side: 1.8, stacked: 2.1 }, lift: { stacked: 0.09 }, drawer: { side: 6, above: 8, zoom: { side: 1.45, stacked: 1.1 } } },
     // As it opens: one full turn round it, then the section slides to just
     // past the middle as the camera closes in square-on to the ridge joint
     // there (GS2_GS6), its profile facing the visitor
