@@ -132,6 +132,7 @@ export default function PathView({ shown }) {
             depth: 0, // radians, the swing to and from the visitor
             depthSpeed: 0,
             lastY: null,
+            upright: null, // the layout it last swung in
             fall: 0, // how fast the line under it is moving down, px/s
         }));
         const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -303,6 +304,19 @@ export default function PathView({ shown }) {
                 const share = (i + 0.5) / DOT_COUNT;
                 const [x, y] = at(share);
                 const reach = THREAD * size * hung.length;
+
+                // Starting out, or the layout changed: already where the wind
+                // holds it, rather than flung there from hanging straight down
+                if (hung.upright !== upright) {
+                    hung.upright = upright;
+                    hung.side = upright
+                        ? Math.atan(FLAG_PUSH * flagWind(share, t) / SWING)
+                        : Math.asin(Math.min(1, PUSH * wind(share, t) / SWING));
+                    hung.sideSpeed = 0;
+                    hung.depth = 0;
+                    hung.depthSpeed = 0;
+                    hung.lastY = null;
+                }
 
                 if (!still && step > 0) {
                     // The line dropping under it lightens the dot a moment,

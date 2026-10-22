@@ -608,6 +608,11 @@ Branch `claude/loving-ramanujan-stqa6z`, not merged.
   from its words too, hovered or tapped.
 - **"click me!"** over the dots instead of "tap me!" (the user's change).
   Merged. Then it turns up over one dot at a time, at random.
+- **The path, revised again**: the flags on a phone start already blown
+  out - they swung wide at first; Rock Print Pavilion taken off the path;
+  the GradX graduation exhibition director role (2020 – 2021) in its
+  place by date, from the CV, with its picture (the first on its last
+  page).
 
 Open at end of session: as at the end of session 5; the path's ten
 milestones checked by the user.
