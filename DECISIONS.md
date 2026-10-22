@@ -901,7 +901,10 @@ sets one `uClip` shared by the model's ink materials: a fragment short of it
 along the model's own z (its length, as fitted) is discarded (flipped, asked
 for: the part beyond the cut is kept) - cheaper and
 simpler than three.js's clipping planes in a ShaderMaterial. A thin outline
-of the model's breadth and height marks the cut, and each part's own cut
+of the plane marks the cut - a third wider and higher than the model, and
+(asked for) shown only while the visitor handles the model (pressing on
+it, the wheel) or the slider, fading out 0.6s after (`fadeSectionOutline`);
+the tour's own cut shows none - and each part's own cut
 is traced in black (asked for, so the joint's detail reads): every
 triangle the plane passes through gives a segment (`traceCut`), worked out
 again as the slider moves - parts whose extent the plane misses skipped. Hover ignores parts cut
@@ -936,6 +939,16 @@ the breadth, they're far wider). The turn slowed to 16s. The slider follows the 
 (`ui.onSection`). Anything the visitor does with it stops the tour where it
 is, so it never takes the model back from them. The desktop view is the
 phone's now, so the turn ends where the close-up starts on both.
+
+Then (asked for: only one rotation before the section, the joint more
+centred, an end view like the user's phone screenshot): the swing round to
+square-on read as a second turn, so the turn itself now ends with the cut's
+side towards the camera - once round, give or take up to half a turn
+(`tourTurn`, worked out as it sets off) - and the move after it only comes
+down. The camera aims at the focus part's own cut outline (`traceCut` of
+that part), not the middle of its box, and ends `side` 20 degrees round
+and `above` 18 degrees down onto it, `reach` 0.22 - fitted to the
+screenshot, where the ridge recedes up and to the right.
 
 The looks were chosen by the user: steel
 graphite (the ridge pieces too, Custom 7 and 8, first taken for glass

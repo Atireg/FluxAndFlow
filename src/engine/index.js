@@ -19,7 +19,7 @@ import { pebbleFluxTime, PEBBLE_FLUX_SPEED } from './pebbles/geometry.js';
 import { dropInProgress, placeDroppingPebble, updateDroppingPebble } from './pebbles/drop.js';
 import { updateDissolve } from './pebbles/dissolve.js';
 import { updateScreenSpin } from './pointcloud/screenVideo.js';
-import { setSection } from './pointcloud/load.js';
+import { fadeSectionOutline, setSection } from './pointcloud/load.js';
 import { GATHER_DURATION, GATHER_MAX_STEP, revealAt, setGather, setReveal } from './pointcloud/gather.js';
 import { trailResolution } from './pointcloud/trails.js';
 
@@ -159,6 +159,11 @@ export function createEngine({ canvas, source, ui }) {
     let lastFrameTime = 0;
     let frameRequest = null;
 
+    // When the visitor last handled a model with a section - pressing on it
+    // (`pressed` while they hold), the wheel or the slider - so its plane's
+    // outline shows (fadeSectionOutline)
+    const handled = { pressed: false, at: -Infinity };
+
     /**
      * Laid over whatever a pebble's mode has set, every frame, in this order:
      * its arrival (catalog and returning only), then the filter's sink and
@@ -267,6 +272,8 @@ export function createEngine({ canvas, source, ui }) {
                 detail.updateTour(model, since);
                 detail.keepNear();
                 detail.updateHover(model, since);
+                if (handled.pressed) handled.at = elapsedTime;
+                fadeSectionOutline(model, elapsedTime - handled.at);
                 detail.maybeShowTapHint(model, since);
                 detail.maybeRepeatDrop(model, since);
                 detail.maybeAutoZoom(model, since);
@@ -369,12 +376,17 @@ export function createEngine({ canvas, source, ui }) {
         });
 
         const release = (event) => {
+            handled.pressed = false;
             if (event.pointerType !== 'mouse') streams.setTouching(false);
         };
         on(window, 'pointerup', release);
         on(window, 'pointercancel', release);
 
-        on(canvas, 'pointerdown', (event) => { lastPointerType = event.pointerType; });
+        on(canvas, 'pointerdown', (event) => {
+            lastPointerType = event.pointerType;
+            handled.pressed = true;
+        });
+        on(canvas, 'wheel', () => { handled.at = clock.getElapsedTime(); }, { passive: true });
 
         /**
          * A mouse sends dblclick; a finger often doesn't, so taps are timed by
@@ -552,6 +564,7 @@ export function createEngine({ canvas, source, ui }) {
         // length, 0..1 - 1 cuts nothing
         setSection(share) {
             detail.stopTour(); // the visitor's own, from here on
+            handled.at = clock.getElapsedTime();
             setSection(state.selected?.userData.detail, share);
         },
 

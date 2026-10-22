@@ -527,7 +527,11 @@ construction." And a `tour` as it opens: one full turn, the chosen view
 (the desktop's now too), then the cut slides to just past the middle as the
 camera closes in square-on on the ridge joint; the visitor's own moves stop
 it. Then the turn slower (16s) and the camera following the cut: square-on
-to it where it starts, and along with it as it slides in.
+to it where it starts, and along with it as it slides in. Then one turn
+only, ending facing the cut, and an end view like the user's screenshot: on
+the ridge joint where it's cut, a little from the side and above; the
+plane's outline larger and shown only while the visitor handles the model
+or the slider.
 
 Open at end of session: as at the end of session 4; a seventh Nap Nap
 Hooray picture, to come as a file; Frameless Glass Structures' year,

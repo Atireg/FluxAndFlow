@@ -4,12 +4,15 @@ import { CUBE_SIZE, PEBBLE_RADIUS, SPACING } from '../constants.js';
 import { getPanelLayout, perLayout } from '../layout.js';
 import { GATHER_DURATION } from '../pointcloud/gather.js';
 import { smooth01 } from '../ease.js';
+import { traceCut } from '../pointcloud/load.js';
 import {
     CATALOG_FOV,
     DETAIL_FOV,
     DETAIL_PROJECTION,
     ORTHO_VIEW_DISTANCE,
 } from './rig.js';
+
+const UP = new THREE.Vector3(0, 1, 0);
 
 /**
  * Where the camera goes.
@@ -521,32 +524,43 @@ export function createFraming({ rig, screen, state, grid, ui }) {
          * across the window - over `duration` seconds, or this frame (0), as
          * a `tour` follows the cut along. The model must stay where it is.
          */
-        frameSection(model, { focus, share, reach, duration = 0 }) {
+        frameSection(model, { focus, share, reach, side = 0, above = 0, duration = 0 }) {
             const section = model.userData.section;
             if (!section) return;
 
             // (its parts only - not the floor under it)
-            const box = new THREE.Box3();
             const all = new THREE.Box3();
+            let part = null;
             model.children.forEach((child) => {
                 if (!child.isMesh || !child.material.uniforms?.uHighlight) return;
                 child.geometry.computeBoundingBox();
                 all.union(child.geometry.boundingBox);
-                if (child.name === focus) box.union(child.geometry.boundingBox);
+                if (child.name === focus) part = child;
             });
-            if (box.isEmpty()) return;
+            if (!part) return;
 
+            // Aimed at the part where it's cut - its outline there - or, past
+            // its ends, at the middle of the part
             const z = section.to - (section.to - section.from) * share;
-            const centre = box.getCenter(new THREE.Vector3());
+            const centre = part.geometry.boundingBox.getCenter(new THREE.Vector3());
+            const cut = traceCut([part], z);
+            if (cut.length) centre.copy(new THREE.Box3().setFromPoints(cut).getCenter(new THREE.Vector3()));
             model.updateMatrixWorld(true);
             const target = model.localToWorld(new THREE.Vector3(centre.x, centre.y, z));
             const along = model.localToWorld(new THREE.Vector3(centre.x, centre.y, z + 1)).sub(target).normalize();
             const breadth = model.localToWorld(new THREE.Vector3(all.max.x, 0, 0))
                 .distanceTo(model.localToWorld(new THREE.Vector3(all.min.x, 0, 0)));
 
+            // Square-on along the model's length, or `side` degrees round
+            // from it and `above` degrees down onto it
+            const toward = along.clone().applyAxisAngle(UP, THREE.MathUtils.degToRad(side));
+            toward.y = 0;
+            toward.normalize().multiplyScalar(Math.cos(THREE.MathUtils.degToRad(above)));
+            toward.y = -Math.sin(THREE.MathUtils.degToRad(above));
+
             const tan = Math.tan(THREE.MathUtils.degToRad(rig.perspectiveCamera.fov) / 2);
             const distance = (reach * breadth) / 2 / (tan * screen.aspect);
-            const position = target.clone().addScaledVector(along, -distance);
+            const position = target.clone().addScaledVector(toward, -distance);
             if (duration > 0) rig.moveCamera(position, target, duration, 'power2.inOut');
             else rig.placeCamera(position, target);
         },

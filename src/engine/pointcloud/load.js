@@ -7,6 +7,7 @@ import { addGatherAttributes, GATHER_DURATION, GATHER_SPREAD, GATHER_SWIRL, GATH
 import { addTrails } from './trails.js';
 import { CLIP_NONE, makeEdgeMaterial, makeInkMaterial, pointsFromMeshes } from './mesh.js';
 import { addScreenPanel, addScreenVideo } from './screenVideo.js';
+import { smooth01 } from '../ease.js';
 
 import gatherGlsl from '../shaders/pointCloud/gather.glsl';
 import pointCloudVertexShader from '../shaders/pointCloud/vertex.glsl';
@@ -255,11 +256,18 @@ function screenFrame(root, name, { centre, factor }) {
     };
 }
 
+const SECTION_PLANE_PAD = 0.3; // the outline's reach past the model, a share of its size
+const SECTION_PLANE_OPACITY = 0.5;
+const SECTION_PLANE_HOLD = 0.6; // seconds it stays after the visitor lets go...
+const SECTION_PLANE_FADE = 0.8; // ...and fades over
+
 /**
  * A model's section (`section`): its parts cut away beyond a plane across
  * its length (z, its own space), moved by the visitor (setSection, engine),
- * a thin outline of the model's breadth and height where it cuts, and each
- * part's own cut edges traced in black - the joints read as in a drawing
+ * a thin outline of the plane, wider and higher than the model, shown only
+ * while the visitor handles the model or the slider (fadeSectionOutline),
+ * and each part's own cut edges traced in black - the joints read as in a
+ * drawing
  */
 function addSection(group, clip) {
     const box = new THREE.Box3();
@@ -282,13 +290,15 @@ function addSection(group, clip) {
     cut.renderOrder = 2; // over the see-through parts
     group.add(cut);
 
+    // From the floor up, past the model's sides and top
     const { min, max } = box;
+    const pad = SECTION_PLANE_PAD * Math.max(max.x - min.x, max.y - min.y);
     const outline = new THREE.LineLoop(
         new THREE.BufferGeometry().setFromPoints([
-            new THREE.Vector3(min.x, min.y, 0), new THREE.Vector3(max.x, min.y, 0),
-            new THREE.Vector3(max.x, max.y, 0), new THREE.Vector3(min.x, max.y, 0),
+            new THREE.Vector3(min.x - pad, min.y, 0), new THREE.Vector3(max.x + pad, min.y, 0),
+            new THREE.Vector3(max.x + pad, max.y + pad, 0), new THREE.Vector3(min.x - pad, max.y + pad, 0),
         ]),
-        new THREE.LineBasicMaterial({ color: THUMB_INK_COLOR, transparent: true, opacity: 0.5 }),
+        new THREE.LineBasicMaterial({ color: THUMB_INK_COLOR, transparent: true, opacity: 0 }),
     );
     outline.visible = false;
     outline.raycast = () => {}; // never something to hover
@@ -297,7 +307,7 @@ function addSection(group, clip) {
 }
 
 // Each triangle the plane z passes through gives one segment of the cut
-function traceCut(meshes, z) {
+export function traceCut(meshes, z) {
     const points = [];
     const a = new THREE.Vector3();
     const b = new THREE.Vector3();
@@ -331,12 +341,24 @@ export function setSection(model, share) {
     const z = section.to - (section.to - section.from) * Math.min(Math.max(share, 0), 1);
     section.clip.value = share >= 1 ? CLIP_NONE : z;
     section.outline.position.z = z;
-    section.outline.visible = share < 1;
     section.cut.visible = share < 1;
     if (share < 1) {
         section.cut.geometry.dispose();
         section.cut.geometry = new THREE.BufferGeometry().setFromPoints(traceCut(section.meshes, z));
     }
+}
+
+/**
+ * The section's outline, `idle` seconds after the visitor last touched the
+ * model or the slider: there while they do, fading out after - only where
+ * it cuts
+ */
+export function fadeSectionOutline(model, idle) {
+    const section = model?.userData.section;
+    if (!section) return;
+    const shown = 1 - smooth01((idle - SECTION_PLANE_HOLD) / SECTION_PLANE_FADE);
+    section.outline.material.opacity = SECTION_PLANE_OPACITY * shown;
+    section.outline.visible = shown > 0 && section.clip.value !== CLIP_NONE;
 }
 
 /**

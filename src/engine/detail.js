@@ -99,7 +99,7 @@ const INSIDE_WIDTH = 55; // degrees across at least, so a tall phone screen stil
 const INSIDE_FOV_MAX = 90; // degrees - the most the lens widens for that
 const TOUR_AFTER = 1.5; // seconds after the model is shown that a `tour` sets off
 const TOUR_PAUSE = 1; // seconds it rests at the view between the turn and the move in
-const TOUR_APPROACH = 3; // seconds to come round square-on to the section where it starts
+const TOUR_APPROACH = 3; // seconds to come down to the section where it starts
 const TOUR_WIDE = 1.15; // ...seeing this much of the model's breadth across, before closing in
 const NEAR_SHARE = 0.05; // the near plane, as a share of the way to what the camera looks at
 const NEAR_LEAST = 0.02; // ...and no nearer than this
@@ -122,17 +122,28 @@ export function createDetail({
     const hoverNdc = new THREE.Vector2();
 
     /**
-     * A project's `tour`, played each time it opens: one full turn of the
-     * model, eased (a turn of the model reads as the camera going round it -
-     * the inks are lit from the view), a moment at its view, then round to
-     * face the section square-on where it starts, and along with it as it
-     * slides to `cut`, closing in on the part `focus`. Whatever the visitor does with it - the slider, a
+     * A project's `tour`, played each time it opens: one turn of the model,
+     * eased (a turn of the model reads as the camera going round it - the
+     * inks are lit from the view), ending with the cut's side towards the
+     * camera at its `side`; a moment there, then down to the section where it
+     * starts, and along with it as it slides to `cut`, closing in on the part
+     * `focus`. Whatever the visitor does with it - the slider, a
      * double-click, the drawer, orbiting by hand - stops it where it is.
      */
-    const tour = { model: null, spin: 0, moved: false, stopped: true };
+    const tour = { model: null, spin: 0, turn: 0, moved: false, stopped: true };
+
+    // The turn, radians: once round, give or take what brings the cut's
+    // side round to the camera - so the move down after it needn't swing
+    function tourTurn(model, plan) {
+        const camera = rig.perspectiveCamera.position;
+        const facing = Math.atan2(camera.x - model.position.x, camera.z - model.position.z);
+        const wanted = facing - Math.PI - THREE.MathUtils.degToRad(plan.side);
+        const off = THREE.MathUtils.euclideanModulo(wanted - model.rotation.y + Math.PI, 2 * Math.PI) - Math.PI;
+        return 2 * Math.PI + off;
+    }
 
     function startTour(model, project) {
-        Object.assign(tour, { model, spin: 0, moved: false, stopped: !project.tour });
+        Object.assign(tour, { model, spin: 0, turn: 0, moved: false, stopped: !project.tour });
         if (project.tour) {
             setSection(model, 1);
             ui.onSection?.(1);
@@ -864,14 +875,16 @@ export function createDetail({
 
             const t = since - TOUR_AFTER;
             if (t < 0) return;
-            tour.spin = 2 * Math.PI * smooth01(t / plan.orbit);
+            if (!tour.turn) tour.turn = tourTurn(model, plan);
+            tour.spin = tour.turn * smooth01(t / plan.orbit);
 
-            // Square-on to the section where it starts, the whole cut in view...
+            // Down to the section where it starts, the whole cut in view...
+            const { focus, side, above } = plan;
             const closing = t - plan.orbit - TOUR_PAUSE;
             if (closing < 0) return;
             if (!tour.moved) {
                 tour.moved = true;
-                framing.frameSection(model, { focus: plan.focus, share: 1, reach: TOUR_WIDE, duration: TOUR_APPROACH });
+                framing.frameSection(model, { focus, side, above, share: 1, reach: TOUR_WIDE, duration: TOUR_APPROACH });
             }
 
             // ...then along with it as it slides to `cut`, closing in on `focus`
@@ -881,7 +894,7 @@ export function createDetail({
             const share = 1 - (1 - plan.cut) * k;
             setSection(model, share);
             ui.onSection?.(share);
-            framing.frameSection(model, { focus: plan.focus, share, reach: TOUR_WIDE + (plan.reach - TOUR_WIDE) * k });
+            framing.frameSection(model, { focus, side, above, share, reach: TOUR_WIDE + (plan.reach - TOUR_WIDE) * k });
             if (following >= plan.over) tour.stopped = true;
         },
 

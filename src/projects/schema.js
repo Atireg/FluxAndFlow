@@ -38,11 +38,13 @@
  *                 pebble's points fall and form it instead (a person, say)
  *   section       with solid: a plane across the model's length the visitor
  *                 slides (a slider over the model), its parts cut away beyond it
- *   tour          with section: { orbit, cut, focus, reach, over } - played as it
- *                 opens: one full turn in `orbit` seconds, then over `over` the
- *                 section slides to `cut` (a share of the length) and the
- *                 camera closes in square-on to it, on the part `focus`,
- *                 `reach` of the model's breadth across the window
+ *   tour          with section: { orbit, cut, focus, reach, over, side, above } -
+ *                 played as it opens: one turn in `orbit` seconds, then over
+ *                 `over` the section slides to `cut` (a share of the length)
+ *                 and the camera closes in on it, on the part `focus` where
+ *                 it's cut, `reach` of the model's breadth across the window,
+ *                 `side` degrees round from square-on and `above` degrees
+ *                 down onto it (both 0: square-on)
  *   notice        a short line under the title in the bar, in orange
  *   floor         with solid: a floor at the model's foot, a figure set down onto it
  *   info          with solid: { [part name]: { title, lines } } - shown beside
@@ -297,12 +299,13 @@ function normaliseSection({ id, section, solid }) {
 
 function normaliseTour({ id, tour, section }) {
     if (tour === undefined) return undefined;
-    const { orbit, cut, focus, reach, over } = tour ?? {};
+    const { orbit, cut, focus, reach, over, side = 0, above = 0 } = tour ?? {};
     if (!section) throw new Error(`Project "${id}": tour needs section`);
-    if (!(orbit > 0) || !(cut >= 0 && cut < 1) || typeof focus !== 'string' || !(reach > 0) || !(over > 0)) {
-        throw new Error(`Project "${id}": tour should be { orbit, cut (0..1), focus (a part's name), reach, over }`);
+    if (!(orbit > 0) || !(cut >= 0 && cut < 1) || typeof focus !== 'string' || !(reach > 0) || !(over > 0)
+        || !Number.isFinite(side) || !(above > -90 && above < 90)) {
+        throw new Error(`Project "${id}": tour should be { orbit, cut (0..1), focus (a part's name), reach, over, side, above (degrees) }`);
     }
-    return { orbit, cut, focus, reach, over };
+    return { orbit, cut, focus, reach, over, side, above };
 }
 
 function normaliseFloor({ id, floor, solid }) {
