@@ -555,10 +555,12 @@ Asked for as a fourth choice in the filter, after The real world: "The
 path", the employment history read like a CV. It isn't a kind of project,
 so it isn't in `CATEGORIES` (`PATH_VIEW`, app/words.js); the engine is told
 to bring 'path' forward like any kind, and as no pebble is of it every
-pebble sinks - no change to the engine but that the spotlight, with none in
-focus, now picks nothing rather than any pebble (an orange behind the line
-would ask for a click). A click on a sunk pebble still brings its own kind
-forward, leaving the path.
+pebble sinks - and, as no kind is left forward, fades out completely,
+thumbnail and all (asked for: "make them disappear completely"; `gone` in
+pebbles/focus.js, generic - any kind no pebble is of). Gone pebbles can't
+be hovered or clicked (`isGone`, `pebbleAt`), and the spotlight, with none
+in focus, picks nothing rather than any pebble. Choosing a kind or All
+brings them back as they sank.
 
 Its name sits under the filter (measured each frame - the filter wraps to
 two rows on a phone), and under it a washing line across the screen

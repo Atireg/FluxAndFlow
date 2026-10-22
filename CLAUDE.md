@@ -31,7 +31,8 @@ in a pull-out drawer.
   pebble holds nothing and answers a click with a two-line phrase
   (`src/app/words.js`).
 - **The path** (the filter's last choice, `PATH_VIEW` in words.js): the
-  employment history, like a CV - every pebble sinks, and under the name a
+  employment history, like a CV - every pebble sinks and fades out
+  completely, and under the name a
   washing line moving in the wind with ten of the tap hint's dots hanging
   from it, swinging (`src/components/PathView.jsx`). The dots hold nothing
   yet; their content comes from the user.

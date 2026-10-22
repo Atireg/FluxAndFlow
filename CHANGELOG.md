@@ -557,7 +557,8 @@ Branch `claude/loving-ramanujan-stqa6z`, not merged.
   pebble sinks and "The path" appears under the filter, with a washing line
   under it moving in the wind and ten of the tap hint's dots hanging from
   it on threads, each swinging (`PathView.jsx`). The spotlight rests while
-  no pebble is in focus.
+  no pebble is in focus. Merged. Then the pebbles fade out completely in
+  it, and can't be picked while gone.
 
 Open at end of session: as at the end of session 5; what the path's dots
 stand for.

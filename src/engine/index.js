@@ -11,7 +11,7 @@ import { createTags } from './tags.js';
 import { createStreamsView } from './streams-view.js';
 import { createFlow } from './pebbles/flow.js';
 import { advanceArrival, applyArrival, ARRIVAL_AFTER_LOADER, startArrival } from './pebbles/arrival.js';
-import { applyFocus, fadeFocus, inFocus, setFocus } from './pebbles/focus.js';
+import { applyFocus, fadeFocus, inFocus, isGone, setFocus } from './pebbles/focus.js';
 import { initSpotlightCycle, updateSpotlightCycle } from './pebbles/spotlight.js';
 import { placeAtRest } from './pebbles/wander.js';
 import { paintGlow } from './pebbles/materials.js';
@@ -152,7 +152,10 @@ export function createEngine({ canvas, source, ui }) {
     function pebbleAt(event) {
         raycaster.setFromCamera(rig.pointerToNdc(event.clientX, event.clientY, pointer), rig.camera);
 
-        const intersects = raycaster.intersectObjects(grid.pebbles);
+        // Not one faded out of sight by the filter (pebbles/focus.js)
+        const elapsedTime = clock.getElapsedTime();
+        const shown = grid.pebbles.filter((pebble) => !isGone(pebble, elapsedTime));
+        const intersects = raycaster.intersectObjects(shown);
         return intersects.length ? findPebble(intersects[0].object) : null;
     }
 
