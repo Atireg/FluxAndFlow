@@ -5,7 +5,7 @@ import { POINT_INKS, POINT_SIZES, pointInkUniforms, screenColor, SPOTLIGHT_GLOW_
 import { createPile, findRods } from '../pile.js';
 import { addGatherAttributes, GATHER_DURATION, GATHER_SPREAD, GATHER_SWIRL, GATHER_TRAIL, GATHER_TRAIL_EVERY } from './gather.js';
 import { addTrails } from './trails.js';
-import { CLIP_NONE, makeCutCounter, makeCutFill, makeEdgeMaterial, makeInkMaterial, pointsFromMeshes } from './mesh.js';
+import { CLIP_NONE, makeCutFill, makeEdgeMaterial, makeInkMaterial, pointsFromMeshes } from './mesh.js';
 import { addScreenPanel, addScreenVideo } from './screenVideo.js';
 import { smooth01 } from '../ease.js';
 
@@ -267,7 +267,7 @@ const SECTION_PLANE_FADE = 0.8; // ...and fades over
  * a thin outline of the plane, wider and higher than the model, shown only
  * while the visitor handles the model or the slider (fadeSectionOutline),
  * each part's own cut edges traced in black - the joints read as in a
- * drawing - and the parts' cut faces filled in orange (makeCutFill)
+ * drawing - and the parts' cut faces filled in orange (cutFaces)
  */
 function addSection(group, { clip, fade }) {
     const box = new THREE.Box3();
@@ -304,28 +304,17 @@ function addSection(group, { clip, fade }) {
     outline.raycast = () => {}; // never something to hover
     group.add(outline);
 
-    // The cut faces: each part counted into the stencil, then the plane
-    // filled where it cuts one
-    const counters = [THREE.BackSide, THREE.FrontSide].map((side) => makeCutCounter(clip, side));
-    meshes.forEach((mesh) => counters.forEach((material) => {
-        const counter = new THREE.Mesh(mesh.geometry, material);
-        counter.position.copy(mesh.position);
-        counter.quaternion.copy(mesh.quaternion);
-        counter.scale.copy(mesh.scale);
-        counter.raycast = () => {};
-        counter.frustumCulled = false;
-        counter.renderOrder = 1;
-        group.add(counter);
-    }));
-    // (a unit square, sized each time to just what the cut crosses - past
-    // that, a ray through a part not quite closed would fill the plane too)
-    const fill = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), makeCutFill(SPOTLIGHT_GLOW_COLOR, { fade }));
+    // The cut faces, filled - worked out again with the cut edges
+    const fill = new THREE.Mesh(new THREE.BufferGeometry(), makeCutFill(SPOTLIGHT_GLOW_COLOR, { fade }));
+    fill.frustumCulled = false;
     fill.visible = false;
     fill.raycast = () => {};
-    fill.renderOrder = 1.5; // after the count, before the cut's black lines
+    fill.renderOrder = 1.5; // before the cut's black lines
     group.add(fill);
 
-    group.userData.section = { clip, outline, fill, cut, meshes, box, from: min.z, to: max.z };
+    // (how near two ends of the cut's segments count as the same point)
+    const join = box.getSize(new THREE.Vector3()).length() * 1e-5;
+    group.userData.section = { clip, outline, fill, cut, meshes, box, join, from: min.z, to: max.z };
 }
 
 // Each triangle the plane z passes through gives one segment of the cut
@@ -357,6 +346,94 @@ export function traceCut(meshes, z) {
 
 // Cut a model at `share` of its length (0..1; 1, or more, cuts nothing),
 // from its far end (z's top) back - the part kept is the one beyond the cut
+/**
+ * A section's cut faces as triangles at z: each part's cut segments joined
+ * end to end into closed outlines, an outline inside another a hole in it,
+ * each filled. A chain that doesn't close (a part that isn't) is left out -
+ * so nothing is filled that the cut doesn't pass through.
+ */
+function cutFaces({ meshes, join }, z) {
+    const triangles = [];
+    meshes.forEach((mesh) => {
+        const loops = joinLoops(traceCut([mesh], z), join);
+        const inside = (point, loop) => {
+            let crossings = 0;
+            for (let i = 0, j = loop.length - 1; i < loop.length; j = i++) {
+                const a = loop[i];
+                const b = loop[j];
+                if ((a.y > point.y) !== (b.y > point.y)
+                    && point.x < ((b.x - a.x) * (point.y - a.y)) / (b.y - a.y) + a.x) crossings++;
+            }
+            return crossings % 2 === 1;
+        };
+        // How many others each lies in: even, an outline; odd, a hole in
+        // the smallest outline around it
+        const depth = loops.map((loop) => loops.filter((other) => other !== loop && inside(loop[0], other)).length);
+        loops.forEach((outer, i) => {
+            if (depth[i] % 2) return;
+            const holes = loops.filter((hole, j) => depth[j] === depth[i] + 1 && inside(hole[0], outer));
+            const all = outer.concat(...holes);
+            THREE.ShapeUtils.triangulateShape(outer, holes).forEach((face) => face.forEach((k) => {
+                triangles.push(new THREE.Vector3(all[k].x, all[k].y, z));
+            }));
+        });
+    });
+    return triangles;
+}
+
+// Segments (pairs of points) into closed loops of 2D points; ends within
+// `join` of each other are the same point
+function joinLoops(points, join) {
+    const ends = [];
+    const cells = new Map();
+    const cellOf = (x, y) => `${Math.floor(x / join)},${Math.floor(y / join)}`;
+    const endAt = (p) => {
+        const cx = Math.floor(p.x / join);
+        const cy = Math.floor(p.y / join);
+        for (let dx = -1; dx <= 1; dx++) {
+            for (let dy = -1; dy <= 1; dy++) {
+                const found = cells.get(`${cx + dx},${cy + dy}`)?.find((k) => ends[k].point.distanceTo(p) <= join);
+                if (found !== undefined) return found;
+            }
+        }
+        ends.push({ point: new THREE.Vector2(p.x, p.y), next: [] });
+        const key = cellOf(p.x, p.y);
+        if (!cells.has(key)) cells.set(key, []);
+        cells.get(key).push(ends.length - 1);
+        return ends.length - 1;
+    };
+    for (let i = 0; i < points.length; i += 2) {
+        const a = endAt(points[i]);
+        const b = endAt(points[i + 1]);
+        if (a === b) continue;
+        ends[a].next.push(b);
+        ends[b].next.push(a);
+    }
+
+    const loops = [];
+    const used = new Set();
+    const edge = (a, b) => (a < b ? `${a}-${b}` : `${b}-${a}`);
+    ends.forEach((start, first) => {
+        start.next.forEach((second) => {
+            if (used.has(edge(first, second))) return;
+            const loop = [first];
+            let previous = first;
+            let current = second;
+            used.add(edge(first, second));
+            while (current !== first) {
+                loop.push(current);
+                const onward = ends[current].next.find((k) => k !== previous && !used.has(edge(current, k)));
+                if (onward === undefined) return; // open: not filled
+                used.add(edge(current, onward));
+                previous = current;
+                current = onward;
+            }
+            if (loop.length >= 3) loops.push(loop.map((k) => ends[k].point));
+        });
+    });
+    return loops;
+}
+
 // Where a section at `share` cuts, along the model's own z
 export function sectionAt(section, share) {
     return section.to - (section.to - section.from) * Math.min(Math.max(share, 0), 1);
@@ -374,12 +451,9 @@ export function setSection(model, share) {
         const points = traceCut(section.meshes, z);
         section.cut.geometry.dispose();
         section.cut.geometry = new THREE.BufferGeometry().setFromPoints(points);
-        if (points.length) {
-            const { min, max } = new THREE.Box3().setFromPoints(points);
-            section.fill.scale.set(max.x - min.x, max.y - min.y, 1);
-            section.fill.position.set((min.x + max.x) / 2, (min.y + max.y) / 2, z);
-            section.fill.visible = true;
-        }
+        section.fill.geometry.dispose();
+        section.fill.geometry = new THREE.BufferGeometry().setFromPoints(cutFaces(section, z));
+        section.fill.visible = true;
     }
 }
 

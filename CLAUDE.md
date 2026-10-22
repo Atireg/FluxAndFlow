@@ -83,12 +83,18 @@ in a pull-out drawer.
   plate nearest it (z 227-278 mm in the file: `cut` 0.472) - closing in on the ridge joint GS2_GS6 where it's cut, from 45
   degrees above and a little from the side, the ridge running up the screen (8s; the
   user's second screenshot), the slider following; the slider, a double-click, the drawer or orbiting by
-  hand stops it where it is. Drawer: the user's chosen text (one paragraph), a YouTube film and five
+  hand stops it where it is. With the drawer out, the part the section
+  keeps, from where it's cut, almost square-on (`view.drawer: { side,
+  above, zoom }` - the user's screenshot). Drawer: the user's ZIM research
+  text, rephrased (four paragraphs - the intro, then Construction,
+  Geometry, Thermal analysis - and the funding line as `credits`; awaiting
+  the user's approval of the wording), a YouTube film and five
   pictures (the pavilion at glasstec, the joints, the joint in section); no
   year, role or context rows or thumbnail yet (the default rock).
 - **Links**: each project's own address is `#<id>` (`#rock-print`).
 - **Drawer copy** is real for all five projects, approved by the user
-  word for word; change it only on request.
+  word for word (Frameless Glass Structures' rephrasing still to be
+  approved); change it only on request.
 - **Waiting on the user**: Frameless Glass Structures' year, role,
   context and thumbnail; a seventh Nap Nap Hooray picture (Sleep per
   day / Number of naps - sent inline, not as a file), picture
@@ -327,12 +333,11 @@ A model in parts (`frameless-glass.js`): `solid` gives the default look,
   the cut at `side`/`above` with `framing.frameSection` (moved there, then placed each
   frame, `rig.placeCamera`); the visitor's slider, double-click, drawer
   or orbiting stops it (`stopTour`).
-- **A section's orange fill uses the stencil** (the renderer is made with
-  `stencil: true`): each part drawn unseen, back faces counting up, front
-  down, then a sheet at the cut where the count isn't 0 (`makeCutCounter`,
-  `makeCutFill`, mesh.js). It needs closed parts; an open one fills wrongly,
-  so the sheet is sized to what the cut crosses (`setSection`) - a full
-  plane once filled a patch above the model through a gap in a part.
+- **A section's orange fill is its cut outlines, triangulated**
+  (`cutFaces`, `joinLoops`, load.js), rebuilt with the black cut lines on
+  each step. Not the stencil: the model's parts aren't all closed, and
+  stencil capping filled a whole glass panel through a gap. An outline
+  that doesn't close is left unfilled.
 - **A model's turn holds for reasons** (`setHold`, framing.js): 'click'
   (`doubleClick: 'hold'`) and 'hover' (a part with `info`); it turns
   again once neither holds it.

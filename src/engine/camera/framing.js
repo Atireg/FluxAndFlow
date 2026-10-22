@@ -113,6 +113,20 @@ function viewDirection(project, { elevation: elevationDeg = perLayout(project?.v
     );
 }
 
+/**
+ * The way a camera looks onto a model's section (world space), given the
+ * model's length (`along`, a unit vector, away from the side cut away):
+ * square-on along it, or `side` degrees round from it and `above` degrees
+ * down onto it
+ */
+function towardSection(along, side, above) {
+    const toward = along.clone().applyAxisAngle(UP, THREE.MathUtils.degToRad(side));
+    toward.y = 0;
+    toward.normalize().multiplyScalar(Math.cos(THREE.MathUtils.degToRad(above)));
+    toward.y = -Math.sin(THREE.MathUtils.degToRad(above));
+    return toward;
+}
+
 // Half the extent along `axis` (a unit vector) of a box `half` across each way
 function halfExtentAlong(axis, half) {
     return Math.abs(axis.x) * half.x + Math.abs(axis.y) * half.y + Math.abs(axis.z) * half.z;
@@ -359,7 +373,7 @@ export function createFraming({ rig, screen, state, grid, ui }) {
          * canvas - a one-point view. A project can ask for its own angle
          * instead through `view`.
          */
-        frameDetail(object, { duration = 1.6, ease, fit, fitZoom } = {}) {
+        frameDetail(object, { duration = 1.6, ease, fit, fitZoom, toCamera: from } = {}) {
             const { camera, controls } = rig;
             state.detailZoomed = false;
 
@@ -418,7 +432,8 @@ export function createFraming({ rig, screen, state, grid, ui }) {
             const center = box.getCenter(new THREE.Vector3());
             const half = box.getSize(new THREE.Vector3()).multiplyScalar(0.5);
 
-            const toCamera = viewDirection(object.userData.project);
+            // (or from a way of its own, `toCamera` - onto a section)
+            const toCamera = from ?? viewDirection(object.userData.project);
             const forward = toCamera.clone().negate();
             const right = forward.clone().cross(camera.up).normalize();
             const up = right.clone().cross(forward).normalize();
@@ -546,12 +561,7 @@ export function createFraming({ rig, screen, state, grid, ui }) {
             const breadth = model.localToWorld(new THREE.Vector3(all.max.x, 0, 0))
                 .distanceTo(model.localToWorld(new THREE.Vector3(all.min.x, 0, 0)));
 
-            // Square-on along the model's length, or `side` degrees round
-            // from it and `above` degrees down onto it
-            const toward = along.clone().applyAxisAngle(UP, THREE.MathUtils.degToRad(side));
-            toward.y = 0;
-            toward.normalize().multiplyScalar(Math.cos(THREE.MathUtils.degToRad(above)));
-            toward.y = -Math.sin(THREE.MathUtils.degToRad(above));
+            const toward = towardSection(along, side, above);
 
             const tan = Math.tan(THREE.MathUtils.degToRad(rig.perspectiveCamera.fov) / 2);
             const distance = (reach * breadth) / 2 / (tan * screen.aspect);
@@ -584,6 +594,19 @@ export function createFraming({ rig, screen, state, grid, ui }) {
             // A device stays square-on, its screen parallel to the window's
             if (pebble.userData.project?.view?.drawer === 'whole' && model?.userData.screen) {
                 frameDevice(model, side ? 'side' : 'stacked', options?.duration ?? 1.6, options?.ease, { margin: DEVICE_WHOLE_MARGIN, whole: true });
+                return;
+            }
+            // A section (`view.drawer: { side, above }`): the part kept, seen
+            // from where it's cut, at those angles
+            const onSection = pebble.userData.project?.view?.drawer;
+            if (onSection?.side !== undefined && model?.userData.section) {
+                const { box: parts, clip } = model.userData.section;
+                const kept = parts.clone();
+                kept.min.z = Math.max(kept.min.z, clip.value);
+                model.updateMatrixWorld(true);
+                const along = new THREE.Vector3(0, 0, 1).transformDirection(model.matrixWorld);
+                const toCamera = towardSection(along, onSection.side, onSection.above ?? 0).negate();
+                framing.frameDetail(pebble, { ...options, fit: kept.applyMatrix4(model.matrixWorld), fitZoom: onSection.zoom ?? 1, toCamera });
                 return;
             }
             if (pebble.userData.project?.view?.drawer === 'whole' && model) {

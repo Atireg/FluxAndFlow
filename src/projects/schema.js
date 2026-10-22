@@ -182,7 +182,11 @@ function normaliseVideo(video, { id, index }) {
  *              square-on to that screen, this many times as far back as
  *              would put its edges at the window's (true: 1)
  *   drawer     'whole': with the drawer out on a narrow screen, the whole
- *              model above it rather than a close-up
+ *              model above it rather than a close-up; { side, above }
+ *              (with `section`): the part the section keeps, seen from
+ *              where it's cut, `side` degrees round and `above` down
+ *              (towardSection, framing.js), beside or above the drawer,
+ *              `zoom` (a number, or { side, stacked }) times closer than its fit
  *
  * Only the keys a project gave are kept: the engine's own `?? 0` fallbacks
  * stay the single source of each default, so normalising can't quietly

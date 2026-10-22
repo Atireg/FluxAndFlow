@@ -53,7 +53,7 @@ export function createCameraRig({ canvas, scene, screen, onShaderError }) {
 
     scene.add(perspectiveCamera, orthographicCamera);
 
-    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, stencil: true }); // (stencil: a section's fill)
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
     renderer.setSize(screen.width, screen.height);
     renderer.setPixelRatio(pixelRatio());
 
