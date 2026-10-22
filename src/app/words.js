@@ -14,6 +14,9 @@ export const SECTION_WORD = 'section';
 // the employment history, as dots on a line (components/PathView.jsx)
 export const PATH_VIEW = { id: 'path', label: 'The path' };
 
+// Over the path's dots, inviting a tap (or a hover)
+export const PATH_HINT = 'tap me!';
+
 // What a double-tap does, by the project's `doubleClick`
 const HINT_ACTIONS = { zoom: 'zoom', hold: 'pause', drop: 'drop again' };
 

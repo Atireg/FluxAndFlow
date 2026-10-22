@@ -603,6 +603,11 @@ asked for): opened, it skips the landing page and chooses the path once
 the loader has cleared; choosing it puts it in the address with a step in
 the history, so Back leaves it; choosing anything else takes it out.
 
+"tap me!" (the user's words, `PATH_HINT`) sits over the dots in the tap
+hint's words' look, riding the line - over its middle, or beside its top
+when it runs down a phone. A card opens from its dot's words as well as
+the dot (asked for), hovered or tapped.
+
 Hovered (tapped on a touch screen), a dot presses twice like the tap hint
 - its own keyframes, played once and quicker (1.2s), rings and all - and on
 the second press (`DROP_AFTER`) a card drops from it on a string: the

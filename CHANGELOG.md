@@ -596,6 +596,9 @@ Branch `claude/loving-ramanujan-stqa6z`, not merged.
   Melbourne; a last one, current: Associate, Head of Digital Technologies
   at knippershelbig, Stuttgart, with Frameless Glass Structures' picture
   (no details yet - a card shows only what it has).
+- **"tap me!"** (the user's words) over the path's dots, riding the line:
+  over its middle, or beside its top on a phone; and a dot's card opens
+  from its words too, hovered or tapped.
 
 Open at end of session: as at the end of session 5; the path's ten
 milestones checked by the user.

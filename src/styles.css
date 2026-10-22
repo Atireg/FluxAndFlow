@@ -897,6 +897,23 @@ body.drawer-open .section-slider {
     opacity: 0.9;
 }
 
+/* "tap me!" over the dots, in the tap hint's words' look (.cube-tag--hint) */
+.path-view__hint {
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin: 0;
+    font-size: clamp(0.8rem, 1.8vmin, 1rem);
+    font-weight: 600;
+    line-height: 1.25;
+    white-space: nowrap;
+    color: var(--hint-line);
+    text-shadow:
+        0 0 0.25rem rgba(var(--bg-rgb), 0.95),
+        0 0 0.6rem rgba(var(--bg-rgb), 0.8);
+    will-change: transform;
+}
+
 /* A milestone under its dot, moving with it (PathView.jsx): the years
    small and dim, the role, the place dim */
 .path-view__label {
@@ -910,6 +927,8 @@ body.drawer-open .section-slider {
     hyphens: auto;
     overflow-wrap: break-word;
     text-shadow: 0 0 0.35rem var(--bg), 0 0 0.15rem var(--bg); /* clear of the streams, like the tags */
+    pointer-events: auto; /* its card opens from its words too */
+    cursor: pointer;
     will-change: transform;
 }
 

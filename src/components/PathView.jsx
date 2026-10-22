@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { assetUrl } from '../engine/assets.js';
-import { PATH_VIEW } from '../app/words.js';
+import { PATH_HINT, PATH_VIEW } from '../app/words.js';
 import { MILESTONES } from '../app/path.js';
 
 /**
@@ -100,6 +100,7 @@ function dotSize() {
 
 export default function PathView({ shown }) {
     const titleRef = useRef(null);
+    const hintRef = useRef(null);
     const svgRef = useRef(null);
 
     useEffect(() => {
@@ -114,6 +115,7 @@ export default function PathView({ shown }) {
             group,
             card: cards[i],
             hit: group.querySelector('.path-view__hit'),
+            label: labels[i],
             hang: group.querySelector('.path-view__hang'),
             openAt: null, // seconds, when it was hovered
             closeAt: null, // seconds, when it was let go
@@ -160,21 +162,23 @@ export default function PathView({ shown }) {
             listeners.push(() => target.removeEventListener(type, handler));
         };
         dots.forEach((hung) => {
-            [hung.hit, hung.card].forEach((target) => {
+            // The dot, its words beside or under it, and its card
+            [hung.hit, hung.label, hung.card].forEach((target) => {
                 on(target, 'pointerenter', (event) => { if (event.pointerType === 'mouse') open(hung); });
                 on(target, 'pointerleave', (event) => { if (event.pointerType === 'mouse') leave(hung); });
             });
-            // A touch has no hover: a tap opens it, another closes it
-            on(hung.hit, 'pointerup', (event) => {
+            // A touch has no hover: a tap on the dot or its words opens it,
+            // another closes it
+            [hung.hit, hung.label].forEach((target) => on(target, 'pointerup', (event) => {
                 if (event.pointerType === 'mouse') return;
                 const opened = hung.openAt !== null && hung.closeAt === null;
                 dots.forEach(close);
                 if (!opened) open(hung);
-            });
+            }));
         });
         // A tap anywhere else, the card itself included, lets go of them all
         on(document, 'pointerup', (event) => {
-            if (event.pointerType === 'mouse' || event.target.closest?.('.path-view__hit')) return;
+            if (event.pointerType === 'mouse' || event.target.closest?.('.path-view__hit, .path-view__label')) return;
             dots.forEach(close);
         });
 
@@ -274,6 +278,13 @@ export default function PathView({ shown }) {
                 knots[i].setAttribute('cy', y);
             });
 
+            // "tap me!" over the dots, riding the line: over its middle, or
+            // beside its top when it runs down the screen
+            const [hintX, hintY] = at(upright ? 0 : 0.5);
+            hintRef.current.style.transform = upright
+                ? `translate(${(hintX + 10).toFixed(1)}px, ${hintY.toFixed(1)}px) translateY(-50%)`
+                : `translate(${hintX.toFixed(1)}px, ${(hintY - 10).toFixed(1)}px) translate(-50%, -100%)`;
+
             dots.forEach((hung, i) => {
                 const share = (i + 0.5) / DOT_COUNT;
                 const [x, y] = at(share);
@@ -361,6 +372,7 @@ export default function PathView({ shown }) {
     return (
         <div className={`path-view${shown ? ' is-showing' : ''}`} aria-hidden={shown ? 'false' : 'true'}>
             <h2 className="path-view__title" ref={titleRef}>{PATH_VIEW.label}</h2>
+            <p className="path-view__hint" ref={hintRef}>{PATH_HINT}</p>
             <svg className="path-view__scene" ref={svgRef} aria-hidden="true">
                 <g className="path-view__line">
                     <path className="path-view__glow" />
