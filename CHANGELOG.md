@@ -557,7 +557,10 @@ Then: half a turn (5s); a double-click plays the tour again; the year
 by subject, with the film after the intro (`after`, new); and the orange
 fill drawn with the stencil even-odd from each part's cut, which fills the
 ridge profile the user circled. And the phone ends on the same close joint
-view as the desktop (`reach` per layout).
+view as the desktop (`reach` per layout). Then the section comes in from
+the other end (`section: { reverse: true }`), the tour closing in on the
+mirrored ridge joint GS3_GS7, and the fill counts windings - one glass
+sheet's lower plies, modelled twice, had been left empty.
 
 Open at end of session: as at the end of session 4; a seventh Nap Nap
 Hooray picture, to come as a file; Frameless Glass Structures' year,

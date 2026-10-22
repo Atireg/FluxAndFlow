@@ -1073,7 +1073,20 @@ model turns on from where it stands (`tour.base`) - starting the spin from
 0 again would have snapped it round. Then (asked for: the desktop's close
 joint view as the end on a phone too) `reach` per layout, { side: 0.17,
 stacked: 0.08 }: the same share of the breadth across a narrow window left
-the joint small. With the drawer out
+the joint small.
+
+Then (asked for) the section comes in from the other end: `section:
+{ reverse: true }`, one sign (`section.sign`) that the shaders, the cut's
+position, hover, the camera's side, the tour's turn and the drawer's view
+all read. The far end mirrors the near one - the ridge joint there is
+GS3_GS7, its plates at the same distances - so the tour keeps `cut`
+0.472 and closes in on GS3_GS7, through the plate at z -252. The odd/even
+fill then left one sheet's lower plies empty: the model has them twice,
+one copy on the other, and two copies cancel. The fill counts windings
+now - each cut segment turned anticlockwise round its part by its face's
+outward side, the fans counting up or down by which way they turn - so a
+doubled piece fills while two pieces touching inside a part (their shared
+segments running opposite ways) still cancel. With the drawer out
 (asked for, with a screenshot): the part the section keeps, seen from where
 it's cut - `view.drawer: { side: 6, above: 8, zoom }`, framed by
 `frameDetail` on the kept part's box (the parts' box from the cut on)

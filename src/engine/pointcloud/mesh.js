@@ -153,6 +153,8 @@ export function makeInkMaterial({ lit, shade, opacity = 1 } = {}) {
             // Cut away short of this along the model's length (z, its own
             // space) - a project's `section`
             uClip: { value: CLIP_NONE },
+            // ...or, -1, beyond it the other way (a `section`'s `reverse`)
+            uClipSign: { value: 1 },
         },
         vertexShader: `
 varying vec3 vNormal;
@@ -169,12 +171,13 @@ uniform float uFade;
 uniform float uOpacity;
 uniform float uHighlight;
 uniform float uClip;
+uniform float uClipSign;
 varying vec3 vNormal;
 varying vec3 vInkLocal;
 
 ${INK_GRAIN_GLSL}
 void main() {
-    if (inkGrain(floor(vInkLocal * 40.0)) < uFade || vInkLocal.z < uClip) discard;
+    if (inkGrain(floor(vInkLocal * 40.0)) < uFade || uClipSign * vInkLocal.z < uClip) discard;
     // (a see-through part's back faces lit as its own, turned towards us)
     vec3 normal = normalize(vNormal) * (gl_FrontFacing ? 1.0 : -1.0);
     float light = max(dot(normal, normalize(vec3(-0.35, 0.8, 0.5))), 0.0);
@@ -190,10 +193,10 @@ void main() {
  * section's cut), fading in with it and cut by its section like its parts:
  * `fade` and `clip` are the model's own uniforms
  */
-export function makeEdgeMaterial(ink, { fade, clip }) {
+export function makeEdgeMaterial(ink, { fade, clip, sign = { value: 1 } }) {
     return new THREE.ShaderMaterial({
         transparent: true,
-        uniforms: { uInk: { value: ink }, uFade: fade, uClip: clip },
+        uniforms: { uInk: { value: ink }, uFade: fade, uClip: clip, uClipSign: sign },
         vertexShader: `
 varying float vAlong;
 void main() {
@@ -204,9 +207,10 @@ void main() {
 uniform vec3 uInk;
 uniform float uFade;
 uniform float uClip;
+uniform float uClipSign;
 varying float vAlong;
 void main() {
-    if (vAlong < uClip) discard;
+    if (uClipSign * vAlong < uClip) discard;
     gl_FragColor = vec4(uInk, 1.0 - uFade);
 }`,
     });
@@ -214,19 +218,20 @@ void main() {
 
 /**
  * A section's cut faces (cutFans, load.js), with the stencil: the fans
- * drawn unseen, each flipping the stencil where it covers, then a sheet
- * over the cut in flat orange where it's left set (setting it back),
- * dissolving with the parts
+ * drawn unseen, those facing the camera counting the stencil up where they
+ * cover, those facing away (`side` BackSide) down, then a sheet over the cut
+ * in flat orange where it's left off 0 (setting it back), dissolving with
+ * the parts
  */
-export function makeCutFan() {
+export function makeCutFan(side) {
     return new THREE.MeshBasicMaterial({
-        side: THREE.DoubleSide,
+        side,
         colorWrite: false,
         depthWrite: false,
         depthTest: false,
         stencilWrite: true,
         stencilFunc: THREE.AlwaysStencilFunc,
-        stencilZPass: THREE.InvertStencilOp,
+        stencilZPass: side === THREE.BackSide ? THREE.DecrementWrapStencilOp : THREE.IncrementWrapStencilOp,
     });
 }
 
