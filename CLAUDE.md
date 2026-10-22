@@ -334,8 +334,9 @@ A model in parts (`frameless-glass.js`): `solid` gives the default look,
 - **A `tour` turns the model, not the camera** (`tourSpin`, detail.js),
   which reads the same - the inks are lit from the view - by about once
   round, ending with the cut's side to the camera (`tourTurn`), then follows
-  the cut at `side`/`above` with `framing.frameSection` (moved there, then placed each
-  frame, `rig.placeCamera`); the visitor's slider, double-click, drawer
+  the cut at `side`/`above` with `framing.frameSection` - placed every frame
+  on the tour's own clock (`rig.placeCamera`), the move down to it too: a
+  tween for that, cut short where the following took over, made it jump; the visitor's slider, double-click, drawer
   or orbiting stops it (`stopTour`).
 - **A section's orange fill is its cut outlines, triangulated**
   (`cutFaces`, `joinLoops`, load.js), rebuilt with the black cut lines on

@@ -995,7 +995,12 @@ middle of the trapezoid connection plates) `cut` 0.472: the ridge joint
 GS2_GS6 has four plates along it (dense clusters of its vertices at z
 227-278, 640-692, 1054-1093 and 1468-1519 mm, the model 9 m long), and
 0.48 fell 5 cm short of the nearest; 0.5 is the gap between the rows,
-where the ridge profile isn't, only the cross joints. With the drawer out
+where the ridge profile isn't, only the cross joints. The move down to the
+section is placed frame by frame too (from the camera where it was to
+`frameSection`'s pose, `place: false` giving it without moving there),
+not a 3s tween: the following starts on the tour's clock, and on a slow
+frame it cut the tween short and the camera jumped (the user saw it just
+before the close-up settled). With the drawer out
 (asked for, with a screenshot): the part the section keeps, seen from where
 it's cut - `view.drawer: { side: 6, above: 8, zoom }`, framed by
 `frameDetail` on the kept part's box (the parts' box from the cut on)
