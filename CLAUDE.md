@@ -57,15 +57,17 @@ in a pull-out drawer.
 - **kh ReUse** (slot 3, the real world, `#kh-reuse`; write the name
   exactly so, and "knippershelbig" as one lowercase word): a laptop, or a
   phone under 860px, each with its own recording (2560 x 1440; 1170 x
-  1992). A reuse sign in its pebble. Drawer: the user's text with two links
-  and a Tech overview list; five screenshots (two desktop `wide`, three
-  phone `pair`).
+  1992). A reuse sign in its pebble. Drawer: the user's text (shortened,
+  approved) with two links and a short Tech overview list; five
+  screenshots placed in the text (`after`; two desktop `wide`, three phone
+  `pair`).
 - **Nap Nap Hooray** (slot 4, the real world, `#nap-nap-hooray`): the
   user's baby-sleep website on the phone (`nap-nap-hooray.mp4`, 1170 x
   1992, three times the screen's 390 x 664). A crescent moon (`moon.glb`,
   `thumbSize` 1.3) in its pebble. Drawer: 2026, "Web developer using AI",
-  "Sleepless nights and cranky days"; the user's text, with two lists; six
-  phone screenshots (two to a row on a wide screen, the first `half`).
+  "Sleepless nights and cranky days"; the user's text (shortened,
+  approved), with two lists; six phone screenshots in the text (`after`;
+  two to a row on a wide screen, the first of each group `half`).
 - **Frameless Glass Structures** (slot 7, the real world,
   `#frameless-glass`; under its title, in orange, "This part of the website
   is still under construction." - `notice`): the user's Rhino model of a glass pavilion

@@ -21,92 +21,77 @@ export default defineProject({
     body: [
         'kh ReUse – Salvaged Building Elements Platform',
         'kh ReUse is a web platform for collecting, cataloguing and reusing '
-        + 'building elements salvaged from demolished buildings. It brings '
-        + 'together the author’s background as an architect and their work in '
-        + 'software development. The aim is to keep usable materials like steel '
-        + 'beams, timber and glass in circulation instead of sending them to '
-        + 'landfill.',
+        + 'building elements salvaged from demolished buildings, so that usable '
+        + 'steel beams, timber and glass stay in circulation instead of going to '
+        + 'landfill. It brings together the author’s background as an architect '
+        + 'and their work in software development.',
         'It was made for [knippershelbig](https://www.knippershelbig.com/), '
-        + 'where the author is Head of Digital Technologies. '
-        + 'The author wrote both the frontend and the backend from scratch, '
-        + 'before AI tools were part of everyday development.',
-        'Visitors can browse demolition projects, such as Stuttgart Rathaus and '
-        + 'Kittler Schule Heilbronn, and see the elements recovered from each '
-        + 'one. The element catalog can be filtered by material, profile type, '
-        + 'profile and condition. Registered users can also add new projects '
-        + 'and elements, and collect elements in a personal basket for reuse.',
+        + 'where the author is Head of Digital Technologies. The author wrote '
+        + 'the frontend and the backend from scratch, before AI tools were part '
+        + 'of everyday development.',
+        'Visitors browse demolition projects, such as Stuttgart Rathaus and '
+        + 'Kittler Schule Heilbronn, and the elements recovered from each one, '
+        + 'filtering the catalogue by material, profile type, profile and '
+        + 'condition.',
+        'Registered users add their own projects and elements, and collect '
+        + 'elements in a personal basket for reuse.',
         'Note: the data in this version of the website is fictional and serves '
         + 'only to demonstrate the platform.',
         '👉 Live demo: [kh-reuse.web.app](https://kh-reuse.web.app/)',
         'Tech overview',
         [
-            'Frontend: React 19 + Vite 6, with React Router 7 and plain CSS. The '
-            + 'layout is responsive: on phones and tablets the wide element table '
-            + 'becomes cards with collapsible sections, and on desktop the '
-            + 'add-element form flows into two or three aligned columns. '
-            + 'Stylesheets get new file names with each build, so a deploy never '
-            + 'mixes old styles with new code. Toast messages come from '
-            + 'react-toastify.',
-            'Backend: a small Node.js 22 HTTP server without a framework, '
-            + 'packaged with Docker and running on Google Cloud Run. Data lives in '
-            + 'MongoDB Atlas (free M0 cluster) in projects, elements, users, '
-            + 'baskets and sessions.',
-            'Accounts and access: email/password sign-up and login with sessions '
-            + 'stored in MongoDB. Guests can browse projects and elements. '
-            + 'Logged-in users can add projects and elements and collect elements '
-            + 'in a personal basket (“Warenkorb”). Only a record’s owner can edit '
-            + 'or delete it; the server checks this as well as the website.',
-            'Data rules: elements belong to a project and can be filtered by '
-            + 'material, profile type, profile and condition. Updates never '
-            + 'overwrite a record’s ID, owner or creation date.',
-            'Import/export: an Excel upload for adding elements in bulk exists in '
-            + 'the code, but it’s currently hidden.',
-            'Quality: ESLint. There are no automated unit tests yet. Changes are '
-            + 'checked in a real browser with Playwright at phone, tablet and '
-            + 'desktop widths against the live backend, and server changes are '
-            + 'tested against a stand-in database before deploying.',
-            'Hosting: the frontend is on Firebase Hosting, deployed by GitHub '
-            + 'Actions on every merge to main. The server is redeployed to Cloud '
-            + 'Run by hand (gcloud run deploy --source), and its database '
-            + 'connection string is set as an environment variable there.',
-            'Privacy: no database credentials or keys are stored in the '
-            + 'repository. The .env file holding the connection string is '
-            + 'excluded from git.',
+            'Frontend: React 19 and Vite 6, with React Router and plain CSS; on '
+            + 'a phone the element table becomes cards.',
+            'Backend: a small Node.js server without a framework, in Docker on '
+            + 'Google Cloud Run, with the data in MongoDB Atlas.',
+            'Accounts: email and password; guests browse, signed-in users add, '
+            + 'and only a record’s owner can edit or delete it.',
+            'Quality: ESLint, and every change checked in a real browser with '
+            + 'Playwright at phone, tablet and desktop widths.',
+            'Hosting: Firebase Hosting, deployed by GitHub Actions; no keys or '
+            + 'credentials in the repository.',
         ],
     ],
 
-    // Screenshots: the two on a desktop across the drawer, then the three on
-    // a phone two to a row (`pair`), on a phone too
+    // Screenshots in the text, each by the paragraph about what it shows
+    // (`after`): the home page, the project page and search, then the two
+    // forms for adding - the desktop ones across the drawer, the phone ones
+    // two to a row (`pair`), on a phone too
     images: [
         {
             src: 'images/kh-reuse-01-home.jpg',
             alt: 'The kh ReUse home page on a desktop: a welcome, a short introduction, and the newest projects, Stuttgart Rathaus and Kittler Schule Heilbronn',
             ratio: '1500 / 938',
             wide: true,
+            after: 2,
         },
         {
             src: 'images/kh-reuse-02-project.jpg',
             alt: 'The Stuttgart Rathaus project page on a desktop: a photo, building data, a description, and a table of the building elements recovered from it',
             ratio: '1500 / 938',
             wide: true,
-        },
-        {
-            src: 'images/kh-reuse-03-mobile-new-project.jpg',
-            alt: 'On a phone: the form for adding a new demolition project',
-            ratio: '700 / 1192',
-            pair: true,
+            after: 3,
         },
         {
             src: 'images/kh-reuse-04-mobile-search.jpg',
             alt: 'On a phone: searching the element catalog by material, profile type, profile and condition',
             ratio: '700 / 1192',
             pair: true,
+            after: 3,
+        },
+        {
+            src: 'images/kh-reuse-03-mobile-new-project.jpg',
+            alt: 'On a phone: the form for adding a new demolition project',
+            ratio: '700 / 1192',
+            pair: true,
+            after: 4,
         },
         {
             src: 'images/kh-reuse-05-mobile-new-element.jpg',
             alt: 'On a phone: the form for adding a new building element, here a steel IPE100 beam',
             ratio: '700 / 1192',
             pair: true,
+            after: 4,
         },
     ],
 

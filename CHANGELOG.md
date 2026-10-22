@@ -575,6 +575,9 @@ Branch `claude/loving-ramanujan-stqa6z`, not merged.
   last sentence (the first Rock Print, with MIT) taken out.
 - **Pictures in the text**: an image's `after: n` places it after that
   paragraph.
+- **kh ReUse and Nap Nap Hooray**: their drawer text shortened, the tech
+  lists most (approved), and each picture placed by the paragraph about
+  what it shows.
 
 Open at end of session: as at the end of session 5; the path's ten
 milestones checked by the user.
