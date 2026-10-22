@@ -940,8 +940,9 @@ camera following the cut, parallel to it) round to face the section
 square-on where it starts, the whole breadth in view (`TOUR_APPROACH`,
 `TOUR_WIDE`), and along with it each frame as it slides in, closing to
 `reach` (`frameSection`, placed with `rig.placeCamera`: centred on the
-focus part at the cut, from the side cut away - the floor discs left out of
-the breadth, they're far wider). The turn slowed to 16s. The slider follows the cut
+focus part at the cut, from the side cut away - its breadth the parts'
+box, measured once as the section is made (`section.box`), so the floor
+discs, far wider, are left out and nothing is re-measured each frame). The turn slowed to 16s. The slider follows the cut
 (`ui.onSection`). Anything the visitor does with it stops the tour where it
 is, so it never takes the model back from them. The desktop view is the
 phone's now, so the turn ends where the close-up starts on both.

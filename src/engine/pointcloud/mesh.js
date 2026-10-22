@@ -12,7 +12,7 @@ import { POINT_INKS, screenColor } from '../colors.js';
  * the detail view frames, since a mesh comes in whatever units it was drawn
  * in. A point cloud is left exactly as it is.
  */
-export const MESH_SAMPLE_POINTS = 20000; // a project can ask for more or fewer (`points`)
+const MESH_SAMPLE_POINTS = 20000; // a project can ask for more or fewer (`points`)
 
 export function pointsFromMeshes(root, total = MESH_SAMPLE_POINTS) {
     root.updateMatrixWorld(true);
@@ -121,6 +121,27 @@ export function pointsFromMeshes(root, total = MESH_SAMPLE_POINTS) {
 // A clip short of anything: nothing cut (the parts are kept beyond it)
 export const CLIP_NONE = -1e6;
 
+// A fixed grain over the surface, in the mesh's own space so it turns with
+// it. Fading is done by dropping more of the grain - a dissolve into specks
+// rather than a see-through ghost - so it stays opaque and three interlocked
+// copies need no sorting. A hash without sin(), which loses precision on
+// some mobile GPUs. (The parts and a section's fill, so they dissolve alike.)
+const INK_GRAIN_GLSL = `
+float inkGrain(vec3 p) {
+    p = fract(p * 0.3183099 + 0.1);
+    p *= 17.0;
+    return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
+}
+`;
+
+// How far along the model's length (its own z) - what a section cuts by
+const ALONG_VERTEX_GLSL = `
+varying float vAlong;
+void main() {
+    vAlong = position.z;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}`;
+
 export function makeInkMaterial({ lit, shade, opacity = 1 } = {}) {
     // See-through (`opacity` under 1, glass): both faces, and it doesn't hide
     // what's behind it from the depth test
@@ -159,17 +180,7 @@ uniform float uClip;
 varying vec3 vNormal;
 varying vec3 vInkLocal;
 
-// A fixed grain over the surface, in the mesh's own space so it turns with
-// it. Fading is done by dropping more of the grain - a dissolve into specks
-// rather than a see-through ghost - so it stays opaque and three interlocked
-// copies need no sorting. A hash without sin(), which loses precision on
-// some mobile GPUs.
-float inkGrain(vec3 p) {
-    p = fract(p * 0.3183099 + 0.1);
-    p *= 17.0;
-    return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
-}
-
+${INK_GRAIN_GLSL}
 void main() {
     if (inkGrain(floor(vInkLocal * 40.0)) < uFade || vInkLocal.z < uClip) discard;
     // (a see-through part's back faces lit as its own, turned towards us)
@@ -191,12 +202,7 @@ export function makeEdgeMaterial(ink, { fade, clip }) {
     return new THREE.ShaderMaterial({
         transparent: true,
         uniforms: { uInk: { value: ink }, uFade: fade, uClip: clip },
-        vertexShader: `
-varying float vAlong;
-void main() {
-    vAlong = position.z;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-}`,
+        vertexShader: ALONG_VERTEX_GLSL,
         fragmentShader: `
 uniform vec3 uInk;
 uniform float uFade;
@@ -226,12 +232,7 @@ export function makeCutCounter(clip, side) {
         stencilFunc: THREE.AlwaysStencilFunc,
         stencilZPass: side === THREE.BackSide ? THREE.IncrementWrapStencilOp : THREE.DecrementWrapStencilOp,
         uniforms: { uClip: clip },
-        vertexShader: `
-varying float vAlong;
-void main() {
-    vAlong = position.z;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-}`,
+        vertexShader: ALONG_VERTEX_GLSL,
         fragmentShader: `
 uniform float uClip;
 varying float vAlong;
@@ -266,12 +267,7 @@ void main() {
 uniform vec3 uInk;
 uniform float uFade;
 varying vec3 vLocal;
-// (the parts' grain, so it dissolves with them)
-float inkGrain(vec3 p) {
-    p = fract(p * 0.3183099 + 0.1);
-    p *= 17.0;
-    return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
-}
+${INK_GRAIN_GLSL}
 void main() {
     if (inkGrain(floor(vLocal * 40.0)) < uFade) discard;
     gl_FragColor = vec4(uInk, 1.0);

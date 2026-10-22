@@ -4,7 +4,7 @@ import { CUBE_SIZE, PEBBLE_RADIUS, SPACING } from '../constants.js';
 import { getPanelLayout, perLayout } from '../layout.js';
 import { GATHER_DURATION } from '../pointcloud/gather.js';
 import { smooth01 } from '../ease.js';
-import { traceCut } from '../pointcloud/load.js';
+import { sectionAt, traceCut } from '../pointcloud/load.js';
 import {
     CATALOG_FOV,
     DETAIL_FOV,
@@ -518,9 +518,10 @@ export function createFraming({ rig, screen, state, grid, ui }) {
         },
 
         /**
-         * Square-on to the model's section at `share` (as `setSection` takes
-         * it), from the side cut away, centred on the part named `focus`
-         * where the cut passes through it, `reach` of the parts' breadth
+         * Onto the model's section at `share` (as `setSection` takes it),
+         * from the side cut away - square-on, or `side` degrees round and
+         * `above` degrees down - centred on the part named `focus` where the
+         * cut passes through it, `reach` of the parts' breadth
          * across the window - over `duration` seconds, or this frame (0), as
          * a `tour` follows the cut along. The model must stay where it is.
          */
@@ -528,20 +529,14 @@ export function createFraming({ rig, screen, state, grid, ui }) {
             const section = model.userData.section;
             if (!section) return;
 
-            // (its parts only - not the floor under it)
-            const all = new THREE.Box3();
-            let part = null;
-            model.children.forEach((child) => {
-                if (!child.isMesh || !child.material.uniforms?.uHighlight) return;
-                child.geometry.computeBoundingBox();
-                all.union(child.geometry.boundingBox);
-                if (child.name === focus) part = child;
-            });
+            // (the parts, measured once as the section was made - not the floor)
+            const { box: all, meshes } = section;
+            const part = meshes.find((mesh) => mesh.name === focus);
             if (!part) return;
 
             // Aimed at the part where it's cut - its outline there - or, past
             // its ends, at the middle of the part
-            const z = section.to - (section.to - section.from) * share;
+            const z = sectionAt(section, share);
             const centre = part.geometry.boundingBox.getCenter(new THREE.Vector3());
             const cut = traceCut([part], z);
             if (cut.length) centre.copy(new THREE.Box3().setFromPoints(cut).getCenter(new THREE.Vector3()));

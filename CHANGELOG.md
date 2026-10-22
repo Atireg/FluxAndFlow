@@ -533,7 +533,11 @@ the ridge joint where it's cut, a little from the side and above; the
 plane's outline larger and shown only while the visitor handles the model
 or the slider. Then that end view steeply from above (a second screenshot),
 and the parts' cut faces filled orange; the glass sheets' outlines dark
-grey, not black.
+grey, not black. Then a clean-up of this round's code: the solid shaders'
+grain and length snippets shared (`INK_GRAIN_GLSL`, `ALONG_VERTEX_GLSL`),
+where a section cuts worked out in one place (`sectionAt`), the tour's cut
+and the slider moved together (`cutAt`), and the tour's framing reading
+the parts' size the section measured once rather than every frame.
 
 Open at end of session: as at the end of session 4; a seventh Nap Nap
 Hooray picture, to come as a file; Frameless Glass Structures' year,

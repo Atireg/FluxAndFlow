@@ -327,7 +327,7 @@ function addSection(group, { clip, fade }) {
     fill.renderOrder = 1.5; // after the count, before the cut's black lines
     group.add(fill);
 
-    group.userData.section = { clip, outline, fill, cut, meshes, from: min.z, to: max.z };
+    group.userData.section = { clip, outline, fill, cut, meshes, box, from: min.z, to: max.z };
 }
 
 // Each triangle the plane z passes through gives one segment of the cut
@@ -359,10 +359,15 @@ export function traceCut(meshes, z) {
 
 // Cut a model at `share` of its length (0..1; 1, or more, cuts nothing),
 // from its far end (z's top) back - the part kept is the one beyond the cut
+// Where a section at `share` cuts, along the model's own z
+export function sectionAt(section, share) {
+    return section.to - (section.to - section.from) * Math.min(Math.max(share, 0), 1);
+}
+
 export function setSection(model, share) {
     const section = model?.userData.section;
     if (!section) return;
-    const z = section.to - (section.to - section.from) * Math.min(Math.max(share, 0), 1);
+    const z = sectionAt(section, share);
     section.clip.value = share >= 1 ? CLIP_NONE : z;
     section.outline.position.z = z;
     section.fill.position.z = z;

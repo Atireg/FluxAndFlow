@@ -142,11 +142,16 @@ export function createDetail({
         return 2 * Math.PI + off;
     }
 
+    // The tour's own cut, the slider moved along with it
+    function cutAt(model, share) {
+        setSection(model, share);
+        ui.onSection?.(share);
+    }
+
     function startTour(model, project) {
         Object.assign(tour, { model, spin: 0, turn: 0, moved: false, stopped: !project.tour });
         if (project.tour) {
-            setSection(model, 1);
-            ui.onSection?.(1);
+            cutAt(model, 1);
         }
     }
 
@@ -892,8 +897,7 @@ export function createDetail({
             if (following < 0) return;
             const k = smooth01(following / plan.over);
             const share = 1 - (1 - plan.cut) * k;
-            setSection(model, share);
-            ui.onSection?.(share);
+            cutAt(model, share);
             framing.frameSection(model, { focus, side, above, share, reach: TOUR_WIDE + (plan.reach - TOUR_WIDE) * k });
             if (following >= plan.over) tour.stopped = true;
         },
