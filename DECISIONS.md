@@ -925,7 +925,7 @@ contact shadow (`softDisc`). Not cut by the section; never hovered.
 
 The steel then made lighter and flatter (asked for: less shiny, and the
 joints between the sheets not reading as dark gaps): lit 204, shade 168,
-against 118 / 52. Each sheet's upper ply outlined in thin black (asked for): the script
+against 118 / 52. Each sheet's upper ply outlined in thin black (asked for; then dark grey, 92, asked for - the cut's lines stay black): the script
 finds the ply furthest out along the sheet's facing and marks it in the
 file (`edges` in its extras); the site draws its EdgesGeometry (faces
 meeting at over 25 degrees) in a line material that fades in with the

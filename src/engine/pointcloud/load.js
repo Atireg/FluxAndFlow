@@ -78,7 +78,7 @@ export function loadPointCloud({
                 const pieces = parts || figure
                     ? sampled.userData.parts
                     : [{ material: '', part: '', geometry: sampled.userData.solid }];
-                const edgeMaterial = makeEdgeMaterial(screenColor(18, 18, 20), { fade, clip });
+                const edgeMaterial = makeEdgeMaterial(screenColor(92, 92, 94), { fade, clip }); // dark grey
                 pieces.forEach(({ material: lookName, part, edges, geometry }) => {
                     if (lookName === figure) {
                         group.userData.figure = geometry;
