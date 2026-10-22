@@ -1009,10 +1009,14 @@ GS2_GS6 has four plates along it (dense clusters of its vertices at z
 0.48 fell 5 cm short of the nearest; 0.5 is the gap between the rows,
 where the ridge profile isn't, only the cross joints. The move down to the
 section is placed frame by frame too (from the camera where it was to
-`frameSection`'s pose, `place: false` giving it without moving there),
-not a 3s tween: the following starts on the tour's clock, and on a slow
+`frameSection`'s pose, which it only returns), not a 3s tween: the following starts on the tour's clock, and on a slow
 frame it cut the tween short and the camera jumped (the user saw it just
-before the close-up settled). With the drawer out
+before the close-up settled). Then (asked for: no pause between the turn
+and the section, the turn 10% faster) `orbit` 9, and no rest and no
+separate move down: the section starts sliding as the turn ends and the
+camera comes down onto it while it slides, blended from where it was over
+`TOUR_APPROACH` (3s) - the cut still standing still while the camera came
+down had read as a pause. With the drawer out
 (asked for, with a screenshot): the part the section keeps, seen from where
 it's cut - `view.drawer: { side: 6, above: 8, zoom }`, framed by
 `frameDetail` on the kept part's box (the parts' box from the cut on)

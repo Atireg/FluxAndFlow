@@ -549,7 +549,8 @@ text replaced by a rephrasing of the user's ZIM research text, the
 funding line as its credits (approved with "merge and build"). Then the
 jump just before the close-up settled: the move down to the section was a
 tween the following cut short; now it's placed frame by frame on the
-tour's clock.
+tour's clock. Then no pause after the turn - the section slides as soon as
+it ends, the camera coming down onto it as it goes - and the turn 9s.
 
 Open at end of session: as at the end of session 4; a seventh Nap Nap
 Hooray picture, to come as a file; Frameless Glass Structures' year,
