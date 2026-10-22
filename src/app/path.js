@@ -1,9 +1,10 @@
 /**
  * The path's milestones, oldest first - one to a dot (components/PathView.jsx).
- * Taken from the user's CV, in its own words: `when` the years, `what` the
- * role or degree, `where` the place - under the dot (on a phone only the
- * first year) - and `details` and a picture (`image`, its file's `ratio`,
- * both from the CV) on the card that drops from the dot on a hover or tap.
+ * Taken from the user's CV and their own changes, in their words: `when` the
+ * years, `what` the role or degree, `where` the place - beside or under the
+ * dot - and, on the card that drops from it on a hover or tap, `details`
+ * and a picture (`image`, its file's `ratio`), either left out if there's
+ * none. Write "knippershelbig" so, one lowercase word.
  */
 export const MILESTONES = [
     {
@@ -80,19 +81,20 @@ export const MILESTONES = [
         image: { src: 'images/path-08.jpg', ratio: '370 / 181', alt: 'A student working with two robot arms' },
     },
     {
-        when: '2020',
-        what: 'Doctor of Sciences',
-        where: 'ETH Zurich',
-        details: 'Doctoral Thesis: Material- and Fabrication-informed Design of Structurally-sound '
-            + 'Jammed Architectural Structures. Supervised by Prof Fabio Gramazio and Prof Matthias '
-            + 'Kohler.',
-        image: { src: 'images/path-09.jpg', ratio: '367 / 245', alt: 'A jammed sample of stone and string in a press' },
+        when: '2021 – 2023',
+        what: 'Deputy Department Chair for Architecture and Industrial Design',
+        where: 'Swinburne University of Technology, Melbourne',
+        details: 'Supporting the Department Chair in overseeing six disciplines and over 30 academic '
+            + 'staff in the School of Design and Architecture.',
     },
     {
         when: 'current',
-        what: 'Deputy Department Chair for Architecture and Industrial Design',
-        where: 'Swinburne University of Technology',
-        details: 'Supporting the Department Chair in overseeing six disciplines and over 30 academic '
-            + 'staff in the School of Design and Architecture.',
+        what: 'Associate, Head of Digital Technologies',
+        where: 'knippershelbig, Stuttgart',
+        image: {
+            src: 'images/frameless-glass-01.jpg',
+            ratio: '1500 / 633',
+            alt: 'The glass pavilion at the fair: a pointed arch of glass sheets in front of white curtains',
+        },
     },
 ];

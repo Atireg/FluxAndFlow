@@ -395,7 +395,7 @@ export default function PathView({ shown }) {
                     <p className="path-view__card-when">{when}</p>
                     <h3 className="path-view__card-what">{what}</h3>
                     <p className="path-view__card-where">{where}</p>
-                    <p className="path-view__card-details">{details}</p>
+                    {details && <p className="path-view__card-details">{details}</p>}
                 </article>
             ))}
         </div>

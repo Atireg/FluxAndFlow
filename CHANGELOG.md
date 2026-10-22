@@ -591,6 +591,11 @@ Branch `claude/loving-ramanujan-stqa6z`, not merged.
   slower fall; a wider hover area round each dot.
 - **A link to the path**: `#path` opens it; choosing it puts it in the
   address, Back leaves it.
+- **The path's milestones, revised by the user**: the Doctor of Sciences
+  taken out; the Deputy Department Chair in its place, 2021 – 2023, in
+  Melbourne; a last one, current: Associate, Head of Digital Technologies
+  at knippershelbig, Stuttgart, with Frameless Glass Structures' picture
+  (no details yet - a card shows only what it has).
 
 Open at end of session: as at the end of session 5; the path's ten
 milestones checked by the user.

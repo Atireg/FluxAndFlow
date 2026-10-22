@@ -66,7 +66,8 @@ Next up (waiting on content or a check from the user)
     [x] The path: what each of its ten dots stands for (from the CV)
     [ ] The path: the user to check the ten milestones' wording and their
         cards' details, pictures (from the CV) and the pictures' credits;
-        a picture for the Deputy Department Chair card
+        a picture for the Deputy Department Chair card, and details for
+        the knippershelbig one
     [ ] Rock Print's view from inside, on a phone: the lens widens to 90°
         there so it sees between the columns - check it reads as standing
         among them (`INSIDE_*` in src/engine/detail.js)
