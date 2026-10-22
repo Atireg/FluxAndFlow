@@ -38,6 +38,9 @@ const PUSH = 5; // how far the wind pushes a dot round
 const TURBULENCE = 5; // how hard the eddies push a dot to and fro
 const GUST_CROSSING = 1.4; // seconds a gust takes to cross the line
 const MAX_STEP = 1 / 30; // a stalled frame holds the swing rather than flinging it
+const HINT_SHOW = 3.2; // seconds "click me!" stays over one dot
+const HINT_GAP = 0.9; // seconds before it shows over another
+const HINT_FADE = 0.4; // seconds it fades in and out
 const UPRIGHT_BELOW = 860; // px wide: the line runs down the screen, the dots fly as flags
 const FLAG_PUSH = 16; // how hard the wind holds a flag out: it flies about 70 degrees from hanging
 const FLAG_TWIST = 9; // how hard the flutter twists it to and fro
@@ -135,6 +138,8 @@ export default function PathView({ shown }) {
 
         let frame = 0;
         let last = performance.now();
+        // "click me!": over which dot, and since when
+        const hint = { dot: Math.floor(Math.random() * DOT_COUNT), at: performance.now() / 1000 };
         const seconds = () => performance.now() / 1000;
 
         // Hovered or tapped: press twice (the CSS restarted), then drop the card
@@ -278,12 +283,21 @@ export default function PathView({ shown }) {
                 knots[i].setAttribute('cy', y);
             });
 
-            // "click me!" over the dots, riding the line: over its middle, or
-            // beside its top when it runs down the screen
-            const [hintX, hintY] = at(upright ? 0 : 0.5);
-            hintRef.current.style.transform = upright
-                ? `translate(${(hintX + 10).toFixed(1)}px, ${hintY.toFixed(1)}px) translateY(-50%)`
-                : `translate(${hintX.toFixed(1)}px, ${(hintY - 10).toFixed(1)}px) translate(-50%, -100%)`;
+            // "click me!" over one dot at a time, chosen at random - never
+            // the last one again, nor one with its card out - fading in and
+            // out; over a dot whose card opens, it fades out at once
+            const cardOut = (i) => dots[i].openAt !== null;
+            if (now / 1000 - hint.at > HINT_SHOW + HINT_GAP) {
+                const others = [...Array(DOT_COUNT).keys()].filter((i) => i !== hint.dot && !cardOut(i));
+                if (others.length) hint.dot = others[Math.floor(Math.random() * others.length)];
+                hint.at = now / 1000;
+            } else if (cardOut(hint.dot) && now / 1000 - hint.at < HINT_SHOW - HINT_FADE) {
+                hint.at = now / 1000 - (HINT_SHOW - HINT_FADE);
+            }
+            const shownFor = now / 1000 - hint.at;
+            hintRef.current.style.opacity = String(still ? 1 : Math.max(0, Math.min(
+                shownFor / HINT_FADE, (HINT_SHOW - shownFor) / HINT_FADE, 1,
+            )));
 
             dots.forEach((hung, i) => {
                 const share = (i + 0.5) / DOT_COUNT;
@@ -333,6 +347,13 @@ export default function PathView({ shown }) {
 
                 const cx = x + across * toDot;
                 const cy = y + down * toDot;
+                // "click me!" over this one: a little up and to the right of a
+                // hanging dot, clear of its thread; straight over a flag
+                if (i === hint.dot) {
+                    hintRef.current.style.transform = upright
+                        ? `translate(${cx.toFixed(1)}px, ${(cy - size * 0.7).toFixed(1)}px) translate(-50%, -100%)`
+                        : `translate(${(cx + size * 0.45).toFixed(1)}px, ${(cy - size * 0.45).toFixed(1)}px) translateY(-100%)`;
+                }
                 hung.hit.setAttribute('cx', cx);
                 hung.hit.setAttribute('cy', cy);
                 // Wider than the dot, so a swinging dot doesn't slip out from under the pointer
