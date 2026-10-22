@@ -1,11 +1,14 @@
 import { CATEGORIES } from '../projects/index.js';
+import { PATH_VIEW } from '../app/words.js';
 import clickOnly from './clickOnly.js';
 
 /**
  * The catalog's filter: bring one kind of project forward - research,
  * teaching or the real world - and the engine sinks the rest
  * (engine/pebbles/focus.js). Choosing the one already chosen, or "All",
- * brings them all back. Only while the catalog is on screen.
+ * brings them all back. Last, "The path": a view of its own (PathView.jsx) -
+ * the engine sinks every pebble, as no pebble is of its kind. Only while the
+ * catalog is on screen.
  *
  * Changes only on a click, so it is React state; the engine is told through
  * `onChoose`, and tells it back when a sunk pebble is clicked (`ui.onFocus`).
@@ -23,7 +26,7 @@ export default function CategoryFilter({ focus, hidden, onChoose }) {
             >
                 All
             </button>
-            {CATEGORIES.map(({ id, label }) => (
+            {[...CATEGORIES, PATH_VIEW].map(({ id, label }) => (
                 <button
                     key={id}
                     className={`filter__choice${focus === id ? ' is-chosen' : ''}`}

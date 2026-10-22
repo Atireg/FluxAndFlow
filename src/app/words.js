@@ -10,6 +10,10 @@ const EMPTY_WORDS = ['under\nconstruction', 'still\nsettling', 'yet to\ntake sha
 // Beside the slider that cuts a model across its length (a project's `section`)
 export const SECTION_WORD = 'section';
 
+// The filter's last choice: not a kind of project but a view of its own -
+// the employment history, as dots on a line (components/PathView.jsx)
+export const PATH_VIEW = { id: 'path', label: 'The path' };
+
 // What a double-tap does, by the project's `doubleClick`
 const HINT_ACTIONS = { zoom: 'zoom', hold: 'pause', drop: 'drop again' };
 

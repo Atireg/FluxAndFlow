@@ -119,9 +119,9 @@ export function poseSpotlightPebble(pebble, state, elapsedTime) {
  * than occasionally repeating itself.
  */
 function pickSpotlight(state, all) {
-    // With one kind brought forward, only among those (pebbles/focus.js)
-    const focused = all.filter((pebble) => inFocus(state, pebble));
-    const pebbles = focused.length ? focused : all;
+    // With one kind brought forward, only among those (pebbles/focus.js);
+    // none at all when every pebble is sunk (the page's path view)
+    const pebbles = all.filter((pebble) => inFocus(state, pebble));
     const withoutRepeat = pebbles.filter(
         (pebble) => pebble !== state.hovered && pebble !== state.spotlight.last
     );

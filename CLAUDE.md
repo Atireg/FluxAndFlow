@@ -30,6 +30,11 @@ in a pull-out drawer.
   (research / teaching / the real world) brings one kind forward. An empty
   pebble holds nothing and answers a click with a two-line phrase
   (`src/app/words.js`).
+- **The path** (the filter's last choice, `PATH_VIEW` in words.js): the
+  employment history, like a CV - every pebble sinks, and under the name a
+  washing line moving in the wind with ten of the tap hint's dots hanging
+  from it, swinging (`src/components/PathView.jsx`). The dots hold nothing
+  yet; their content comes from the user.
 - **Rock Print Pavilion** (slot 0): a point cloud that gathers out of a
   scattered swirl, turns and nods; every 10s the camera moves in by itself,
   in turn on a point, from inside at eye height, and from there facing back.
@@ -89,7 +94,7 @@ in a pull-out drawer.
 - **Links**: each project's own address is `#<id>` (`#rock-print`).
 - **Drawer copy** is real for all five projects, approved by the user
   word for word; change it only on request.
-- **Waiting on the user**: Frameless Glass Structures' year, role,
+- **Waiting on the user**: what the path's dots stand for; Frameless Glass Structures' year, role,
   context and thumbnail; a seventh Nap Nap Hooray picture (Sleep per
   day / Number of naps - sent inline, not as a file), picture
   captions/credits, model licensing, real-device and Safari checks.

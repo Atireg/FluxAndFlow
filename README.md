@@ -63,6 +63,8 @@ Next up (waiting on content or a check from the user)
         device (it was only checked with software rendering here)
     [ ] The catalog's streams on a phone: WebGL draws them one device pixel
         wide - darker (`STREAM_ALPHA` in src/engine/streams.js) if they're faint
+    [ ] The path: what each of its ten dots stands for (the employment
+        history, from the user) and what a dot does when clicked
     [ ] Rock Print's view from inside, on a phone: the lens widens to 90°
         there so it sees between the columns - check it reads as standing
         among them (`INSIDE_*` in src/engine/detail.js)
