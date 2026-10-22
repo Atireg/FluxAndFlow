@@ -546,7 +546,7 @@ The orange fill rebuilt from the cut's own outlines - the stencil had
 filled a whole glass panel through a gap in a part. With the drawer out,
 the kept part seen from the cut (the user's screenshot). And the drawer
 text replaced by a rephrasing of the user's ZIM research text, the
-funding line as its credits - to be approved.
+funding line as its credits (approved with "merge and build").
 
 Open at end of session: as at the end of session 4; a seventh Nap Nap
 Hooray picture, to come as a file; Frameless Glass Structures' year,

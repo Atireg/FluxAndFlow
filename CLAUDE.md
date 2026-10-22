@@ -87,14 +87,13 @@ in a pull-out drawer.
   keeps, from where it's cut, almost square-on (`view.drawer: { side,
   above, zoom }` - the user's screenshot). Drawer: the user's ZIM research
   text, rephrased (four paragraphs - the intro, then Construction,
-  Geometry, Thermal analysis - and the funding line as `credits`; awaiting
-  the user's approval of the wording), a YouTube film and five
+  Geometry, Thermal analysis - and the funding line as `credits`;
+  approved), a YouTube film and five
   pictures (the pavilion at glasstec, the joints, the joint in section); no
   year, role or context rows or thumbnail yet (the default rock).
 - **Links**: each project's own address is `#<id>` (`#rock-print`).
 - **Drawer copy** is real for all five projects, approved by the user
-  word for word (Frameless Glass Structures' rephrasing still to be
-  approved); change it only on request.
+  word for word; change it only on request.
 - **Waiting on the user**: Frameless Glass Structures' year, role,
   context and thumbnail; a seventh Nap Nap Hooray picture (Sleep per
   day / Number of naps - sent inline, not as a file), picture
