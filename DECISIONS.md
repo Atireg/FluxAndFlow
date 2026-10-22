@@ -607,8 +607,10 @@ pulsing dots"). It drifts side to side as it drops, like the hint's falling
 leaf, but settles hanging under the dot rather than falling off the screen;
 only once let go does it fall on and fade (`LET_GO`), as the hint does.
 The pictures are the CV's own, ~370px across - enough for a card 17rem
-wide. The pointer gets `LEAVE_GRACE` to cross from a dot to its card, so a
-card can be read with the pointer on it. The label under a dot fades while
+wide. A card stays `LEAVE_GRACE` (1.8s) after the pointer leaves it or its
+dot, then falls over `LET_GO` (0.9s) - at 0.25s and 0.6s it fell before
+it could be read (asked for) - and a dot's hover area is wider than the
+dot, so its swing doesn't slip it out from under a still pointer. The label under a dot fades while
 its card is out - the card says the same. The card is drawn by the same
 frame loop, through refs. It moves every frame, so it is drawn through refs by its
 own frame loop, running only while the view is on screen - not the

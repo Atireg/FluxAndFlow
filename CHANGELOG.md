@@ -587,6 +587,8 @@ Branch `claude/loving-ramanujan-stqa6z`, not merged.
 - **The streams in the wind**: in the path view the background's streams
   blow left to right with the wind, in gusts (`setWind`), and no longer part
   round the faded-out pebbles.
+- **The path's cards stay longer**: 1.8s after the pointer leaves, then a
+  slower fall; a wider hover area round each dot.
 
 Open at end of session: as at the end of session 5; the path's ten
 milestones checked by the user.

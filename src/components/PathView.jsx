@@ -47,8 +47,8 @@ const DROP_HANG = 1.3; // the card's string, in dot sizes
 const DROP_SWAY = 1.4; // its drift either side as it drops, in dot sizes
 const DROP_SWAY_PERIOD = 1.6; // seconds, one drift there and back
 const DROP_TILT = 0.12; // radians it tilts by as it drifts
-const LET_GO = 0.6; // seconds a card takes to fall away and fade once let go
-const LEAVE_GRACE = 250; // ms the pointer has to cross from a dot to its card
+const LET_GO = 0.9; // seconds a card takes to fall away and fade once let go
+const LEAVE_GRACE = 1800; // ms a card stays once the pointer has left it or its dot - to read, or to reach it
 
 // A fixed 0..1 for each whole number, for the noise and the threads
 function hash(n) {
@@ -324,7 +324,8 @@ export default function PathView({ shown }) {
                 const cy = y + down * toDot;
                 hung.hit.setAttribute('cx', cx);
                 hung.hit.setAttribute('cy', cy);
-                hung.hit.setAttribute('r', size * 0.9);
+                // Wider than the dot, so a swinging dot doesn't slip out from under the pointer
+                hung.hit.setAttribute('r', size * 1.2);
                 hung.group.querySelectorAll('.path-view__ripple').forEach((ring) => {
                     ring.setAttribute('cx', cx);
                     ring.setAttribute('cy', cy);
