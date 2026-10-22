@@ -989,12 +989,18 @@ of the plane marks the cut - a third wider and higher than the model, and
 (asked for) shown only while the visitor handles the model (pressing on
 it, the wheel) or the slider, fading out 0.6s after (`fadeSectionOutline`);
 the tour's own cut shows none - the parts' cut faces filled orange (asked
-for): each part's cut segments (`traceCut`) joined end to end into closed
-outlines (`joinLoops`, ends within a hundred-thousandth of the model's size
-the same point), an outline inside another a hole in it, triangulated
-(`cutFaces`) and drawn just behind the black lines (a polygon offset) -
-worked out again with the cut edges at each step of the slider. First it
-was stencil capping (each part drawn unseen, back faces counting up and
+for): drawn flat at the cut with the stencil - from the middle of each
+part's cut a thin triangle to each of its cut segments, every one flipping
+the stencil where it covers (`cutFans`), so what's left set is inside an
+odd number of outlines; then an orange sheet over the cut where it's set,
+just behind the black lines (a polygon offset), rebuilt at each step of the
+slider. A segment there twice (two pieces of a part touching inside it, a
+plate welded to a profile) cancels by itself, and the model's corners that
+miss each other by a tenth of a millimetre leave only a sliver. Before it,
+the segments joined end to end into outlines and triangulated: the ridge
+joint's pieces overlap and don't meet, and at every joining tolerance some
+piece came out unfilled (the user circled one). First it was stencil
+capping (each part drawn unseen, back faces counting up and
 front faces down, a sheet at the cut where the count wasn't 0): cheap, but
 the model's parts aren't all closed, and a ray through a gap counted as
 cut - a patch above the model, then a whole glass panel filled orange
@@ -1062,7 +1068,15 @@ and the section, the turn 10% faster) `orbit` 9, and no rest and no
 separate move down: the section starts sliding as the turn ends and the
 camera comes down onto it while it slides, blended from where it was over
 `TOUR_APPROACH` (3s) - the cut still standing still while the camera came
-down had read as a pause. With the drawer out
+down had read as a pause. Then (asked for) half a turn (`turns` 0.5, in
+5s - about the speed asked for before), still ending with the cut's side
+to the camera; and a double-click plays the tour again (`doubleClick:
+'tour'`): uncut, the camera eased back to the project's view while the
+model turns on from where it stands (`tour.base`) - starting the spin from
+0 again would have snapped it round. Then (asked for: the desktop's close
+joint view as the end on a phone too) `reach` per layout, { side: 0.17,
+stacked: 0.08 }: the same share of the breadth across a narrow window left
+the joint small. With the drawer out
 (asked for, with a screenshot): the part the section keeps, seen from where
 it's cut - `view.drawer: { side: 6, above: 8, zoom }`, framed by
 `frameDetail` on the kept part's box (the parts' box from the cut on)

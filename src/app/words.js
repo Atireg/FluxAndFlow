@@ -18,7 +18,7 @@ export const PATH_VIEW = { id: 'path', label: 'The path' };
 export const PATH_HINT = 'click me!';
 
 // What a double-tap does, by the project's `doubleClick`
-const HINT_ACTIONS = { zoom: 'zoom', hold: 'pause', drop: 'drop again' };
+const HINT_ACTIONS = { zoom: 'zoom', hold: 'pause', drop: 'drop again', tour: 'play again' };
 
 // A new answer for an empty pebble - never the one it gave last
 export function emptyWords(last) {

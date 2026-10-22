@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { gsap } from 'gsap';
 import { assetUrl } from './assets.js';
-import { getPanelLayout, layoutMode } from './layout.js';
+import { getPanelLayout, layoutMode, perLayout } from './layout.js';
 import { loadPhysics, PILE_FADE_OUT, PILE_REPLAY_WAIT } from './pile.js';
 import { loadPointCloud, setSection } from './pointcloud/load.js';
 import { GATHER_DURATION } from './pointcloud/gather.js';
@@ -131,14 +131,14 @@ export function createDetail({
      */
     const tour = { model: null, spin: 0, turn: 0, moved: false, from: null, stopped: true };
 
-    // The turn, radians: once round, give or take what brings the cut's
+    // The turn, radians: `turns` round, give or take what brings the cut's
     // side round to the camera - so the move down after it needn't swing
     function tourTurn(model, plan) {
         const camera = rig.perspectiveCamera.position;
         const facing = Math.atan2(camera.x - model.position.x, camera.z - model.position.z);
         const wanted = facing - Math.PI - THREE.MathUtils.degToRad(plan.side);
         const off = THREE.MathUtils.euclideanModulo(wanted - model.rotation.y + Math.PI, 2 * Math.PI) - Math.PI;
-        return 2 * Math.PI + off;
+        return 2 * Math.PI * plan.turns + off;
     }
 
     // The tour's own cut, the slider moved along with it
@@ -148,7 +148,7 @@ export function createDetail({
     }
 
     function startTour(model, project) {
-        Object.assign(tour, { model, spin: 0, turn: 0, moved: false, stopped: !project.tour });
+        Object.assign(tour, { model, spin: 0, base: 0, start: TOUR_AFTER, turn: 0, moved: false, stopped: !project.tour });
         if (project.tour) {
             cutAt(model, 1);
         }
@@ -854,7 +854,8 @@ export function createDetail({
             ui.dissolveTapHint();
 
             const action = state.selected.userData.project?.doubleClick ?? 'zoom';
-            if (action === 'zoom') detail.toggleZoom(clientX, clientY);
+            if (action === 'tour') detail.replayTour();
+            else if (action === 'zoom') detail.toggleZoom(clientX, clientY);
             else if (action === 'hold') detail.toggleHold();
             else if (action === 'drop') detail.replayDrop();
         },
@@ -868,6 +869,19 @@ export function createDetail({
             tour.stopped = true;
         },
 
+        /**
+         * `doubleClick: 'tour'`: the tour again from the start - uncut, the
+         * camera back to the project's view while the model turns on from
+         * where it stands
+         */
+        replayTour() {
+            const model = state.selected?.userData.detail;
+            if (!model || tour.model !== model) return;
+            Object.assign(tour, { base: tour.spin, start: null, turn: 0, moved: false, stopped: false });
+            cutAt(model, 1);
+            framing.reframe(state.selected);
+        },
+
         // One frame of the tour, `since` the model was shown
         updateTour(model, since) {
             const plan = state.selected?.userData.project?.tour;
@@ -877,10 +891,11 @@ export function createDetail({
                 return;
             }
 
-            const t = since - TOUR_AFTER;
+            tour.start ??= since; // played again: from now
+            const t = since - tour.start;
             if (t < 0) return;
             if (!tour.turn) tour.turn = tourTurn(model, plan);
-            tour.spin = tour.turn * smooth01(t / plan.orbit);
+            tour.spin = tour.base + tour.turn * smooth01(t / plan.orbit);
 
             // As the turn ends the section sets off, sliding to `cut` as the
             // camera closes in on `focus` - and over the first TOUR_APPROACH
@@ -898,7 +913,7 @@ export function createDetail({
             const share = 1 - (1 - plan.cut) * k;
             cutAt(model, share);
             const to = framing.frameSection(model, {
-                focus, side, above, share, reach: TOUR_WIDE + (plan.reach - TOUR_WIDE) * k,
+                focus, side, above, share, reach: TOUR_WIDE + (perLayout(plan.reach, 1) - TOUR_WIDE) * k,
             });
             if (to) {
                 const down = smooth01(closing / TOUR_APPROACH);

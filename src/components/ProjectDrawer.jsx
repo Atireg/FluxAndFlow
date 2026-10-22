@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useState } from 'react';
+import { forwardRef, Fragment, useEffect, useState } from 'react';
 import { hasDescription, metaRows } from '../projects/index.js';
 import clickOnly from './clickOnly.js';
 import ImageViewer from './ImageViewer.jsx';
@@ -41,10 +41,22 @@ const ProjectDrawer = forwardRef(function ProjectDrawer({ project, open, onToggl
     const available = hasDescription(project);
     const rows = metaRows(project);
     const [enlarged, setEnlarged] = useState(null);
-    const images = project?.images ?? [];
-    const pictures = (some) => some.map((image) => (
-        <ProjectImage key={image.src || `empty-${images.indexOf(image)}`} image={image} onEnlarge={() => setEnlarged(image)} />
-    ));
+
+    // The films, then the pictures, set after paragraph `after` of the text
+    // (`after` in the project), or undefined: the rest, after all of it
+    const media = (after) => (
+        <>
+            <div className="drawer__videos">
+                {(project?.videos ?? []).filter((video) => video.after === after)
+                    .map((video) => <ProjectVideo key={video.vimeo ?? video.youtube} video={video} />)}
+            </div>
+            <div className="drawer__images">
+                {(project?.images ?? []).filter((image) => image.after === after).map((image, index) => (
+                    <ProjectImage key={image.src || `empty-${index}`} image={image} onEnlarge={() => setEnlarged(image)} />
+                ))}
+            </div>
+        </>
+    );
 
     // An enlarged picture goes with the drawer, and with the project
     useEffect(() => {
@@ -85,27 +97,18 @@ const ProjectDrawer = forwardRef(function ProjectDrawer({ project, open, onToggl
                     ])}
                 </dl>
 
-                {/* Pictures with an `after` sit in the text, after that entry */}
                 <div className="drawer__body">
-                    {(project?.body ?? []).map((entry, index) => [
-                        Array.isArray(entry)
-                            ? <ul key={index}>{entry.map((item, i) => <li key={i}>{withLinks(item)}</li>)}</ul>
-                            : <p key={index}>{withLinks(entry)}</p>,
-                        images.some((image) => image.after === index) && (
-                            <div className="drawer__images drawer__images--in-text" key={`images-${index}`}>
-                                {pictures(images.filter((image) => image.after === index))}
-                            </div>
-                        ),
-                    ])}
+                    {(project?.body ?? []).map((entry, index) => (
+                        <Fragment key={index}>
+                            {Array.isArray(entry)
+                                ? <ul>{entry.map((item, i) => <li key={i}>{withLinks(item)}</li>)}</ul>
+                                : <p>{withLinks(entry)}</p>}
+                            {media(index)}
+                        </Fragment>
+                    ))}
                 </div>
 
-                <div className="drawer__videos">
-                    {(project?.videos ?? []).map((video) => <ProjectVideo key={video.vimeo ?? video.youtube} video={video} />)}
-                </div>
-
-                <div className="drawer__images">
-                    {pictures(images.filter((image) => image.after === null))}
-                </div>
+                {media(undefined)}
 
                 <p className="drawer__credits">{project?.credits ?? ''}</p>
             </div>

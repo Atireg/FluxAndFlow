@@ -42,9 +42,12 @@
  *                 played as it opens: one turn in `orbit` seconds, then over
  *                 `over` the section slides to `cut` (a share of the length)
  *                 and the camera closes in on it, on the part `focus` where
- *                 it's cut, `reach` of the model's breadth across the window,
+ *                 it's cut, `reach` of the model's breadth across the window
+ *                 (a number, or per layout { side, stacked }),
  *                 `side` degrees round from square-on and `above` degrees
- *                 down onto it (both 0: square-on)
+ *                 down onto it (both 0: square-on); `turns` (1) round in
+ *                 `orbit`, give or take what ends it with the cut's side
+ *                 to the camera
  *   notice        a short line under the title in the bar, in orange
  *   floor         with solid: a floor at the model's foot, a figure set down onto it
  *   info          with solid: { [part name]: { title, lines } } - shown beside
@@ -63,8 +66,8 @@
  *                 loading sign, and the model turns, until its film has loaded
  *   doubleClick   what a double-click/double-tap on the model does: 'zoom'
  *                 (the default) in and back out, 'hold' stops its turn until
- *                 the next, 'drop' drops it again (with a `drop`), 'none'
- *                 nothing (and no hint for it)
+ *                 the next, 'drop' drops it again (with a `drop`), 'tour'
+ *                 plays its `tour` again, 'none' nothing (and no hint for it)
  *   autoZoom      seconds: the camera moves in on the model, or back out, this often
  *   eyeLevel      with autoZoom: two of every three moves in are from inside,
  *                 at this share of the model's height - the second turned round
@@ -123,9 +126,18 @@ const META_FIELDS = [
  * One picture in the drawer. The first spans the drawer's width, the rest sit
  * two to a row unless `wide` (diagrams whose text is unreadable at half).
  * An entry with no `src` is deliberate: it shows as an empty dashed frame,
- * holding its place.
+ * holding its place. `after`: set among the text, after that paragraph of
+ * `body` (0 the first) rather than with the rest at the end - as is a film.
  */
-function normaliseImage(image, { id, index }) {
+function normaliseAfter(entry, { id, what, body }) {
+    if (entry.after === undefined) return undefined;
+    if (!Number.isInteger(entry.after) || entry.after < 0 || entry.after >= body.length) {
+        throw new Error(`Project "${id}": ${what}.after should be a paragraph of body, 0 to ${body.length - 1}`);
+    }
+    return entry.after;
+}
+
+function normaliseImage(image, { id, index, body }) {
     if (!image || typeof image !== 'object') {
         throw new Error(`Project "${id}": images[${index}] should be an object`);
     }
@@ -143,9 +155,7 @@ function normaliseImage(image, { id, index }) {
         // Half the drawer's width on a wide screen even as the first picture,
         // which otherwise spans it - a row of tall screenshots from the start
         half: Boolean(image.half),
-        // Shown in the text, after body[after], rather than with the rest
-        // below it
-        after: Number.isInteger(image.after) ? image.after : null,
+        after: normaliseAfter(image, { id, what: `images[${index}]`, body }),
     };
 }
 
@@ -155,7 +165,7 @@ function normaliseImage(image, { id, index }) {
  * `?turnstile=` part, which is one visitor's session. `title` names the
  * player for screen readers; `ratio` is the film's width / height.
  */
-function normaliseVideo(video, { id, index }) {
+function normaliseVideo(video, { id, index, body }) {
     const vimeo = /^\d+$/.test(String(video?.vimeo ?? ''));
     const youtube = /^[\w-]{11}$/.test(String(video?.youtube ?? ''));
     if (vimeo === youtube) {
@@ -167,6 +177,7 @@ function normaliseVideo(video, { id, index }) {
         title: video.title ?? '',
         caption: video.caption ?? '',
         ratio: video.ratio || '16 / 9',
+        after: normaliseAfter(video, { id, what: `videos[${index}]`, body }),
     };
 }
 
@@ -244,11 +255,12 @@ function normaliseDrop(drop, { id }) {
     return { ...drop };
 }
 
-function normaliseDoubleClick({ id, doubleClick = 'zoom', drop }) {
-    if (!['zoom', 'hold', 'drop', 'none'].includes(doubleClick)) {
-        throw new Error(`Project "${id}": doubleClick should be 'zoom', 'hold', 'drop' or 'none'`);
+function normaliseDoubleClick({ id, doubleClick = 'zoom', drop, tour }) {
+    if (!['zoom', 'hold', 'drop', 'tour', 'none'].includes(doubleClick)) {
+        throw new Error(`Project "${id}": doubleClick should be 'zoom', 'hold', 'drop', 'tour' or 'none'`);
     }
     if (doubleClick === 'drop' && !drop) throw new Error(`Project "${id}": doubleClick 'drop' needs a drop`);
+    if (doubleClick === 'tour' && !tour) throw new Error(`Project "${id}": doubleClick 'tour' needs a tour`);
     return doubleClick;
 }
 
@@ -304,15 +316,20 @@ function normaliseSection({ id, section, solid }) {
     return section;
 }
 
+// A number that passes `ok`, or one per layout - { side, stacked }, each passing it
+function isPerLayout(value, ok) {
+    return value && typeof value === 'object' ? Object.values(value).every(ok) : ok(value);
+}
+
 function normaliseTour({ id, tour, section }) {
     if (tour === undefined) return undefined;
-    const { orbit, cut, focus, reach, over, side = 0, above = 0 } = tour ?? {};
+    const { orbit, cut, focus, reach, over, side = 0, above = 0, turns = 1 } = tour ?? {};
     if (!section) throw new Error(`Project "${id}": tour needs section`);
-    if (!(orbit > 0) || !(cut >= 0 && cut < 1) || typeof focus !== 'string' || !(reach > 0) || !(over > 0)
-        || !Number.isFinite(side) || !(above > -90 && above < 90)) {
-        throw new Error(`Project "${id}": tour should be { orbit, cut (0..1), focus (a part's name), reach, over, side, above (degrees) }`);
+    if (!(orbit > 0) || !(cut >= 0 && cut < 1) || typeof focus !== 'string' || !isPerLayout(reach, (value) => value > 0) || !(over > 0)
+        || !Number.isFinite(side) || !(above > -90 && above < 90) || !(turns > 0)) {
+        throw new Error(`Project "${id}": tour should be { orbit, cut (0..1), focus (a part's name), reach, over, side, above (degrees), turns }`);
     }
-    return { orbit, cut, focus, reach, over, side, above };
+    return { orbit, cut, focus, reach, over, side, above, turns };
 }
 
 function normaliseFloor({ id, floor, solid }) {
@@ -464,8 +481,8 @@ export function defineProject(project) {
         eyeLevel: normaliseEyeLevel(project),
         drop: normaliseDrop(project.drop, { id }),
 
-        images: images.map((image, index) => normaliseImage(image, { id, index })),
-        videos: videos.map((video, index) => normaliseVideo(video, { id, index })),
+        images: images.map((image, index) => normaliseImage(image, { id, index, body: project.body ?? [] })),
+        videos: videos.map((video, index) => normaliseVideo(video, { id, index, body: project.body ?? [] })),
     };
 }
 
