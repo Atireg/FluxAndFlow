@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { PATH_VIEW } from '../app/words.js';
+import { MILESTONES } from '../app/path.js';
 
 /**
  * "The path": the employment history, as a washing line under the view's
@@ -9,12 +10,13 @@ import { PATH_VIEW } from '../app/words.js';
  * and to and from the visitor (seen as its thread shortening), pushed by the
  * same wind where it hangs and jolted as the line moves under it. The wind
  * is smooth noise, not waves, with gusts that cross the line from the left;
- * each thread a little longer or shorter, so no two dots keep time.
+ * each thread a little longer or shorter, so no two dots keep time. Under
+ * each dot, moving with it, its milestone (app/path.js).
  *
  * Moves every frame, so never through React state: its own frame loop
  * writes the SVG through refs, and only while it is on screen.
  */
-const DOT_COUNT = 10;
+const DOT_COUNT = MILESTONES.length;
 const SAG = 0.05; // the line's belly, as a share of its length
 const LIFT = 0.4; // how much of the belly the wind lifts and drops
 const THREAD = 1.6; // a thread's length, in dot sizes, on average
@@ -73,6 +75,7 @@ export default function PathView({ shown }) {
         if (!shown) return undefined;
 
         const svg = svgRef.current;
+        const labels = [...svg.parentNode.querySelectorAll('.path-view__label')];
         const [glow, line] = svg.querySelectorAll('.path-view__line path');
         const knots = svg.querySelectorAll('.path-view__end');
         const dots = [...svg.querySelectorAll('.path-view__dot')].map((group, i) => ({
@@ -108,6 +111,7 @@ export default function PathView({ shown }) {
             const top = title.bottom + Math.max(28, window.innerHeight * 0.06);
             const length = right - left;
             const size = dotSize();
+            const labelWidth = (length / DOT_COUNT) * 0.92;
             const belly = SAG * length * (1 + (still ? 0 : LIFT * (noise(t * 0.3 + 300) - 2 * (wind(0.5, t) - 0.1))));
 
             // Where the line is at `share` along it: a belly, and ripples
@@ -170,6 +174,11 @@ export default function PathView({ shown }) {
                 hung.dot.setAttribute('cy', y + down * toDot);
                 hung.dot.setAttribute('r', size / 2);
                 hung.dot.style.strokeWidth = Math.max(1.5, size * 0.08);
+
+                const label = labels[i].style;
+                label.width = `${labelWidth}px`;
+                label.transform = `translate(${(x + across * toDot - labelWidth / 2).toFixed(1)}px, `
+                    + `${(y + down * toDot + size * 0.75).toFixed(1)}px)`;
             });
 
             frame = requestAnimationFrame(draw);
@@ -197,6 +206,14 @@ export default function PathView({ shown }) {
                     </g>
                 ))}
             </svg>
+            {MILESTONES.map(({ when, what, where }) => (
+                <p className="path-view__label" key={when + what}>
+                    <span className="path-view__when">{when}</span>
+                    <span className="path-view__year">{when.match(/\d{4}/)?.[0] ?? when}</span>
+                    <span className="path-view__what">{what}</span>
+                    <span className="path-view__where">{where}</span>
+                </p>
+            ))}
         </div>
     );
 }

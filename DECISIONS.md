@@ -573,7 +573,13 @@ longer or shorter (`THREAD_SPREAD`), so no two dots keep time; each dot a
 pendulum free in two ways - sideways with the wind, and to and from the
 visitor with the eddies (`eddy`), seen as its thread shortening on screen;
 and jolted as the line lifts and drops under it (gravity as the dot feels
-it). The line's belly and ripple follow the same noise. It moves every frame, so it is drawn through refs by its
+it). The line's belly and ripple follow the same noise.
+
+Each dot is a milestone of the user's career and education, oldest first
+(`MILESTONES`, app/path.js), taken from their CV in its own words: years,
+role or degree, place, in a label under the dot that moves with it. On a
+phone the dots are about 33px apart, too close for more than the first
+year. It moves every frame, so it is drawn through refs by its
 own frame loop, running only while the view is on screen - not the
 engine's, which owns only the canvas. Still with reduced motion. The dots
 hold nothing yet: what each stands for comes from the user.
