@@ -317,11 +317,9 @@ function addSection(group, { clip, fade }) {
         counter.renderOrder = 1;
         group.add(counter);
     }));
-    const fill = new THREE.Mesh(
-        new THREE.PlaneGeometry(max.x - min.x + 2 * pad, max.y - min.y + pad),
-        makeCutFill(SPOTLIGHT_GLOW_COLOR, { fade }),
-    );
-    fill.geometry.translate((min.x + max.x) / 2, min.y + (max.y - min.y + pad) / 2, 0);
+    // (a unit square, sized each time to just what the cut crosses - past
+    // that, a ray through a part not quite closed would fill the plane too)
+    const fill = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), makeCutFill(SPOTLIGHT_GLOW_COLOR, { fade }));
     fill.visible = false;
     fill.raycast = () => {};
     fill.renderOrder = 1.5; // after the count, before the cut's black lines
@@ -370,12 +368,18 @@ export function setSection(model, share) {
     const z = sectionAt(section, share);
     section.clip.value = share >= 1 ? CLIP_NONE : z;
     section.outline.position.z = z;
-    section.fill.position.z = z;
-    section.fill.visible = share < 1;
     section.cut.visible = share < 1;
+    section.fill.visible = false;
     if (share < 1) {
+        const points = traceCut(section.meshes, z);
         section.cut.geometry.dispose();
-        section.cut.geometry = new THREE.BufferGeometry().setFromPoints(traceCut(section.meshes, z));
+        section.cut.geometry = new THREE.BufferGeometry().setFromPoints(points);
+        if (points.length) {
+            const { min, max } = new THREE.Box3().setFromPoints(points);
+            section.fill.scale.set(max.x - min.x, max.y - min.y, 1);
+            section.fill.position.set((min.x + max.x) / 2, (min.y + max.y) / 2, z);
+            section.fill.visible = true;
+        }
     }
 }
 

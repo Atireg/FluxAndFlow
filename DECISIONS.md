@@ -908,7 +908,10 @@ the tour's own cut shows none - the parts' cut faces filled orange (asked
 for), the usual stencil capping: every part drawn unseen with its back
 faces adding one and its front faces taking one away, so only where the
 plane opened a part does a ray meet more inside than outside; a sheet at
-the cut is drawn there (behind the black lines by a polygon offset). Over
+the cut is drawn there (behind the black lines by a polygon offset), sized
+each time to the box of the cut's own segments - a sheet the plane's whole
+size filled a patch above the model once the camera came closer, a ray
+there meeting a part that isn't quite closed. Over
 working out each cut's polygons from `traceCut` and triangulating them,
 which would rebuild geometry on every step of the slider - and each part's own cut
 is traced in black (asked for, so the joint's detail reads): every
@@ -957,7 +960,9 @@ that part), not the middle of its box, and ends `side` 20 degrees round
 and `above` 18 degrees down onto it, `reach` 0.22 - fitted to the
 screenshot, where the ridge recedes up and to the right. Then (a second
 screenshot: "finish more like this") `above` 55: steeply down onto the cut
-joint, the ridge running up the screen from it, the timber below.
+joint, the ridge running up the screen from it, the timber below. Then
+(asked for: the turn faster, closer in, more facing the visitor) `orbit`
+10, `reach` 0.17, `above` 45.
 
 The looks were chosen by the user: steel
 graphite (the ridge pieces too, Custom 7 and 8, first taken for glass

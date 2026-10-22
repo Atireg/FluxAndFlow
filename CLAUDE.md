@@ -76,11 +76,11 @@ in a pull-out drawer.
   on a soft floor at the foot of its foundations, the person set down onto
   it, a faint shadow under them (`floor`). Its view, on both layouts, is
   steeply from above, its length up the screen (the user's screenshot).
-  As it opens it plays a `tour`: one turn round it (16s) ending with the
+  As it opens it plays a `tour`: one turn round it (10s) ending with the
   cut's side towards the camera, a moment at that view, down to the section
   where it starts (3s), then along with it as it slides to just past the
-  middle, closing in on the ridge joint GS2_GS6 where it's cut, steeply from
-  above and a little from the side, the ridge running up the screen (8s; the
+  middle, closing in on the ridge joint GS2_GS6 where it's cut, from 45
+  degrees above and a little from the side, the ridge running up the screen (8s; the
   user's second screenshot), the slider following; the slider, a double-click, the drawer or orbiting by
   hand stops it where it is. Drawer: the user's chosen text (one paragraph), a YouTube film and five
   pictures (the pavilion at glasstec, the joints, the joint in section); no
@@ -229,7 +229,7 @@ A model in parts (`frameless-glass.js`): `solid` gives the default look,
     info: { GS1: { title, lines: [] } },  // by part name: a card over it, the turn held
     section: true,                        // a slider cuts the model across its length (z in its own space)
     floor: true,                          // soft ground at the model's foot, the figure set down on it, its shadow
-    tour: { orbit: 16, cut: 0.48, focus: 'GS2_GS6', reach: 0.22, over: 8, side: 20, above: 55 },  // played as it opens - see schema.js
+    tour: { orbit: 10, cut: 0.48, focus: 'GS2_GS6', reach: 0.17, over: 8, side: 20, above: 45 },  // played as it opens - see schema.js
 ```
 
 - **Models from Rhino** come as OBJ + .mtl (Rhino 7 has no glTF export):
@@ -329,7 +329,9 @@ A model in parts (`frameless-glass.js`): `solid` gives the default look,
 - **A section's orange fill uses the stencil** (the renderer is made with
   `stencil: true`): each part drawn unseen, back faces counting up, front
   down, then a sheet at the cut where the count isn't 0 (`makeCutCounter`,
-  `makeCutFill`, mesh.js). It needs closed parts; an open one fills wrongly.
+  `makeCutFill`, mesh.js). It needs closed parts; an open one fills wrongly,
+  so the sheet is sized to what the cut crosses (`setSection`) - a full
+  plane once filled a patch above the model through a gap in a part.
 - **A model's turn holds for reasons** (`setHold`, framing.js): 'click'
   (`doubleClick: 'hold'`) and 'hover' (a part with `info`); it turns
   again once neither holds it.
