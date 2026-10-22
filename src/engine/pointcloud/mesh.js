@@ -212,8 +212,24 @@ void main() {
     });
 }
 
-// A section's cut faces (cutFaces, load.js): flat orange, dissolving with
-// the parts
+/**
+ * A section's cut faces (cutFans, load.js), with the stencil: the fans
+ * drawn unseen, each flipping the stencil where it covers, then a sheet
+ * over the cut in flat orange where it's left set (setting it back),
+ * dissolving with the parts
+ */
+export function makeCutFan() {
+    return new THREE.MeshBasicMaterial({
+        side: THREE.DoubleSide,
+        colorWrite: false,
+        depthWrite: false,
+        depthTest: false,
+        stencilWrite: true,
+        stencilFunc: THREE.AlwaysStencilFunc,
+        stencilZPass: THREE.InvertStencilOp,
+    });
+}
+
 export function makeCutFill(ink, { fade }) {
     return new THREE.ShaderMaterial({
         side: THREE.DoubleSide,
@@ -221,6 +237,12 @@ export function makeCutFill(ink, { fade }) {
         polygonOffset: true,
         polygonOffsetFactor: 1,
         polygonOffsetUnits: 1,
+        stencilWrite: true,
+        stencilRef: 0,
+        stencilFunc: THREE.NotEqualStencilFunc,
+        stencilFail: THREE.ReplaceStencilOp,
+        stencilZFail: THREE.ReplaceStencilOp,
+        stencilZPass: THREE.ReplaceStencilOp,
         uniforms: { uInk: { value: ink }, uFade: fade },
         vertexShader: `
 varying vec3 vLocal;

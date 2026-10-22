@@ -73,7 +73,8 @@ in a pull-out drawer.
   each part in its own look (`parts`: light matt-grey steel, oak timber,
   clear glass, each sheet's upper ply outlined thin dark grey); the person beside it isn't drawn - the pebble's points fall and
   form them (`figure`), in three greys (`inks`). Stands still
-  (`still`); a double-click zooms. Over a glass sheet, joint or support (named after
+  (`still`); a double-click plays the tour again (`doubleClick: 'tour'`,
+  hint "play again"). Over a glass sheet, joint or support (named after
   the user's drawing, GS1-GS8) the part is picked out, the turn holds and a
   card beside the pointer says what it is (`info`; a tap on a phone).
   A slider at the foot ("section") cuts it across its length, the far
@@ -83,26 +84,29 @@ in a pull-out drawer.
   on a soft floor at the foot of its foundations, the person set down onto
   it, a faint shadow under them (`floor`). Its view, on both layouts, is
   steeply from above, its length up the screen (the user's screenshot).
-  As it opens it plays a `tour`: one turn round it (9s) ending with the
-  cut's side towards the camera, then at once the section slides (8s), the
+  As it opens it plays a `tour`: half a turn round it (5s, `turns` 0.5)
+  ending with the cut's side towards the camera, then at once the section slides (8s), the
   camera coming down onto it over the first 3s and following it to just
   before the middle - through the middle of the ridge joint's trapezoid connection
   plate nearest it (z 227-278 mm in the file: `cut` 0.472) - closing in on the ridge joint GS2_GS6 where it's cut, from 45
   degrees above and a little from the side, the ridge running up the screen (8s; the
-  user's second screenshot), the slider following; the slider, a double-click, the drawer or orbiting by
-  hand stops it where it is. With the drawer out, the part the section
+  user's second screenshot), the slider following; the slider, the drawer
+  or orbiting by hand stops it where it is, a double-click plays it again. With the drawer out, the part the section
   keeps, from where it's cut, almost square-on (`view.drawer: { side,
-  above, zoom }` - the user's screenshot). Drawer: the user's ZIM research
-  text, rephrased (four paragraphs - the intro, then Construction,
-  Geometry, Thermal analysis - and the funding line as `credits`;
-  approved), a YouTube film and five
-  pictures (the pavilion at glasstec, the joints, the joint in section); no
-  year, role or context rows or thumbnail yet (the default rock).
+  above, zoom }` - the user's screenshot). Drawer: 2024, "Principal
+  investigator", "knippershelbig, project Frameless Glass Structures, for
+  Glasstec 2024 Duesseldorf"; the user's ZIM research text, rephrased (four
+  paragraphs - the intro, then Construction, Geometry, Thermal analysis -
+  and the funding line as `credits`; approved), with a YouTube film and
+  nine pictures set among it by subject (`after`): the pavilion after the
+  intro, the joint after Construction, the tool's diagrams after
+  Geometry, the climate studies after Thermal analysis. No thumbnail yet
+  (the default rock).
 - **Links**: each project's own address is `#<id>` (`#rock-print`).
 - **Drawer copy** is real for all five projects, approved by the user
   word for word; change it only on request.
-- **Waiting on the user**: the path's milestones checked; Frameless Glass Structures' year, role,
-  context and thumbnail; a seventh Nap Nap Hooray picture (Sleep per
+- **Waiting on the user**: the path's milestones checked; Frameless Glass Structures'
+  thumbnail; a seventh Nap Nap Hooray picture (Sleep per
   day / Number of naps - sent inline, not as a file), picture
   captions/credits, model licensing, real-device and Safari checks.
 
@@ -206,13 +210,14 @@ defineProject({
             lift: { stacked: 0.14, side: 0 }, sway: 13 },  // camera angle; give every new model one -
                                           // elevation, turn, zoom, lift: a number, or { side, stacked }
     gather: true,                         // points gather from a scattered swirl on open
-    doubleClick: 'hold',                  // 'zoom' (default), 'hold', 'drop' (with `drop`), 'none'
+    doubleClick: 'hold',                  // 'zoom' (default), 'hold', 'drop' (with `drop`), 'tour' (with `tour`), 'none'
     autoZoom: 10,                         // camera moves in / out by itself every 10s (not with `drop`)
     eyeLevel: 0.4,                        // with autoZoom: two of every three moves in are from inside
     // drop: { count: 3, size: 3, ground: -1.2, solid: true, contacts: true,
     //         closeUp: { hold: 5, after: 5 }, velocity: true },  // physics drop (Emergent Space)
     videos: [{ vimeo: '294086902', title: '' }],  // films above the pictures: a Vimeo number, or { youtube: 'JnKaReHR4So' }
     images: [{ src: 'images/x.jpg', alt: '', caption: '', ratio: '3 / 2', wide: false }],
+                                          // a picture or film with `after: n`: set after paragraph n of body
 })
 ```
 
@@ -334,18 +339,23 @@ A model in parts (`frameless-glass.js`): `solid` gives the default look,
 - **Nothing runs at module scope in `src/engine/`** - everything waits for
   `engine.start()`.
 - **A `tour` turns the model, not the camera** (`tourSpin`, detail.js),
-  which reads the same - the inks are lit from the view - by about once
+  which reads the same - the inks are lit from the view - by about `turns`
   round, ending with the cut's side to the camera (`tourTurn`), then follows
   the cut at `side`/`above` (`framing.frameSection` gives the pose) -
   placed every frame on the tour's own clock (`rig.placeCamera`), blended
   from where the camera was over the first `TOUR_APPROACH` seconds: a tween
   for the move down, cut short where the following took over, made it jump; the visitor's slider, double-click, drawer
-  or orbiting stops it (`stopTour`).
-- **A section's orange fill is its cut outlines, triangulated**
-  (`cutFaces`, `joinLoops`, load.js), rebuilt with the black cut lines on
-  each step. Not the stencil: the model's parts aren't all closed, and
-  stencil capping filled a whole glass panel through a gap. An outline
-  that doesn't close is left unfilled.
+  or orbiting stops it (`stopTour`); `doubleClick: 'tour'` plays it again
+  (`replayTour`: the turn on from where the model stands, `tour.base`).
+- **A section's orange fill is drawn flat, at the cut, with the stencil**
+  (renderer `stencil: true`): from the middle of each part's cut a thin
+  triangle to every cut segment, each flipping the stencil (`cutFans`,
+  `makeCutFan`), then an orange sheet where it's left set (`makeCutFill`),
+  rebuilt with the black lines each step. Even-odd needs no joined
+  outlines - this model's pieces overlap and miss each other by 0.1 mm,
+  which broke joining them - and doubled segments cancel. Not stencil
+  capping of the 3D parts: they aren't all closed, and it filled a whole
+  glass panel through a gap.
 - **A model's turn holds for reasons** (`setHold`, framing.js): 'click'
   (`doubleClick: 'hold'`) and 'hover' (a part with `info`); it turns
   again once neither holds it.

@@ -551,6 +551,12 @@ jump just before the close-up settled: the move down to the section was a
 tween the following cut short; now it's placed frame by frame on the
 tour's clock. Then no pause after the turn - the section slides as soon as
 it ends, the camera coming down onto it as it goes - and the turn 9s.
+Then: half a turn (5s); a double-click plays the tour again; the year
+(2024), role (Principal investigator) and context rows; all nine pictures
+(four new: the tool's diagrams and the thermal studies) set among the text
+by subject, with the film after the intro (`after`, new); and the orange
+fill drawn with the stencil even-odd from each part's cut, which fills the
+ridge profile the user circled.
 
 Open at end of session: as at the end of session 4; a seventh Nap Nap
 Hooray picture, to come as a file; Frameless Glass Structures' year,

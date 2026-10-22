@@ -1109,6 +1109,12 @@ body.drawer-open .section-slider {
     margin: 1.5rem 0 0;
 }
 
+/* ...or set among the text, after a paragraph (`after`) */
+.drawer__body .drawer__videos,
+.drawer__body .drawer__images {
+    margin: 0 0 1.5rem;
+}
+
 /* The way to the film that always works, full screen on a phone included */
 .drawer__video-link,
 .drawer__link {

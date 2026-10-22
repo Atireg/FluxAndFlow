@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useState } from 'react';
+import { forwardRef, Fragment, useEffect, useState } from 'react';
 import { hasDescription, metaRows } from '../projects/index.js';
 import clickOnly from './clickOnly.js';
 import ImageViewer from './ImageViewer.jsx';
@@ -42,6 +42,22 @@ const ProjectDrawer = forwardRef(function ProjectDrawer({ project, open, onToggl
     const rows = metaRows(project);
     const [enlarged, setEnlarged] = useState(null);
 
+    // The films, then the pictures, set after paragraph `after` of the text
+    // (`after` in the project), or undefined: the rest, after all of it
+    const media = (after) => (
+        <>
+            <div className="drawer__videos">
+                {(project?.videos ?? []).filter((video) => video.after === after)
+                    .map((video) => <ProjectVideo key={video.vimeo ?? video.youtube} video={video} />)}
+            </div>
+            <div className="drawer__images">
+                {(project?.images ?? []).filter((image) => image.after === after).map((image, index) => (
+                    <ProjectImage key={image.src || `empty-${index}`} image={image} onEnlarge={() => setEnlarged(image)} />
+                ))}
+            </div>
+        </>
+    );
+
     // An enlarged picture goes with the drawer, and with the project
     useEffect(() => {
         if (!open) setEnlarged(null);
@@ -82,20 +98,17 @@ const ProjectDrawer = forwardRef(function ProjectDrawer({ project, open, onToggl
                 </dl>
 
                 <div className="drawer__body">
-                    {(project?.body ?? []).map((entry, index) => (Array.isArray(entry)
-                        ? <ul key={index}>{entry.map((item, i) => <li key={i}>{withLinks(item)}</li>)}</ul>
-                        : <p key={index}>{withLinks(entry)}</p>))}
-                </div>
-
-                <div className="drawer__videos">
-                    {(project?.videos ?? []).map((video) => <ProjectVideo key={video.vimeo ?? video.youtube} video={video} />)}
-                </div>
-
-                <div className="drawer__images">
-                    {(project?.images ?? []).map((image, index) => (
-                        <ProjectImage key={image.src || `empty-${index}`} image={image} onEnlarge={() => setEnlarged(image)} />
+                    {(project?.body ?? []).map((entry, index) => (
+                        <Fragment key={index}>
+                            {Array.isArray(entry)
+                                ? <ul>{entry.map((item, i) => <li key={i}>{withLinks(item)}</li>)}</ul>
+                                : <p>{withLinks(entry)}</p>}
+                            {media(index)}
+                        </Fragment>
                     ))}
                 </div>
+
+                {media(undefined)}
 
                 <p className="drawer__credits">{project?.credits ?? ''}</p>
             </div>
