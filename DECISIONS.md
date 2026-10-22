@@ -948,7 +948,9 @@ side towards the camera - once round, give or take up to half a turn
 down. The camera aims at the focus part's own cut outline (`traceCut` of
 that part), not the middle of its box, and ends `side` 20 degrees round
 and `above` 18 degrees down onto it, `reach` 0.22 - fitted to the
-screenshot, where the ridge recedes up and to the right.
+screenshot, where the ridge recedes up and to the right. Then (a second
+screenshot: "finish more like this") `above` 55: steeply down onto the cut
+joint, the ridge running up the screen from it, the timber below.
 
 The looks were chosen by the user: steel
 graphite (the ridge pieces too, Custom 7 and 8, first taken for glass

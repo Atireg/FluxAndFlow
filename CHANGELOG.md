@@ -531,7 +531,7 @@ to it where it starts, and along with it as it slides in. Then one turn
 only, ending facing the cut, and an end view like the user's screenshot: on
 the ridge joint where it's cut, a little from the side and above; the
 plane's outline larger and shown only while the visitor handles the model
-or the slider.
+or the slider. Then that end view steeply from above (a second screenshot).
 
 Open at end of session: as at the end of session 4; a seventh Nap Nap
 Hooray picture, to come as a file; Frameless Glass Structures' year,
