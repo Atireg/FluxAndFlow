@@ -741,6 +741,74 @@ body.drawer-open .section-slider {
     text-decoration-color: currentColor;
 }
 
+/* The filter's path view (PathView.jsx): its name under the filter, in the
+   bar title's type, and a washing line under it with the tap hint's dots
+   hung on it, black like the hint's string. Over the sunk pebbles, clear of
+   the canvas's clicks */
+.path-view {
+    position: fixed;
+    inset: 0;
+    z-index: 2; /* above the canvas (1) by z-index, not page order */
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.4s ease, visibility 0s linear 0.4s;
+}
+
+.path-view.is-showing {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 1s ease 0.3s, visibility 0s;
+}
+
+.path-view__title {
+    position: absolute;
+    left: 0;
+    margin: 0;
+    padding: 0 clamp(1.25rem, 3vw, 2.5rem);
+    font-size: clamp(1.4rem, 2.6vw, 2.1rem);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+}
+
+.path-view__scene {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+
+.path-view__line path,
+.path-view__dot line {
+    fill: none;
+    stroke: var(--hint-line);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.2;
+}
+
+.path-view__line .path-view__glow {
+    stroke-width: 4;
+    opacity: 0.14;
+}
+
+.path-view__dot line {
+    stroke-width: 1;
+}
+
+.path-view__end,
+.path-view__peg {
+    fill: var(--hint-line);
+}
+
+.path-view__ball {
+    fill: var(--hint-fill);
+    stroke: var(--hint-line);
+    opacity: 0.9;
+}
+
 /* A project's kind, after its name in the bar: a small, quiet tag */
 .bar__category {
     margin-left: 0.6em;

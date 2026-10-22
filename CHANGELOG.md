@@ -551,3 +551,18 @@ funding line as its credits (approved with "merge and build").
 Open at end of session: as at the end of session 4; a seventh Nap Nap
 Hooray picture, to come as a file; Frameless Glass Structures' year,
 role, context and thumbnail.
+
+---
+
+## Session 6 — 2026-10-22
+
+Branch `claude/loving-ramanujan-stqa6z`, not merged.
+
+- **The path.** A fourth choice in the filter, after The real world: every
+  pebble sinks and "The path" appears under the filter, with a washing line
+  under it moving in the wind and ten of the tap hint's dots hanging from
+  it on threads, each swinging (`PathView.jsx`). The spotlight rests while
+  no pebble is in focus.
+
+Open at end of session: as at the end of session 5; what the path's dots
+stand for.

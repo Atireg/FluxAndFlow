@@ -25,6 +25,7 @@ The catalog (the grid of pebbles - "cubes" in the code)
 - Clicking a project knocks the rest of the grid off the screen
 - A pebble's colour drifts with its shape
 - Three kinds of project, and bringing one forward
+- The path: a view of its own, a washing line of dots
 
 The project view: camera
 - The detail camera looks along the catalog's screen-up; every move slerps
@@ -545,6 +546,31 @@ snapping off (`spotlight.dwell`, `cut`).
 A click on a sunk pebble brings its kind forward rather than opening it: a
 project opens on its own pebble, which has to be up in its place for the
 dissolve and the framing.
+
+
+The path: a view of its own, a washing line of dots
+---------------------------------------------------
+
+Asked for as a fourth choice in the filter, after The real world: "The
+path", the employment history read like a CV. It isn't a kind of project,
+so it isn't in `CATEGORIES` (`PATH_VIEW`, app/words.js); the engine is told
+to bring 'path' forward like any kind, and as no pebble is of it every
+pebble sinks - no change to the engine but that the spotlight, with none in
+focus, now picks nothing rather than any pebble (an orange behind the line
+would ask for a click). A click on a sunk pebble still brings its own kind
+forward, leaving the path.
+
+Its name sits under the filter (measured each frame - the filter wraps to
+two rows on a phone), and under it a washing line across the screen
+(asked for: "like a string where we hang clothes to dry", moving in the
+wind) with ten of the tap hint's dots, white with a black outline, each
+on a short thread (`PathView.jsx`). The line bellies and lifts with a slow
+gust and carries a small ripple; each dot is a damped pendulum pushed by
+the same wind where it hangs (`wind(share, t)`), so neighbours move alike
+but not in step. It moves every frame, so it is drawn through refs by its
+own frame loop, running only while the view is on screen - not the
+engine's, which owns only the canvas. Still with reduced motion. The dots
+hold nothing yet: what each stands for comes from the user.
 
 
 
