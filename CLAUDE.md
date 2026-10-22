@@ -364,8 +364,8 @@ pixels (it projects in place - never project first);
 `pickInk(tone)` in a points shader with `pointInkUniforms()`;
 `clickOnly(fn)` for a button over the canvas; `TagString`, `DrawerFigure`;
 `sectionAt(section, share)` (pointcloud/load.js) for where a section cuts,
-`setSection` to cut there; `INK_GRAIN_GLSL` and `ALONG_VERTEX_GLSL`
-(pointcloud/mesh.js) in a solid model's shaders.
+`setSection` to cut there; `INK_GRAIN_GLSL` (pointcloud/mesh.js) in a
+solid model's shaders.
 
 ## After every fixed issue
 
