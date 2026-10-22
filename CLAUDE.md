@@ -35,8 +35,9 @@ in a pull-out drawer.
   completely, and under the name a
   washing line moving in the wind with ten of the tap hint's dots hanging
   from it, swinging (`src/components/PathView.jsx`). Each dot a milestone
-  from the user's CV (`src/app/path.js`), labelled under it - only the
-  year on a phone. Hovered or tapped, a dot presses twice like the tap
+  from the user's CV (`src/app/path.js`), labelled under it. On a phone the
+  line runs down the left edge and the dots fly from it like flags, each
+  labelled beside it. Hovered or tapped, a dot presses twice like the tap
   hint and a card drops from it on a string (details and a picture, both
   from the CV; `static/images/path-*.jpg`). Put there "for now"; the user
   may reword them.

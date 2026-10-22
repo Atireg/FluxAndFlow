@@ -577,9 +577,17 @@ it). The line's belly and ripple follow the same noise.
 
 Each dot is a milestone of the user's career and education, oldest first
 (`MILESTONES`, app/path.js), taken from their CV in its own words: years,
-role or degree, place, in a label under the dot that moves with it. On a
-phone the dots are about 33px apart, too close for more than the first
-year.
+role or degree, place, in a label under the dot that moves with it.
+
+On a phone (under `UPRIGHT_BELOW`, 860px) the line runs down the screen by
+its left edge, and the dots fly from it like flags (asked for): the wind
+across each holds it out against its weight (`FLAG_PUSH`, about 70
+degrees from hanging), gusting, with a quick flutter (`flagWind`) and a
+faster twist to and fro (`FLAG_TWIST`). The label sits beside its flag -
+the years and the role, at most two lines; the card has the rest. Across
+the screen, the dots were 33px apart there, room for a year only. A card
+stops short of the foot of the screen, over its dot if need be, and a tap
+on it closes it.
 
 Hovered (tapped on a touch screen), a dot presses twice like the tap hint
 - its own keyframes, played once and quicker (1.2s), rings and all - and on

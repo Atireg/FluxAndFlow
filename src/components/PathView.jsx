@@ -20,6 +20,10 @@ import { MILESTONES } from '../app/path.js';
  * to side like the hint's falling leaf until it settles hanging under the
  * dot. Let go, the card falls on away and fades, as the hint does.
  *
+ * On a phone (under 860px) the line runs down the screen instead, by its
+ * left edge, and the dots fly from it like flags: blown out to the right on
+ * their threads, fluttering, the milestone beside each.
+ *
  * Moves every frame, so never through React state: its own frame loop
  * writes the SVG through refs, and only while it is on screen.
  */
@@ -34,6 +38,9 @@ const PUSH = 5; // how far the wind pushes a dot round
 const TURBULENCE = 5; // how hard the eddies push a dot to and fro
 const GUST_CROSSING = 1.4; // seconds a gust takes to cross the line
 const MAX_STEP = 1 / 30; // a stalled frame holds the swing rather than flinging it
+const UPRIGHT_BELOW = 860; // px wide: the line runs down the screen, the dots fly as flags
+const FLAG_PUSH = 16; // how hard the wind holds a flag out: it flies about 70 degrees from hanging
+const FLAG_TWIST = 9; // how hard the flutter twists it to and fro
 const DROP_AFTER = 0.55; // seconds from the hover to the second press, when the card drops
 const DROP_EASE = 0.35; // seconds it takes to settle, roughly
 const DROP_HANG = 1.3; // the card's string, in dot sizes
@@ -68,6 +75,15 @@ function wind(share, t) {
         + 0.09 * noise(gusting * 0.22)
         + 0.06 * noise(gusting * 0.7 + 40)
         + 0.03 * noise(t * 1.7 + share * 9 + 80);
+}
+
+// The wind a flag feels at `share` down the line: steady enough to hold it
+// out, with gusts and a quick flutter
+function flagWind(share, t) {
+    const gusting = t - share * GUST_CROSSING;
+    return 0.8
+        + 0.22 * noise(gusting * 0.4 + 500)
+        + 0.14 * noise(t * 3.1 + share * 11 + 600);
 }
 
 // Eddies to and from the visitor at `share`, -1..1
@@ -156,9 +172,9 @@ export default function PathView({ shown }) {
                 if (!opened) open(hung);
             });
         });
-        // A tap anywhere else lets go of them all
+        // A tap anywhere else, the card itself included, lets go of them all
         on(document, 'pointerup', (event) => {
-            if (event.pointerType === 'mouse' || event.target.closest?.('.path-view__hit, .path-view__card')) return;
+            if (event.pointerType === 'mouse' || event.target.closest?.('.path-view__hit')) return;
             dots.forEach(close);
         });
 
@@ -193,7 +209,10 @@ export default function PathView({ shown }) {
             const cardWidth = hung.card.offsetWidth;
             const swayX = DROP_SWAY * size * Math.sin(phase) * fade;
             const leftX = Math.min(Math.max(bottomX + swayX - cardWidth / 2, margin), width - margin - cardWidth);
-            const topY = bottomY + DROP_HANG * size * settle + away;
+            // Never past the foot of the screen: a low flag's card stops
+            // short, over its dot if need be
+            const lowest = window.innerHeight - margin - hung.card.offsetHeight;
+            const topY = Math.min(bottomY + DROP_HANG * size * settle, Math.max(lowest, margin)) + away;
             const tilt = DROP_TILT * Math.cos(phase) * fade;
 
             card.visibility = 'visible';
@@ -203,7 +222,7 @@ export default function PathView({ shown }) {
             label.opacity = String(Math.max(0, 1 - Math.min(since / 0.25, 1) * (1 - gone)));
 
             const tieX = Math.min(Math.max(bottomX + swayX, leftX + 12), leftX + cardWidth - 12);
-            hung.hang.style.visibility = gone > 0 ? 'hidden' : 'visible';
+            hung.hang.style.visibility = gone > 0 || topY < bottomY ? 'hidden' : 'visible';
             hung.hang.setAttribute('x1', bottomX);
             hung.hang.setAttribute('y1', bottomY);
             hung.hang.setAttribute('x2', tieX);
@@ -221,12 +240,16 @@ export default function PathView({ shown }) {
             const filter = document.querySelector('.filter')?.getBoundingClientRect();
             titleRef.current.style.top = `${filter ? filter.bottom - margin * 0.5 : margin}px`;
             const title = titleRef.current.getBoundingClientRect();
-            const left = margin;
+            const upright = width < UPRIGHT_BELOW;
+            const left = upright ? margin + 4 : margin;
             const right = width - margin;
-            const top = title.bottom + Math.max(28, window.innerHeight * 0.06);
-            const length = right - left;
+            const top = title.bottom + (upright ? 22 : Math.max(28, window.innerHeight * 0.06));
+            const bottom = window.innerHeight - margin;
+            const length = upright ? bottom - top : right - left;
             const size = dotSize();
-            const labelWidth = (length / DOT_COUNT) * 0.92;
+            const labelWidth = upright
+                ? width - left - SAG * length - size * (THREAD + 2) - margin
+                : (length / DOT_COUNT) * 0.92;
             const belly = SAG * length * (1 + (still ? 0 : LIFT * (noise(t * 0.3 + 300) - 2 * (wind(0.5, t) - 0.1))));
 
             // Where the line is at `share` along it: a belly, and ripples
@@ -234,7 +257,9 @@ export default function PathView({ shown }) {
             const at = (share) => {
                 const ripple = still ? 0 : 0.014 * length * Math.sin(Math.PI * share)
                     * noise(t * 0.9 - share * 2.5 + 400);
-                return [left + share * length, top + belly * 4 * share * (1 - share) + ripple];
+                const bow = belly * 4 * share * (1 - share) + ripple;
+                // Upright, the wind bows the line out to the right
+                return upright ? [left + bow * 0.6, top + share * length] : [left + share * length, top + bow];
             };
 
             let d = '';
@@ -258,18 +283,23 @@ export default function PathView({ shown }) {
                     // The line dropping under it lightens the dot a moment,
                     // rising makes it heavier: gravity as the dot feels it
                     const fall = hung.lastY === null ? 0 : (y - hung.lastY) / step;
-                    const lurch = (fall - hung.fall) / step;
+                    const lurch = upright ? 0 : (fall - hung.fall) / step;
                     hung.fall = fall;
                     hung.lastY = y;
                     const gravity = (SWING / hung.length) * Math.min(2, Math.max(0.3, 1 - lurch / (SWING * reach)));
 
+                    // A flag: the wind across it against its weight; hanging,
+                    // the wind's push
+                    const push = upright
+                        ? FLAG_PUSH * flagWind(share, t) * Math.cos(hung.side)
+                        : PUSH * wind(share, t);
                     const sidePull = -gravity * Math.sin(hung.side) - DAMPING * hung.sideSpeed
-                        + PUSH * wind(share, t) / hung.length;
+                        + push / hung.length;
                     hung.sideSpeed += sidePull * step;
                     hung.side += hung.sideSpeed * step;
 
                     const depthPull = -gravity * Math.sin(hung.depth) - DAMPING * hung.depthSpeed
-                        + TURBULENCE * eddy(share, t) / hung.length;
+                        + (upright ? FLAG_TWIST * eddy(share, t * 2.5) : TURBULENCE * eddy(share, t)) / hung.length;
                     hung.depthSpeed += depthPull * step;
                     hung.depth += hung.depthSpeed * step;
                 }
@@ -304,8 +334,10 @@ export default function PathView({ shown }) {
 
                 const label = labels[i].style;
                 label.width = `${labelWidth}px`;
-                label.transform = `translate(${(cx - labelWidth / 2).toFixed(1)}px, `
-                    + `${(cy + size * 0.75).toFixed(1)}px)`;
+                // Beside a flag; under a hanging dot
+                label.transform = upright
+                    ? `translate(${(cx + size * 0.8).toFixed(1)}px, ${cy.toFixed(1)}px) translateY(-50%)`
+                    : `translate(${(cx - labelWidth / 2).toFixed(1)}px, ${(cy + size * 0.75).toFixed(1)}px)`;
 
                 dropCard(hung, cx, cy + size / 2, size, margin, width, label);
             });
@@ -350,7 +382,6 @@ export default function PathView({ shown }) {
             {MILESTONES.map(({ when, what, where }) => (
                 <p className="path-view__label" key={when + what}>
                     <span className="path-view__when">{when}</span>
-                    <span className="path-view__year">{when.match(/\d{4}/)?.[0] ?? when}</span>
                     <span className="path-view__what">{what}</span>
                     <span className="path-view__where">{where}</span>
                 </p>

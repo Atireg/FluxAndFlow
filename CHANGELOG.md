@@ -582,6 +582,8 @@ Branch `claude/loving-ramanujan-stqa6z`, not merged.
 - **The path's cards**: hovered or tapped, a dot presses twice like the
   tap hint and a card with details and a picture from the CV drops from it
   like the hint's leaf, settling under it; let go, it falls away.
+- **The path on a phone**: the line runs down the screen, the dots flying
+  from it like flags, fluttering, each labelled beside it.
 
 Open at end of session: as at the end of session 5; the path's ten
 milestones checked by the user.
