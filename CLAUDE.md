@@ -81,10 +81,10 @@ in a pull-out drawer.
   on a soft floor at the foot of its foundations, the person set down onto
   it, a faint shadow under them (`floor`). Its view, on both layouts, is
   steeply from above, its length up the screen (the user's screenshot).
-  As it opens it plays a `tour`: one turn round it (10s) ending with the
-  cut's side towards the camera, a moment at that view, down to the section
-  where it starts (3s), then along with it as it slides to just before the
-  middle - through the middle of the ridge joint's trapezoid connection
+  As it opens it plays a `tour`: one turn round it (9s) ending with the
+  cut's side towards the camera, then at once the section slides (8s), the
+  camera coming down onto it over the first 3s and following it to just
+  before the middle - through the middle of the ridge joint's trapezoid connection
   plate nearest it (z 227-278 mm in the file: `cut` 0.472) - closing in on the ridge joint GS2_GS6 where it's cut, from 45
   degrees above and a little from the side, the ridge running up the screen (8s; the
   user's second screenshot), the slider following; the slider, a double-click, the drawer or orbiting by
@@ -240,7 +240,7 @@ A model in parts (`frameless-glass.js`): `solid` gives the default look,
     info: { GS1: { title, lines: [] } },  // by part name: a card over it, the turn held
     section: true,                        // a slider cuts the model across its length (z in its own space)
     floor: true,                          // soft ground at the model's foot, the figure set down on it, its shadow
-    tour: { orbit: 10, cut: 0.472, focus: 'GS2_GS6', reach: 0.17, over: 8, side: 20, above: 45 },  // played as it opens - see schema.js
+    tour: { orbit: 9, cut: 0.472, focus: 'GS2_GS6', reach: 0.17, over: 8, side: 20, above: 45 },  // played as it opens - see schema.js
 ```
 
 - **Models from Rhino** come as OBJ + .mtl (Rhino 7 has no glTF export):
@@ -334,9 +334,10 @@ A model in parts (`frameless-glass.js`): `solid` gives the default look,
 - **A `tour` turns the model, not the camera** (`tourSpin`, detail.js),
   which reads the same - the inks are lit from the view - by about once
   round, ending with the cut's side to the camera (`tourTurn`), then follows
-  the cut at `side`/`above` with `framing.frameSection` - placed every frame
-  on the tour's own clock (`rig.placeCamera`), the move down to it too: a
-  tween for that, cut short where the following took over, made it jump; the visitor's slider, double-click, drawer
+  the cut at `side`/`above` (`framing.frameSection` gives the pose) -
+  placed every frame on the tour's own clock (`rig.placeCamera`), blended
+  from where the camera was over the first `TOUR_APPROACH` seconds: a tween
+  for the move down, cut short where the following took over, made it jump; the visitor's slider, double-click, drawer
   or orbiting stops it (`stopTour`).
 - **A section's orange fill is its cut outlines, triangulated**
   (`cutFaces`, `joinLoops`, load.js), rebuilt with the black cut lines on

@@ -98,9 +98,8 @@ const INSIDE_FOV = 65; // degrees - a wider lens than outside, the way eyes take
 const INSIDE_WIDTH = 55; // degrees across at least, so a tall phone screen still sees between the columns
 const INSIDE_FOV_MAX = 90; // degrees - the most the lens widens for that
 const TOUR_AFTER = 1.5; // seconds after the model is shown that a `tour` sets off
-const TOUR_PAUSE = 1; // seconds it rests at the view between the turn and the move in
-const TOUR_APPROACH = 3; // seconds to come down to the section where it starts
-const TOUR_WIDE = 1.15; // ...seeing this much of the model's breadth across, before closing in
+const TOUR_APPROACH = 3; // seconds to come down onto the section, as it starts to slide
+const TOUR_WIDE = 1.15; // ...seeing this much of the model's breadth across as it sets off
 const NEAR_SHARE = 0.05; // the near plane, as a share of the way to what the camera looks at
 const NEAR_LEAST = 0.02; // ...and no nearer than this
 const INSIDE_NEAR = 0.05; // the camera's near plane while standing among the points (1 otherwise clips the nearest columns)
@@ -883,36 +882,32 @@ export function createDetail({
             if (!tour.turn) tour.turn = tourTurn(model, plan);
             tour.spin = tour.turn * smooth01(t / plan.orbit);
 
-            // Down to the section where it starts, the whole cut in view...
+            // As the turn ends the section sets off, sliding to `cut` as the
+            // camera closes in on `focus` - and over the first TOUR_APPROACH
+            // seconds comes down onto it from wherever it was. Frame by frame
+            // on the tour's own clock: a tween for the move down, cut short
+            // where the following took over, made the camera jump.
             const { focus, side, above } = plan;
-            const closing = t - plan.orbit - TOUR_PAUSE;
+            const closing = t - plan.orbit;
             if (closing < 0) return;
-            // (frame by frame on the tour's own clock, from wherever the
-            // camera was - a tween of its own, cut short where the following
-            // took over, made the camera jump on a slow frame)
             if (!tour.moved) {
                 tour.moved = true;
                 tour.from = { position: rig.camera.position.clone(), target: rig.controls.target.clone() };
             }
-            if (closing < TOUR_APPROACH) {
-                const k = smooth01(closing / TOUR_APPROACH);
-                const to = framing.frameSection(model, { focus, side, above, share: 1, reach: TOUR_WIDE, place: false });
-                if (to) {
-                    rig.placeCamera(
-                        tour.from.position.clone().lerp(to.position, k),
-                        tour.from.target.clone().lerp(to.target, k),
-                    );
-                }
-                return;
-            }
-
-            // ...then along with it as it slides to `cut`, closing in on `focus`
-            const following = closing - TOUR_APPROACH;
-            const k = smooth01(following / plan.over);
+            const k = smooth01(closing / plan.over);
             const share = 1 - (1 - plan.cut) * k;
             cutAt(model, share);
-            framing.frameSection(model, { focus, side, above, share, reach: TOUR_WIDE + (plan.reach - TOUR_WIDE) * k });
-            if (following >= plan.over) tour.stopped = true;
+            const to = framing.frameSection(model, {
+                focus, side, above, share, reach: TOUR_WIDE + (plan.reach - TOUR_WIDE) * k,
+            });
+            if (to) {
+                const down = smooth01(closing / TOUR_APPROACH);
+                rig.placeCamera(
+                    tour.from.position.clone().lerp(to.position, down),
+                    tour.from.target.clone().lerp(to.target, down),
+                );
+            }
+            if (closing >= Math.max(plan.over, TOUR_APPROACH)) tour.stopped = true;
         },
 
         // Where the pointer is over the model now (null: off it, or gone)

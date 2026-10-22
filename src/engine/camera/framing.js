@@ -537,11 +537,11 @@ export function createFraming({ rig, screen, state, grid, ui }) {
          * from the side cut away - square-on, or `side` degrees round and
          * `above` degrees down - centred on the part named `focus` where the
          * cut passes through it, `reach` of the parts' breadth
-         * across the window - this frame, as a `tour` follows the cut along
-         * (the model must stay where it is), or with `place: false` only
-         * where the camera would be, { position, target }.
+         * across the window: where the camera would be, { position, target }
+         * (nothing without a section or that part) - a `tour` places it there
+         * frame by frame.
          */
-        frameSection(model, { focus, share, reach, side = 0, above = 0, place = true }) {
+        frameSection(model, { focus, share, reach, side = 0, above = 0 }) {
             const section = model.userData.section;
             if (!section) return;
 
@@ -567,7 +567,6 @@ export function createFraming({ rig, screen, state, grid, ui }) {
             const tan = Math.tan(THREE.MathUtils.degToRad(rig.perspectiveCamera.fov) / 2);
             const distance = (reach * breadth) / 2 / (tan * screen.aspect);
             const position = target.clone().addScaledVector(toward, -distance);
-            if (place) rig.placeCamera(position, target);
             return { position, target };
         },
 
