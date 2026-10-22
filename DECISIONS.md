@@ -603,9 +603,12 @@ asked for): opened, it skips the landing page and chooses the path once
 the loader has cleared; choosing it puts it in the address with a step in
 the history, so Back leaves it; choosing anything else takes it out.
 
-"click me!" (the user's words, `PATH_HINT`) sits over the dots in the tap
-hint's words' look, riding the line - over its middle, or beside its top
-when it runs down a phone. A card opens from its dot's words as well as
+"click me!" (the user's words, `PATH_HINT`) sits over one dot at a time in
+the tap hint's words' look - a little up and to the right of a hanging
+dot, clear of its thread, or straight over a flag - for `HINT_SHOW`, then
+fades and turns up over another chosen at random (asked for), never the
+same one twice running nor one with its card out; over a dot whose card
+opens it fades at once. It first sat still over the line's middle. A card opens from its dot's words as well as
 the dot (asked for), hovered or tapped.
 
 Hovered (tapped on a touch screen), a dot presses twice like the tap hint
