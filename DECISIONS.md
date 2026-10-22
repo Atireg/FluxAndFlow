@@ -577,9 +577,52 @@ it). The line's belly and ripple follow the same noise.
 
 Each dot is a milestone of the user's career and education, oldest first
 (`MILESTONES`, app/path.js), taken from their CV in its own words: years,
-role or degree, place, in a label under the dot that moves with it. On a
-phone the dots are about 33px apart, too close for more than the first
-year. It moves every frame, so it is drawn through refs by its
+role or degree, place, in a label under the dot that moves with it.
+
+On a phone (under `UPRIGHT_BELOW`, 860px) the line runs down the screen by
+its left edge, and the dots fly from it like flags (asked for): the wind
+across each holds it out against its weight (`FLAG_PUSH`, about 70
+degrees from hanging), gusting, with a quick flutter (`flagWind`) and a
+faster twist to and fro (`FLAG_TWIST`). The label sits beside its flag -
+the years and the role, at most two lines; the card has the rest. Across
+the screen, the dots were 33px apart there, room for a year only. A card
+stops short of the foot of the screen, over its dot if need be, and a tap
+on it closes it.
+
+The background's streams go with the wind (asked for: "more or less"):
+while the path is on screen the page tells the engine (`setWind`, generic -
+a wind across the screen, left to right), and over `WIND_IN` the streams
+turn to blow that way, in gusts that cross from the left, `WIND_SHARE` of
+their way the wind's and the rest still their own braided current, so they
+don't run in ruled lines. The pointer's pull gives way to it. They no
+longer part round pebbles the filter has faded out of sight (`isGone`) -
+they turned aside round nothing.
+
+The path has a link of its own, `#path`, as a project does (links.js,
+asked for): opened, it skips the landing page and chooses the path once
+the loader has cleared; choosing it puts it in the address with a step in
+the history, so Back leaves it; choosing anything else takes it out.
+
+"click me!" (the user's words, `PATH_HINT`) sits over the dots in the tap
+hint's words' look, riding the line - over its middle, or beside its top
+when it runs down a phone. A card opens from its dot's words as well as
+the dot (asked for), hovered or tapped.
+
+Hovered (tapped on a touch screen), a dot presses twice like the tap hint
+- its own keyframes, played once and quicker (1.2s), rings and all - and on
+the second press (`DROP_AFTER`) a card drops from it on a string: the
+milestone's picture, years, role, place and a few lines of details, from
+the CV (asked for: "details and images ... make them drop similar to the
+pulsing dots"). It drifts side to side as it drops, like the hint's falling
+leaf, but settles hanging under the dot rather than falling off the screen;
+only once let go does it fall on and fade (`LET_GO`), as the hint does.
+The pictures are the CV's own, ~370px across - enough for a card 17rem
+wide. A card stays `LEAVE_GRACE` (1.8s) after the pointer leaves it or its
+dot, then falls over `LET_GO` (0.9s) - at 0.25s and 0.6s it fell before
+it could be read (asked for) - and a dot's hover area is wider than the
+dot, so its swing doesn't slip it out from under a still pointer. The label under a dot fades while
+its card is out - the card says the same. The card is drawn by the same
+frame loop, through refs. It moves every frame, so it is drawn through refs by its
 own frame loop, running only while the view is on screen - not the
 engine's, which owns only the canvas. Still with reduced motion. The dots
 hold nothing yet: what each stands for comes from the user.
@@ -1459,6 +1502,10 @@ every width (`nowrap`, ellipsis if ever too long).
 
 Drawer pictures
 ---------------
+
+A picture with `after: n` sits in the text after `body[n]` (asked for: the
+pictures distributed through the text, each by what it shows), in a grid
+of its own laid out by the same rules; the rest stay below the text.
 
 `images` entries (`{ src, alt, caption, ratio, wide, pair }`) render as figures
 under the text (`components/ProjectImage.jsx`, in the frame it shares with

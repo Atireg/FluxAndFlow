@@ -35,9 +35,15 @@ in a pull-out drawer.
   completely, and under the name a
   washing line moving in the wind with ten of the tap hint's dots hanging
   from it, swinging (`src/components/PathView.jsx`). Each dot a milestone
-  from the user's CV (`src/app/path.js`), labelled under it - only the
-  year on a phone. Put there "for now"; the user may reword them.
-- **Rock Print Pavilion** (slot 0): a point cloud that gathers out of a
+  from the user's CV (`src/app/path.js`), labelled under it. On a phone the
+  line runs down the left edge and the dots fly from it like flags, each
+  labelled beside it. Hovered or tapped, a dot presses twice like the tap
+  hint and a card drops from it on a string ("click me!" over the dots; its
+  words open it too) (details and a picture, both
+  from the CV; `static/images/path-*.jpg`). The streams behind blow with
+  the wind, left to right (`engine.setWind`). Put there "for now"; the
+  user may reword them.
+- **Rock Print Pavilion** (slot 0; role "Project lead" alone): a point cloud that gathers out of a
   scattered swirl, turns and nods; every 10s the camera moves in by itself,
   in turn on a point, from inside at eye height, and from there facing back.
   A double-click pauses it. Two Vimeo films in its drawer.
@@ -57,15 +63,17 @@ in a pull-out drawer.
 - **kh ReUse** (slot 3, the real world, `#kh-reuse`; write the name
   exactly so, and "knippershelbig" as one lowercase word): a laptop, or a
   phone under 860px, each with its own recording (2560 x 1440; 1170 x
-  1992). A reuse sign in its pebble. Drawer: the user's text with two links
-  and a Tech overview list; five screenshots (two desktop `wide`, three
-  phone `pair`).
+  1992). A reuse sign in its pebble. Drawer: the user's text (shortened,
+  approved) with two links and a short Tech overview list; five
+  screenshots placed in the text (`after`; two desktop `wide`, three phone
+  `pair`).
 - **Nap Nap Hooray** (slot 4, the real world, `#nap-nap-hooray`): the
   user's baby-sleep website on the phone (`nap-nap-hooray.mp4`, 1170 x
   1992, three times the screen's 390 x 664). A crescent moon (`moon.glb`,
   `thumbSize` 1.3) in its pebble. Drawer: 2026, "Web developer using AI",
-  "Sleepless nights and cranky days"; the user's text, with two lists; six
-  phone screenshots (two to a row on a wide screen, the first `half`).
+  "Sleepless nights and cranky days"; the user's text (shortened,
+  approved), with two lists; six phone screenshots in the text (`after`;
+  two to a row on a wide screen, the first of each group `half`).
 - **Frameless Glass Structures** (slot 7, the real world,
   `#frameless-glass`; under its title, in orange, "This part of the website
   is still under construction." - `notice`): the user's Rhino model of a glass pavilion
@@ -102,7 +110,8 @@ in a pull-out drawer.
   intro, the joint after Construction, the tool's diagrams after
   Geometry, the climate studies after Thermal analysis. No thumbnail yet
   (the default rock).
-- **Links**: each project's own address is `#<id>` (`#rock-print`).
+- **Links**: each project's own address is `#<id>` (`#rock-print`); the
+  path's is `#path`.
 - **Drawer copy** is real for all five projects, approved by the user
   word for word; change it only on request.
 - **Waiting on the user**: the path's milestones checked; Frameless Glass Structures'
@@ -236,6 +245,7 @@ A solid model with a film on its screen - `kh-reuse.js` is the example;
             drawer: 'whole' },            // with the drawer out, the whole device square-on, not a close-up
     images: [{ ..., pair: true }],        // two to a row on a phone too (tall screenshots)
                                           // `half`: the first picture two to a row as well, not across
+                                          // `after: n`: in the text, after body[n], not below it
 ```
 
 A model in parts (`frameless-glass.js`): `solid` gives the default look,

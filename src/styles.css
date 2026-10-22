@@ -782,6 +782,7 @@ body.drawer-open .section-slider {
 
 .path-view__line path,
 .path-view__dot line {
+    pointer-events: none;
     fill: none;
     stroke: var(--hint-line);
     stroke-linecap: round;
@@ -798,6 +799,93 @@ body.drawer-open .section-slider {
     stroke-width: 1;
 }
 
+/* What the pointer finds: a little more than the dot, wherever it swings */
+.path-view__hit {
+    fill: transparent;
+    pointer-events: all;
+    cursor: pointer;
+}
+
+/* Hovered or tapped (PathView.jsx): two presses, a ring with each - the
+   tap hint's (tap-hint-press, tap-hint-ripple) played once, quicker; the
+   card drops on the second, DROP_AFTER */
+.path-view__ball,
+.path-view__ripple {
+    transform-box: fill-box;
+    transform-origin: center;
+}
+
+.path-view__dot.is-pressed .path-view__ball {
+    animation: tap-hint-press 1.2s ease 1;
+}
+
+.path-view__ripple {
+    fill: none;
+    stroke: var(--hint-line);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.path-view__dot.is-pressed .path-view__ripple {
+    animation: tap-hint-ripple 1.2s ease-out 1;
+}
+
+.path-view__dot.is-pressed .path-view__ripple--second {
+    animation-delay: 0.27s;
+}
+
+/* A milestone's card, dropped from its dot on a string: its picture, years,
+   role, place and details (app/path.js). On the paper, over the labels */
+.path-view__card {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: min(17rem, calc(100vw - 2.5rem));
+    padding: 0.6rem 0.6rem 0.75rem;
+    background: var(--panel-bg);
+    border: 1px solid var(--rule);
+    box-shadow: 0 0.4rem 1.2rem rgba(14, 29, 36, 0.12);
+    font-size: 0.75rem;
+    line-height: 1.45;
+    pointer-events: auto;
+    visibility: hidden;
+    transform-origin: 50% 0;
+    will-change: transform, opacity;
+}
+
+.path-view__card img {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin-bottom: 0.55rem;
+    object-fit: cover;
+}
+
+.path-view__card p,
+.path-view__card h3 {
+    margin: 0;
+}
+
+.path-view__card-when {
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    color: var(--ink-dim);
+}
+
+.path-view__card-what {
+    font-size: 0.85rem;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.path-view__card-where {
+    color: var(--ink-dim);
+}
+
+.path-view__card-details {
+    margin-top: 0.45rem !important;
+}
+
 .path-view__end,
 .path-view__peg {
     fill: var(--hint-line);
@@ -809,9 +897,25 @@ body.drawer-open .section-slider {
     opacity: 0.9;
 }
 
+/* "click me!" over the dots, in the tap hint's words' look (.cube-tag--hint) */
+.path-view__hint {
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin: 0;
+    font-size: clamp(0.8rem, 1.8vmin, 1rem);
+    font-weight: 600;
+    line-height: 1.25;
+    white-space: nowrap;
+    color: var(--hint-line);
+    text-shadow:
+        0 0 0.25rem rgba(var(--bg-rgb), 0.95),
+        0 0 0.6rem rgba(var(--bg-rgb), 0.8);
+    will-change: transform;
+}
+
 /* A milestone under its dot, moving with it (PathView.jsx): the years
-   small and dim, the role, the place dim. On a phone the dots are too close
-   for more than the first year */
+   small and dim, the role, the place dim */
 .path-view__label {
     position: absolute;
     top: 0;
@@ -823,6 +927,8 @@ body.drawer-open .section-slider {
     hyphens: auto;
     overflow-wrap: break-word;
     text-shadow: 0 0 0.35rem var(--bg), 0 0 0.15rem var(--bg); /* clear of the streams, like the tags */
+    pointer-events: auto; /* its card opens from its words too */
+    cursor: pointer;
     will-change: transform;
 }
 
@@ -830,16 +936,11 @@ body.drawer-open .section-slider {
     display: block;
 }
 
-.path-view__when,
-.path-view__year {
+.path-view__when {
     margin-bottom: 0.2rem;
     font-size: 0.65rem;
     letter-spacing: 0.08em;
     color: var(--ink-dim);
-}
-
-.path-view__year {
-    display: none !important;
 }
 
 .path-view__what {
@@ -851,17 +952,27 @@ body.drawer-open .section-slider {
     color: var(--ink-dim);
 }
 
+/* On a phone the line runs down the screen and the label sits beside its
+   flag: the years and the role, at most two lines of it - the card has
+   the rest */
 @media (max-width: 859px) {
-    .path-view__when,
-    .path-view__what,
+    .path-view__label {
+        text-align: left;
+    }
+
     .path-view__where {
         display: none !important;
     }
 
-    .path-view__year {
-        display: block !important;
-        font-size: 0.6rem;
-        letter-spacing: 0;
+    .path-view__what {
+        display: -webkit-box !important;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        overflow: hidden;
+    }
+
+    .path-view__when {
+        margin-bottom: 0.05rem;
     }
 }
 

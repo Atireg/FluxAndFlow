@@ -595,6 +595,14 @@ export function createEngine({ canvas, source, ui }) {
         },
 
         /**
+         * A wind across the screen, left to right, that the streams go with
+         * while it blows (the page's path view, its line and dots in it)
+         */
+        setWind(on) {
+            state.wind = on;
+        },
+
+        /**
          * The drawer has been pulled out or pushed back. Opening makes room
          * for it - beside the model on a wide screen, the close-up on a narrow
          * one; closing returns to the full-fit view.

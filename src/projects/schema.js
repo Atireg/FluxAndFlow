@@ -424,6 +424,12 @@ export function defineProject(project) {
         throw new Error(`Project "${id}": images should be an array`);
     }
 
+    images.forEach((image, index) => {
+        if (image?.after != null && !(Number.isInteger(image.after) && image.after >= 0 && image.after < body.length)) {
+            throw new Error(`Project "${id}": images[${index}].after should be the index of a body entry (0..${body.length - 1})`);
+        }
+    });
+
     const videos = project.videos ?? [];
 
     if (!Array.isArray(videos)) {

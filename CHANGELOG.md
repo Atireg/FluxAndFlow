@@ -577,7 +577,35 @@ Branch `claude/loving-ramanujan-stqa6z`, not merged.
   noise for wind, gusts crossing the line, threads of different lengths, a
   swing to and from the visitor too, a jolt as the line moves. Then each
   dot a milestone from the user's CV, labelled under it (only the year on a
-  phone).
+  phone). Merged.
+- **Rock Print Pavilion**: the role is "Project lead" alone; the drawer's
+  last sentence (the first Rock Print, with MIT) taken out.
+- **Pictures in the text**: an image's `after: n` places it after that
+  paragraph.
+- **kh ReUse and Nap Nap Hooray**: their drawer text shortened, the tech
+  lists most (approved), and each picture placed by the paragraph about
+  what it shows. Merged.
+- **The path's cards**: hovered or tapped, a dot presses twice like the
+  tap hint and a card with details and a picture from the CV drops from it
+  like the hint's leaf, settling under it; let go, it falls away.
+- **The path on a phone**: the line runs down the screen, the dots flying
+  from it like flags, fluttering, each labelled beside it. Merged.
+- **The streams in the wind**: in the path view the background's streams
+  blow left to right with the wind, in gusts (`setWind`), and no longer part
+  round the faded-out pebbles.
+- **The path's cards stay longer**: 1.8s after the pointer leaves, then a
+  slower fall; a wider hover area round each dot.
+- **A link to the path**: `#path` opens it; choosing it puts it in the
+  address, Back leaves it.
+- **The path's milestones, revised by the user**: the Doctor of Sciences
+  taken out; the Deputy Department Chair in its place, 2021 – 2023, in
+  Melbourne; a last one, current: Associate, Head of Digital Technologies
+  at knippershelbig, Stuttgart, with Frameless Glass Structures' picture
+  (no details yet - a card shows only what it has).
+- **"tap me!"** (the user's words) over the path's dots, riding the line:
+  over its middle, or beside its top on a phone; and a dot's card opens
+  from its words too, hovered or tapped.
+- **"click me!"** over the dots instead of "tap me!" (the user's change).
 
 Open at end of session: as at the end of session 5; the path's ten
 milestones checked by the user.
