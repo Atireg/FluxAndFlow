@@ -589,6 +589,8 @@ Branch `claude/loving-ramanujan-stqa6z`, not merged.
   round the faded-out pebbles.
 - **The path's cards stay longer**: 1.8s after the pointer leaves, then a
   slower fall; a wider hover area round each dot.
+- **A link to the path**: `#path` opens it; choosing it puts it in the
+  address, Back leaves it.
 
 Open at end of session: as at the end of session 5; the path's ten
 milestones checked by the user.

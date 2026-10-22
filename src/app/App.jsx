@@ -40,6 +40,9 @@ export default function App() {
     const [drawerOpen, setDrawerOpen] = useState(false);
     // The kind of project the catalog has brought forward, or null for all
     const [focus, setFocus] = useState(null);
+    // The focus as of the last render, for the address's Back and Forward
+    const focusRef = useRef(null);
+    focusRef.current = focus;
 
     const canvasRef = useRef(null);
     const barRef = useRef(null);
@@ -208,9 +211,15 @@ export default function App() {
      */
     useEffect(() => {
         let timer = null;
+        const showPath = (shown) => {
+            const next = shown ? PATH_VIEW.id : null;
+            engineRef.current?.setFocus(next);
+            setFocus(next);
+        };
         const openLinked = () => {
             const id = linkedProject();
-            if (id && !engineRef.current?.openProject(id)) clearProjectLink();
+            if (id === PATH_VIEW.id) showPath(true);
+            else if (id && !engineRef.current?.openProject(id)) clearProjectLink();
         };
         const onLeaving = () => { timer = window.setTimeout(openLinked, LINK_OPEN_AFTER); };
 
@@ -221,8 +230,15 @@ export default function App() {
 
         const onPopState = () => {
             const id = linkedProject();
-            if (id) engineRef.current?.openProject(id);
-            else engineRef.current?.closeProject();
+            if (id === PATH_VIEW.id) {
+                engineRef.current?.closeProject();
+                showPath(true);
+            } else if (id) {
+                engineRef.current?.openProject(id);
+            } else {
+                engineRef.current?.closeProject();
+                if (focusRef.current === PATH_VIEW.id) showPath(false);
+            }
         };
         window.addEventListener('popstate', onPopState);
 
@@ -249,6 +265,19 @@ export default function App() {
     useEffect(() => {
         engineRef.current?.setWind(focus === PATH_VIEW.id && !project);
     }, [focus, project]);
+
+    // The path in the address while it's chosen (`#path`, links.js); chosen
+    // away, out of it again - only then, not as the page opens on the link
+    const shownPath = useRef(false);
+    useEffect(() => {
+        if (focus === PATH_VIEW.id) {
+            shownPath.current = true;
+            showProjectLink(PATH_VIEW.id);
+        } else if (shownPath.current) {
+            shownPath.current = false;
+            if (linkedProject() === PATH_VIEW.id) clearProjectLink();
+        }
+    }, [focus]);
 
     const chooseFocus = useCallback((category) => {
         engineRef.current?.setFocus(category);

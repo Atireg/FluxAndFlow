@@ -105,7 +105,8 @@ in a pull-out drawer.
   approved), a YouTube film and five
   pictures (the pavilion at glasstec, the joints, the joint in section); no
   year, role or context rows or thumbnail yet (the default rock).
-- **Links**: each project's own address is `#<id>` (`#rock-print`).
+- **Links**: each project's own address is `#<id>` (`#rock-print`); the
+  path's is `#path`.
 - **Drawer copy** is real for all five projects, approved by the user
   word for word; change it only on request.
 - **Waiting on the user**: the path's milestones checked; Frameless Glass Structures' year, role,

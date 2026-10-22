@@ -598,6 +598,11 @@ don't run in ruled lines. The pointer's pull gives way to it. They no
 longer part round pebbles the filter has faded out of sight (`isGone`) -
 they turned aside round nothing.
 
+The path has a link of its own, `#path`, as a project does (links.js,
+asked for): opened, it skips the landing page and chooses the path once
+the loader has cleared; choosing it puts it in the address with a step in
+the history, so Back leaves it; choosing anything else takes it out.
+
 Hovered (tapped on a touch screen), a dot presses twice like the tap hint
 - its own keyframes, played once and quicker (1.2s), rings and all - and on
 the second press (`DROP_AFTER`) a card drops from it on a string: the

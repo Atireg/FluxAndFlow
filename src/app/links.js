@@ -8,6 +8,9 @@
  * Opening one from the playground adds a step to the browser's history, so
  * Back closes it again; closing it with the page's own way back takes that
  * step back off rather than adding another.
+ *
+ * The path has one the same way, `#path` (PATH_VIEW's id): there while the
+ * filter has it chosen.
  */
 
 // The project the address names, or null
