@@ -4,29 +4,58 @@ import { PATH_VIEW } from '../app/words.js';
 /**
  * "The path": the employment history, as a washing line under the view's
  * name with DOT_COUNT dots pegged on it - the tap hint's dot, white with a
- * black outline - each on a short thread. The line bellies and lifts in the
- * wind; each dot swings on its thread as a damped pendulum pushed by the
- * same wind where it hangs, so neighbours move alike but never in lockstep.
+ * black outline - each on a short thread. The line bellies, lifts and
+ * ripples in the wind; each dot hangs as a pendulum free to swing sideways
+ * and to and from the visitor (seen as its thread shortening), pushed by the
+ * same wind where it hangs and jolted as the line moves under it. The wind
+ * is smooth noise, not waves, with gusts that cross the line from the left;
+ * each thread a little longer or shorter, so no two dots keep time.
  *
  * Moves every frame, so never through React state: its own frame loop
  * writes the SVG through refs, and only while it is on screen.
  */
 const DOT_COUNT = 10;
 const SAG = 0.05; // the line's belly, as a share of its length
-const LIFT = 0.35; // how much of the belly the wind lifts and drops
-const THREAD = 1.6; // a thread's length, in dot sizes
+const LIFT = 0.4; // how much of the belly the wind lifts and drops
+const THREAD = 1.6; // a thread's length, in dot sizes, on average
+const THREAD_SPREAD = 0.35; // each thread up to this share longer or shorter
 const SWING = 6.3; // gravity over thread length: a swing of about 2.5s
-const DAMPING = 0.7;
+const DAMPING = 0.45;
 const PUSH = 5; // how far the wind pushes a dot round
+const TURBULENCE = 5; // how hard the eddies push a dot to and fro
+const GUST_CROSSING = 1.4; // seconds a gust takes to cross the line
 const MAX_STEP = 1 / 30; // a stalled frame holds the swing rather than flinging it
 
-// The wind at `share` along the line at `t` seconds: a steady breeze, a slow
-// gust and a quicker flutter that travels along it
+// A fixed 0..1 for each whole number, for the noise and the threads
+function hash(n) {
+    const x = Math.sin(n * 127.1 + 311.7) * 43758.5453;
+    return x - Math.floor(x);
+}
+
+// Smooth noise along one line, -1..1: gradients at whole numbers, eased between
+function noise(x) {
+    const i = Math.floor(x);
+    const f = x - i;
+    const a = (hash(i) * 2 - 1) * f;
+    const b = (hash(i + 1) * 2 - 1) * (f - 1);
+    const u = f * f * f * (f * (f * 6 - 15) + 10);
+    return 2 * (a + (b - a) * u);
+}
+
+// The wind at `share` along the line at `t` seconds: a breeze that rises and
+// falls, gusts that reach the left end first, and a flutter of its own at
+// each place
 function wind(share, t) {
-    return 0.12
-        + 0.1 * Math.sin(0.31 * t)
-        + 0.06 * Math.sin(0.83 * t + share * 2.4)
-        + 0.03 * Math.sin(1.9 * t - share * 7);
+    const gusting = t - share * GUST_CROSSING;
+    return 0.1
+        + 0.09 * noise(gusting * 0.22)
+        + 0.06 * noise(gusting * 0.7 + 40)
+        + 0.03 * noise(t * 1.7 + share * 9 + 80);
+}
+
+// Eddies to and from the visitor at `share`, -1..1
+function eddy(share, t) {
+    return noise(t * 0.5 + share * 3 + 120) * 0.7 + noise(t * 1.3 - share * 5 + 200) * 0.3;
 }
 
 // The tap hint's --hint-size, clamp(1.1rem, 3vmin, 2.6rem), in pixels
@@ -46,12 +75,17 @@ export default function PathView({ shown }) {
         const svg = svgRef.current;
         const [glow, line] = svg.querySelectorAll('.path-view__line path');
         const knots = svg.querySelectorAll('.path-view__end');
-        const dots = [...svg.querySelectorAll('.path-view__dot')].map((group) => ({
+        const dots = [...svg.querySelectorAll('.path-view__dot')].map((group, i) => ({
             thread: group.querySelector('line'),
             peg: group.querySelector('.path-view__peg'),
             dot: group.querySelector('.path-view__ball'),
-            angle: 0,
-            speed: 0,
+            length: 1 + THREAD_SPREAD * (hash(i + 7) * 2 - 1),
+            side: 0, // radians, the swing across the screen
+            sideSpeed: 0,
+            depth: 0, // radians, the swing to and from the visitor
+            depthSpeed: 0,
+            lastY: null,
+            fall: 0, // how fast the line under it is moving down, px/s
         }));
         const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -59,7 +93,7 @@ export default function PathView({ shown }) {
         let last = performance.now();
 
         const draw = (now) => {
-            const t = now / 1000;
+            const t = still ? 0 : now / 1000;
             const step = Math.min((now - last) / 1000, MAX_STEP);
             last = now;
 
@@ -74,12 +108,13 @@ export default function PathView({ shown }) {
             const top = title.bottom + Math.max(28, window.innerHeight * 0.06);
             const length = right - left;
             const size = dotSize();
-            const belly = SAG * length * (1 + (still ? 0 : LIFT * Math.sin(0.6 * t) * (0.6 + wind(0.5, t))));
+            const belly = SAG * length * (1 + (still ? 0 : LIFT * (noise(t * 0.3 + 300) - 2 * (wind(0.5, t) - 0.1))));
 
-            // Where the line is at `share` along it: a belly, and a small
-            // ripple running along it
+            // Where the line is at `share` along it: a belly, and ripples
+            // running along it with the gusts
             const at = (share) => {
-                const ripple = still ? 0 : 0.012 * length * Math.sin(Math.PI * share) * Math.sin(1.3 * t - share * 5);
+                const ripple = still ? 0 : 0.014 * length * Math.sin(Math.PI * share)
+                    * noise(t * 0.9 - share * 2.5 + 400);
                 return [left + share * length, top + belly * 4 * share * (1 - share) + ripple];
             };
 
@@ -97,24 +132,42 @@ export default function PathView({ shown }) {
 
             dots.forEach((hung, i) => {
                 const share = (i + 0.5) / DOT_COUNT;
-                if (!still) {
-                    const pull = -SWING * Math.sin(hung.angle) - DAMPING * hung.speed + PUSH * wind(share, t);
-                    hung.speed += pull * step;
-                    hung.angle += hung.speed * step;
+                const [x, y] = at(share);
+                const reach = THREAD * size * hung.length;
+
+                if (!still && step > 0) {
+                    // The line dropping under it lightens the dot a moment,
+                    // rising makes it heavier: gravity as the dot feels it
+                    const fall = hung.lastY === null ? 0 : (y - hung.lastY) / step;
+                    const lurch = (fall - hung.fall) / step;
+                    hung.fall = fall;
+                    hung.lastY = y;
+                    const gravity = (SWING / hung.length) * Math.min(2, Math.max(0.3, 1 - lurch / (SWING * reach)));
+
+                    const sidePull = -gravity * Math.sin(hung.side) - DAMPING * hung.sideSpeed
+                        + PUSH * wind(share, t) / hung.length;
+                    hung.sideSpeed += sidePull * step;
+                    hung.side += hung.sideSpeed * step;
+
+                    const depthPull = -gravity * Math.sin(hung.depth) - DAMPING * hung.depthSpeed
+                        + TURBULENCE * eddy(share, t) / hung.length;
+                    hung.depthSpeed += depthPull * step;
+                    hung.depth += hung.depthSpeed * step;
                 }
 
-                const [x, y] = at(share);
-                const reach = THREAD * size;
-                const cx = x + Math.sin(hung.angle) * (reach + size / 2);
-                const cy = y + Math.cos(hung.angle) * (reach + size / 2);
+                // Swung towards or away from the visitor, it hangs shorter
+                // on screen
+                const across = Math.sin(hung.side);
+                const down = Math.cos(hung.side) * Math.cos(hung.depth);
+                const toDot = reach + size / 2;
                 hung.peg.setAttribute('cx', x);
                 hung.peg.setAttribute('cy', y);
                 hung.thread.setAttribute('x1', x);
                 hung.thread.setAttribute('y1', y);
-                hung.thread.setAttribute('x2', x + Math.sin(hung.angle) * reach);
-                hung.thread.setAttribute('y2', y + Math.cos(hung.angle) * reach);
-                hung.dot.setAttribute('cx', cx);
-                hung.dot.setAttribute('cy', cy);
+                hung.thread.setAttribute('x2', x + across * reach);
+                hung.thread.setAttribute('y2', y + down * reach);
+                hung.dot.setAttribute('cx', x + across * toDot);
+                hung.dot.setAttribute('cy', y + down * toDot);
                 hung.dot.setAttribute('r', size / 2);
                 hung.dot.style.strokeWidth = Math.max(1.5, size * 0.08);
             });

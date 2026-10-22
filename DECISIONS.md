@@ -566,10 +566,14 @@ Its name sits under the filter (measured each frame - the filter wraps to
 two rows on a phone), and under it a washing line across the screen
 (asked for: "like a string where we hang clothes to dry", moving in the
 wind) with ten of the tap hint's dots, white with a black outline, each
-on a short thread (`PathView.jsx`). The line bellies and lifts with a slow
-gust and carries a small ripple; each dot is a damped pendulum pushed by
-the same wind where it hangs (`wind(share, t)`), so neighbours move alike
-but not in step. It moves every frame, so it is drawn through refs by its
+on a short thread (`PathView.jsx`). Then asked to move more organically:
+the wind is smooth noise rather than sine waves, with gusts that reach the
+left end first and cross the line (`GUST_CROSSING`); each thread a little
+longer or shorter (`THREAD_SPREAD`), so no two dots keep time; each dot a
+pendulum free in two ways - sideways with the wind, and to and from the
+visitor with the eddies (`eddy`), seen as its thread shortening on screen;
+and jolted as the line lifts and drops under it (gravity as the dot feels
+it). The line's belly and ripple follow the same noise. It moves every frame, so it is drawn through refs by its
 own frame loop, running only while the view is on screen - not the
 engine's, which owns only the canvas. Still with reduced motion. The dots
 hold nothing yet: what each stands for comes from the user.
