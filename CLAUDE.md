@@ -247,7 +247,7 @@ A model in parts (`frameless-glass.js`): `solid` gives the default look,
     info: { GS1: { title, lines: [] } },  // by part name: a card over it, the turn held
     section: true,                        // a slider cuts the model across its length (z in its own space)
     floor: true,                          // soft ground at the model's foot, the figure set down on it, its shadow
-    tour: { orbit: 9, cut: 0.472, focus: 'GS2_GS6', reach: 0.17, over: 8, side: 20, above: 45 },  // played as it opens - see schema.js
+    tour: { orbit: 5, turns: 0.5, cut: 0.472, focus: 'GS2_GS6', reach: 0.17, over: 8, side: 20, above: 45 },  // played as it opens - see schema.js
 ```
 
 - **Models from Rhino** come as OBJ + .mtl (Rhino 7 has no glTF export):
