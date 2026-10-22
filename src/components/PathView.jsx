@@ -278,7 +278,7 @@ export default function PathView({ shown }) {
                 knots[i].setAttribute('cy', y);
             });
 
-            // "tap me!" over the dots, riding the line: over its middle, or
+            // "click me!" over the dots, riding the line: over its middle, or
             // beside its top when it runs down the screen
             const [hintX, hintY] = at(upright ? 0 : 0.5);
             hintRef.current.style.transform = upright

@@ -15,7 +15,7 @@ export const SECTION_WORD = 'section';
 export const PATH_VIEW = { id: 'path', label: 'The path' };
 
 // Over the path's dots, inviting a tap (or a hover)
-export const PATH_HINT = 'tap me!';
+export const PATH_HINT = 'click me!';
 
 // What a double-tap does, by the project's `doubleClick`
 const HINT_ACTIONS = { zoom: 'zoom', hold: 'pause', drop: 'drop again' };

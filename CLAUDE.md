@@ -38,7 +38,7 @@ in a pull-out drawer.
   from the user's CV (`src/app/path.js`), labelled under it. On a phone the
   line runs down the left edge and the dots fly from it like flags, each
   labelled beside it. Hovered or tapped, a dot presses twice like the tap
-  hint and a card drops from it on a string ("tap me!" over the dots; its
+  hint and a card drops from it on a string ("click me!" over the dots; its
   words open it too) (details and a picture, both
   from the CV; `static/images/path-*.jpg`). The streams behind blow with
   the wind, left to right (`engine.setWind`). Put there "for now"; the

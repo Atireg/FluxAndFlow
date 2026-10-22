@@ -897,7 +897,7 @@ body.drawer-open .section-slider {
     opacity: 0.9;
 }
 
-/* "tap me!" over the dots, in the tap hint's words' look (.cube-tag--hint) */
+/* "click me!" over the dots, in the tap hint's words' look (.cube-tag--hint) */
 .path-view__hint {
     position: absolute;
     top: 0;
