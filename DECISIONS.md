@@ -1070,7 +1070,10 @@ down had read as a pause. Then (asked for) half a turn (`turns` 0.5, in
 to the camera; and a double-click plays the tour again (`doubleClick:
 'tour'`): uncut, the camera eased back to the project's view while the
 model turns on from where it stands (`tour.base`) - starting the spin from
-0 again would have snapped it round. With the drawer out
+0 again would have snapped it round. Then (asked for: the desktop's close
+joint view as the end on a phone too) `reach` per layout, { side: 0.17,
+stacked: 0.08 }: the same share of the breadth across a narrow window left
+the joint small. With the drawer out
 (asked for, with a screenshot): the part the section keeps, seen from where
 it's cut - `view.drawer: { side: 6, above: 8, zoom }`, framed by
 `frameDetail` on the kept part's box (the parts' box from the cut on)

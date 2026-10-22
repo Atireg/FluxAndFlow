@@ -98,7 +98,7 @@ in a pull-out drawer.
   before the middle - through the middle of the ridge joint's trapezoid connection
   plate nearest it (z 227-278 mm in the file: `cut` 0.472) - closing in on the ridge joint GS2_GS6 where it's cut, from 45
   degrees above and a little from the side, the ridge running up the screen (8s; the
-  user's second screenshot), the slider following; the slider, the drawer
+  user's second screenshot; as close on a phone, `reach` per layout), the slider following; the slider, the drawer
   or orbiting by hand stops it where it is, a double-click plays it again. With the drawer out, the part the section
   keeps, from where it's cut, almost square-on (`view.drawer: { side,
   above, zoom }` - the user's screenshot). Drawer: 2024, "Principal
@@ -257,7 +257,7 @@ A model in parts (`frameless-glass.js`): `solid` gives the default look,
     info: { GS1: { title, lines: [] } },  // by part name: a card over it, the turn held
     section: true,                        // a slider cuts the model across its length (z in its own space)
     floor: true,                          // soft ground at the model's foot, the figure set down on it, its shadow
-    tour: { orbit: 5, turns: 0.5, cut: 0.472, focus: 'GS2_GS6', reach: 0.17, over: 8, side: 20, above: 45 },  // played as it opens - see schema.js
+    tour: { orbit: 5, turns: 0.5, cut: 0.472, focus: 'GS2_GS6', reach: { side: 0.17, stacked: 0.08 }, over: 8, side: 20, above: 45 },  // played as it opens - see schema.js
 ```
 
 - **Models from Rhino** come as OBJ + .mtl (Rhino 7 has no glTF export):

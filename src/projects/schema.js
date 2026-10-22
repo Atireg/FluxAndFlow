@@ -42,7 +42,8 @@
  *                 played as it opens: one turn in `orbit` seconds, then over
  *                 `over` the section slides to `cut` (a share of the length)
  *                 and the camera closes in on it, on the part `focus` where
- *                 it's cut, `reach` of the model's breadth across the window,
+ *                 it's cut, `reach` of the model's breadth across the window
+ *                 (a number, or per layout { side, stacked }),
  *                 `side` degrees round from square-on and `above` degrees
  *                 down onto it (both 0: square-on); `turns` (1) round in
  *                 `orbit`, give or take what ends it with the cut's side
@@ -315,11 +316,16 @@ function normaliseSection({ id, section, solid }) {
     return section;
 }
 
+// A number that passes `ok`, or one per layout - { side, stacked }, each passing it
+function isPerLayout(value, ok) {
+    return value && typeof value === 'object' ? Object.values(value).every(ok) : ok(value);
+}
+
 function normaliseTour({ id, tour, section }) {
     if (tour === undefined) return undefined;
     const { orbit, cut, focus, reach, over, side = 0, above = 0, turns = 1 } = tour ?? {};
     if (!section) throw new Error(`Project "${id}": tour needs section`);
-    if (!(orbit > 0) || !(cut >= 0 && cut < 1) || typeof focus !== 'string' || !(reach > 0) || !(over > 0)
+    if (!(orbit > 0) || !(cut >= 0 && cut < 1) || typeof focus !== 'string' || !isPerLayout(reach, (value) => value > 0) || !(over > 0)
         || !Number.isFinite(side) || !(above > -90 && above < 90) || !(turns > 0)) {
         throw new Error(`Project "${id}": tour should be { orbit, cut (0..1), focus (a part's name), reach, over, side, above (degrees), turns }`);
     }

@@ -556,7 +556,8 @@ Then: half a turn (5s); a double-click plays the tour again; the year
 (four new: the tool's diagrams and the thermal studies) set among the text
 by subject, with the film after the intro (`after`, new); and the orange
 fill drawn with the stencil even-odd from each part's cut, which fills the
-ridge profile the user circled.
+ridge profile the user circled. And the phone ends on the same close joint
+view as the desktop (`reach` per layout).
 
 Open at end of session: as at the end of session 4; a seventh Nap Nap
 Hooray picture, to come as a file; Frameless Glass Structures' year,

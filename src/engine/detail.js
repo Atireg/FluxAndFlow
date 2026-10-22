@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { gsap } from 'gsap';
 import { assetUrl } from './assets.js';
-import { getPanelLayout, layoutMode } from './layout.js';
+import { getPanelLayout, layoutMode, perLayout } from './layout.js';
 import { loadPhysics, PILE_FADE_OUT, PILE_REPLAY_WAIT } from './pile.js';
 import { loadPointCloud, setSection } from './pointcloud/load.js';
 import { GATHER_DURATION } from './pointcloud/gather.js';
@@ -913,7 +913,7 @@ export function createDetail({
             const share = 1 - (1 - plan.cut) * k;
             cutAt(model, share);
             const to = framing.frameSection(model, {
-                focus, side, above, share, reach: TOUR_WIDE + (plan.reach - TOUR_WIDE) * k,
+                focus, side, above, share, reach: TOUR_WIDE + (perLayout(plan.reach, 1) - TOUR_WIDE) * k,
             });
             if (to) {
                 const down = smooth01(closing / TOUR_APPROACH);
