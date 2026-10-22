@@ -95,6 +95,9 @@ export const MILESTONES = [
         when: 'current',
         what: 'Associate, Head of Digital Technologies',
         where: 'knippershelbig, Stuttgart',
+        details: 'Developing innovative engineering solutions with code: automating fabrication '
+            + 'processes, simulating thermal performance and exploring new material applications in '
+            + 'construction, drawing on over a decade of coding experience across multiple domains.',
         image: {
             src: 'images/frameless-glass-01.jpg',
             ratio: '1500 / 633',

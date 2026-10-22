@@ -613,6 +613,8 @@ Branch `claude/loving-ramanujan-stqa6z`, not merged.
   the GradX graduation exhibition director role (2020 – 2021) in its
   place by date, from the CV, with its picture (the first on its last
   page).
+- **The knippershelbig card's details**: the user's text reworked to match
+  the others (option 1, approved).
 
 Open at end of session: as at the end of session 5; the path's ten
 milestones checked by the user.
