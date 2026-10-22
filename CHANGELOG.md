@@ -540,7 +540,8 @@ and the slider moved together (`cutAt`), and the tour's framing reading
 the parts' size the section measured once rather than every frame. Then
 the tour's turn faster (10s), its end closer and less steep (45 degrees),
 and the orange fill sized to the cut - closer in it had filled a patch
-above the model.
+above the model. And the section ends through the middle of the ridge
+joint's trapezoid connection plate nearest the middle (`cut` 0.472).
 
 Open at end of session: as at the end of session 4; a seventh Nap Nap
 Hooray picture, to come as a file; Frameless Glass Structures' year,

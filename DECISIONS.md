@@ -962,7 +962,12 @@ screenshot, where the ridge recedes up and to the right. Then (a second
 screenshot: "finish more like this") `above` 55: steeply down onto the cut
 joint, the ridge running up the screen from it, the timber below. Then
 (asked for: the turn faster, closer in, more facing the visitor) `orbit`
-10, `reach` 0.17, `above` 45.
+10, `reach` 0.17, `above` 45. Then (asked for: the section ending in the
+middle of the trapezoid connection plates) `cut` 0.472: the ridge joint
+GS2_GS6 has four plates along it (dense clusters of its vertices at z
+227-278, 640-692, 1054-1093 and 1468-1519 mm, the model 9 m long), and
+0.48 fell 5 cm short of the nearest; 0.5 is the gap between the rows,
+where the ridge profile isn't, only the cross joints.
 
 The looks were chosen by the user: steel
 graphite (the ridge pieces too, Custom 7 and 8, first taken for glass
