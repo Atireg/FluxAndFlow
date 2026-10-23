@@ -69,8 +69,8 @@ in a pull-out drawer.
   exactly so, and "knippershelbig" as one lowercase word): a laptop, or a
   phone under 860px, each with its own recording (2560 x 1440; 1170 x
   1992). A reuse sign in its pebble. Drawer: the user's text (shortened,
-  approved) with two links and a short Tech overview list; five
-  screenshots placed in the text (`after`; two desktop `wide`, three phone
+  approved) with two links and a short Tech overview list; six
+  screenshots placed in the text (`after`; two desktop `wide`, four phone
   `pair` - the two forms side by side on a wide screen too, the first `half`).
 - **Nap Nap Hooray** (slot 4, the real world, `#nap-nap-hooray`): the
   user's baby-sleep website on the phone (`nap-nap-hooray.mp4`, 1170 x
