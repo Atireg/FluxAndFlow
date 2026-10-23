@@ -634,7 +634,9 @@ Branch `claude/loving-ramanujan-stqa6z`, not merged.
 - **The places off the flags' labels on a phone again** - too crowded;
   they're on the cards.
 - **A twelfth dot**: JavaScript Developer Degree, 2023 – 2025, SoftUni,
-  online qualification (its card's details to come, once approved).
+  online qualification; its card's details option 1 (approved) and that
+  the knowledge built this website, its picture a screenshot of the
+  playground.
 
 Open at end of session: as at the end of session 5; the path's ten
 milestones checked by the user.

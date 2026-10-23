@@ -106,6 +106,10 @@ export const MILESTONES = [
         when: '2023 – 2025',
         what: 'JavaScript Developer Degree',
         where: 'SoftUni, online qualification',
+        details: 'A full-stack web development qualification: JavaScript, React JS and AngularJS for '
+            + 'the front end, MongoDB for data, Three.js for 3D in the browser, and responsive web '
+            + 'design throughout. The knowledge went into building this website.',
+        image: { src: 'images/path-12.jpg', ratio: '800 / 582', alt: 'This website’s playground: graphite pebbles among floating streams, one glowing orange' },
     },
     {
         when: 'current',
