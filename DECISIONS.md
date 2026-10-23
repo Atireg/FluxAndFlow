@@ -1122,7 +1122,9 @@ setting): a flat sheet in the thumbnails' ink whose alpha is the drawing's
 darkness, cut out at `DRAWING_INK` rather than see-through - see-through
 it was drawn after the pebble's translucent face and hidden by it - shrunk
 first to about the width it shows (`DRAWING_WIDTH`) keeping each block's
-darkest pixel, since its 2px lines averaged away under the cut-out, and
+darkest pixel, since its 2px lines averaged away under the cut-out - 110
+pixels across, not 200: at 200 the lines were too thin to see on a phone
+("the thumbnail is gone") - and
 turned to face the camera each frame (on the pebble's own copy: a clone
 doesn't carry `onBeforeRender`).
 

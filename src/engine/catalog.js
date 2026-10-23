@@ -14,7 +14,7 @@ import { poseSpotlightPebble } from './pebbles/spotlight.js';
  */
 const THUMB_INK = new THREE.MeshBasicMaterial({ color: THUMB_INK_COLOR });
 const DRAWING_INK = 0.35; // how dark a drawing's pixel must be to show in its pebble (`thumbImage`)
-const DRAWING_WIDTH = 200; // ...brought down to about this many pixels across, as it shows
+const DRAWING_WIDTH = 110; // ...brought down to about this many pixels across - coarse, so its lines stay bold at pebble size
 
 /**
  * The catalog: a fixed grid of pebbles, one per slot.
