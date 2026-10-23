@@ -67,7 +67,7 @@ in a pull-out drawer.
   1992). A reuse sign in its pebble. Drawer: the user's text (shortened,
   approved) with two links and a short Tech overview list; five
   screenshots placed in the text (`after`; two desktop `wide`, three phone
-  `pair`).
+  `pair` - the two forms side by side on a wide screen too, the first `half`).
 - **Nap Nap Hooray** (slot 4, the real world, `#nap-nap-hooray`): the
   user's baby-sleep website on the phone (`nap-nap-hooray.mp4`, 1170 x
   1992, three times the screen's 390 x 664). A crescent moon (`moon.glb`,

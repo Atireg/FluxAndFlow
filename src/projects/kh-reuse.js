@@ -84,6 +84,8 @@ export default defineProject({
             alt: 'On a phone: the form for adding a new demolition project',
             ratio: '700 / 1192',
             pair: true,
+            // (first of its group, yet half - beside the next on a wide screen)
+            half: true,
             after: 4,
         },
         {
