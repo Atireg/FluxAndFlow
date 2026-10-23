@@ -183,7 +183,7 @@ export default defineProject({
     ],
     // Steeply from above, its length up the screen, on both layouts (the
     // user's chosen view) - where the tour's turn ends
-    view: { elevation: 62, turn: 72, zoom: { side: 1.8, stacked: 2.1 }, lift: { stacked: 0.09 }, drawer: { side: 6, above: 8, zoom: { side: 1.45, stacked: 1.1 } } },
+    view: { elevation: 62, turn: 72, zoom: { side: 1.8, stacked: 2.1 }, lift: { stacked: 0.09 }, drawer: { side: 6, above: 8, zoom: { side: 1.45, stacked: 1.1 }, stay: { zoom: { side: 0.75, stacked: 1.3 } } } },
     // As it opens: one full turn round it, then the section slides to just
     // past the middle as the camera closes in square-on to the ridge joint
     // there (GS2_GS6), its profile facing the visitor

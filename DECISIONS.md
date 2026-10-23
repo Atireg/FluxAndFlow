@@ -1111,7 +1111,14 @@ it was drawn after the pebble's translucent face and hidden by it - shrunk
 first to about the width it shows (`DRAWING_WIDTH`) keeping each block's
 darkest pixel, since its 2px lines averaged away under the cut-out, and
 turned to face the camera each frame (on the pebble's own copy: a clone
-doesn't carry `onBeforeRender`). With the drawer out
+doesn't carry `onBeforeRender`).
+
+With the drawer closed again (asked for, with a phone screenshot) the
+view onto the section stays rather than going back to the steep view from
+above: `view.drawer.stay`, framed by the same `frameOnSection` on the whole
+canvas, with a zoom of its own (`stay.zoom`, 0.75 beside / 1.3 stacked -
+the drawer's own zoom on the whole canvas was far too close on a wide
+screen and cut the person off on a phone). With the drawer out
 (asked for, with a screenshot): the part the section keeps, seen from where
 it's cut - `view.drawer: { side: 6, above: 8, zoom }`, framed by
 `frameDetail` on the kept part's box (the parts' box from the cut on)

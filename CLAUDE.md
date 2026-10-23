@@ -103,7 +103,8 @@ in a pull-out drawer.
   user's second screenshot; as close on a phone, `reach` per layout), the slider following; the slider, the drawer
   or orbiting by hand stops it where it is, a double-click plays it again. With the drawer out, the part the section
   keeps, from where it's cut, almost square-on (`view.drawer: { side,
-  above, zoom }` - the user's screenshot). Drawer: 2024, "Principal
+  above, zoom }` - the user's screenshot), and that view stays when the
+  drawer closes, on the whole canvas (`stay: { zoom }`, another screenshot). Drawer: 2024, "Principal
   investigator", "knippershelbig, project Frameless Glass Structures, for
   Glasstec 2024 Duesseldorf"; the user's ZIM research text, rephrased (four
   paragraphs - the intro, then Construction, Geometry, Thermal analysis -

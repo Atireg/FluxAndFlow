@@ -564,7 +564,8 @@ sheet's lower plies, modelled twice, had been left empty. Then the cut
 ends on the plate just short of its bolt hole, and the camera no longer
 jumps as it closes in (aimed where the cut will end). The person formed
 by a third of the points; the joint drawing as the pebble's thumbnail
-(`thumbImage`, new).
+(`thumbImage`, new). With the drawer closed, the view onto the section
+stays (`view.drawer.stay`).
 
 Open at end of session: as at the end of session 4; a seventh Nap Nap
 Hooray picture, to come as a file; Frameless Glass Structures' year,
