@@ -48,7 +48,7 @@ in a pull-out drawer.
   from the CV; `static/images/path-*.jpg`). The streams behind blow with
   the wind, left to right (`engine.setWind`). Put there "for now"; the
   user may reword them.
-- **Rock Print Pavilion** (slot 0; role "Project lead" alone): a point cloud that gathers out of a
+- **Rock Print Pavilion** (slot 0; role "Project lead, doctoral research"): a point cloud that gathers out of a
   scattered swirl, turns and nods; every 10s the camera moves in by itself,
   in turn on a point, from inside at eye height, and from there facing back.
   A double-click pauses it. Two Vimeo films in its drawer, ten pictures

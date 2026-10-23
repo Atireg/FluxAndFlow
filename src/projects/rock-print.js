@@ -14,7 +14,7 @@ export default defineProject({
     // The drawer's rows and text; anything left empty is skipped. State
     // the role accurately - the page implies authorship of what it shows.
     year: '2018',
-    role: 'Project lead',
+    role: 'Project lead, doctoral research',
     context: 'Gramazio Kohler Research, ETH Zurich, for "Hello, Robot." '
         + 'at the Gewerbemuseum Winterthur',
     body: [
