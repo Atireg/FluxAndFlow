@@ -52,6 +52,12 @@ const SCREEN_HOLD = 0.25;
  * points and their tails. `falling` is how far down to a pile's ground it is.
  */
 const DISSOLVE_GLSL = `
+uniform float uPixelsPerUnit;
+uniform float uSize;
+attribute float aTone;
+varying float vAlpha;
+varying float vInk;
+varying float vTone;
 uniform float uT;
 uniform float uSwell;
 uniform float uGround; // 1: the points fall and stay - as a pile's surface or a figure (aGround)
@@ -118,24 +124,22 @@ float dissolveAlpha(float T, float falling) {
     float fading = 1.0 - smoothstep(0.55, 1.0, T);
     // (a pile's ground lighter once landed; a screen's points not)
     return smoothstep(0.0, 0.12, T) * mix(fading, 1.0 - 0.45 * falling * uFine, landsHere()) * spinnerInk();
+}
+
+// Its size on screen, depth in front of the camera: landed, finer - a
+// ground, not a cloud (a screen's points not)
+float dissolveSize(float falling, float depth) {
+    float settled = falling * landsHere() * (1.0 - uScreen);
+    return uSize * (1.0 - (1.0 - uLanded) * settled) * uPixelsPerUnit / max(depth, 0.001);
 }`;
 
-const dissolveVertexShader = `
-uniform float uPixelsPerUnit;
-uniform float uSize;
-attribute float aTone;
-varying float vAlpha;
-varying float vInk;
-varying float vTone;
-${DISSOLVE_GLSL}
+const dissolveVertexShader = `${DISSOLVE_GLSL}
 
 void main() {
     float falling;
     vec4 mv = modelViewMatrix * vec4(dissolvePosition(position, uT, uTime, falling), 1.0);
     gl_Position = projectionMatrix * mv;
-    // Landed, they're finer and fainter - a ground, not a cloud
-    float settled = falling * landsHere() * (1.0 - uScreen);
-    gl_PointSize = uSize * (1.0 - (1.0 - uLanded) * settled) * uPixelsPerUnit / max(-mv.z, 0.001);
+    gl_PointSize = dissolveSize(falling, -mv.z);
 
     vAlpha = dissolveAlpha(uT, falling);
     vInk = smoothstep(0.1, 0.6, uT);
@@ -144,14 +148,8 @@ void main() {
 
 // A dissolving point's tail (see addTrails)
 const dissolveTrailVertexShader = `
-uniform float uPixelsPerUnit;
-uniform float uSize;
 uniform float uTrailLag;
 attribute vec3 aHome;
-attribute float aTone;
-varying float vAlpha;
-varying float vInk;
-varying float vTone;
 ${DISSOLVE_GLSL}
 ${trailCornerGlsl}
 
@@ -161,8 +159,7 @@ void main() {
     vec4 headView = modelViewMatrix * vec4(dissolvePosition(aHome, uT, uTime, falling), 1.0);
     vec4 tailView = modelViewMatrix * vec4(dissolvePosition(aHome, max(uT - uTrailLag, 0.0), uTime - ${SPINNER_TRAIL.toFixed(2)}, before), 1.0);
 
-    float settled = falling * landsHere() * (1.0 - uScreen);
-    float width = uSize * (1.0 - (1.0 - uLanded) * settled) * uPixelsPerUnit / max(-headView.z, 0.001);
+    float width = dissolveSize(falling, -headView.z);
     float moving;
     gl_Position = trailCorner(headView, tailView, width, moving);
 
