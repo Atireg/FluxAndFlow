@@ -898,6 +898,11 @@ body.drawer-open .section-slider {
     opacity: 0.9;
 }
 
+/* A degree's dot (path.js `degree`): light grey, the jobs' white */
+.path-view__dot.is-degree .path-view__ball {
+    fill: #d6d3cc;
+}
+
 /* "click me!" over the dots, in the tap hint's words' look (.cube-tag--hint),
    in the site's one orange - the invitation (--warm-text, for text on the
    paper) */

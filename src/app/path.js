@@ -4,13 +4,14 @@
  * years, `what` the role or degree, `where` the place - beside or under the
  * dot - and, on the card that drops from it on a hover or tap, `details`
  * and a picture (`image`, its file's `ratio`), either left out if there's
- * none; `title`, if given, heads the card in place of `what` - a longer
+ * none; `degree` for a degree - its dot drawn light grey; `title`, if given, heads the card in place of `what` - a longer
  * name than fits by the dot. Write "knippershelbig" so, one lowercase word.
  */
 export const MILESTONES = [
     {
         when: '2009 – 2013',
         what: 'Bachelor in Architecture and Urban Planning',
+        degree: true,
         where: 'University of Stuttgart',
         details: 'Bachelor Thesis: Development of Connections and Structural Reinforcement for Fiber '
             + 'Composites Using Computational Design Methods. Developed a tool to simulate the '
@@ -39,6 +40,7 @@ export const MILESTONES = [
     {
         when: '2014 – 2015',
         what: 'Master in Integrative Technologies and Architectural Design Research (ITECH)',
+        degree: true,
         where: 'University of Stuttgart',
         details: 'Master Thesis: Emergent Space: Simulations and Analyses of Spatial Aggregate '
             + 'Formations. Investigated the structural behavior and architectural potential of the '
@@ -105,6 +107,7 @@ export const MILESTONES = [
     {
         when: '2023 – 2025',
         what: 'JavaScript Developer Degree',
+        degree: true,
         where: 'SoftUni, online qualification',
         details: 'A full-stack web development qualification: JavaScript, React JS and AngularJS for '
             + 'the front end, MongoDB for data, Three.js for 3D in the browser, and responsive web '

@@ -639,6 +639,8 @@ Branch `claude/loving-ramanujan-stqa6z`, not merged.
   online qualification; its card's details option 1 (approved) and that
   the knowledge built this website, its picture a screenshot of the
   playground.
+- **The path's degrees in light grey**: the bachelor, the master and the
+  JavaScript Developer Degree (`degree`).
 
 Open at end of session: as at the end of session 5; the path's ten
 milestones checked by the user.
