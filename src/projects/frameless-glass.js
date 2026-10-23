@@ -155,6 +155,25 @@ export default defineProject({
             after: 1,
         },
         {
+            src: 'images/frameless-glass-12.jpg',
+            alt: 'In a cleanroom, a worker in a hairnet lines up a thin steel profile along the edge of a glass sheet for lamination',
+            ratio: '1500 / 886',
+            after: 1,
+        },
+        {
+            src: 'images/frameless-glass-13.jpg',
+            alt: 'In the glass factory, wrapped glass sheets on a rack, moved by a worker on an electric pallet truck',
+            ratio: '1500 / 886',
+            after: 1,
+        },
+        {
+            src: 'images/frameless-glass-14.jpg',
+            alt: 'The pavilion being assembled at the fair: the glass arch on its steel supports, a timber frame propping it from inside',
+            ratio: '1500 / 886',
+            wide: true,
+            after: 1,
+        },
+        {
             src: 'images/frameless-glass-07.jpg',
             alt: 'Diagram: the pavilion drawn on a translation surface between two ellipses, its eight numbered glass sheets, joints, angles and dimensions',
             ratio: '1500 / 882',
@@ -177,6 +196,18 @@ export default defineProject({
         {
             src: 'images/frameless-glass-09.jpg',
             alt: 'Thermal simulations of the steel-glass joint for four climates - Moscow, Zurich, Bangalore and Dubai - temperatures shown in colour',
+            ratio: '1500 / 882',
+            after: 3,
+        },
+        {
+            src: 'images/frameless-glass-10.jpg',
+            alt: 'Thermal simulation of the joint in section under strong heat: temperatures in colour from 37 to 57 °C, heat flow as red arrows',
+            ratio: '1500 / 882',
+            after: 3,
+        },
+        {
+            src: 'images/frameless-glass-11.jpg',
+            alt: 'Thermal simulation of the joint in section in milder conditions: temperatures in colour from 25 to 55 °C, heat flow as red arrows',
             ratio: '1500 / 882',
             after: 3,
         },
