@@ -560,7 +560,9 @@ ridge profile the user circled. And the phone ends on the same close joint
 view as the desktop (`reach` per layout). Then the section comes in from
 the other end (`section: { reverse: true }`), the tour closing in on the
 mirrored ridge joint GS3_GS7, and the fill counts windings - one glass
-sheet's lower plies, modelled twice, had been left empty.
+sheet's lower plies, modelled twice, had been left empty. Then the cut
+ends on the plate just short of its bolt hole, and the camera no longer
+jumps as it closes in (aimed where the cut will end).
 
 Open at end of session: as at the end of session 4; a seventh Nap Nap
 Hooray picture, to come as a file; Frameless Glass Structures' year,

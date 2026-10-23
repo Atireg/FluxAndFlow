@@ -1089,7 +1089,15 @@ one copy on the other, and two copies cancel. The fill counts windings
 now - each cut segment turned anticlockwise round its part by its face's
 outward side, the fans counting up or down by which way they turn - so a
 doubled piece fills while two pieces touching inside a part (their shared
-segments running opposite ways) still cancel. With the drawer out
+segments running opposite ways) still cancel.
+
+Then (asked for: the section ending before the hole in the plate, and no
+jump as the camera closes in) `cut` 0.4738 - z -236, on the plate (-227 to
+-278) short of its bolt hole (a ring of vertices 9 mm round z -252, so
+-243 to -261) - and `frameSection` aims at the part's cut outline where the
+tour will end (`aim`), sliding only along the length to the moving cut:
+aimed at the outline where the cut was, its middle shifted whenever the
+cut reached a plate or a hole, and the camera jumped with it. With the drawer out
 (asked for, with a screenshot): the part the section keeps, seen from where
 it's cut - `view.drawer: { side: 6, above: 8, zoom }`, framed by
 `frameDetail` on the kept part's box (the parts' box from the cut on)

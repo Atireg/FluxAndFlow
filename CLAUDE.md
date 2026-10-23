@@ -97,7 +97,8 @@ in a pull-out drawer.
   ending with the cut's side towards the camera, then at once the section slides (8s), the
   camera coming down onto it over the first 3s and following it to just
   before the middle - through the middle of the ridge joint's trapezoid connection
-  plate nearest it (z -227 to -278 mm in the file: `cut` 0.472) - closing in on the ridge joint GS3_GS7 where it's cut, from 45
+  plate nearest it (z -227 to -278 mm in the file), just short of its
+  bolt hole (z -243 to -261: `cut` 0.4738, at z -236) - closing in on the ridge joint GS3_GS7 where it's cut, from 45
   degrees above and a little from the side, the ridge running up the screen (8s; the
   user's second screenshot; as close on a phone, `reach` per layout), the slider following; the slider, the drawer
   or orbiting by hand stops it where it is, a double-click plays it again. With the drawer out, the part the section
@@ -259,7 +260,7 @@ A model in parts (`frameless-glass.js`): `solid` gives the default look,
     section: true,                        // a slider cuts the model across its length (z in its own space);
                                           // { reverse: true }: in from the high end of z
     floor: true,                          // soft ground at the model's foot, the figure set down on it, its shadow
-    tour: { orbit: 5, turns: 0.5, cut: 0.472, focus: 'GS3_GS7', reach: { side: 0.17, stacked: 0.08 }, over: 8, side: 20, above: 45 },  // played as it opens - see schema.js
+    tour: { orbit: 5, turns: 0.5, cut: 0.4738, focus: 'GS3_GS7', reach: { side: 0.17, stacked: 0.08 }, over: 8, side: 20, above: 45 },  // played as it opens - see schema.js
 ```
 
 - **Models from Rhino** come as OBJ + .mtl (Rhino 7 has no glTF export):
@@ -353,7 +354,9 @@ A model in parts (`frameless-glass.js`): `solid` gives the default look,
 - **A `tour` turns the model, not the camera** (`tourSpin`, detail.js),
   which reads the same - the inks are lit from the view - by about `turns`
   round, ending with the cut's side to the camera (`tourTurn`), then follows
-  the cut at `side`/`above` (`framing.frameSection` gives the pose) -
+  the cut at `side`/`above` (`framing.frameSection` gives the pose, aimed
+  where the cut will end, `aim` - aimed at the moving cut's outline it
+  jumped as plates and holes came and went) -
   placed every frame on the tour's own clock (`rig.placeCamera`), blended
   from where the camera was over the first `TOUR_APPROACH` seconds: a tween
   for the move down, cut short where the following took over, made it jump; the visitor's slider, double-click, drawer

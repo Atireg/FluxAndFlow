@@ -541,7 +541,7 @@ export function createFraming({ rig, screen, state, grid, ui }) {
          * (nothing without a section or that part) - a `tour` places it there
          * frame by frame.
          */
-        frameSection(model, { focus, share, reach, side = 0, above = 0 }) {
+        frameSection(model, { focus, share, aim = share, reach, side = 0, above = 0 }) {
             const section = model.userData.section;
             if (!section) return;
 
@@ -550,11 +550,14 @@ export function createFraming({ rig, screen, state, grid, ui }) {
             const part = meshes.find((mesh) => mesh.name === focus);
             if (!part) return;
 
-            // Aimed at the part where it's cut - its outline there - or, past
-            // its ends, at the middle of the part
+            // Aimed at the part where it's cut at `aim` - its outline there -
+            // or, past its ends, at the middle of the part, then along to the
+            // cut at `share`. A tour aims where it will end: aimed where the
+            // moving cut is, the outline gains and loses pieces (a plate, a
+            // hole) and the camera jumped with its middle.
             const z = sectionAt(section, share);
             const centre = part.geometry.boundingBox.getCenter(new THREE.Vector3());
-            const cut = traceCut([part], z);
+            const cut = traceCut([part], sectionAt(section, aim));
             if (cut.length) centre.copy(new THREE.Box3().setFromPoints(cut).getCenter(new THREE.Vector3()));
             model.updateMatrixWorld(true);
             const target = model.localToWorld(new THREE.Vector3(centre.x, centre.y, z));
