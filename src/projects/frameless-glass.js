@@ -143,12 +143,6 @@ export default defineProject({
             after: 1,
         },
         {
-            src: 'images/frameless-glass-02.jpg',
-            alt: 'Looking up at four glass sheets meeting at the ridge, joined by slim steel profiles along their edges',
-            ratio: '900 / 1251',
-            after: 1,
-        },
-        {
             src: 'images/frameless-glass-03.jpg',
             alt: 'Close-up of two laminated glass sheets meeting at an angle, the bolted steel joint between their edges',
             ratio: '900 / 529',
@@ -170,7 +164,6 @@ export default defineProject({
             src: 'images/frameless-glass-14.jpg',
             alt: 'The pavilion being assembled at the fair: the glass arch on its steel supports, a timber frame propping it from inside',
             ratio: '1500 / 886',
-            wide: true,
             after: 1,
         },
         {

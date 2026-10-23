@@ -109,7 +109,7 @@ in a pull-out drawer.
   Glasstec 2024 Duesseldorf"; the user's ZIM research text, rephrased (four
   paragraphs - the intro, then Construction, Geometry, Thermal analysis -
   and the funding line as `credits`; approved), with a YouTube film and
-  fourteen pictures set among it by subject (`after`): the pavilion after
+  thirteen pictures set among it by subject (`after`): the pavilion after
   the intro; the joint, the lamination in the cleanroom, the glass in the
   factory and the assembly at the fair after Construction; the tool's
   diagrams after Geometry; the climate studies and two thermal simulations
