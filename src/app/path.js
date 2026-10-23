@@ -103,6 +103,11 @@ export const MILESTONES = [
             + 'staff in the School of Design and Architecture.',
     },
     {
+        when: '2023 – 2025',
+        what: 'JavaScript Developer Degree',
+        where: 'SoftUni, online qualification',
+    },
+    {
         when: 'current',
         what: 'Associate, Head of Digital Technologies',
         where: 'knippershelbig, Stuttgart',
