@@ -72,6 +72,13 @@ export default defineProject({
             after: 3,
         },
         {
+            src: 'images/kh-reuse-06-mobile-home.jpg',
+            alt: 'The kh ReUse home page on a phone: a welcome, a short introduction, and the newest projects',
+            ratio: '700 / 1192',
+            pair: true,
+            after: 3,
+        },
+        {
             src: 'images/kh-reuse-04-mobile-search.jpg',
             alt: 'On a phone: searching the element catalog by material, profile type, profile and condition',
             ratio: '700 / 1192',
