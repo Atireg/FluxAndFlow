@@ -605,8 +605,9 @@ longer part round pebbles the filter has faded out of sight (`isGone`) -
 they turned aside round nothing.
 
 The path has a link of its own, `#path`, as a project does (links.js,
-asked for): opened, it skips the landing page and chooses the path once
-the loader has cleared; choosing it puts it in the address with a step in
+asked for): opened, it skips the landing page and chooses the path at
+once, the pebbles gone before they surface (`setFocus(..., { instant })`)
+- chosen after the loader, they rose and then sank, which confused; choosing it puts it in the address with a step in
 the history, so Back leaves it; choosing anything else takes it out.
 
 A degree's dot (`degree` in path.js: the bachelor, the ITECH master, the

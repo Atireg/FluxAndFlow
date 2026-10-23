@@ -646,6 +646,8 @@ Branch `claude/loving-ramanujan-stqa6z`, not merged.
   playground.
 - **The path's degrees in light grey**: the bachelor, the master and the
   JavaScript Developer Degree (`degree`).
+- **`#path` skips the pebbles**: the path is chosen as the page opens and
+  the pebbles are gone before they surface (they showed briefly).
 
 Open at end of session: as at the end of session 5; the path's ten
 milestones checked by the user.
