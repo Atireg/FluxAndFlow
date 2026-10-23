@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { CUBE_SIZE, PEBBLE_RADIUS, PEBBLE_SQUASH } from './constants.js';
+import { PEBBLE_RADIUS, PEBBLE_SQUASH } from './constants.js';
 import { SPOTLIGHT_TAG_MIN, spotlightGlow, spotlightIntensity } from './pebbles/spotlight.js';
 import { clamp01, smooth01 } from './ease.js';
 
@@ -312,9 +312,9 @@ export function createTags({ screen, rig, state, overlays }) {
      * it on a tight frame.
      */
     function placeTagOnPebble(tag, pebble) {
-        // Down the screen is world +Z from the overhead catalog camera
+        // In the middle of the pebble, on its top
         pebble.updateMatrixWorld();
-        anchor.set(0, PEBBLE_RADIUS * PEBBLE_SQUASH, CUBE_SIZE * 0.36).multiplyScalar(pebble.userData.size);
+        anchor.set(0, PEBBLE_RADIUS * PEBBLE_SQUASH, 0).multiplyScalar(pebble.userData.size);
         const [x, y] = rig.toScreen(pebble.localToWorld(anchor));
         tag.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
     }
