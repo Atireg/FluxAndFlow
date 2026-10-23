@@ -48,8 +48,8 @@ export const MILESTONES = [
     },
     {
         when: '2014 – 2016',
-        what: 'Trainee',
-        where: 'SL Rasch GmbH Special & Lightweight Structures',
+        what: 'Digital Designer',
+        where: 'SL Rasch GmbH Special & Lightweight Structures, Stuttgart',
         image: { src: 'images/path-11.jpg', ratio: '700 / 577', alt: 'The Masjid al-Haram in Mecca from above: the Kaaba inside a ring-shaped walkway' },
     },
     {
