@@ -1097,7 +1097,19 @@ jump as the camera closes in) `cut` 0.4738 - z -236, on the plate (-227 to
 -243 to -261) - and `frameSection` aims at the part's cut outline where the
 tour will end (`aim`), sliding only along the length to the moving cut:
 aimed at the outline where the cut was, its middle shifted whenever the
-cut reached a plate or a hole, and the camera jumped with it. With the drawer out
+cut reached a plate or a hole, and the camera jumped with it.
+
+The person's points (asked for: too many, slowing the load) are a third
+of a pebble's usual 2400 (`FIGURE_SHARE`, dissolve.js) - the dissolve, its
+tails and the sampling onto the figure all shrink with them. And in its
+pebble the joint-in-section drawing (asked for; `thumbImage`, a new
+setting): a flat sheet in the thumbnails' ink whose alpha is the drawing's
+darkness, cut out at `DRAWING_INK` rather than see-through - see-through
+it was drawn after the pebble's translucent face and hidden by it - shrunk
+first to about the width it shows (`DRAWING_WIDTH`) keeping each block's
+darkest pixel, since its 2px lines averaged away under the cut-out, and
+turned to face the camera each frame (on the pebble's own copy: a clone
+doesn't carry `onBeforeRender`). With the drawer out
 (asked for, with a screenshot): the part the section keeps, seen from where
 it's cut - `view.drawer: { side: 6, above: 8, zoom }`, framed by
 `frameDetail` on the kept part's box (the parts' box from the cut on)

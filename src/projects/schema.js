@@ -21,6 +21,8 @@
  *   credits       collaborators, and any research group to credit
  *   category      'research', 'teaching' or 'real-world' - see CATEGORIES
  *   thumbModel    the small model shown in the catalog pebble
+ *   thumbImage    or a drawing instead (a picture's path): its dark lines in
+ *                 the pebble's ink, the paper see-through, facing the camera
  *   thumbSize     fit thumbModel to this longest side (the pebble is 4.4
  *                 across at size 1); without it the model is drawn as-is
  *   detailModel   the .glb loaded on click: a point cloud, or a plain mesh
@@ -461,6 +463,7 @@ export function defineProject(project) {
 
         thumbModel: project.thumbModel ?? DEFAULT_THUMB,
         thumbSize: project.thumbSize,
+        thumbImage: typeof project.thumbImage === 'string' ? project.thumbImage : '',
         detailModel: project.detailModel,
 
         view: normaliseView(project.view, { id }),

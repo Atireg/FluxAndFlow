@@ -110,14 +110,15 @@ in a pull-out drawer.
   and the funding line as `credits`; approved), with a YouTube film and
   nine pictures set among it by subject (`after`): the pavilion after the
   intro, the joint after Construction, the tool's diagrams after
-  Geometry, the climate studies after Thermal analysis. No thumbnail yet
-  (the default rock).
+  Geometry, the climate studies after Thermal analysis. In its pebble, the
+  joint-in-section drawing (`thumbImage`, a 600px copy), its lines in the
+  ink. The person is formed by a third of the usual dissolve points
+  (`FIGURE_SHARE`, dissolve.js: all 2400 slowed its opening).
 - **Links**: each project's own address is `#<id>` (`#rock-print`); the
   path's is `#path`.
 - **Drawer copy** is real for all five projects, approved by the user
   word for word; change it only on request.
-- **Waiting on the user**: the path's milestones checked; Frameless Glass Structures'
-  thumbnail; a seventh Nap Nap Hooray picture (Sleep per
+- **Waiting on the user**: the path's milestones checked; a seventh Nap Nap Hooray picture (Sleep per
   day / Number of naps - sent inline, not as a file), picture
   captions/credits, model licensing, real-device and Safari checks.
 
@@ -215,7 +216,8 @@ defineProject({
     notice: '',                           // a small orange line under the title in the bar, if non-empty
     body: [], credits: '',                // drawer text: paragraphs, or string arrays for a list;
                                           // [words](https://...) a link; nothing = no handle
-    thumbModel: 'models/rock.gltf',       // in the pebble; thumbSize: 1.9 fits the project's own
+    thumbModel: 'models/rock.gltf',       // in the pebble; thumbSize: 1.9 fits the project's own;
+                                          // or thumbImage: a drawing, its lines in the ink, facing the camera
     detailModel: 'models/RockPrintStructureReduced.glb',  // opened on click: a cloud, or a mesh sampled to points (`points`)
     view: { elevation: 58, azimuth: 4, turn: 94, zoom: { stacked: 1.75, side: 1.4 },
             lift: { stacked: 0.14, side: 0 }, sway: 13 },  // camera angle; give every new model one -
@@ -380,6 +382,11 @@ A model in parts (`frameless-glass.js`): `solid` gives the default look,
 - **A model's turn holds for reasons** (`setHold`, framing.js): 'click'
   (`doubleClick: 'hold'`) and 'hover' (a part with `info`); it turns
   again once neither holds it.
+- **A drawing in a pebble** (`thumbImage`, catalog.js) is cut out, not
+  see-through (`alphaTest`): see-through it drew after the pebble's face,
+  which hid it. It's shrunk to about its shown size keeping each block's
+  darkest pixel (thin lines averaged away otherwise), and turned to face
+  the camera on the pebble's copy - a clone drops `onBeforeRender`.
 - **A project can have two models** (`phone`): `pebble.userData.details`
   keeps each once loaded, `pebble.userData.detail` is the one shown -
   chosen as the project opens, so read `detail`, never assume one model.

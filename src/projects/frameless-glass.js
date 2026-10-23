@@ -87,6 +87,9 @@ export default defineProject({
     credits: 'Funded by the Federal Ministry for Economic Affairs and Climate '
         + 'Action on the basis of a resolution of the German Bundestag.',
 
+    // In its pebble, the joint in section (the drawing in its drawer)
+    thumbImage: 'images/frameless-glass-thumb.jpg',
+    thumbSize: 3,
     detailModel: 'models/frameless-glass.glb',
     // The model itself, the parts by their Rhino material names; anything
     // not listed in `solid`'s light grey

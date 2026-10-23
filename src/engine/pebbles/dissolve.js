@@ -27,6 +27,7 @@ import inkGlsl from '../shaders/pointCloud/ink.glsl';
 const DISSOLVE_DURATION = 3.6; // seconds from the click to the last point gone - overlapping the move in and the gather
 export const DISSOLVE_FADE = 0.5; // seconds for the face and rim to give way
 const DISSOLVE_POINTS = 2400;
+const FIGURE_SHARE = 1 / 3; // ...a third of them for a pebble whose points form a figure: all 2400 slowed its opening
 const DISSOLVE_SWELL = 0.55; // how far the cloud swells past the pebble's surface, as a share
 const DISSOLVE_DRIFT = 0.9; // units each point also wanders off on its own
 const DISSOLVE_POINT_SIZE = 0.07; // world units across
@@ -198,25 +199,26 @@ export function getDissolve(pebble) {
 
     const surface = pebble.geometry.attributes.position;
     const surfaceNormals = pebble.geometry.attributes.normal;
-    const positions = new Float32Array(DISSOLVE_POINTS * 3);
-    const normals = new Float32Array(DISSOLVE_POINTS * 3);
-    const drifts = new Float32Array(DISSOLVE_POINTS * 3);
-    const delays = new Float32Array(DISSOLVE_POINTS);
-    const tones = new Float32Array(DISSOLVE_POINTS);
-    const grounds = new Float32Array(DISSOLVE_POINTS * 3);
-    const screens = new Float32Array(DISSOLVE_POINTS);
-    const stays = new Float32Array(DISSOLVE_POINTS);
-    const v = new THREE.Vector3();
-    const screen = Boolean(pebble.userData.project?.screen);
     // ...or a figure, every point landing on it once its model is in (`figure`)
     const figure = Boolean(pebble.userData.project?.figure);
+    const count = Math.round(DISSOLVE_POINTS * (figure ? FIGURE_SHARE : 1));
+    const positions = new Float32Array(count * 3);
+    const normals = new Float32Array(count * 3);
+    const drifts = new Float32Array(count * 3);
+    const delays = new Float32Array(count);
+    const tones = new Float32Array(count);
+    const grounds = new Float32Array(count * 3);
+    const screens = new Float32Array(count);
+    const stays = new Float32Array(count);
+    const v = new THREE.Vector3();
+    const screen = Boolean(pebble.userData.project?.screen);
 
     // A project dropped onto a surface (`drop`) gets its surface from these:
     // each point's place on a disc on the ground, in the grey ink
     const drop = pebble.userData.project?.drop;
     const groundRadius = drop ? (drop.size ?? 3) * PILE_SURFACE_RADIUS : 0;
 
-    for (let i = 0; i < DISSOLVE_POINTS; i++) {
+    for (let i = 0; i < count; i++) {
         // A point on the pebble's surface, nudged a little off it
         const vertex = Math.floor(Math.random() * surface.count);
         v.fromBufferAttribute(surface, vertex);
