@@ -588,8 +588,8 @@ faster twist to and fro (`FLAG_TWIST`). The label sits beside its flag -
 the years and the role, at most two lines; the card has the rest. The
 places were there too for a while (asked for), then taken off again - too
 crowded. A milestone's
-`title` heads its card when the name by the dot is short ("Director of
-exhibition", the GradX one in full on the card). Each
+`title` heads its card when the name by the dot is short ("Exhibition
+Director", the GradX one in full on the card). Each
 starts already blown out (and again when the layout changes) - from
 hanging straight down the wind flung it up and it swung wide at first. Across
 the screen, the dots were 33px apart there, room for a year only. A card
