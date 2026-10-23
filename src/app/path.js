@@ -20,7 +20,7 @@ export const MILESTONES = [
     },
     {
         when: '2011 – 2013',
-        what: 'Student employee',
+        what: 'Trainee',
         where: 'Knippers Helbig Advanced Engineering, Stuttgart',
         details: 'Participated in the planning and execution phases for projects at different scales: '
             + 'art installations, a museum, an airport, high-rise buildings, and pedestrian and road '
@@ -45,6 +45,12 @@ export const MILESTONES = [
             + 'non-standard building material system called "Aggregates" through physical '
             + 'prototyping and material simulations.',
         image: { src: 'images/path-04.jpg', ratio: '372 / 279', alt: 'An aggregate of white star-shaped grains around a red ball' },
+    },
+    {
+        when: '2014 – 2016',
+        what: 'Trainee',
+        where: 'SL Rasch GmbH Special & Lightweight Structures',
+        image: { src: 'images/path-11.jpg', ratio: '700 / 577', alt: 'The Masjid al-Haram in Mecca from above: the Kaaba inside a ring-shaped walkway' },
     },
     {
         when: '2016 – 2019',

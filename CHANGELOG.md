@@ -622,6 +622,10 @@ Branch `claude/loving-ramanujan-stqa6z`, not merged.
   card (`title`); on a phone each flag's label shows the place too.
 - **Lecturer in Architecture: 2019 – 2023** (the user's correction).
 - **"click me!" in orange** (`--warm-text`, the invitation's orange).
+- **The path's words can't be selected** - a tap marked the word and
+  offered a search. "Student employee" is "Trainee"; an eleventh dot,
+  Trainee 2014 – 2016 at SL Rasch GmbH Special & Lightweight Structures,
+  with the user's picture (the Haram in Mecca from above).
 
 Open at end of session: as at the end of session 5; the path's ten
 milestones checked by the user.

@@ -631,7 +631,9 @@ dot, then falls over `LET_GO` (0.9s) - at 0.25s and 0.6s it fell before
 it could be read (asked for) - and a dot's hover area is wider than the
 dot, so its swing doesn't slip it out from under a still pointer. The label under a dot fades while
 its card is out - the card says the same. The card is drawn by the same
-frame loop, through refs. It moves every frame, so it is drawn through refs by its
+frame loop, through refs. A tap on a dot's words selects nothing and calls
+up no phone look-up (`user-select`, `-webkit-touch-callout`) - it marked
+the word and offered a search. It moves every frame, so it is drawn through refs by its
 own frame loop, running only while the view is on screen - not the
 engine's, which owns only the canvas. Still with reduced motion. The dots
 hold nothing yet: what each stands for comes from the user.

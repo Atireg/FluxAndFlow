@@ -753,6 +753,7 @@ body.drawer-open .section-slider {
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.4s ease, visibility 0s linear 0.4s;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .path-view.is-showing {
@@ -914,6 +915,8 @@ body.drawer-open .section-slider {
         0 0 0.25rem rgba(var(--bg-rgb), 0.95),
         0 0 0.6rem rgba(var(--bg-rgb), 0.8);
     will-change: transform;
+    -webkit-user-select: none;
+    user-select: none;
 }
 
 /* A milestone under its dot, moving with it (PathView.jsx): the years
@@ -932,6 +935,11 @@ body.drawer-open .section-slider {
     pointer-events: auto; /* its card opens from its words too */
     cursor: pointer;
     will-change: transform;
+    /* A tap opens its card - not a text selection, nor a phone's look-up */
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .path-view__label span {

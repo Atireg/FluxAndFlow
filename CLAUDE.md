@@ -33,8 +33,8 @@ in a pull-out drawer.
 - **The path** (the filter's last choice, `PATH_VIEW` in words.js): the
   employment history, like a CV - every pebble sinks and fades out
   completely, and under the name a
-  washing line moving in the wind with ten of the tap hint's dots hanging
-  from it, swinging (`src/components/PathView.jsx`). Each dot a milestone
+  washing line moving in the wind with the tap hint's dots hanging
+  from it, one per milestone (eleven), swinging (`src/components/PathView.jsx`). Each dot a milestone
   from the user's CV (`src/app/path.js`), labelled under it. On a phone the
   line runs down the left edge and the dots fly from it like flags, each
   labelled beside it (years, role, place). Hovered or tapped, a dot presses twice like the tap
