@@ -566,7 +566,9 @@ jumps as it closes in (aimed where the cut will end). The person formed
 by a third of the points; the joint drawing as the pebble's thumbnail
 (`thumbImage`, new). With the drawer closed, the view onto the section
 stays (`view.drawer.stay`). The tour's turn always turns again (it could
-cancel itself to almost nothing), faster (4s).
+cancel itself to almost nothing), faster (4s). Five more pictures in its
+drawer by subject: lamination, the factory, the assembly after
+Construction; two thermal simulations after Thermal analysis.
 
 Open at end of session: as at the end of session 4; a seventh Nap Nap
 Hooray picture, to come as a file; Frameless Glass Structures' year,

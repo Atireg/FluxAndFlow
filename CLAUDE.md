@@ -109,9 +109,11 @@ in a pull-out drawer.
   Glasstec 2024 Duesseldorf"; the user's ZIM research text, rephrased (four
   paragraphs - the intro, then Construction, Geometry, Thermal analysis -
   and the funding line as `credits`; approved), with a YouTube film and
-  nine pictures set among it by subject (`after`): the pavilion after the
-  intro, the joint after Construction, the tool's diagrams after
-  Geometry, the climate studies after Thermal analysis. In its pebble, the
+  fourteen pictures set among it by subject (`after`): the pavilion after
+  the intro; the joint, the lamination in the cleanroom, the glass in the
+  factory and the assembly at the fair after Construction; the tool's
+  diagrams after Geometry; the climate studies and two thermal simulations
+  of the joint after Thermal analysis. In its pebble, the
   joint-in-section drawing (`thumbImage`, a 600px copy), its lines in the
   ink. The person is formed by a third of the usual dissolve points
   (`FIGURE_SHARE`, dissolve.js: all 2400 slowed its opening).
