@@ -54,7 +54,7 @@ in a pull-out drawer.
   scattered swirl, turns and nods; every 10s the camera moves in by itself,
   in turn on a point, from inside at eye height, and from there facing back.
   A double-click pauses it. Two Vimeo films in its drawer, ten pictures
-  (five set in the text by subject, `after`: plans, column shapes, measurements).
+  below the text: the five photos, then the plans, column shapes and measurements.
 - **Emergent Space** (slot 1): three aggregates dropped with live physics;
   velocity arrows, interlock dots, a close-up, then a new drop. A
   double-click drops again. One Vimeo film in its drawer.
