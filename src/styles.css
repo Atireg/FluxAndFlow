@@ -753,6 +753,7 @@ body.drawer-open .section-slider {
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.4s ease, visibility 0s linear 0.4s;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .path-view.is-showing {
@@ -897,7 +898,9 @@ body.drawer-open .section-slider {
     opacity: 0.9;
 }
 
-/* "click me!" over the dots, in the tap hint's words' look (.cube-tag--hint) */
+/* "click me!" over the dots, in the tap hint's words' look (.cube-tag--hint),
+   in the site's one orange - the invitation (--warm-text, for text on the
+   paper) */
 .path-view__hint {
     position: absolute;
     top: 0;
@@ -907,11 +910,13 @@ body.drawer-open .section-slider {
     font-weight: 600;
     line-height: 1.25;
     white-space: nowrap;
-    color: var(--hint-line);
+    color: var(--warm-text);
     text-shadow:
         0 0 0.25rem rgba(var(--bg-rgb), 0.95),
         0 0 0.6rem rgba(var(--bg-rgb), 0.8);
     will-change: transform;
+    -webkit-user-select: none;
+    user-select: none;
 }
 
 /* A milestone under its dot, moving with it (PathView.jsx): the years
@@ -930,6 +935,11 @@ body.drawer-open .section-slider {
     pointer-events: auto; /* its card opens from its words too */
     cursor: pointer;
     will-change: transform;
+    /* A tap opens its card - not a text selection, nor a phone's look-up */
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .path-view__label span {
@@ -954,7 +964,7 @@ body.drawer-open .section-slider {
 
 /* On a phone the line runs down the screen and the label sits beside its
    flag: the years and the role, at most two lines of it - the card has
-   the rest */
+   the rest (the places too: with them it was crowded) */
 @media (max-width: 859px) {
     .path-view__label {
         text-align: left;

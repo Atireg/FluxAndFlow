@@ -584,7 +584,11 @@ its left edge, and the dots fly from it like flags (asked for): the wind
 across each holds it out against its weight (`FLAG_PUSH`, about 70
 degrees from hanging), gusting, with a quick flutter (`flagWind`) and a
 faster twist to and fro (`FLAG_TWIST`). The label sits beside its flag -
-the years and the role, at most two lines; the card has the rest. Each
+the years and the role, at most two lines; the card has the rest. The
+places were there too for a while (asked for), then taken off again - too
+crowded. A milestone's
+`title` heads its card when the name by the dot is short ("Director of
+exhibition", the GradX one in full on the card). Each
 starts already blown out (and again when the layout changes) - from
 hanging straight down the wind flung it up and it swung wide at first. Across
 the screen, the dots were 33px apart there, room for a year only. A card
@@ -606,7 +610,8 @@ the loader has cleared; choosing it puts it in the address with a step in
 the history, so Back leaves it; choosing anything else takes it out.
 
 "click me!" (the user's words, `PATH_HINT`) sits over one dot at a time in
-the tap hint's words' look - a little up and to the right of a hanging
+the tap hint's words' look, in the site's orange (asked for - it's the
+invitation, which is what the one orange means) - a little up and to the right of a hanging
 dot, clear of its thread, or straight over a flag - for `HINT_SHOW`, then
 fades and turns up over another chosen at random (asked for), never the
 same one twice running nor one with its card out; over a dot whose card
@@ -627,7 +632,9 @@ dot, then falls over `LET_GO` (0.9s) - at 0.25s and 0.6s it fell before
 it could be read (asked for) - and a dot's hover area is wider than the
 dot, so its swing doesn't slip it out from under a still pointer. The label under a dot fades while
 its card is out - the card says the same. The card is drawn by the same
-frame loop, through refs. It moves every frame, so it is drawn through refs by its
+frame loop, through refs. A tap on a dot's words selects nothing and calls
+up no phone look-up (`user-select`, `-webkit-touch-callout`) - it marked
+the word and offered a search. It moves every frame, so it is drawn through refs by its
 own frame loop, running only while the view is on screen - not the
 engine's, which owns only the canvas. Still with reduced motion. The dots
 hold nothing yet: what each stands for comes from the user.

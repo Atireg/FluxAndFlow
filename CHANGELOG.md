@@ -623,6 +623,17 @@ Branch `claude/loving-ramanujan-stqa6z`, not merged.
   page).
 - **The knippershelbig card's details**: the user's text reworked to match
   the others (option 1, approved).
+- **GradX by its dot: "Director of exhibition"**, the full title on its
+  card (`title`); on a phone each flag's label shows the place too.
+- **Lecturer in Architecture: 2019 – 2023** (the user's correction).
+- **"click me!" in orange** (`--warm-text`, the invitation's orange).
+- **The path's words can't be selected** - a tap marked the word and
+  offered a search. "Student employee" is "Trainee"; an eleventh dot,
+  Trainee 2014 – 2016 at SL Rasch GmbH Special & Lightweight Structures,
+  with the user's picture (the Haram in Mecca from above) - then Digital
+  Designer, in Stuttgart, its card's details the user's (option 1).
+- **The places off the flags' labels on a phone again** - too crowded;
+  they're on the cards.
 
 Open at end of session: as at the end of session 5; the path's ten
 milestones checked by the user.

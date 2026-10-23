@@ -4,7 +4,8 @@
  * years, `what` the role or degree, `where` the place - beside or under the
  * dot - and, on the card that drops from it on a hover or tap, `details`
  * and a picture (`image`, its file's `ratio`), either left out if there's
- * none. Write "knippershelbig" so, one lowercase word.
+ * none; `title`, if given, heads the card in place of `what` - a longer
+ * name than fits by the dot. Write "knippershelbig" so, one lowercase word.
  */
 export const MILESTONES = [
     {
@@ -19,7 +20,7 @@ export const MILESTONES = [
     },
     {
         when: '2011 – 2013',
-        what: 'Student employee',
+        what: 'Trainee',
         where: 'Knippers Helbig Advanced Engineering, Stuttgart',
         details: 'Participated in the planning and execution phases for projects at different scales: '
             + 'art installations, a museum, an airport, high-rise buildings, and pedestrian and road '
@@ -46,6 +47,15 @@ export const MILESTONES = [
         image: { src: 'images/path-04.jpg', ratio: '372 / 279', alt: 'An aggregate of white star-shaped grains around a red ball' },
     },
     {
+        when: '2014 – 2016',
+        what: 'Digital Designer',
+        where: 'SL Rasch GmbH Special & Lightweight Structures, Stuttgart',
+        details: 'Designing for the company’s model-making department: large-scale models, moving '
+            + 'and adjustable, made for public display of some of the company’s largest projects, '
+            + 'among them the Makkah Royal Clock Tower.',
+        image: { src: 'images/path-11.jpg', ratio: '700 / 577', alt: 'The Masjid al-Haram in Mecca from above: the Kaaba inside a ring-shaped walkway' },
+    },
+    {
         when: '2016 – 2019',
         what: 'PhD researcher',
         where: 'Gramazio Kohler Research, ETH Zurich',
@@ -64,7 +74,7 @@ export const MILESTONES = [
         image: { src: 'images/path-06.jpg', ratio: '345 / 220', alt: 'Spatial Aggregations, a MAS DFAB project' },
     },
     {
-        when: '2019 – current',
+        when: '2019 – 2023',
         what: 'Lecturer in Architecture',
         where: 'Swinburne University of Technology, Melbourne',
         details: 'A workload split between 50 % teaching, 30 % research and 20 % leadership/service, '
@@ -74,7 +84,8 @@ export const MILESTONES = [
     },
     {
         when: '2020 – 2021',
-        what: 'Director of end-of-year graduation exhibition (GradX) for Architecture and Industrial Design',
+        what: 'Director of exhibition',
+        title: 'Director of end-of-year graduation exhibition (GradX) for Architecture and Industrial Design',
         where: 'Swinburne University of Technology, Melbourne',
         details: 'For two consecutive years, I had a leading role in directing the end-of-year '
             + 'exhibition GradX for the School of Design and Architecture. Due to COVID-19 '

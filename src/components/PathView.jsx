@@ -434,13 +434,13 @@ export default function PathView({ shown }) {
                     <span className="path-view__where">{where}</span>
                 </p>
             ))}
-            {MILESTONES.map(({ when, what, where, details, image }) => (
+            {MILESTONES.map(({ when, what, title, where, details, image }) => (
                 <article className="path-view__card" key={`card-${when}${what}`}>
                     {image && (
                         <img src={assetUrl(image.src)} alt={image.alt} style={{ aspectRatio: image.ratio }} />
                     )}
                     <p className="path-view__card-when">{when}</p>
-                    <h3 className="path-view__card-what">{what}</h3>
+                    <h3 className="path-view__card-what">{title ?? what}</h3>
                     <p className="path-view__card-where">{where}</p>
                     {details && <p className="path-view__card-details">{details}</p>}
                 </article>
