@@ -571,7 +571,7 @@ drawer by subject: lamination, the factory, the assembly after
 Construction; two thermal simulations after Thermal analysis. Then the photo looking up at the ridge taken out (asked for). And the "under construction" line under its title taken off. Then a
 clean-up: no unused code found (the parked smoke aside); Frameless Glass's
 own comments, the tour's descriptions in the schema and detail.js, and
-the README's list of what a project can say brought up to date. kh ReUse's two phone forms side by side on a wide screen (the first `half`). And the two demolition projects' names taken out of its text (asked for). A banner running across the top of every view: "Welcome to a living playground – it grows and shifts with its author, and is happily never finished." (option 4).
+the README's list of what a project can say brought up to date. kh ReUse's two phone forms side by side on a wide screen (the first `half`). And the two demolition projects' names taken out of its text (asked for). A banner running across the top of every view: "Welcome to a living playground – it grows and shifts with its author, and is happily never finished." (option 4). On a phone the filter moved back up, clear of the pebbles (a slimmer banner, a smaller gap).
 
 Open at end of session: as at the end of session 4; a seventh Nap Nap
 Hooray picture, to come as a file; Frameless Glass Structures' year,

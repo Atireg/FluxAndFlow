@@ -1655,8 +1655,11 @@ the "F&F playground" link rather than the orange, which means "click me".
 Two copies of the words side by side, the track moved by half its width
 over 60s, so the loop has no seam; still for those who ask for less motion.
 The bar and the filter sit below it (`top: var(--banner-height)`); on a
-phone their padding alone left them under it. No close button (none asked
-for).
+phone their padding alone left them under it. On a phone the strip is
+slimmer (1.35rem) and the two start with a small gap (0.35rem) rather
+than their full padding: pushed down the whole banner, the filter's two
+lines ran into the pebbles (the user's phone) - now about 8px below where
+they were without it. No close button (none asked for).
 
 
 Loading

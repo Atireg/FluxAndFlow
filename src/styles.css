@@ -737,6 +737,20 @@ body.drawer-open .section-slider {
     transition: opacity 0.5s ease, visibility 0s;
 }
 
+/* On a phone, under the banner the filter and the bar start with a small
+   gap rather than their full padding - pushed down the banner's height as
+   well, the filter's two lines ran into the pebbles */
+@media (max-width: 859px) {
+    :root {
+        --banner-height: 1.35rem;
+    }
+
+    .filter,
+    .bar {
+        padding-top: 0.35rem;
+    }
+}
+
 /* Hidden behind the loader until it hands over, then in with the pebbles
    rather than there at once as its paper clears */
 .loader:not(.is-handed-over) ~ #root .filter {
