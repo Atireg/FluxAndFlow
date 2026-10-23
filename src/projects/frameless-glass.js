@@ -45,14 +45,13 @@ export default defineProject({
     id: 'frameless-glass',
     slot: 7,
     title: 'Frameless Glass Structures',
-    // Under the title, in orange (the user's words)
     // Research, teaching or the real world - its tag, and the catalog's filter
     category: 'real-world',
     year: '2024',
     role: 'Principal investigator',
     context: 'knippershelbig, project Frameless Glass Structures, for Glasstec 2024 Duesseldorf',
 
-    // The drawer's text, as the user chose it (option 1 of three)
+    // The drawer's text: the user's ZIM research text, rephrased (approved)
     body: [
         'In most façades, glass only fills the openings: it closes the space, '
         + 'while a separate substructure carries the loads. The result is a '
@@ -116,7 +115,7 @@ export default defineProject({
     // Ground under it, so the person stands on something
     floor: true,
 
-    // The film, from YouTube, above the pictures in the drawer
+    // The film, from YouTube, after the drawer's first paragraph
     videos: [
         { youtube: 'JnKaReHR4So', title: 'Frameless Glass Structures - film', after: 0 },
     ],
@@ -204,11 +203,16 @@ export default defineProject({
             after: 3,
         },
     ],
-    // Steeply from above, its length up the screen, on both layouts (the
-    // user's chosen view) - where the tour's turn ends
-    view: { elevation: 62, turn: 72, zoom: { side: 1.8, stacked: 2.1 }, lift: { stacked: 0.09 }, drawer: { side: 6, above: 8, zoom: { side: 1.45, stacked: 1.1 }, stay: { zoom: { side: 0.75, stacked: 1.3 } } } },
-    // As it opens: one full turn round it, then the section slides to just
-    // past the middle as the camera closes in square-on to the ridge joint
-    // there (GS2_GS6), its profile facing the visitor
+    view: {
+        // Steeply from above, its length up the screen, on both layouts
+        // (the user's chosen view) - where the tour starts
+        elevation: 62, turn: 72, zoom: { side: 1.8, stacked: 2.1 }, lift: { stacked: 0.09 },
+        // With the drawer out, the part the section keeps, from the cut,
+        // almost square-on - and that view kept once it's closed again
+        drawer: { side: 6, above: 8, zoom: { side: 1.45, stacked: 1.1 }, stay: { zoom: { side: 0.75, stacked: 1.3 } } },
+    },
+    // As it opens: about half a turn, then the section slides in from the
+    // far end to just before the middle, the camera closing in on the ridge
+    // joint there (GS3_GS7) through a connection plate, short of its hole
     tour: { orbit: 4, turns: 0.5, cut: 0.4738, focus: 'GS3_GS7', reach: { side: 0.17, stacked: 0.08 }, over: 8, side: 20, above: 45 },
 });

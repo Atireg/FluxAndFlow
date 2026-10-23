@@ -29,10 +29,9 @@ export default defineProject({
         + 'where the author is Head of Digital Technologies. The author wrote '
         + 'the frontend and the backend from scratch, before AI tools were part '
         + 'of everyday development.',
-        'Visitors browse demolition projects, such as Stuttgart Rathaus and '
-        + 'Kittler Schule Heilbronn, and the elements recovered from each one, '
-        + 'filtering the catalogue by material, profile type, profile and '
-        + 'condition.',
+        'Visitors browse demolition projects and the elements recovered from '
+        + 'each one, filtering the catalogue by material, profile type, profile '
+        + 'and condition.',
         'Registered users add their own projects and elements, and collect '
         + 'elements in a personal basket for reuse.',
         'Note: the data in this version of the website is fictional and serves '
@@ -84,6 +83,8 @@ export default defineProject({
             alt: 'On a phone: the form for adding a new demolition project',
             ratio: '700 / 1192',
             pair: true,
+            // (first of its group, yet half - beside the next on a wide screen)
+            half: true,
             after: 4,
         },
         {

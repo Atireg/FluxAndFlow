@@ -7,6 +7,7 @@ import CatalogTags from '../components/CatalogTags.jsx';
 import TapHint from '../components/TapHint.jsx';
 import PartInfo from '../components/PartInfo.jsx';
 import SectionSlider from '../components/SectionSlider.jsx';
+import Banner from '../components/Banner.jsx';
 import HintTag from '../components/HintTag.jsx';
 import CategoryFilter from '../components/CategoryFilter.jsx';
 import VelocityTags from '../components/VelocityTags.jsx';
@@ -307,6 +308,8 @@ export default function App() {
     return (
         <>
             <canvas className="webgl" ref={canvasRef} />
+
+            <Banner />
 
             <VelocityTags ref={velocityRef} />
 

@@ -25,6 +25,10 @@ in a pull-out drawer.
   1.6s while the playground compiles its shaders, then the pebbles surface
   and the scene's streams take the same particles over where they are; the
   filter fades in and the orange glow waits 3s for them.
+- **Banner** (`components/Banner.jsx`): a thin strip across the top of
+  every view, the user's words (`BANNER_WORDS`, words.js) running slowly by
+  in small grey capitals; the bar and filter sit below it (`--banner-height`;
+  on a phone slimmer, and the two with a smaller top gap, clear of the pebbles).
 - **Playground**: ten pebbles, a random size each visit, slowly changing
   shape; one at a time glows orange with its name on a string. A filter
   (research / teaching / the real world) brings one kind forward. An empty
@@ -69,7 +73,7 @@ in a pull-out drawer.
   1992). A reuse sign in its pebble. Drawer: the user's text (shortened,
   approved) with two links and a short Tech overview list; five
   screenshots placed in the text (`after`; two desktop `wide`, three phone
-  `pair`).
+  `pair` - the two forms side by side on a wide screen too, the first `half`).
 - **Nap Nap Hooray** (slot 4, the real world, `#nap-nap-hooray`): the
   user's baby-sleep website on the phone (`nap-nap-hooray.mp4`, 1170 x
   1992, three times the screen's 390 x 664). A crescent moon (`moon.glb`,
