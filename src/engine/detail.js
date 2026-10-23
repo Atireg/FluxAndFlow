@@ -122,13 +122,14 @@ export function createDetail({
     const hoverNdc = new THREE.Vector2();
 
     /**
-     * A project's `tour`, played each time it opens: one turn of the model,
-     * eased (a turn of the model reads as the camera going round it - the
-     * inks are lit from the view), ending with the cut's side towards the
-     * camera at its `side`; a moment there, then down to the section where it
-     * starts, and along with it as it slides to `cut`, closing in on the part
-     * `focus`. Whatever the visitor does with it - the slider, a
-     * double-click, the drawer, orbiting by hand - stops it where it is.
+     * A project's `tour`, played each time it opens: about `turns` of the
+     * model, eased (a turn of the model reads as the camera going round it -
+     * the inks are lit from the view), ending with the cut's side towards
+     * the camera at its `side`; then at once the section slides to `cut`,
+     * the camera coming down onto it and closing in on the part `focus`.
+     * Whatever the visitor does with it - the slider, the drawer, orbiting
+     * by hand - stops it where it is; a double-click (`doubleClick: 'tour'`)
+     * plays it again.
      */
     const tour = { model: null, spin: 0, turn: 0, moved: false, from: null, stopped: true };
 

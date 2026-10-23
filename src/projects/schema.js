@@ -42,16 +42,16 @@
  *                 slides (a slider over the model), its parts cut away beyond it;
  *                 true comes in from the low end of z, { reverse: true } from
  *                 the high end
- *   tour          with section: { orbit, cut, focus, reach, over, side, above } -
- *                 played as it opens: one turn in `orbit` seconds, then over
- *                 `over` the section slides to `cut` (a share of the length)
- *                 and the camera closes in on it, on the part `focus` where
- *                 it's cut, `reach` of the model's breadth across the window
- *                 (a number, or per layout { side, stacked }),
- *                 `side` degrees round from square-on and `above` degrees
- *                 down onto it (both 0: square-on); `turns` (1) round in
- *                 `orbit`, give or take what ends it with the cut's side
- *                 to the camera
+ *   tour          with section: { orbit, turns, cut, focus, reach, over, side,
+ *                 above } - played as it opens: `turns` (1) round in `orbit`
+ *                 seconds, give or take what ends it with the cut's side to
+ *                 the camera; then over `over` the section slides to `cut` (a
+ *                 share of the length) as the camera comes down onto it and
+ *                 closes in on the part `focus` where it will be cut,
+ *                 `reach` of the model's breadth across the window (a
+ *                 number, or per layout { side, stacked }), `side` degrees
+ *                 round from square-on and `above` degrees down onto it (both
+ *                 0: square-on)
  *   notice        a short line under the title in the bar, in orange
  *   floor         with solid: a floor at the model's foot, a figure set down onto it
  *   info          with solid: { [part name]: { title, lines } } - shown beside

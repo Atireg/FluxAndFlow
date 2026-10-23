@@ -11,10 +11,13 @@ says why the line between React and the engine is drawn where it is.
 Adding a project is two steps: write `src/projects/<id>.js` exporting
 `defineProject({ ... })`, then add it to the `catalog` array in
 `src/projects/index.js`. Its settings say everything that's particular to
-it - its slot and kind, its models, the camera angle and nod (`view`), the
-gather, a physics drop, a solid model with a film on its screen, what a
-double-click does, timed zooms, and the drawer's text, films (Vimeo) and
-pictures. CLAUDE.md lists them with an
+it - its slot and kind, its models (a 3D model or a drawing in its
+pebble), the camera angle and nod (`view`), the gather, a physics drop, a
+solid model with a film on its screen, a model in parts with a section
+the visitor slides and a camera tour as it opens, a person formed by the
+pebble's points, what a double-click does, timed zooms, and the drawer's
+text, films (Vimeo or YouTube) and pictures, set among the text if
+wanted. CLAUDE.md lists them with an
 example; `src/projects/schema.js` fills the defaults and rejects a
 half-declared project. There is no per-project branch in the engine, so
 nothing else needs touching. Each project has its own link, `#<id>` on the
@@ -58,6 +61,9 @@ Next up (waiting on content or a check from the user)
     [x] Frameless Glass Structures (slot 7): year, role and context rows
     [x] Frameless Glass Structures: a thumbnail for its pebble (the joint
         drawing, `thumbImage`)
+    [ ] Frameless Glass Structures on a real phone and in Safari: the
+        tour's smoothness, the cut's orange fill (the stencil) and the
+        drawing in its pebble, all checked only headless
     [ ] Nap Nap Hooray: a seventh picture (Sleep per day / Number of naps),
         sent inline - to come as a file
     [ ] Emergent Space's drop on a phone: confirm it runs smoothly on a real
