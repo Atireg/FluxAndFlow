@@ -90,6 +90,46 @@ export default defineProject({
     // as a CSS aspect ratio, '3 / 2' if left out.
     //   { src: '', alt: 'what it shows', caption: '', ratio: '4 / 5' }
     images: [
+        // The plans after the robot and the pillars, two to a row
+        {
+            src: 'images/rock-print-06-robot-positions.jpg',
+            alt: 'Plan of the pavilion: the robot\'s five positions, its reach around each, the columns it printed from there and the safety distances',
+            caption: '',
+            ratio: '900 / 1106',
+            half: true,
+            after: 0,
+        },
+        {
+            src: 'images/rock-print-07-column-layout.jpg',
+            alt: 'Plan of the pavilion, 8 by 10 metres: each column\'s position and orientation, and the roof\'s axes',
+            caption: '',
+            ratio: '900 / 1106',
+            after: 0,
+        },
+        // How the columns are shaped, and how the built pavilion behaved
+        {
+            src: 'images/rock-print-08-column-shapes.jpg',
+            alt: 'Four column shapes, each set by a top, a middle and a bottom hexagon within the robot\'s reach',
+            caption: '',
+            ratio: '900 / 1024',
+            half: true,
+            after: 1,
+        },
+        {
+            src: 'images/rock-print-09-strain.jpg',
+            alt: 'A scan of the columns seen from above, and the strain measured in the string of each, S1 to S7',
+            caption: '',
+            ratio: '900 / 1593',
+            after: 1,
+        },
+        {
+            src: 'images/rock-print-10-settlement.jpg',
+            alt: 'The roof\'s settlement at its four corners over 26 days, beside a scan of the pavilion and a photo of a measuring point under the roof',
+            caption: '',
+            ratio: '1500 / 1346',
+            wide: true,
+            after: 1,
+        },
         {
             src: 'images/rock-print-01-exterior.jpg',
             alt: 'The pavilion under a chestnut tree beside a stone church: columns of loose stone holding up a thin rusted steel roof',
