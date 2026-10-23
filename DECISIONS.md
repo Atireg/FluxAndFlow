@@ -609,6 +609,10 @@ asked for): opened, it skips the landing page and chooses the path once
 the loader has cleared; choosing it puts it in the address with a step in
 the history, so Back leaves it; choosing anything else takes it out.
 
+A degree's dot (`degree` in path.js: the bachelor, the ITECH master, the
+JavaScript Developer Degree) is filled light grey, the jobs' white (asked
+for), so education reads apart from work at a glance; same outline.
+
 "click me!" (the user's words, `PATH_HINT`) sits over one dot at a time in
 the tap hint's words' look, in the site's orange (asked for - it's the
 invitation, which is what the one orange means) - a little up and to the right of a hanging

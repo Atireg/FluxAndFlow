@@ -415,8 +415,8 @@ export default function PathView({ shown }) {
                 </g>
                 <circle className="path-view__end" r="2.5" />
                 <circle className="path-view__end" r="2.5" />
-                {Array.from({ length: DOT_COUNT }, (_, i) => (
-                    <g className="path-view__dot" key={i}>
+                {MILESTONES.map(({ degree }, i) => (
+                    <g className={`path-view__dot${degree ? ' is-degree' : ''}`} key={i}>
                         <line className="path-view__thread" />
                         <line className="path-view__hang" />
                         <circle className="path-view__peg" r="1.8" />
