@@ -50,6 +50,9 @@ export const MILESTONES = [
         when: '2014 – 2016',
         what: 'Digital Designer',
         where: 'SL Rasch GmbH Special & Lightweight Structures, Stuttgart',
+        details: 'Designing for the company’s model-making department: large-scale models, moving '
+            + 'and adjustable, made for public display of some of the company’s largest projects, '
+            + 'among them the Makkah Royal Clock Tower.',
         image: { src: 'images/path-11.jpg', ratio: '700 / 577', alt: 'The Masjid al-Haram in Mecca from above: the Kaaba inside a ring-shaped walkway' },
     },
     {

@@ -626,7 +626,7 @@ Branch `claude/loving-ramanujan-stqa6z`, not merged.
   offered a search. "Student employee" is "Trainee"; an eleventh dot,
   Trainee 2014 – 2016 at SL Rasch GmbH Special & Lightweight Structures,
   with the user's picture (the Haram in Mecca from above) - then Digital
-  Designer, in Stuttgart.
+  Designer, in Stuttgart, its card's details the user's (option 1).
 
 Open at end of session: as at the end of session 5; the path's ten
 milestones checked by the user.
