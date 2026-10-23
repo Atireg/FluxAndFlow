@@ -4,7 +4,8 @@
  * years, `what` the role or degree, `where` the place - beside or under the
  * dot - and, on the card that drops from it on a hover or tap, `details`
  * and a picture (`image`, its file's `ratio`), either left out if there's
- * none. Write "knippershelbig" so, one lowercase word.
+ * none; `title`, if given, heads the card in place of `what` - a longer
+ * name than fits by the dot. Write "knippershelbig" so, one lowercase word.
  */
 export const MILESTONES = [
     {
@@ -74,7 +75,8 @@ export const MILESTONES = [
     },
     {
         when: '2020 – 2021',
-        what: 'Director of end-of-year graduation exhibition (GradX) for Architecture and Industrial Design',
+        what: 'Director of exhibition',
+        title: 'Director of end-of-year graduation exhibition (GradX) for Architecture and Industrial Design',
         where: 'Swinburne University of Technology, Melbourne',
         details: 'For two consecutive years, I had a leading role in directing the end-of-year '
             + 'exhibition GradX for the School of Design and Architecture. Due to COVID-19 '

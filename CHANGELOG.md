@@ -618,6 +618,8 @@ Branch `claude/loving-ramanujan-stqa6z`, not merged.
   page).
 - **The knippershelbig card's details**: the user's text reworked to match
   the others (option 1, approved).
+- **GradX by its dot: "Director of exhibition"**, the full title on its
+  card (`title`); on a phone each flag's label shows the place too.
 
 Open at end of session: as at the end of session 5; the path's ten
 milestones checked by the user.
