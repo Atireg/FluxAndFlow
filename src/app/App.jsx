@@ -211,9 +211,9 @@ export default function App() {
      */
     useEffect(() => {
         let timer = null;
-        const showPath = (shown) => {
+        const showPath = (shown, options) => {
             const next = shown ? PATH_VIEW.id : null;
-            engineRef.current?.setFocus(next);
+            engineRef.current?.setFocus(next, options);
             setFocus(next);
         };
         const openLinked = () => {
@@ -223,7 +223,10 @@ export default function App() {
         };
         const onLeaving = () => { timer = window.setTimeout(openLinked, LINK_OPEN_AFTER); };
 
-        if (linkedProject()) {
+        // The path's link opens on the path at once: the pebbles gone before
+        // they ever surface, rather than seen and then sunk
+        if (linkedProject() === PATH_VIEW.id) showPath(true, { instant: true });
+        else if (linkedProject()) {
             if (document.getElementById('loader')) window.addEventListener('fluxloader:leaving', onLeaving, { once: true });
             else onLeaving();
         }

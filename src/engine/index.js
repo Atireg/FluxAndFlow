@@ -588,10 +588,11 @@ export function createEngine({ canvas, source, ui }) {
 
         /**
          * The catalog's filter: bring one kind of project forward (a
-         * pebble's `categoryOf`) and sink the rest, or null for all
+         * pebble's `categoryOf`) and sink the rest, or null for all;
+         * `instant`: already there, without the sink
          */
-        setFocus(category) {
-            setFocus(state, grid.pebbles, category, clock.getElapsedTime());
+        setFocus(category, options) {
+            setFocus(state, grid.pebbles, category, clock.getElapsedTime(), options);
         },
 
         /**

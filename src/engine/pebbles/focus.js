@@ -49,16 +49,18 @@ export function isGone(pebble, elapsedTime) {
 
 /**
  * Bring `category` forward (null for all of them): every pebble starts
- * towards its new depth from wherever it is now
+ * towards its new depth from wherever it is now - or, `instant`, is there
+ * already (a link that opens on a view of its own: nothing seen moving)
  */
-export function setFocus(state, pebbles, category, elapsedTime) {
+export function setFocus(state, pebbles, category, elapsedTime, { instant = false } = {}) {
     state.focus = category;
     const none = Boolean(category) && !pebbles.some((pebble) => pebble.userData.category === category);
     pebbles.forEach((pebble) => {
         const to = category && pebble.userData.category !== category ? 1 : 0;
+        const goneTo = none ? 1 : 0;
         pebble.userData.focus = {
-            from: sunk(pebble, elapsedTime), to,
-            goneFrom: goneBy(pebble, elapsedTime), goneTo: none ? 1 : 0,
+            from: instant ? to : sunk(pebble, elapsedTime), to,
+            goneFrom: instant ? goneTo : goneBy(pebble, elapsedTime), goneTo,
             at: elapsedTime,
         };
     });
