@@ -64,14 +64,6 @@ export const MILESTONES = [
         image: { src: 'images/path-06.jpg', ratio: '345 / 220', alt: 'Spatial Aggregations, a MAS DFAB project' },
     },
     {
-        when: '2018',
-        what: 'Rock Print Pavilion',
-        where: 'Winterthur',
-        details: 'A house made from loose aggregates and twine, built by a mobile robot on the church '
-            + 'square in the old town of Winterthur, as part of the "Hello, Robot" exhibition.',
-        image: { src: 'images/path-07.jpg', ratio: '370 / 273', alt: 'The Rock Print Pavilion on the Kirchplatz in Winterthur' },
-    },
-    {
         when: '2019 – current',
         what: 'Lecturer in Architecture',
         where: 'Swinburne University of Technology, Melbourne',
@@ -79,6 +71,18 @@ export const MILESTONES = [
             + 'shaping the newly established bachelor\'s and master\'s programs, and co-supervising '
             + 'two PhD students.',
         image: { src: 'images/path-08.jpg', ratio: '370 / 181', alt: 'A student working with two robot arms' },
+    },
+    {
+        when: '2020 – 2021',
+        what: 'Director of end-of-year graduation exhibition (GradX) for Architecture and Industrial Design',
+        where: 'Swinburne University of Technology, Melbourne',
+        details: 'For two consecutive years, I had a leading role in directing the end-of-year '
+            + 'exhibition GradX for the School of Design and Architecture. Due to COVID-19 '
+            + 'restrictions, my team and I reinvented it: more than twenty 3D virtual spaces '
+            + 'showcasing the work of nearly 400 graduating students from 18 disciplines, visited by '
+            + '2.2 K people from all over the world. For my efforts, I won the Dean’s Award for '
+            + 'Innovation.',
+        image: { src: 'images/path-10.jpg', ratio: '375 / 314', alt: 'One of the GradX virtual spaces: a city block on a crumbling cube of earth' },
     },
     {
         when: '2021 – 2023',
@@ -91,6 +95,9 @@ export const MILESTONES = [
         when: 'current',
         what: 'Associate, Head of Digital Technologies',
         where: 'knippershelbig, Stuttgart',
+        details: 'Developing innovative engineering solutions with code: automating fabrication '
+            + 'processes, simulating thermal performance and exploring new material applications in '
+            + 'construction, drawing on over a decade of coding experience across multiple domains.',
         image: {
             src: 'images/frameless-glass-01.jpg',
             ratio: '1500 / 633',

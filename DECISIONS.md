@@ -584,7 +584,9 @@ its left edge, and the dots fly from it like flags (asked for): the wind
 across each holds it out against its weight (`FLAG_PUSH`, about 70
 degrees from hanging), gusting, with a quick flutter (`flagWind`) and a
 faster twist to and fro (`FLAG_TWIST`). The label sits beside its flag -
-the years and the role, at most two lines; the card has the rest. Across
+the years and the role, at most two lines; the card has the rest. Each
+starts already blown out (and again when the layout changes) - from
+hanging straight down the wind flung it up and it swung wide at first. Across
 the screen, the dots were 33px apart there, room for a year only. A card
 stops short of the foot of the screen, over its dot if need be, and a tap
 on it closes it.
