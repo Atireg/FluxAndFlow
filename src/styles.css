@@ -773,6 +773,32 @@ body.drawer-open .section-slider {
     letter-spacing: -0.01em;
 }
 
+/* The full CV, beside the path's name: a small outlined button in the
+   filter's small capitals; opens the PDF in a new tab */
+.path-view__cv {
+    display: inline-block;
+    margin-left: 0.9em;
+    padding: 0.35em 0.9em;
+    vertical-align: 0.35em;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    line-height: 1;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--ink);
+    pointer-events: auto;
+    transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.path-view__cv:hover,
+.path-view__cv:focus-visible {
+    color: var(--bg);
+    background: var(--ink);
+}
+
 .path-view__scene {
     position: absolute;
     inset: 0;

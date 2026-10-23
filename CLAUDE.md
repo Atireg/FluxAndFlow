@@ -38,7 +38,9 @@ in a pull-out drawer.
   from the user's CV (`src/app/path.js`), labelled under it. On a phone the
   line runs down the left edge and the dots fly from it like flags, each
   labelled beside it (years and role; the place only on its card). A
-  degree's dot is light grey (`degree`). Hovered or tapped, a dot presses twice like the tap
+  degree's dot is light grey (`degree`). Beside its name, a "Full CV"
+  button opens `static/cv/Gergana_Rusenova_CV.pdf` (`PATH_CV`) - replace
+  the file, same name, when the CV changes. Hovered or tapped, a dot presses twice like the tap
   hint and a card drops from it on a string ("click me!" over one dot at a time, at random; its
   words open it too) (details and a picture, both
   from the CV; `static/images/path-*.jpg`). The streams behind blow with

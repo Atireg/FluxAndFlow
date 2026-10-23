@@ -17,6 +17,9 @@ export const PATH_VIEW = { id: 'path', label: 'The path' };
 // Over the path's dots, inviting a tap (or a hover)
 export const PATH_HINT = 'click me!';
 
+// Beside the path's name: the full CV, a PDF in static/cv/
+export const PATH_CV = { label: 'Full CV', src: 'cv/Gergana_Rusenova_CV.pdf' };
+
 // What a double-tap does, by the project's `doubleClick`
 const HINT_ACTIONS = { zoom: 'zoom', hold: 'pause', drop: 'drop again', tour: 'play again' };
 

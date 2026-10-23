@@ -645,6 +645,8 @@ Branch `claude/loving-ramanujan-stqa6z`, not merged.
   JavaScript Developer Degree (`degree`).
 - **`#path` skips the pebbles**: the path is chosen as the page opens and
   the pebbles are gone before they surface (they showed briefly).
+- **"Full CV" beside the path's name**: opens the user's CV, a PDF in
+  `static/cv/`, in a new tab.
 
 Open at end of session: as at the end of session 5; the path's ten
 milestones checked by the user.
