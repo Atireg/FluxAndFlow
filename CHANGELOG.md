@@ -621,6 +621,7 @@ Branch `claude/loving-ramanujan-stqa6z`, not merged.
 - **GradX by its dot: "Director of exhibition"**, the full title on its
   card (`title`); on a phone each flag's label shows the place too.
 - **Lecturer in Architecture: 2019 – 2023** (the user's correction).
+- **"click me!" in orange** (`--warm-text`, the invitation's orange).
 
 Open at end of session: as at the end of session 5; the path's ten
 milestones checked by the user.
