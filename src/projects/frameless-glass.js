@@ -110,7 +110,7 @@ export default defineProject({
     // Over a sheet, a joint or a support: what it is, the turn held
     info,
     // A cut across its length, slid by the visitor
-    section: true,
+    section: { reverse: true }, // in from the other end (asked for)
     // Ground under it, so the person stands on something
     floor: true,
 
@@ -184,5 +184,5 @@ export default defineProject({
     // As it opens: one full turn round it, then the section slides to just
     // past the middle as the camera closes in square-on to the ridge joint
     // there (GS2_GS6), its profile facing the visitor
-    tour: { orbit: 5, turns: 0.5, cut: 0.472, focus: 'GS2_GS6', reach: { side: 0.17, stacked: 0.08 }, over: 8, side: 20, above: 45 },
+    tour: { orbit: 5, turns: 0.5, cut: 0.472, focus: 'GS3_GS7', reach: { side: 0.17, stacked: 0.08 }, over: 8, side: 20, above: 45 },
 });

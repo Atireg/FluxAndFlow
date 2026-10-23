@@ -558,7 +558,7 @@ export function createFraming({ rig, screen, state, grid, ui }) {
             if (cut.length) centre.copy(new THREE.Box3().setFromPoints(cut).getCenter(new THREE.Vector3()));
             model.updateMatrixWorld(true);
             const target = model.localToWorld(new THREE.Vector3(centre.x, centre.y, z));
-            const along = model.localToWorld(new THREE.Vector3(centre.x, centre.y, z + 1)).sub(target).normalize();
+            const along = model.localToWorld(new THREE.Vector3(centre.x, centre.y, z + section.sign)).sub(target).normalize();
             const breadth = model.localToWorld(new THREE.Vector3(all.max.x, 0, 0))
                 .distanceTo(model.localToWorld(new THREE.Vector3(all.min.x, 0, 0)));
 
@@ -600,11 +600,12 @@ export function createFraming({ rig, screen, state, grid, ui }) {
             // from where it's cut, at those angles
             const onSection = pebble.userData.project?.view?.drawer;
             if (onSection?.side !== undefined && model?.userData.section) {
-                const { box: parts, clip } = model.userData.section;
+                const { box: parts, clip, sign } = model.userData.section;
                 const kept = parts.clone();
-                kept.min.z = Math.max(kept.min.z, clip.value);
+                if (sign > 0) kept.min.z = Math.max(kept.min.z, clip.value);
+                else kept.max.z = Math.min(kept.max.z, -clip.value);
                 model.updateMatrixWorld(true);
-                const along = new THREE.Vector3(0, 0, 1).transformDirection(model.matrixWorld);
+                const along = new THREE.Vector3(0, 0, sign).transformDirection(model.matrixWorld);
                 const toCamera = towardSection(along, onSection.side, onSection.above ?? 0).negate();
                 framing.frameDetail(pebble, { ...options, fit: kept.applyMatrix4(model.matrixWorld), fitZoom: onSection.zoom ?? 1, toCamera });
                 return;

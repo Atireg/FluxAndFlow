@@ -37,7 +37,9 @@
  *   figure        with solid: the material name of a part not drawn - the
  *                 pebble's points fall and form it instead (a person, say)
  *   section       with solid: a plane across the model's length the visitor
- *                 slides (a slider over the model), its parts cut away beyond it
+ *                 slides (a slider over the model), its parts cut away beyond it;
+ *                 true comes in from the low end of z, { reverse: true } from
+ *                 the high end
  *   tour          with section: { orbit, cut, focus, reach, over, side, above } -
  *                 played as it opens: one turn in `orbit` seconds, then over
  *                 `over` the section slides to `cut` (a share of the length)
@@ -310,10 +312,13 @@ function normaliseInfo({ id, info, solid }) {
 }
 
 function normaliseSection({ id, section, solid }) {
-    if (section === undefined) return false;
-    if (section !== true && section !== false) throw new Error(`Project "${id}": section should be true or false`);
-    if (section && !solid) throw new Error(`Project "${id}": section needs solid`);
-    return section;
+    if (section === undefined || section === false) return false;
+    const reverse = section?.reverse ?? false;
+    if (section !== true && (typeof section !== 'object' || typeof reverse !== 'boolean')) {
+        throw new Error(`Project "${id}": section should be true, false or { reverse }`);
+    }
+    if (!solid) throw new Error(`Project "${id}": section needs solid`);
+    return { reverse };
 }
 
 // A number that passes `ok`, or one per layout - { side, stacked }, each passing it

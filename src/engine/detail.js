@@ -136,7 +136,9 @@ export function createDetail({
     function tourTurn(model, plan) {
         const camera = rig.perspectiveCamera.position;
         const facing = Math.atan2(camera.x - model.position.x, camera.z - model.position.z);
-        const wanted = facing - Math.PI - THREE.MathUtils.degToRad(plan.side);
+        // (the camera on the side cut away: the model's -z, or +z reversed)
+        const away = model.userData.section?.sign < 0 ? 0 : Math.PI;
+        const wanted = facing - away - THREE.MathUtils.degToRad(plan.side);
         const off = THREE.MathUtils.euclideanModulo(wanted - model.rotation.y + Math.PI, 2 * Math.PI) - Math.PI;
         return 2 * Math.PI * plan.turns + off;
     }
@@ -942,10 +944,10 @@ export function createDetail({
             if (hover.x !== null && !rig.visitorOrbiting) {
                 hoverRay.setFromCamera(rig.pointerToNdc(hover.x, hover.y, hoverNdc), rig.camera);
                 // (not a part cut away by the section - it's still there to hit)
-                const clip = model.userData.section?.clip.value ?? -Infinity;
+                const { clip, sign } = model.userData.section ?? { clip: { value: -Infinity }, sign: 1 };
                 mesh = hoverRay.intersectObject(model, true)
                     .find((hit) => hit.object.isMesh && hit.object.material.uniforms?.uHighlight
-                        && model.worldToLocal(hit.point.clone()).z >= clip)?.object ?? null;
+                        && sign * model.worldToLocal(hit.point.clone()).z >= clip.value)?.object ?? null;
             }
             pickPart(mesh, model, since);
 

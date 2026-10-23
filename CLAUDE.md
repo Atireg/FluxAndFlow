@@ -85,8 +85,9 @@ in a pull-out drawer.
   hint "play again"). Over a glass sheet, joint or support (named after
   the user's drawing, GS1-GS8) the part is picked out, the turn holds and a
   card beside the pointer says what it is (`info`; a tap on a phone).
-  A slider at the foot ("section") cuts it across its length, the far
-  part cut away, each part's cut faces filled orange and their edges
+  A slider at the foot ("section") cuts it across its length, coming in
+  from the far end (`section: { reverse: true }`, asked for), the part
+  behind the plane cut away, each part's cut faces filled orange and their edges
   traced in black (the joints read as in a drawing) and a faint outline of the plane, wider than the model,
   shown only while the visitor handles the model or the slider (`section`). It stands
   on a soft floor at the foot of its foundations, the person set down onto
@@ -96,7 +97,7 @@ in a pull-out drawer.
   ending with the cut's side towards the camera, then at once the section slides (8s), the
   camera coming down onto it over the first 3s and following it to just
   before the middle - through the middle of the ridge joint's trapezoid connection
-  plate nearest it (z 227-278 mm in the file: `cut` 0.472) - closing in on the ridge joint GS2_GS6 where it's cut, from 45
+  plate nearest it (z -227 to -278 mm in the file: `cut` 0.472) - closing in on the ridge joint GS3_GS7 where it's cut, from 45
   degrees above and a little from the side, the ridge running up the screen (8s; the
   user's second screenshot; as close on a phone, `reach` per layout), the slider following; the slider, the drawer
   or orbiting by hand stops it where it is, a double-click plays it again. With the drawer out, the part the section
@@ -255,9 +256,10 @@ A model in parts (`frameless-glass.js`): `solid` gives the default look,
     figure: 'People_ZIM',                 // a part not drawn: the pebble's points form it
     inks: [[176, 174, 170], [128, 126, 123], [80, 79, 78]],  // the pebble's points' three inks, not the clouds'
     info: { GS1: { title, lines: [] } },  // by part name: a card over it, the turn held
-    section: true,                        // a slider cuts the model across its length (z in its own space)
+    section: true,                        // a slider cuts the model across its length (z in its own space);
+                                          // { reverse: true }: in from the high end of z
     floor: true,                          // soft ground at the model's foot, the figure set down on it, its shadow
-    tour: { orbit: 5, turns: 0.5, cut: 0.472, focus: 'GS2_GS6', reach: { side: 0.17, stacked: 0.08 }, over: 8, side: 20, above: 45 },  // played as it opens - see schema.js
+    tour: { orbit: 5, turns: 0.5, cut: 0.472, focus: 'GS3_GS7', reach: { side: 0.17, stacked: 0.08 }, over: 8, side: 20, above: 45 },  // played as it opens - see schema.js
 ```
 
 - **Models from Rhino** come as OBJ + .mtl (Rhino 7 has no glTF export):
@@ -358,14 +360,20 @@ A model in parts (`frameless-glass.js`): `solid` gives the default look,
   or orbiting stops it (`stopTour`); `doubleClick: 'tour'` plays it again
   (`replayTour`: the turn on from where the model stands, `tour.base`).
 - **A section's orange fill is drawn flat, at the cut, with the stencil**
-  (renderer `stencil: true`): from the middle of each part's cut a thin
-  triangle to every cut segment, each flipping the stencil (`cutFans`,
-  `makeCutFan`), then an orange sheet where it's left set (`makeCutFill`),
-  rebuilt with the black lines each step. Even-odd needs no joined
-  outlines - this model's pieces overlap and miss each other by 0.1 mm,
-  which broke joining them - and doubled segments cancel. Not stencil
-  capping of the 3D parts: they aren't all closed, and it filled a whole
-  glass panel through a gap.
+  (renderer `stencil: true`): `traceCut` runs each segment anticlockwise
+  round its part (by its face's outward side); from the middle of each
+  part's cut a thin triangle to every segment counts the stencil up or down
+  by which way it turns (`cutFans`, `makeCutFan`, a front- and a back-side
+  pass), then an orange sheet where it's left off 0 (`makeCutFill`),
+  rebuilt with the black lines each step. A winding count, not odd/even:
+  touching pieces' shared segments run opposite ways and cancel, a piece
+  modelled twice (one glass sheet's lower plies) still fills. Joined
+  outlines failed (pieces overlap, miss by 0.1 mm); stencil capping of
+  the 3D parts filled a whole glass panel through a gap.
+- **Which side a section keeps** is one sign (`section.sign`, -1 with
+  `reverse`): the shaders keep `uClipSign * z` past `uClip`, and
+  `sectionAt`, hover, `frameSection`, the drawer's view and the tour's turn
+  all read it - never assume the cut comes from low z.
 - **A model's turn holds for reasons** (`setHold`, framing.js): 'click'
   (`doubleClick: 'hold'`) and 'hover' (a part with `info`); it turns
   again once neither holds it.

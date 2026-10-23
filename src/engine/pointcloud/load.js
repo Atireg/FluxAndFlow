@@ -73,12 +73,15 @@ export function loadPointCloud({
                 // uniform - or the whole model merged in one. The `figure`
                 // part isn't drawn: the pebble's points form it (dissolve.js)
                 const fade = { value: 1 };
-                // ...and cut on one uniform too (`section`, see addSection)
+                // ...and cut on one uniform too (`section`, see addSection):
+                // kept where `sign` times its z is past `clip` - the cut
+                // coming in from the low end of z, or the high (`reverse`)
                 const clip = { value: CLIP_NONE };
+                const sign = { value: section?.reverse ? -1 : 1 };
                 const pieces = parts || figure
                     ? sampled.userData.parts
                     : [{ material: '', part: '', geometry: sampled.userData.solid }];
-                const edgeMaterial = makeEdgeMaterial(screenColor(92, 92, 94), { fade, clip }); // dark grey
+                const edgeMaterial = makeEdgeMaterial(screenColor(92, 92, 94), { fade, clip, sign }); // dark grey
                 pieces.forEach(({ material: lookName, part, edges, geometry }) => {
                     if (lookName === figure) {
                         group.userData.figure = geometry;
@@ -87,6 +90,7 @@ export function loadPointCloud({
                     const material = makeInkMaterial(parts?.[lookName] ?? look);
                     material.uniforms.uFade = fade;
                     material.uniforms.uClip = clip;
+                    material.uniforms.uClipSign = sign;
                     const mesh = new THREE.Mesh(geometry, material);
                     // Its own name, for a project's `info` (see detail.js's hover)
                     mesh.name = part;
@@ -102,7 +106,7 @@ export function loadPointCloud({
                     }
                     group.userData.solidMaterial ??= material;
                 });
-                if (section) addSection(group, { clip, fade });
+                if (section) addSection(group, { clip, sign, fade });
                 if (floor) addFloor(group, fade);
                 // Where the pebble's points settle and circle (`screen`)
                 if (screen) group.userData.screen = screenFrame(original, screen, sampled.userData.fit);
@@ -269,7 +273,7 @@ const SECTION_PLANE_FADE = 0.8; // ...and fades over
  * each part's own cut edges traced in black - the joints read as in a
  * drawing - and the parts' cut faces filled in orange (cutFans)
  */
-function addSection(group, { clip, fade }) {
+function addSection(group, { clip, sign, fade }) {
     const box = new THREE.Box3();
     const meshes = group.children.filter((child) => child.isMesh);
     meshes.forEach((mesh) => {
@@ -304,22 +308,25 @@ function addSection(group, { clip, fade }) {
     outline.raycast = () => {}; // never something to hover
     group.add(outline);
 
-    // The cut faces: their fans counted into the stencil, then a sheet
-    // over the cut drawn where they leave it set - both worked out again
-    // with the cut edges
-    const fan = new THREE.Mesh(new THREE.BufferGeometry(), makeCutFan());
+    // The cut faces: their fans counted into the stencil - turning one way
+    // up, the other down - then a sheet over the cut drawn where they leave
+    // it off 0; all worked out again with the cut edges
+    const fan = new THREE.BufferGeometry();
+    const counts = [THREE.FrontSide, THREE.BackSide].map((side) => new THREE.Mesh(fan, makeCutFan(side)));
     const fill = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), makeCutFill(SPOTLIGHT_GLOW_COLOR, { fade }));
-    [fan, fill].forEach((mesh, i) => {
+    [...counts, fill].forEach((mesh) => {
         mesh.frustumCulled = false;
         mesh.visible = false;
         mesh.raycast = () => {};
-        mesh.renderOrder = 1.4 + 0.1 * i; // the count, then the sheet - before the cut's black lines
+        mesh.renderOrder = mesh === fill ? 1.5 : 1.4; // the count, then the sheet - before the cut's black lines
         group.add(mesh);
     });
-    group.userData.section = { clip, outline, fan, fill, cut, meshes, box, from: min.z, to: max.z };
+    group.userData.section = { clip, sign: sign.value, outline, counts, fill, cut, meshes, box, from: min.z, to: max.z };
 }
 
-// Each triangle the plane z passes through gives one segment of the cut
+// Each triangle the plane z passes through gives one segment of the cut,
+// running anticlockwise round the part seen from +z (from its face's
+// outward side: the fill's winding count needs it)
 export function traceCut(meshes, z) {
     const points = [];
     const a = new THREE.Vector3();
@@ -340,7 +347,12 @@ export function traceCut(meshes, z) {
             if ((a.z - z) * (b.z - z) < 0) ends.push(crossing(a, b));
             if ((b.z - z) * (c.z - z) < 0) ends.push(crossing(b, c));
             if ((c.z - z) * (a.z - z) < 0) ends.push(crossing(c, a));
-            if (ends.length === 2) points.push(ends[0], ends[1]);
+            if (ends.length !== 2) continue;
+            // (the face's normal turned a quarter about z points along the cut)
+            const nx = (b.y - a.y) * (c.z - a.z) - (b.z - a.z) * (c.y - a.y);
+            const ny = (b.z - a.z) * (c.x - a.x) - (b.x - a.x) * (c.z - a.z);
+            const forward = (ends[1].x - ends[0].x) * -ny + (ends[1].y - ends[0].y) * nx >= 0;
+            points.push(...(forward ? ends : ends.reverse()));
         }
     });
     return points;
@@ -350,13 +362,17 @@ export function traceCut(meshes, z) {
 // from its far end (z's top) back - the part kept is the one beyond the cut
 /**
  * A section's cut faces, for the stencil (makeCutFan): from the middle of
- * each part's cut, a thin triangle to every one of its cut segments. Each
- * flips the pixels it covers, so those flipped an odd number of times are
- * inside the part's cut, whatever order the segments come in - and a
- * segment there twice, where two pieces of a part touch inside it (a plate
- * welded to a profile), cancels. Joining the segments into outlines first
- * failed on this model: its pieces overlap and their corners miss each other
- * by a tenth of a millimetre, which here leaves only a sliver.
+ * each part's cut, a thin triangle to every one of its cut segments - each
+ * counting one up where it covers if it turns one way round the middle,
+ * one down if the other, so what's left above or below 0 is inside the
+ * part's cut, whatever order the segments come in (a winding count). Two
+ * pieces touching inside a part (a plate welded to a profile) give a
+ * segment there twice, running opposite ways: it cancels. A piece there
+ * twice, one copy on the other (the lower plies of one glass sheet), runs
+ * the same way: still filled - which counting odd and even alone (it was
+ * first) left empty. Joining the segments into outlines failed on this
+ * model: its pieces overlap and their corners miss each other by a tenth of
+ * a millimetre, which here leaves only a sliver.
  */
 function cutFans(meshes, z) {
     const triangles = [];
@@ -373,29 +389,31 @@ function cutFans(meshes, z) {
 
 // Where a section at `share` cuts, along the model's own z
 export function sectionAt(section, share) {
-    return section.to - (section.to - section.from) * Math.min(Math.max(share, 0), 1);
+    const along = (section.to - section.from) * Math.min(Math.max(share, 0), 1);
+    return section.sign > 0 ? section.to - along : section.from + along;
 }
 
 export function setSection(model, share) {
     const section = model?.userData.section;
     if (!section) return;
     const z = sectionAt(section, share);
-    section.clip.value = share >= 1 ? CLIP_NONE : z;
+    section.clip.value = share >= 1 ? CLIP_NONE : section.sign * z;
     section.outline.position.z = z;
     section.cut.visible = share < 1;
-    section.fan.visible = false;
+    section.counts.forEach((count) => { count.visible = false; });
     section.fill.visible = false;
     if (share < 1) {
         const points = traceCut(section.meshes, z);
         section.cut.geometry.dispose();
         section.cut.geometry = new THREE.BufferGeometry().setFromPoints(points);
-        section.fan.geometry.dispose();
-        section.fan.geometry = new THREE.BufferGeometry().setFromPoints(cutFans(section.meshes, z));
+        const fan = new THREE.BufferGeometry().setFromPoints(cutFans(section.meshes, z));
+        section.counts[0].geometry.dispose();
+        section.counts.forEach((count) => { count.geometry = fan; });
         if (points.length) {
             const { min, max } = new THREE.Box3().setFromPoints(points);
             section.fill.scale.set(max.x - min.x, max.y - min.y, 1);
             section.fill.position.set((min.x + max.x) / 2, (min.y + max.y) / 2, z);
-            section.fan.visible = true;
+            section.counts.forEach((count) => { count.visible = true; });
             section.fill.visible = true;
         }
     }
