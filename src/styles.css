@@ -34,6 +34,7 @@
      * step with PANEL_FRACTION there.
      */
     --drawer-size: 42%;
+    --banner-height: 1.6rem; /* the strip running across the top (Banner) */
     --handle: 2.75rem;
 }
 
@@ -527,7 +528,7 @@ canvas.webgl {
  */
 .bar {
     position: fixed;
-    top: 0;
+    top: var(--banner-height);
     left: 0;
     z-index: 2;
 
@@ -582,6 +583,44 @@ canvas.webgl {
 /* The live speed beside each moving aggregate (a project's `drop.velocity`),
    placed and written by the engine every frame. Small and quiet, with a
    paper halo so it reads over the orange aggregates as well as the ground */
+/* The banner (Banner): a thin strip across the top, the user's words
+   running slowly by in small grey capitals, the paper under them so the
+   scene passes behind; over the canvas and overlays, under the drawer */
+.banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 2;
+    height: var(--banner-height);
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    background: rgba(var(--bg-rgb), 0.92);
+    border-bottom: 1px solid var(--rule);
+    pointer-events: none;
+}
+
+.banner__track {
+    display: flex;
+    flex: none;
+    white-space: nowrap;
+    animation: banner-run 60s linear infinite;
+}
+
+.banner__words {
+    padding-right: 6rem; /* the gap before the words come round again */
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+}
+
+@keyframes banner-run {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+}
+
 /* A project's section (SectionSlider): a slim slider over the model, at the
    foot of the window - on a phone above the drawer's handle - its thumb the
    one dark ink, not orange (orange means "click me") */
@@ -685,7 +724,7 @@ body.drawer-open .section-slider {
    the canvas's clicks; gone while a project is open */
 .filter {
     position: fixed;
-    top: 0;
+    top: var(--banner-height);
     left: 0;
     z-index: 2; /* above the canvas (1) by z-index, not page order */
     display: flex;
@@ -1445,6 +1484,11 @@ body.drawer-open .section-slider {
 }
 
 @media (prefers-reduced-motion: reduce) {
+    /* the banner's words still, from the start */
+    .banner__track {
+        animation: none;
+    }
+
     /* The hint just appears and fades - no presses or rings */
     .tap-hint.is-showing .tap-hint__dot,
     .tap-hint.is-showing .tap-hint__ripple {

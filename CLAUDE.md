@@ -25,6 +25,9 @@ in a pull-out drawer.
   1.6s while the playground compiles its shaders, then the pebbles surface
   and the scene's streams take the same particles over where they are; the
   filter fades in and the orange glow waits 3s for them.
+- **Banner** (`components/Banner.jsx`): a thin strip across the top of
+  every view, the user's words (`BANNER_WORDS`, words.js) running slowly by
+  in small grey capitals; the bar and filter sit below it (`--banner-height`).
 - **Playground**: ten pebbles, a random size each visit, slowly changing
   shape; one at a time glows orange with its name on a string. A filter
   (research / teaching / the real world) brings one kind forward. An empty

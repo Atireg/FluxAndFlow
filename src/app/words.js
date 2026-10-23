@@ -14,6 +14,9 @@ export const SECTION_WORD = 'section';
 // the employment history, as dots on a line (components/PathView.jsx)
 export const PATH_VIEW = { id: 'path', label: 'The path' };
 
+// The banner running across the top of the page (the user's words: option 4)
+export const BANNER_WORDS = 'Welcome to a living playground – it grows and shifts with its author, and is happily never finished.';
+
 // Over the path's dots, inviting a tap (or a hover)
 export const PATH_HINT = 'click me!';
 

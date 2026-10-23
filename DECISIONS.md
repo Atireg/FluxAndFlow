@@ -55,6 +55,7 @@ Page, colour and drawer
 - The bar's title moves into the drawer on a phone
 - Drawer pictures
 - Asset paths resolve against the Vite base URL
+- The banner running across the top
 
 Loading
 - The landing page, then the loader, on one field of particles
@@ -1640,6 +1641,22 @@ Paths have no leading slash and go through `assetUrl`: Vite's `base`
 rewrites the HTML and imports but not strings handed to loaders at runtime,
 so absolute paths 404 under GitHub Pages' sub-path. Works at a domain root
 too.
+
+
+The banner running across the top
+---------------------------------
+
+Asked for: a running message saying the site is a playground that changes
+with its author and may never be finished; the words are the user's (option
+4 of four offered, in `words.js`, `BANNER_WORDS`). A thin strip
+(`--banner-height`) over everything but the drawer, on every view - the
+playground, the path and inside a project - in the small grey capitals of
+the "F&F playground" link rather than the orange, which means "click me".
+Two copies of the words side by side, the track moved by half its width
+over 60s, so the loop has no seam; still for those who ask for less motion.
+The bar and the filter sit below it (`top: var(--banner-height)`); on a
+phone their padding alone left them under it. No close button (none asked
+for).
 
 
 Loading
