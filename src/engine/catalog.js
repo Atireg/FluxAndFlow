@@ -13,6 +13,8 @@ import { poseSpotlightPebble } from './pebbles/spotlight.js';
  * one set.
  */
 const THUMB_INK = new THREE.MeshBasicMaterial({ color: THUMB_INK_COLOR });
+const DRAWING_INK = 0.35; // how dark a drawing's pixel must be to show in its pebble (`thumbImage`)
+const DRAWING_WIDTH = 200; // ...brought down to about this many pixels across, as it shows
 
 /**
  * The catalog: a fixed grid of pebbles, one per slot.
@@ -29,11 +31,20 @@ export function createCatalog({ scene, grid, state, boot, visited, source }) {
      */
     const thumbScenes = new Map();
 
-    function loadThumb(path) {
+    function loadThumb(path, image = false) {
         if (!thumbScenes.has(path)) {
             const asset = boot.asset();
 
             thumbScenes.set(path, new Promise((resolve) => {
+                if (image) {
+                    new THREE.ImageLoader().load(
+                        assetUrl(path),
+                        (picture) => { asset.done(); resolve(drawingThumb(picture)); },
+                        undefined,
+                        () => { asset.done(); resolve(null); },
+                    );
+                    return;
+                }
                 gltfLoader.load(
                     assetUrl(path),
                     (gltf) => { asset.done(); resolve(gltf.scene); },
@@ -46,12 +57,69 @@ export function createCatalog({ scene, grid, state, boot, visited, source }) {
         return thumbScenes.get(path);
     }
 
+    // Turned to face the camera each time it's drawn
+    function faceCamera(mesh) {
+        const turned = new THREE.Quaternion();
+        mesh.onBeforeRender = (renderer, scene, camera) => {
+            mesh.parent.getWorldQuaternion(turned).invert();
+            mesh.quaternion.copy(turned.multiply(camera.quaternion));
+            mesh.updateMatrixWorld();
+        };
+    }
+
+    /**
+     * A drawing for a pebble (`thumbImage`): its dark lines in the ink, the
+     * paper see-through - the picture turned into how much ink each pixel
+     * holds (`alphaMap`, read from green) - on a flat sheet, turned to face
+     * the camera (faceCamera) so it never shows edge-on
+     */
+    function drawingThumb(picture) {
+        const source = document.createElement('canvas');
+        source.width = picture.width;
+        source.height = picture.height;
+        source.getContext('2d').drawImage(picture, 0, 0);
+        const from = source.getContext('2d').getImageData(0, 0, source.width, source.height).data;
+
+        // Down to about the size it shows at, each pixel the darkest of the
+        // ones it stands for - averaged, thin lines faded to nothing
+        const step = Math.max(1, Math.round(picture.width / DRAWING_WIDTH));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.floor(picture.width / step);
+        canvas.height = Math.floor(picture.height / step);
+        const context = canvas.getContext('2d');
+        const pixels = context.createImageData(canvas.width, canvas.height);
+        for (let y = 0; y < canvas.height; y++) {
+            for (let x = 0; x < canvas.width; x++) {
+                let ink = 0;
+                for (let dy = 0; dy < step; dy++) {
+                    for (let dx = 0; dx < step; dx++) {
+                        const i = ((y * step + dy) * source.width + x * step + dx) * 4;
+                        ink = Math.max(ink, 255 - (from[i] * 0.3 + from[i + 1] * 0.59 + from[i + 2] * 0.11));
+                    }
+                }
+                const o = (y * canvas.width + x) * 4;
+                pixels.data[o] = pixels.data[o + 1] = pixels.data[o + 2] = ink;
+                pixels.data[o + 3] = 255;
+            }
+        }
+        context.putImageData(pixels, 0, 0);
+
+        const sheet = new THREE.Mesh(
+            new THREE.PlaneGeometry(1, picture.height / picture.width),
+            new THREE.MeshBasicMaterial({ alphaMap: new THREE.CanvasTexture(canvas) }),
+        );
+        const scene = new THREE.Group();
+        scene.add(sheet);
+        return scene;
+    }
+
     // A project's thumbnail; a slot with no project yet stays empty
     function addContentToPebble(pebble) {
-        const path = pebble.userData.project?.thumbModel;
+        const image = pebble.userData.project?.thumbImage;
+        const path = image || pebble.userData.project?.thumbModel;
         if (!path) return;
 
-        loadThumb(path).then((scene) => {
+        loadThumb(path, Boolean(image)).then((scene) => {
             if (!scene) return;
 
             const size = pebble.userData.project?.thumbSize;
@@ -81,7 +149,17 @@ export function createCatalog({ scene, grid, state, boot, visited, source }) {
 
             // Its own copy of the ink, for the filter to fade (pebbles/focus.js)
             const ink = THUMB_INK.clone();
-            content.traverse((child) => { if (child.isMesh) child.material = ink; });
+            content.traverse((child) => {
+                if (!child.isMesh) return;
+                // (a drawing keeps only where its ink is - cut out, not
+                // see-through, so it's drawn before the pebble's face like
+                // the models; see-through, the face hid it)
+                if (child.material.alphaMap) {
+                    Object.assign(ink, { alphaMap: child.material.alphaMap, alphaTest: DRAWING_INK, side: THREE.DoubleSide });
+                    faceCamera(child); // (on the copy: a clone doesn't keep it)
+                }
+                child.material = ink;
+            });
             pebble.userData.contentInk = ink;
 
             content.scale.setScalar(pebble.userData.contentBaseScale);

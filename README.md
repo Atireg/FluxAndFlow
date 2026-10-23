@@ -56,8 +56,8 @@ Next up (waiting on content or a check from the user)
         screen (390 x 664, like kh ReUse's mobile one)
     [x] Nap Nap Hooray: pictures in its drawer
     [x] Frameless Glass Structures (slot 7): year, role and context rows
-    [ ] Frameless Glass Structures: a thumbnail for its pebble (the
-        default rock for now)
+    [x] Frameless Glass Structures: a thumbnail for its pebble (the joint
+        drawing, `thumbImage`)
     [ ] Nap Nap Hooray: a seventh picture (Sleep per day / Number of naps),
         sent inline - to come as a file
     [ ] Emergent Space's drop on a phone: confirm it runs smoothly on a real

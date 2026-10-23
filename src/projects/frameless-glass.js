@@ -87,6 +87,9 @@ export default defineProject({
     credits: 'Funded by the Federal Ministry for Economic Affairs and Climate '
         + 'Action on the basis of a resolution of the German Bundestag.',
 
+    // In its pebble, the joint in section (the drawing in its drawer)
+    thumbImage: 'images/frameless-glass-thumb.jpg',
+    thumbSize: 3,
     detailModel: 'models/frameless-glass.glb',
     // The model itself, the parts by their Rhino material names; anything
     // not listed in `solid`'s light grey
@@ -184,5 +187,5 @@ export default defineProject({
     // As it opens: one full turn round it, then the section slides to just
     // past the middle as the camera closes in square-on to the ridge joint
     // there (GS2_GS6), its profile facing the visitor
-    tour: { orbit: 5, turns: 0.5, cut: 0.472, focus: 'GS3_GS7', reach: { side: 0.17, stacked: 0.08 }, over: 8, side: 20, above: 45 },
+    tour: { orbit: 5, turns: 0.5, cut: 0.4738, focus: 'GS3_GS7', reach: { side: 0.17, stacked: 0.08 }, over: 8, side: 20, above: 45 },
 });

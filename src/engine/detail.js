@@ -915,7 +915,7 @@ export function createDetail({
             const share = 1 - (1 - plan.cut) * k;
             cutAt(model, share);
             const to = framing.frameSection(model, {
-                focus, side, above, share, reach: TOUR_WIDE + (perLayout(plan.reach, 1) - TOUR_WIDE) * k,
+                focus, side, above, share, aim: plan.cut, reach: TOUR_WIDE + (perLayout(plan.reach, 1) - TOUR_WIDE) * k,
             });
             if (to) {
                 const down = smooth01(closing / TOUR_APPROACH);
