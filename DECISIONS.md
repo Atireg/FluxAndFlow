@@ -611,6 +611,11 @@ once, the pebbles gone before they surface (`setFocus(..., { instant })`)
 - chosen after the loader, they rose and then sank, which confused; choosing it puts it in the address with a step in
 the history, so Back leaves it; choosing anything else takes it out.
 
+Beside the path's name, a small outlined "Full CV" button (`PATH_CV`,
+words.js) opens the user's CV as a PDF in a new tab
+(`static/cv/Gergana_Rusenova_CV.pdf`, asked for). The PDF is made outside
+the site, from the designed CV page; replacing it keeps its name.
+
 A degree's dot (`degree` in path.js: the bachelor, the ITECH master, the
 JavaScript Developer Degree) is filled light grey, the jobs' white (asked
 for), so education reads apart from work at a glance; same outline.

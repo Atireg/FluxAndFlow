@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { assetUrl } from '../engine/assets.js';
-import { PATH_HINT, PATH_VIEW } from '../app/words.js';
+import { PATH_CV, PATH_HINT, PATH_VIEW } from '../app/words.js';
 import { MILESTONES } from '../app/path.js';
 
 /**
@@ -406,7 +406,12 @@ export default function PathView({ shown }) {
 
     return (
         <div className={`path-view${shown ? ' is-showing' : ''}`} aria-hidden={shown ? 'false' : 'true'}>
-            <h2 className="path-view__title" ref={titleRef}>{PATH_VIEW.label}</h2>
+            <h2 className="path-view__title" ref={titleRef}>
+                {PATH_VIEW.label}
+                <a className="path-view__cv" href={assetUrl(PATH_CV.src)} target="_blank" rel="noopener noreferrer">
+                    {PATH_CV.label}
+                </a>
+            </h2>
             <p className="path-view__hint" ref={hintRef}>{PATH_HINT}</p>
             <svg className="path-view__scene" ref={svgRef} aria-hidden="true">
                 <g className="path-view__line">
