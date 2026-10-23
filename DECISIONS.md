@@ -1125,7 +1125,14 @@ view onto the section stays rather than going back to the steep view from
 above: `view.drawer.stay`, framed by the same `frameOnSection` on the whole
 canvas, with a zoom of its own (`stay.zoom`, 0.75 beside / 1.3 stacked -
 the drawer's own zoom on the whole canvas was far too close on a wide
-screen and cut the person off on a phone). With the drawer out
+screen and cut the person off on a phone).
+
+The turn then came back (asked for: "no more rotation... bring it back,
+just make it fast"): half a turn give or take what ends it facing the cut
+could all but cancel itself (the give or take reached half a turn either
+way), so it's now short of `turns` by at most `TOUR_LESS_AT_MOST` (an
+eighth of a turn) and over by the rest - at least three-eighths of a turn
+- and in 4s. With the drawer out
 (asked for, with a screenshot): the part the section keeps, seen from where
 it's cut - `view.drawer: { side: 6, above: 8, zoom }`, framed by
 `frameDetail` on the kept part's box (the parts' box from the cut on)

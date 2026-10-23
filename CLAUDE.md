@@ -93,8 +93,8 @@ in a pull-out drawer.
   on a soft floor at the foot of its foundations, the person set down onto
   it, a faint shadow under them (`floor`). Its view, on both layouts, is
   steeply from above, its length up the screen (the user's screenshot).
-  As it opens it plays a `tour`: half a turn round it (5s, `turns` 0.5)
-  ending with the cut's side towards the camera, then at once the section slides (8s), the
+  As it opens it plays a `tour`: about half a turn round it (4s, `turns`
+  0.5; never under three-eighths, `TOUR_LESS_AT_MOST`) ending with the cut's side towards the camera, then at once the section slides (8s), the
   camera coming down onto it over the first 3s and following it to just
   before the middle - through the middle of the ridge joint's trapezoid connection
   plate nearest it (z -227 to -278 mm in the file), just short of its
@@ -263,7 +263,7 @@ A model in parts (`frameless-glass.js`): `solid` gives the default look,
     section: true,                        // a slider cuts the model across its length (z in its own space);
                                           // { reverse: true }: in from the high end of z
     floor: true,                          // soft ground at the model's foot, the figure set down on it, its shadow
-    tour: { orbit: 5, turns: 0.5, cut: 0.4738, focus: 'GS3_GS7', reach: { side: 0.17, stacked: 0.08 }, over: 8, side: 20, above: 45 },  // played as it opens - see schema.js
+    tour: { orbit: 4, turns: 0.5, cut: 0.4738, focus: 'GS3_GS7', reach: { side: 0.17, stacked: 0.08 }, over: 8, side: 20, above: 45 },  // played as it opens - see schema.js
 ```
 
 - **Models from Rhino** come as OBJ + .mtl (Rhino 7 has no glTF export):
