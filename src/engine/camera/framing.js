@@ -601,18 +601,7 @@ export function createFraming({ rig, screen, state, grid, ui }) {
             }
             // A section (`view.drawer: { side, above }`): the part kept, seen
             // from where it's cut, at those angles
-            const onSection = pebble.userData.project?.view?.drawer;
-            if (onSection?.side !== undefined && model?.userData.section) {
-                const { box: parts, clip, sign } = model.userData.section;
-                const kept = parts.clone();
-                if (sign > 0) kept.min.z = Math.max(kept.min.z, clip.value);
-                else kept.max.z = Math.min(kept.max.z, -clip.value);
-                model.updateMatrixWorld(true);
-                const along = new THREE.Vector3(0, 0, sign).transformDirection(model.matrixWorld);
-                const toCamera = towardSection(along, onSection.side, onSection.above ?? 0).negate();
-                framing.frameDetail(pebble, { ...options, fit: kept.applyMatrix4(model.matrixWorld), fitZoom: onSection.zoom ?? 1, toCamera });
-                return;
-            }
+            if (framing.frameOnSection(pebble, options)) return;
             if (pebble.userData.project?.view?.drawer === 'whole' && model) {
                 framing.frameDetail(pebble, { ...options, fit: new THREE.Box3().setFromObject(model), fitZoom: side ? 1 : WHOLE_ABOVE_DRAWER_ZOOM });
                 return;
@@ -644,6 +633,35 @@ export function createFraming({ rig, screen, state, grid, ui }) {
             const position = center.clone().addScaledVector(dir, radius * CLOSEUP_DISTANCE_FACTOR);
 
             rig.moveCamera(position, center, duration);
+        },
+
+        /**
+         * `view.drawer: { side, above, zoom }` with a `section`: the part the
+         * section keeps, seen from where it's cut at those angles, fitted
+         * into whatever the drawer leaves. False for any other project.
+         */
+        frameOnSection(pebble, options, zoom) {
+            const onSection = pebble.userData.project?.view?.drawer;
+            const model = pebble.userData.detail;
+            if (onSection?.side === undefined || !model?.userData.section) return false;
+            const { box: parts, clip, sign } = model.userData.section;
+            const kept = parts.clone();
+            if (sign > 0) kept.min.z = Math.max(kept.min.z, clip.value);
+            else kept.max.z = Math.min(kept.max.z, -clip.value);
+            model.updateMatrixWorld(true);
+            const along = new THREE.Vector3(0, 0, sign).transformDirection(model.matrixWorld);
+            const toCamera = towardSection(along, onSection.side, onSection.above ?? 0).negate();
+            framing.frameDetail(pebble, { ...options, fit: kept.applyMatrix4(model.matrixWorld), fitZoom: zoom ?? onSection.zoom ?? 1, toCamera });
+            return true;
+        },
+
+        // The drawer pushed back: the full-fit view - or, with `view.drawer:
+        // { stay: { zoom } }`, its view onto the section kept, on the whole
+        // canvas, `zoom` times closer than its fit there
+        frameDrawerClosed(pebble, options) {
+            const stay = pebble.userData.project?.view?.drawer?.stay;
+            if (stay && framing.frameOnSection(pebble, options, stay.zoom ?? 1)) return;
+            framing.frameDetail(pebble, options);
         },
 
         // Whichever frame the project is currently meant to be in

@@ -98,6 +98,7 @@ const INSIDE_FOV = 65; // degrees - a wider lens than outside, the way eyes take
 const INSIDE_WIDTH = 55; // degrees across at least, so a tall phone screen still sees between the columns
 const INSIDE_FOV_MAX = 90; // degrees - the most the lens widens for that
 const TOUR_AFTER = 1.5; // seconds after the model is shown that a `tour` sets off
+const TOUR_LESS_AT_MOST = Math.PI / 4; // the turn falls short of `turns` by at most this (radians) to end facing the cut - it may run over by up to a turn less this
 const TOUR_APPROACH = 3; // seconds to come down onto the section, as it starts to slide
 const TOUR_WIDE = 1.15; // ...seeing this much of the model's breadth across as it sets off
 const NEAR_SHARE = 0.05; // the near plane, as a share of the way to what the camera looks at
@@ -132,15 +133,18 @@ export function createDetail({
     const tour = { model: null, spin: 0, turn: 0, moved: false, from: null, stopped: true };
 
     // The turn, radians: `turns` round, give or take what brings the cut's
-    // side round to the camera - so the move down after it needn't swing
+    // side round to the camera - so the move down after it needn't swing.
+    // Short of `turns` by at most TOUR_LESS_AT_MOST, over by the rest: given
+    // or taken either way, it could all but cancel half a turn, and the model
+    // barely moved
     function tourTurn(model, plan) {
         const camera = rig.perspectiveCamera.position;
         const facing = Math.atan2(camera.x - model.position.x, camera.z - model.position.z);
         // (the camera on the side cut away: the model's -z, or +z reversed)
         const away = model.userData.section?.sign < 0 ? 0 : Math.PI;
         const wanted = facing - away - THREE.MathUtils.degToRad(plan.side);
-        const off = THREE.MathUtils.euclideanModulo(wanted - model.rotation.y + Math.PI, 2 * Math.PI) - Math.PI;
-        return 2 * Math.PI * plan.turns + off;
+        const least = 2 * Math.PI * plan.turns - TOUR_LESS_AT_MOST;
+        return least + THREE.MathUtils.euclideanModulo(wanted - model.rotation.y - least, 2 * Math.PI);
     }
 
     // The tour's own cut, the slider moved along with it

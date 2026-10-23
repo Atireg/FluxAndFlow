@@ -616,7 +616,7 @@ export function createEngine({ canvas, source, ui }) {
             if (open) {
                 framing.frameWithDrawerOpen(state.selected, { duration: 1.1 });
             } else {
-                framing.frameDetail(state.selected, { duration: 0.8 });
+                framing.frameDrawerClosed(state.selected, { duration: 0.8 });
             }
         },
 

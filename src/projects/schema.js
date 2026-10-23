@@ -204,7 +204,9 @@ function normaliseVideo(video, { id, index, body }) {
  *              (with `section`): the part the section keeps, seen from
  *              where it's cut, `side` degrees round and `above` down
  *              (towardSection, framing.js), beside or above the drawer,
- *              `zoom` (a number, or { side, stacked }) times closer than its fit
+ *              `zoom` (a number, or { side, stacked }) times closer than its fit;
+ *              `stay: { zoom }`: that view kept when the drawer closes, on the
+ *              whole canvas, `zoom` (a number or per layout) closer than its fit
  *
  * Only the keys a project gave are kept: the engine's own `?? 0` fallbacks
  * stay the single source of each default, so normalising can't quietly
