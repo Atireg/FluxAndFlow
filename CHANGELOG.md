@@ -631,6 +631,8 @@ Branch `claude/loving-ramanujan-stqa6z`, not merged.
   Trainee 2014 – 2016 at SL Rasch GmbH Special & Lightweight Structures,
   with the user's picture (the Haram in Mecca from above) - then Digital
   Designer, in Stuttgart, its card's details the user's (option 1).
+- **The places off the flags' labels on a phone again** - too crowded;
+  they're on the cards.
 
 Open at end of session: as at the end of session 5; the path's ten
 milestones checked by the user.

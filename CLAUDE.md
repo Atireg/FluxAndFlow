@@ -37,7 +37,7 @@ in a pull-out drawer.
   from it, one per milestone (eleven), swinging (`src/components/PathView.jsx`). Each dot a milestone
   from the user's CV (`src/app/path.js`), labelled under it. On a phone the
   line runs down the left edge and the dots fly from it like flags, each
-  labelled beside it (years, role, place). Hovered or tapped, a dot presses twice like the tap
+  labelled beside it (years and role; the place only on its card). Hovered or tapped, a dot presses twice like the tap
   hint and a card drops from it on a string ("click me!" over one dot at a time, at random; its
   words open it too) (details and a picture, both
   from the CV; `static/images/path-*.jpg`). The streams behind blow with

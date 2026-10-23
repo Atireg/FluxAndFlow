@@ -963,18 +963,15 @@ body.drawer-open .section-slider {
 }
 
 /* On a phone the line runs down the screen and the label sits beside its
-   flag: the years, the role in at most two lines, and the place on one -
-   the card has the rest */
+   flag: the years and the role, at most two lines of it - the card has
+   the rest (the places too: with them it was crowded) */
 @media (max-width: 859px) {
     .path-view__label {
         text-align: left;
     }
 
     .path-view__where {
-        margin-top: 0;
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
+        display: none !important;
     }
 
     .path-view__what {

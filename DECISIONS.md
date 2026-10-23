@@ -584,8 +584,9 @@ its left edge, and the dots fly from it like flags (asked for): the wind
 across each holds it out against its weight (`FLAG_PUSH`, about 70
 degrees from hanging), gusting, with a quick flutter (`flagWind`) and a
 faster twist to and fro (`FLAG_TWIST`). The label sits beside its flag -
-the years, the role in at most two lines and the place on one (asked
-for: the companies on a phone too); the card has the rest. A milestone's
+the years and the role, at most two lines; the card has the rest. The
+places were there too for a while (asked for), then taken off again - too
+crowded. A milestone's
 `title` heads its card when the name by the dot is short ("Director of
 exhibition", the GradX one in full on the card). Each
 starts already blown out (and again when the layout changes) - from
