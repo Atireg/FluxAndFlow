@@ -65,7 +65,7 @@ export const MILESTONES = [
         image: { src: 'images/path-06.jpg', ratio: '345 / 220', alt: 'Spatial Aggregations, a MAS DFAB project' },
     },
     {
-        when: '2019 – current',
+        when: '2019 – 2023',
         what: 'Lecturer in Architecture',
         where: 'Swinburne University of Technology, Melbourne',
         details: 'A workload split between 50 % teaching, 30 % research and 20 % leadership/service, '
