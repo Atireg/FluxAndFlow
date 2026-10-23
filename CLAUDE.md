@@ -34,7 +34,7 @@ in a pull-out drawer.
   employment history, like a CV - every pebble sinks and fades out
   completely, and under the name a
   washing line moving in the wind with the tap hint's dots hanging
-  from it, one per milestone (eleven), swinging (`src/components/PathView.jsx`). Each dot a milestone
+  from it, one per milestone (twelve), swinging (`src/components/PathView.jsx`). Each dot a milestone
   from the user's CV (`src/app/path.js`), labelled under it. On a phone the
   line runs down the left edge and the dots fly from it like flags, each
   labelled beside it (years and role; the place only on its card). Hovered or tapped, a dot presses twice like the tap
