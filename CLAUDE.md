@@ -75,8 +75,8 @@ in a pull-out drawer.
   approved), with two lists; six phone screenshots in the text (`after`;
   two to a row on a wide screen, the first of each group `half`).
 - **Frameless Glass Structures** (slot 7, the real world,
-  `#frameless-glass`; under its title, in orange, "This part of the website
-  is still under construction." - `notice`): the user's Rhino model of a glass pavilion
+  `#frameless-glass`; its "under construction" `notice` taken off, asked
+  for): the user's Rhino model of a glass pavilion
   (`frameless-glass.glb`, seven parts named after its Rhino materials),
   each part in its own look (`parts`: light matt-grey steel, oak timber,
   clear glass, each sheet's upper ply outlined thin dark grey); the person beside it isn't drawn - the pebble's points fall and

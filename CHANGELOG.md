@@ -568,7 +568,7 @@ by a third of the points; the joint drawing as the pebble's thumbnail
 stays (`view.drawer.stay`). The tour's turn always turns again (it could
 cancel itself to almost nothing), faster (4s). Five more pictures in its
 drawer by subject: lamination, the factory, the assembly after
-Construction; two thermal simulations after Thermal analysis. Then the photo looking up at the ridge taken out (asked for).
+Construction; two thermal simulations after Thermal analysis. Then the photo looking up at the ridge taken out (asked for). And the "under construction" line under its title taken off.
 
 Open at end of session: as at the end of session 4; a seventh Nap Nap
 Hooray picture, to come as a file; Frameless Glass Structures' year,
