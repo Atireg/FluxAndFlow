@@ -86,7 +86,7 @@ export const MILESTONES = [
     },
     {
         when: '2020 – 2021',
-        what: 'Director of exhibition',
+        what: 'Exhibition Director',
         title: 'Director of end-of-year graduation exhibition (GradX) for Architecture and Industrial Design',
         where: 'Swinburne University of Technology, Melbourne',
         details: 'For two consecutive years, I had a leading role in directing the end-of-year '

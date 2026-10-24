@@ -650,6 +650,9 @@ Branch `claude/loving-ramanujan-stqa6z`, not merged.
   the pebbles are gone before they surface (they showed briefly).
 - **"Full CV" beside the path's name**: opens the user's CV, a PDF in
   `static/cv/`, in a new tab.
+- **GradX by its dot: "Exhibition Director"** (was "Director of
+  exhibition").
+- **The CV behind "Full CV" replaced**: the latest version, set in Manrope.
 
 Open at end of session: as at the end of session 5; the path's ten
 milestones checked by the user.
