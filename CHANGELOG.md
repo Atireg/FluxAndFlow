@@ -655,6 +655,8 @@ Branch `claude/loving-ramanujan-stqa6z`, not merged.
 - **The CV behind "Full CV" replaced**: the latest version, set in Manrope.
 - **The CV behind "Full CV" replaced again**: "Exhibition Director" for the
   GradX role.
+- **The CV behind "Full CV" with pictures**: one beside each role and
+  degree, as in the old CV (830 KB).
 
 Open at end of session: as at the end of session 5; the path's ten
 milestones checked by the user.
