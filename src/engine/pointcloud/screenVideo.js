@@ -18,7 +18,7 @@ const PANEL_LIFT = 0.004; // the white screen under it
 const VIDEO_INSET = 0.985; // a hair inside the screen's edges, clear of its rounding
 const SCREEN_CORNER = 0.07; // the screen's (and film's) rounded corners, a share of its shorter side
 const VIDEO_FADE = 0.7; // seconds
-const SPIN_PERIOD = 8; // seconds a turn, while the film loads
+const SPIN_PERIOD = 8 / 1.5; // seconds a turn, while the film loads - half as fast again as the 8s it was
 const SPIN_SETTLE = 1; // radians from facing the visitor that the turn starts to slow
 const LOADING_FADE = 2.2; // seconds for the loading circle's points to drift out and fade, once loaded
 // The film counts as loaded at this, or this long after it was asked to load
