@@ -334,8 +334,9 @@ A model in parts (`frameless-glass.js`): `solid` gives the default look,
   the shader (`pointcloud/trails.js`); change the motion in `gather.glsl`
   or `DISSOLVE_GLSL` and the tails follow. A cloud's gather gives only
   every fifth point a tail (`GATHER_TRAIL_EVERY`) - more made it lag.
-- **The gather and the pebbles' arrival run on their own clocks**
-  (`gatherTime`, at most `GATHER_MAX_STEP` a frame; `state.arrivalTime`,
+- **The gather, the dissolve and the pebbles' arrival run on their own clocks**
+  (`gatherTime`, at most `GATHER_MAX_STEP` a frame; the dissolve's
+  `userData.run`, `DISSOLVE_MAX_STEP`; `state.arrivalTime`,
   `ARRIVAL_MAX_STEP`) so a stalled frame holds them rather than jumping
   them; everything else uses `detailSince(pebble, t)`.
 - **The tap hint** (`tags.js`, `HINT_*`) pulses, then falls like a leaf;
