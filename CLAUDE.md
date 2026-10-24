@@ -40,7 +40,7 @@ in a pull-out drawer.
   washing line moving in the wind with the tap hint's dots hanging
   from it, one per milestone (twelve), swinging (`src/components/PathView.jsx`). Each dot a milestone
   from the user's CV (`src/app/path.js`), labelled under it. On a phone the
-  line runs down the left edge and the dots fly from it like flags, each
+  line runs down the left edge, newest at the top, and the dots fly from it like flags, each
   labelled beside it (years and role; the place only on its card). A
   degree's dot is light grey (`degree`). Beside its name, a "Full CV"
   button opens `static/cv/Gergana_Rusenova_CV.pdf` (`PATH_CV`) - replace

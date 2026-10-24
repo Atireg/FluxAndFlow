@@ -581,7 +581,9 @@ Each dot is a milestone of the user's career and education, oldest first
 role or degree, place, in a label under the dot that moves with it.
 
 On a phone (under `UPRIGHT_BELOW`, 860px) the line runs down the screen by
-its left edge, and the dots fly from it like flags (asked for): the wind
+its left edge, newest at the top (asked for: the current position first;
+across a wide screen the oldest stays at the left), and the dots fly from
+it like flags (asked for): the wind
 across each holds it out against its weight (`FLAG_PUSH`, about 70
 degrees from hanging), gusting, with a quick flutter (`flagWind`) and a
 faster twist to and fro (`FLAG_TWIST`). The label sits beside its flag -

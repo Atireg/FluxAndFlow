@@ -21,7 +21,7 @@ import { MILESTONES } from '../app/path.js';
  * dot. Let go, the card falls on away and fades, as the hint does.
  *
  * On a phone (under 860px) the line runs down the screen instead, by its
- * left edge, and the dots fly from it like flags: blown out to the right on
+ * left edge, newest at the top, and the dots fly from it like flags: blown out to the right on
  * their threads, fluttering, the milestone beside each.
  *
  * Moves every frame, so never through React state: its own frame loop
@@ -301,7 +301,9 @@ export default function PathView({ shown }) {
             )));
 
             dots.forEach((hung, i) => {
-                const share = (i + 0.5) / DOT_COUNT;
+                // Down a phone the newest comes first, at the top; across the
+                // screen the oldest, at the left
+                const share = ((upright ? DOT_COUNT - 1 - i : i) + 0.5) / DOT_COUNT;
                 const [x, y] = at(share);
                 const reach = THREAD * size * hung.length;
 
