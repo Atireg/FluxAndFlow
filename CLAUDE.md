@@ -81,7 +81,7 @@ in a pull-out drawer.
   `thumbSize` 1.3) in its pebble. Drawer: 2026, "Web developer using AI",
   "Sleepless nights and cranky days"; the user's text (shortened,
   approved), with two lists; six phone screenshots in the text (`after`;
-  two to a row on a wide screen, the first of each group `half`).
+  two to a row, on a phone too (`pair`), the first of each group `half`).
 - **Frameless Glass Structures** (slot 7, the real world,
   `#frameless-glass`; its "under construction" `notice` taken off, asked
   for): the user's Rhino model of a glass pavilion
