@@ -660,6 +660,9 @@ Branch `claude/loving-ramanujan-stqa6z`, not merged.
 - **The path on a phone, newest first**: the current position at the top
   of the line, the bachelor at its foot.
 - **knippershelbig on the path: 2023 – current**, as in the CV.
+- **"Full CV" opens the tailored CV**: the version reworked for the Drees &
+  Sommer Digital Solutions Consultant role (Profile and Skills), same file
+  name.
 
 Open at end of session: as at the end of session 5; the path's ten
 milestones checked by the user.
