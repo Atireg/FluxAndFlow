@@ -677,6 +677,8 @@ Branch `claude/loving-ramanujan-stqa6z`, not merged.
 - **The path's knippershelbig card with the same two pictures**, in a row
   under the pavilion, equally tall (`more` in path.js), the mall's credit
   under it.
+- **The card's text** to match (the user's option B): construction
+  processes, and the projects named.
 
 Open at end of session: as at the end of session 5; the path's ten
 milestones checked by the user.
