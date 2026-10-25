@@ -1,6 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { assetUrl } from '../engine/assets.js';
 import { PATH_CV, PATH_HINT, PATH_VIEW } from '../app/words.js';
+// The CV, built under a name that changes with its contents - a browser
+// never shows an old copy from its cache
+import cvUrl from '../assets/Gergana_Rusenova_CV.pdf?url';
 import { MILESTONES } from '../app/path.js';
 
 /**
@@ -410,7 +413,7 @@ export default function PathView({ shown }) {
         <div className={`path-view${shown ? ' is-showing' : ''}`} aria-hidden={shown ? 'false' : 'true'}>
             <h2 className="path-view__title" ref={titleRef}>
                 {PATH_VIEW.label}
-                <a className="path-view__cv" href={assetUrl(PATH_CV.src)} target="_blank" rel="noopener noreferrer">
+                <a className="path-view__cv" href={cvUrl} target="_blank" rel="noopener noreferrer">
                     {PATH_CV.label}
                 </a>
             </h2>
