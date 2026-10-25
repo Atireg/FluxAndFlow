@@ -669,6 +669,7 @@ Branch `claude/loving-ramanujan-stqa6z`, not merged.
 - **The tailored CV's interests** matched to the role: digitalisation of
   planning and construction, digital platforms and data-driven workflows,
   automation, AI, sustainable construction.
+- **The CV's pictures wider and uncropped** (each at its own shape).
 
 Open at end of session: as at the end of session 5; the path's ten
 milestones checked by the user.
