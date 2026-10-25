@@ -1650,6 +1650,15 @@ the next tap is the player's. Two taps rather than one - asking the
 player to play by message after the first was left out, as a phone's
 browser may refuse a start that isn't its own tap.
 
+An X closes what's been opened in a drawer (asked for): on an enlarged
+picture, top right under the banner (a click anywhere still closes it
+too), and on a film's corner once it has been started - the sheet lifted
+on a touch screen, or a click into the player, seen as the page losing
+focus to its frame. Closing a film loads its player afresh (a new `key`),
+which stops it without either host's messaging API, and puts the sheet
+back. One `CloseButton` for both; its hover darkens the ring rather than
+turning orange - orange means "click me" on this site.
+
 Asset paths resolve against the Vite base URL
 ---------------------------------------------
 

@@ -1335,7 +1335,50 @@ body.drawer-open .section-slider {
 
 /* A picture or a film (DrawerFigure) */
 .drawer__figure {
+    position: relative; /* for a film's X on its corner */
     margin: 0;
+}
+
+/* The X that closes an enlarged picture or a started film (CloseButton.jsx) */
+.close-button {
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border: 1px solid var(--rule);
+    border-radius: 50%;
+    background: rgb(var(--bg-rgb));
+    color: var(--ink);
+    cursor: pointer;
+}
+
+.close-button svg {
+    width: 0.75rem;
+    height: 0.75rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.4;
+    stroke-linecap: round;
+}
+
+.close-button:hover {
+    border-color: var(--ink);
+}
+
+/* On a film's top right corner, half outside it */
+.drawer__video-close {
+    position: absolute;
+    top: 0;
+    right: 0;
+    transform: translate(35%, -35%);
+    z-index: 1;
+}
+
+.image-viewer__close {
+    position: fixed;
+    top: calc(var(--banner-height, 0px) + 0.75rem);
+    right: 0.75rem;
 }
 
 .drawer__image:first-child:not(.is-half),

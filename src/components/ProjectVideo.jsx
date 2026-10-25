@@ -1,4 +1,5 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import CloseButton from './CloseButton.jsx';
 import DrawerFigure from './DrawerFigure.jsx';
 
 /**
@@ -17,6 +18,10 @@ import DrawerFigure from './DrawerFigure.jsx';
  * On a touch screen a clear sheet lies over the player, so a finger
  * scrolling the drawer across it can't start the film: a tap that hardly
  * moves (TAP_SLOP) lifts the sheet, and the next tap is the player's own.
+ *
+ * Once a film has been started - the sheet lifted, or a click into the
+ * player, seen as the page losing focus to it - an X on its corner closes
+ * it: the player loaded afresh, stopped, the sheet back over it.
  */
 const TAP_SLOP = 10; // pixels a finger may move and still be tapping
 // Where each kind of film plays embedded, and where it opens on its own site
@@ -38,7 +43,28 @@ export default function ProjectVideo({ video }) {
     const host = HOSTS[kind];
     const src = host.embed(video[kind]);
     const [armed, setArmed] = useState(false);
+    const [started, setStarted] = useState(false);
+    const [round, setRound] = useState(0);
     const down = useRef(null);
+    const frame = useRef(null);
+
+    // A click into the player takes the focus from the page
+    useEffect(() => {
+        const onBlur = () => setTimeout(() => {
+            if (frame.current && document.activeElement === frame.current) setStarted(true);
+        });
+        window.addEventListener('blur', onBlur);
+        return () => window.removeEventListener('blur', onBlur);
+    }, []);
+
+    const close = () => {
+        setRound((count) => count + 1);
+        setArmed(false);
+        setStarted(false);
+    };
+    const corner = (armed || started) && (
+        <CloseButton className="drawer__video-close" label="Close film" onClose={close} />
+    );
 
     const caption = (
         <>
@@ -50,8 +76,10 @@ export default function ProjectVideo({ video }) {
     );
 
     return (
-        <DrawerFigure className="drawer__video" ratio={video.ratio} caption={caption}>
+        <DrawerFigure className="drawer__video" ratio={video.ratio} caption={caption} corner={corner}>
             <iframe
+                key={round}
+                ref={frame}
                 src={src}
                 title={video.title || 'Film'}
                 loading="lazy"
