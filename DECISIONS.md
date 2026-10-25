@@ -1641,6 +1641,13 @@ in that as it starts, the old `webkitallowfullscreen`/`mozallowfullscreen`
 cover older browsers, and a "Watch on Vimeo" link under it opens the film
 on Vimeo - the way that always works.
 
+On a touch screen a finger scrolling the drawer across a film started it
+(reported): a clear sheet lies over each player (`pointer: coarse` only)
+and lifts on a tap that moves under `TAP_SLOP` (10px), on `pointerup`;
+the next tap is the player's. Two taps rather than one - asking the
+player to play by message after the first was left out, as a phone's
+browser may refuse a start that isn't its own tap.
+
 Asset paths resolve against the Vite base URL
 ---------------------------------------------
 
