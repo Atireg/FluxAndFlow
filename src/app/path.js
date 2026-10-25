@@ -119,11 +119,10 @@ export const MILESTONES = [
         what: 'Associate, Head of Digital Technologies',
         where: 'knippershelbig, Stuttgart',
         details: 'Developing engineering solutions with code: automating construction processes, '
-            + 'simulating thermal performance and exploring new material applications, drawing on over '
-            + 'a decade of coding experience. Computational design and engineering on large '
-            + 'international projects: Dubai Square Mall and Al Maktoum International Airport in '
-            + 'Dubai, and double-curved canopies for the Projekt-Campus in Bad Friedrichshall and for '
-            + 'a confidential client, the second-largest private yacht in the world.',
+            + 'simulating thermal performance and exploring new uses for materials. Projects include '
+            + 'Dubai Square Mall, Al Maktoum International Airport and double-curved canopies, one for '
+            + 'the second-largest private yacht in the world. Principal investigator of Frameless Glass '
+            + 'Structures; built kh ReUse; shaping the office\'s digital strategy.',
         image: {
             src: 'images/frameless-glass-01.jpg',
             ratio: '1500 / 633',
