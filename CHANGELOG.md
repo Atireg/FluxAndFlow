@@ -666,6 +666,9 @@ Branch `claude/loving-ramanujan-stqa6z`, not merged.
 - **"Full CV" never stale**: the PDF moved to `src/assets/` and is imported,
   so its built name changes with each new CV - the old one showed from the
   cache after it was replaced.
+- **The tailored CV's interests** matched to the role: digitalisation of
+  planning and construction, digital platforms and data-driven workflows,
+  automation, AI, sustainable construction.
 
 Open at end of session: as at the end of session 5; the path's ten
 milestones checked by the user.
