@@ -683,6 +683,7 @@ Branch `claude/loving-ramanujan-stqa6z`, not merged.
   shortened (the user's option A).
 - **The CV's airport picture without its name, the mall's caption only
   its credit.**
+- **The CV's doctorate links the Rock Print Pavilion** (`#rock-print`).
 
 Open at end of session: as at the end of session 5; the path's ten
 milestones checked by the user.
