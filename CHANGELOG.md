@@ -653,6 +653,13 @@ Branch `claude/loving-ramanujan-stqa6z`, not merged.
 - **GradX by its dot: "Exhibition Director"** (was "Director of
   exhibition").
 - **The CV behind "Full CV" replaced**: the latest version, set in Manrope.
+- **The CV behind "Full CV" replaced again**: "Exhibition Director" for the
+  GradX role.
+- **The CV behind "Full CV" with pictures**: one beside each role and
+  degree, as in the old CV (830 KB).
+- **The path on a phone, newest first**: the current position at the top
+  of the line, the bachelor at its foot.
+- **knippershelbig on the path: 2023 – current**, as in the CV.
 
 Open at end of session: as at the end of session 5; the path's ten
 milestones checked by the user.

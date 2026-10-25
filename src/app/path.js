@@ -115,7 +115,7 @@ export const MILESTONES = [
         image: { src: 'images/path-12.jpg', ratio: '800 / 582', alt: 'This website’s playground: graphite pebbles among floating streams, one glowing orange' },
     },
     {
-        when: 'current',
+        when: '2023 – current',
         what: 'Associate, Head of Digital Technologies',
         where: 'knippershelbig, Stuttgart',
         details: 'Developing innovative engineering solutions with code: automating fabrication '
