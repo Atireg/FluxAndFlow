@@ -49,8 +49,7 @@ in a pull-out drawer.
   changes. Hovered or tapped, a dot presses twice like the tap
   hint and a card drops from it on a string ("click me!" over one dot at a time, at random; its
   words open it too) (details and a picture, both
-  from the CV; `static/images/path-*.jpg`; knippershelbig's card has two
-  more in a row under it, `more`, one with a `credit`). The streams behind blow with
+  from the CV; `static/images/path-*.jpg`). The streams behind blow with
   the wind, left to right (`engine.setWind`). Put there "for now"; the
   user may reword them.
 - **Rock Print Pavilion** (slot 0; role "Project lead, doctoral research"): a point cloud that gathers out of a

@@ -678,7 +678,8 @@ Branch `claude/loving-ramanujan-stqa6z`, not merged.
   under the pavilion, equally tall (`more` in path.js), the mall's credit
   under it.
 - **The card's text** to match (the user's option B): construction
-  processes, and the projects named.
+  processes, and the projects named. Then the two pictures taken off the
+  card again (asked for) - the pavilion alone, as before.
 
 Open at end of session: as at the end of session 5; the path's ten
 milestones checked by the user.
