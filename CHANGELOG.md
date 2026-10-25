@@ -681,6 +681,8 @@ Branch `claude/loving-ramanujan-stqa6z`, not merged.
   processes, and the projects named. Then the two pictures taken off the
   card again (asked for) - the pavilion alone, as before - and its text
   shortened (the user's option A).
+- **The CV's airport picture without its name, the mall's caption only
+  its credit.**
 
 Open at end of session: as at the end of session 5; the path's ten
 milestones checked by the user.
