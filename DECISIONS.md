@@ -1193,7 +1193,7 @@ project setting read by one code path, not a branch for the project:
   stripped, `faststart` so they stream at once). Headless Chromium here
   can't decode H.264, so they are checked with a WebM copy in `dist/`.
 - **While the film loads** (`screenVideo.js`), a model with a `screen` turns
-  slowly round (`SPIN_PERIOD`, a turn in about 5.3s - 8s at first, then half as fast again, asked for) and its screen's points circle like
+  slowly round (`SPIN_PERIOD`, a turn in about 3.6s - 8s at first, then half as fast again, twice, asked for) and its screen's points circle like
   a loading sign - an arc of three quarters of a circle turning, brightest at
   its head (`SPINNER_*` in dissolve.js), tails `SPINNER_TRAIL` long - asked
   for by the user.
