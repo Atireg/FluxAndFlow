@@ -1193,7 +1193,7 @@ project setting read by one code path, not a branch for the project:
   stripped, `faststart` so they stream at once). Headless Chromium here
   can't decode H.264, so they are checked with a WebM copy in `dist/`.
 - **While the film loads** (`screenVideo.js`), a model with a `screen` turns
-  slowly round (`SPIN_PERIOD` 8s a turn) and its screen's points circle like
+  slowly round (`SPIN_PERIOD`, a turn in about 5.3s - 8s at first, then half as fast again, asked for) and its screen's points circle like
   a loading sign - an arc of three quarters of a circle turning, brightest at
   its head (`SPINNER_*` in dissolve.js), tails `SPINNER_TRAIL` long - asked
   for by the user.
@@ -1642,6 +1642,13 @@ screen, only its own video player, so `playsinline=0` has the film open
 in that as it starts, the old `webkitallowfullscreen`/`mozallowfullscreen`
 cover older browsers, and a "Watch on Vimeo" link under it opens the film
 on Vimeo - the way that always works.
+
+On a touch screen a finger scrolling the drawer across a film started it
+(reported): a clear sheet lies over each player (`pointer: coarse` only)
+and lifts on a tap that moves under `TAP_SLOP` (10px), on `pointerup`;
+the next tap is the player's. Two taps rather than one - asking the
+player to play by message after the first was left out, as a phone's
+browser may refuse a start that isn't its own tap.
 
 Asset paths resolve against the Vite base URL
 ---------------------------------------------

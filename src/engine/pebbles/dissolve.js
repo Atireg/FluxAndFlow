@@ -25,6 +25,7 @@ import inkGlsl from '../shaders/pointCloud/ink.glsl';
  * (uScreen).
  */
 const DISSOLVE_DURATION = 3.6; // seconds from the click to the last point gone - overlapping the move in and the gather
+const DISSOLVE_MAX_STEP = 0.1; // seconds the dissolve moves on in one frame, at most - as the gather (GATHER_MAX_STEP)
 export const DISSOLVE_FADE = 0.5; // seconds for the face and rim to give way
 const DISSOLVE_POINTS = 2400;
 const FIGURE_SHARE = 1 / 3; // ...a third of them for a pebble whose points form a figure: all 2400 slowed its opening
@@ -308,17 +309,23 @@ export function updateDissolve({ state, renderer, camera, elapsedTime }) {
     const points = state.droppingFrom?.userData.dissolve;
     if (!points) return;
 
-    // Each open starts the dissolve afresh
+    // Each open starts the dissolve afresh, on its own clock: a frame's step
+    // at a time, at most DISSOLVE_MAX_STEP - a stalled frame (the model
+    // appearing, its parts and section built) holds the points rather than
+    // jumping them on mid-fall
     if (points.userData.from !== state.dropStartedAt) {
         points.userData.from = state.dropStartedAt;
-        points.userData.waited = 0;
+        points.userData.run = Math.max(elapsedTime - state.dropStartedAt, 0);
+    } else {
+        points.userData.run += Math.min(Math.max(elapsedTime - points.userData.last, 0), DISSOLVE_MAX_STEP);
     }
+    points.userData.last = elapsedTime;
 
     const detail = state.droppingFrom.userData.detail;
     const shown = state.view === 'detail' && state.selected === state.droppingFrom && detail?.visible;
 
     // A pile's surface stays; otherwise the cloud is gone by the end
-    let t = (elapsedTime - state.dropStartedAt - points.userData.waited) / DISSOLVE_DURATION;
+    let t = points.userData.run / DISSOLVE_DURATION;
     const ground = points.userData.ground;
 
     // Points bound for a screen or a figure wait for it, then carry on from there
@@ -326,7 +333,7 @@ export function updateDissolve({ state, renderer, camera, elapsedTime }) {
     const figure = points.userData.figure && shown ? detail.userData.figure : null;
     if (points.userData.screen || points.userData.figure) {
         if (!screen && !figure && t > SCREEN_HOLD) {
-            points.userData.waited += (t - SCREEN_HOLD) * DISSOLVE_DURATION;
+            points.userData.run = SCREEN_HOLD * DISSOLVE_DURATION;
             t = SCREEN_HOLD;
         }
         if (screen) placeScreen(points.material.uniforms, screen, detail);

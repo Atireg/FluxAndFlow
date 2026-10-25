@@ -1,3 +1,4 @@
+import { useRef, useState } from 'react';
 import DrawerFigure from './DrawerFigure.jsx';
 
 /**
@@ -12,7 +13,12 @@ import DrawerFigure from './DrawerFigure.jsx';
  * its own video player: `playsinline=0` has the film open in that, full
  * screen, as it starts, and the old webkit/moz attributes cover older
  * browsers. "Watch on Vimeo" below it is the way that always works.
+ *
+ * On a touch screen a clear sheet lies over the player, so a finger
+ * scrolling the drawer across it can't start the film: a tap that hardly
+ * moves (TAP_SLOP) lifts the sheet, and the next tap is the player's own.
  */
+const TAP_SLOP = 10; // pixels a finger may move and still be tapping
 // Where each kind of film plays embedded, and where it opens on its own site
 const HOSTS = {
     vimeo: {
@@ -31,6 +37,8 @@ export default function ProjectVideo({ video }) {
     const kind = video.youtube ? 'youtube' : 'vimeo';
     const host = HOSTS[kind];
     const src = host.embed(video[kind]);
+    const [armed, setArmed] = useState(false);
+    const down = useRef(null);
 
     const caption = (
         <>
@@ -52,6 +60,19 @@ export default function ProjectVideo({ video }) {
                 webkitallowfullscreen="true"
                 mozallowfullscreen="true"
             />
+            {!armed && (
+                <div
+                    className="drawer__video-shield"
+                    aria-hidden="true"
+                    onPointerDown={(event) => { down.current = { x: event.clientX, y: event.clientY }; }}
+                    onPointerCancel={() => { down.current = null; }}
+                    onPointerUp={(event) => {
+                        const from = down.current;
+                        down.current = null;
+                        if (from && Math.hypot(event.clientX - from.x, event.clientY - from.y) < TAP_SLOP) setArmed(true);
+                    }}
+                />
+            )}
         </DrawerFigure>
     );
 }

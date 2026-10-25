@@ -1374,6 +1374,20 @@ body.drawer-open .section-slider {
     border: 0;
 }
 
+/* Over a film on a touch screen, so scrolling across it can't play it
+   (ProjectVideo.jsx) - nothing with a mouse */
+.drawer__video-shield {
+    display: none;
+}
+
+@media (pointer: coarse) {
+    .drawer__video-shield {
+        display: block;
+        position: absolute;
+        inset: 0;
+    }
+}
+
 /* A picture is a button that enlarges it (ImageViewer) */
 .drawer__enlarge {
     display: block;
