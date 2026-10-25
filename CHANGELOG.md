@@ -685,6 +685,7 @@ Branch `claude/loving-ramanujan-stqa6z`, not merged.
   its credit.**
 - **The CV's doctorate links the Rock Print Pavilion** (`#rock-print`).
 - **The CV's mall picture without its credit** (asked for).
+- **The CV set in IBM Plex Sans** (the user's choice of eight), not Manrope.
 
 Open at end of session: as at the end of session 5; the path's ten
 milestones checked by the user.
