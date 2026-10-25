@@ -43,8 +43,10 @@ in a pull-out drawer.
   line runs down the left edge, newest at the top, and the dots fly from it like flags, each
   labelled beside it (years and role; the place only on its card). A
   degree's dot is light grey (`degree`). Beside its name, a "Full CV"
-  button opens `static/cv/Gergana_Rusenova_CV.pdf` (`PATH_CV`) - replace
-  the file, same name, when the CV changes. Hovered or tapped, a dot presses twice like the tap
+  button opens `src/assets/Gergana_Rusenova_CV.pdf` (imported `?url`, so
+  its built name changes with its contents - in `static/` a replaced CV
+  stayed cached as the old one) - replace the file, same name, when the CV
+  changes. Hovered or tapped, a dot presses twice like the tap
   hint and a card drops from it on a string ("click me!" over one dot at a time, at random; its
   words open it too) (details and a picture, both
   from the CV; `static/images/path-*.jpg`). The streams behind blow with

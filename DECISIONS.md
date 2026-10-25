@@ -615,8 +615,11 @@ the history, so Back leaves it; choosing anything else takes it out.
 
 Beside the path's name, a small outlined "Full CV" button (`PATH_CV`,
 words.js) opens the user's CV as a PDF in a new tab
-(`static/cv/Gergana_Rusenova_CV.pdf`, asked for). The PDF is made outside
-the site, from the designed CV page; replacing it keeps its name.
+(asked for). The PDF is made outside the site, from the designed CV page,
+and lives in `src/assets/`, imported with `?url`: the build names it after
+its contents, so a new CV gets a new address. From `static/` it kept one
+address, and once replaced, browsers went on showing the old copy (Pages
+lets them cache for ten minutes, a PDF viewer longer).
 
 A degree's dot (`degree` in path.js: the bachelor, the ITECH master, the
 JavaScript Developer Degree) is filled light grey, the jobs' white (asked
