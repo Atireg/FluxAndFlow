@@ -941,6 +941,28 @@ body.drawer-open .section-slider {
     object-fit: cover;
 }
 
+.path-view__card-more {
+    display: flex;
+    gap: 0.4rem;
+    align-items: flex-start;
+    margin: -0.2rem 0 0.55rem;
+}
+
+.path-view__card-more figure {
+    min-width: 0;
+    margin: 0;
+}
+
+.path-view__card-more img {
+    margin-bottom: 0;
+}
+
+.path-view__card-more figcaption {
+    margin-top: 0.2rem;
+    font-size: 0.62rem;
+    color: var(--ink-dim);
+}
+
 .path-view__card p,
 .path-view__card h3 {
     margin: 0;

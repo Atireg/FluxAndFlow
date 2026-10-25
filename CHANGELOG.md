@@ -670,6 +670,13 @@ Branch `claude/loving-ramanujan-stqa6z`, not merged.
   planning and construction, digital platforms and data-driven workflows,
   automation, AI, sustainable construction.
 - **The CV's pictures wider and uncropped** (each at its own shape).
+- **knippershelbig's role, in the CV, with its projects**: construction
+  processes, not fabrication; Dubai Square Mall, Al Maktoum International
+  Airport, the canopies for the Projekt-Campus and a confidential yacht;
+  pictures of the mall (credit Emaar) and the airport under the pavilion's.
+- **The path's knippershelbig card with the same two pictures**, in a row
+  under the pavilion, equally tall (`more` in path.js), the mall's credit
+  under it.
 
 Open at end of session: as at the end of session 5; the path's ten
 milestones checked by the user.

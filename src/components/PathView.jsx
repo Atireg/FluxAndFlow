@@ -104,6 +104,12 @@ function dotSize() {
     return Math.min(Math.max(1.1 * rem, 3 * vmin), 2.6 * rem);
 }
 
+// A picture's width over its height, from its ratio ('700 / 528').
+function widthOver(ratio) {
+    const [w, h] = ratio.split('/').map(Number);
+    return w / h;
+}
+
 export default function PathView({ shown }) {
     const titleRef = useRef(null);
     const hintRef = useRef(null);
@@ -444,10 +450,21 @@ export default function PathView({ shown }) {
                     <span className="path-view__where">{where}</span>
                 </p>
             ))}
-            {MILESTONES.map(({ when, what, title, where, details, image }) => (
+            {MILESTONES.map(({ when, what, title, where, details, image, more }) => (
                 <article className="path-view__card" key={`card-${when}${what}`}>
                     {image && (
                         <img src={assetUrl(image.src)} alt={image.alt} style={{ aspectRatio: image.ratio }} />
+                    )}
+                    {more && (
+                        <div className="path-view__card-more">
+                            {more.map((pic) => (
+                                // Flexed by its ratio, so every picture in the row is as tall
+                                <figure key={pic.src} style={{ flex: widthOver(pic.ratio) }}>
+                                    <img src={assetUrl(pic.src)} alt={pic.alt} style={{ aspectRatio: pic.ratio }} />
+                                    {pic.credit && <figcaption>{pic.credit}</figcaption>}
+                                </figure>
+                            ))}
+                        </div>
                     )}
                     <p className="path-view__card-when">{when}</p>
                     <h3 className="path-view__card-what">{title ?? what}</h3>

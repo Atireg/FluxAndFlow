@@ -5,7 +5,8 @@
  * dot - and, on the card that drops from it on a hover or tap, `details`
  * and a picture (`image`, its file's `ratio`), either left out if there's
  * none; `degree` for a degree - its dot drawn light grey; `title`, if given, heads the card in place of `what` - a longer
- * name than fits by the dot. Write "knippershelbig" so, one lowercase word.
+ * name than fits by the dot; `more`, further pictures in a row under the first, each
+ * with its `credit` under it if given. Write "knippershelbig" so, one lowercase word.
  */
 export const MILESTONES = [
     {
@@ -126,5 +127,9 @@ export const MILESTONES = [
             ratio: '1500 / 633',
             alt: 'The glass pavilion at the fair: a pointed arch of glass sheets in front of white curtains',
         },
+        more: [
+            { src: 'images/path-13.jpg', ratio: '700 / 528', alt: 'Dubai Square Mall: a curved roof of white ribs over the shopping street', credit: 'Dubai Square Mall. Image: Emaar' },
+            { src: 'images/path-14.jpg', ratio: '900 / 314', alt: 'Al Maktoum International Airport, Dubai, from the air' },
+        ],
     },
 ];
