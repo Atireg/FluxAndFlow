@@ -1196,7 +1196,7 @@ project setting read by one code path, not a branch for the project:
   stripped, `faststart` so they stream at once). Headless Chromium here
   can't decode H.264, so they are checked with a WebM copy in `dist/`.
 - **While the film loads** (`screenVideo.js`), a model with a `screen` turns
-  slowly round (`SPIN_PERIOD`, a turn in about 5.3s - 8s at first, then half as fast again, asked for) and its screen's points circle like
+  slowly round (`SPIN_PERIOD`, a turn in about 3.6s - 8s at first, then half as fast again, twice, asked for) and its screen's points circle like
   a loading sign - an arc of three quarters of a circle turning, brightest at
   its head (`SPINNER_*` in dissolve.js), tails `SPINNER_TRAIL` long - asked
   for by the user.
@@ -1652,6 +1652,15 @@ and lifts on a tap that moves under `TAP_SLOP` (10px), on `pointerup`;
 the next tap is the player's. Two taps rather than one - asking the
 player to play by message after the first was left out, as a phone's
 browser may refuse a start that isn't its own tap.
+
+An X closes what's been opened in a drawer (asked for): on an enlarged
+picture, top right under the banner (a click anywhere still closes it
+too), and on a film's corner once it has been started - the sheet lifted
+on a touch screen, or a click into the player, seen as the page losing
+focus to its frame. Closing a film loads its player afresh (a new `key`),
+which stops it without either host's messaging API, and puts the sheet
+back. One `CloseButton` for both; its hover darkens the ring rather than
+turning orange - orange means "click me" on this site.
 
 Asset paths resolve against the Vite base URL
 ---------------------------------------------
