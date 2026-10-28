@@ -1,8 +1,8 @@
 import * as THREE from 'three';
 
 const BINS = 14; // rows of folds along a strip
-const FROM = 0.12; // where along a petal a strip starts and ends, a share of its length
-const TO = 0.96;
+const FROM = 0.06; // where along a petal a strip starts and ends, a share of its length
+const TO = 0.97;
 const PUSH = 0.2; // how far a fold is pushed out, a share of the strip's width there
 const PUSH_ALTERNATE = 0.25; // ...and every other row only this much of it, so it creases
 
@@ -21,22 +21,28 @@ export function makeCloth(plates, material) {
     const edges = plates.map(({ geometry }) => plateEdges(geometry));
     const hub = plates.reduce((sum, plate, i) => sum.add(edges[i].centre), new THREE.Vector3()).multiplyScalar(1 / plates.length);
 
+    // Every edge run from the hub out to the tip: a plate's length axis has
+    // no sign of its own, and one run the other way crossed its strips over
+    const reach = (p) => Math.hypot(p.x - hub.x, p.z - hub.z);
+    edges.forEach(({ sides }) => sides.forEach((side) => {
+        if (reach(side[0]) > reach(side[side.length - 1])) side.reverse();
+    }));
+
     // Round the ring, by angle about the model's vertical axis
     const order = plates.map((_, i) => i)
         .sort((a, b) => Math.atan2(edges[a].centre.z - hub.z, edges[a].centre.x - hub.x)
             - Math.atan2(edges[b].centre.z - hub.z, edges[b].centre.x - hub.x));
 
-    // Each plate's edge facing the next one round: of the four pairs of
-    // edges, the two closest together all along - which also keeps the strip
-    // from twisting over
+    // Each plate's outer edge - the long edge lower and further out from the
+    // ring's axis (the red line in the user's picture), where the cloth hangs
+    // from - joined to the next one round's
+    const outer = edges.map(({ sides }) => {
+        const score = (side) => side.reduce((sum, p) => sum + Math.hypot(p.x - hub.x, p.z - hub.z) - p.y, 0);
+        return score(sides[0]) > score(sides[1]) ? sides[0] : sides[1];
+    });
     const strips = order.map((index, n) => {
         const next = order[(n + 1) % order.length];
-        let best = null;
-        edges[index].sides.forEach((a) => edges[next].sides.forEach((b) => {
-            const gap = a.reduce((sum, p, j) => sum + p.distanceTo(b[j]), 0);
-            if (!best || gap < best.gap) best = { gap, a, b };
-        }));
-        return { a: best.a, b: best.b, plates: [index, next] };
+        return { a: outer[index], b: outer[next], plates: [index, next] };
     });
 
     const triangles = strips.length * (BINS - 1) * 4;
