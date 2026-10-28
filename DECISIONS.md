@@ -1293,7 +1293,9 @@ a fit gives them exactly. Needed of the export: the same mesh in both poses
 named objects (`petel_n`, `rack`; unnamed ones count as fixed), and curves
 (objects with no faces) are left out. The converter checks that every
 petal is a rigid turn and every rack vertex lands where the closed file has
-it. It plays by itself (`mechanism: { loop: seconds }`): open, closing,
+it. The rack travels the other way to the petals (`--flip-rack`, asked
+for): up as they open, down as they close - not as the user's two files
+have it. It plays by itself (`mechanism: { loop: seconds }`): open, closing,
 closed, opening, each end held a little, the slider following; the visitor's
 slider stops it, and it takes up again from there after 6s untouched.
 

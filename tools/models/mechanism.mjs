@@ -11,7 +11,11 @@
  * The two files' meshes must have the same vertices in each part, which a
  * Rhino mesh made once and moved gives.
  *
- *     node tools/models/mechanism.mjs open.obj closed.obj mechanism.glb
+ *     node tools/models/mechanism.mjs open.obj closed.obj mechanism.glb [--flip-rack]
+ *
+ * `--flip-rack` has the rack travel the other way to the petals: in the
+ * closed file's place when the petals are open, and the open file's when they
+ * are closed (asked for).
  */
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -109,7 +113,7 @@ function fitRotation(from, to) {
     return { axis: axis.toArray(), pivot: pivot.toArray(), angle, error, slide: along };
 }
 
-export function mechanismToGlb(openPath, closedPath, fileName) {
+export function mechanismToGlb(openPath, closedPath, fileName, { flipRack = false } = {}) {
     const open = readObj(openPath);
     const closed = readObj(closedPath);
     const named = (list, test) => list.filter((o) => test(o.name));
@@ -149,9 +153,10 @@ export function mechanismToGlb(openPath, closedPath, fileName) {
     const missing = moved.filter((p) => !have.has(key(p))).length;
     if (missing) throw new Error(`rack: ${missing} vertices don't land where the closed file has them`);
     console.log('rack slides', slide.toArray().map((x) => x.toFixed(3)).join(' '));
+    // (flipped: the rack as the closed file has it to start with, back to the open file's)
     meshes.push({
-        name: 'rack', material: 'rack', geometry: merged(rackOpen),
-        extras: { part: 'rack', motion: { type: 'slide', by: slide.toArray() } },
+        name: 'rack', material: 'rack', geometry: merged(flipRack ? rackClosed : rackOpen),
+        extras: { part: 'rack', motion: { type: 'slide', by: (flipRack ? slide.clone().negate() : slide).toArray() } },
     });
 
     // The fixed parts, in the open file
@@ -165,7 +170,7 @@ export function mechanismToGlb(openPath, closedPath, fileName) {
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-    const [open, closed, fileName] = process.argv.slice(2);
-    if (!open || !closed || !fileName) throw new Error('usage: node tools/models/mechanism.mjs open.obj closed.obj name.glb');
-    mechanismToGlb(open, closed, fileName);
+    const [open, closed, fileName, flag] = process.argv.slice(2);
+    if (!open || !closed || !fileName) throw new Error('usage: node tools/models/mechanism.mjs open.obj closed.obj name.glb [--flip-rack]');
+    mechanismToGlb(open, closed, fileName, { flipRack: flag === '--flip-rack' });
 }
