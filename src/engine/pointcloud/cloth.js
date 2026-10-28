@@ -1,4 +1,11 @@
 import * as THREE from 'three';
+import { MESH_FIT_SIZE } from '../constants.js';
+import { screenColor } from '../colors.js';
+import { INK_GRAIN_GLSL } from './mesh.js';
+
+const BLINK_SECONDS = 2.6; // a blink of light from the middle, and its glow travelling out, this often
+const GLOW_COLOR = [0.93, 0.89, 1.0]; // a lavender white
+
 
 const BINS = 14; // rows of folds along a strip
 const COLS = 2; // and points across it, between the two petals
@@ -18,7 +25,10 @@ const PUSH_ALTERNATE = 0.3; // ...and every other row only this much of it, so i
  * `plates`: [{ mesh, geometry }] - the moving meshes and their geometry (in
  * their own space, as the group holds them); returns { mesh, update }.
  */
-export function makeCloth(plates, material) {
+export function makeCloth(plates, look, uniforms) {
+    // The flower's middle, where its light is: where the petals hinge
+    const centre = plates.reduce((sum, { motion }) => sum.add(motion.pivot), new THREE.Vector3()).multiplyScalar(1 / plates.length);
+    const material = makeClothMaterial(look, uniforms, centre);
     const edges = plates.map(({ geometry }) => plateEdges(geometry));
     const hub = plates.reduce((sum, plate, i) => sum.add(edges[i].centre), new THREE.Vector3()).multiplyScalar(1 / plates.length);
 
@@ -54,6 +64,8 @@ export function makeCloth(plates, material) {
     mesh.frustumCulled = false; // its bounds move with the plates
     mesh.raycast = () => {};
     mesh.renderOrder = 1;
+    // Its own clock, for the light's blinking
+    mesh.onBeforeRender = () => { material.uniforms.uTime.value = performance.now() / 1000; };
 
     // The strip's points: a row for each place along the petals, COLS + 1 across
     const P = Array.from({ length: BINS }, () => Array.from({ length: COLS + 1 }, () => new THREE.Vector3()));
@@ -200,4 +212,74 @@ function axesOf(points, centre) {
     const length = dominant(cov);
     const width = dominant(cov, length);
     return { length, width };
+}
+
+/**
+ * The cloth's look: the same two inks as the other parts, lit by a fixed
+ * light, but with a light blinking in the middle of the flower - each blink
+ * a flash that fades, with a ring of glow travelling out across the cloth
+ * and a faint steady glow near the middle. `uniforms` the model's own
+ * (fade, clip, sign), so it dissolves in and is cut with the rest.
+ */
+function makeClothMaterial({ lit, shade, opacity = 1 }, { fade, clip, sign }, centre) {
+    return new THREE.ShaderMaterial({
+        transparent: true,
+        depthWrite: false,
+        side: THREE.DoubleSide,
+        uniforms: {
+            uLit: { value: screenColor(...lit) },
+            uShade: { value: screenColor(...shade) },
+            uOpacity: { value: opacity },
+            uFade: fade,
+            uClip: clip,
+            uClipSign: sign,
+            uTime: { value: 0 },
+            uCentre: { value: centre },
+            uReach: { value: MESH_FIT_SIZE * 0.5 },
+            uGlow: { value: screenColor(...GLOW_COLOR.map((x) => Math.round(x * 255))) },
+        },
+        vertexShader: `
+varying vec3 vNormal;
+varying vec3 vLocal;
+void main() {
+    vNormal = normalize(normalMatrix * normal);
+    vLocal = position;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}`,
+        fragmentShader: `
+uniform vec3 uLit;
+uniform vec3 uShade;
+uniform vec3 uGlow;
+uniform float uOpacity;
+uniform float uFade;
+uniform float uClip;
+uniform float uClipSign;
+uniform float uTime;
+uniform vec3 uCentre;
+uniform float uReach;
+varying vec3 vNormal;
+varying vec3 vLocal;
+
+${INK_GRAIN_GLSL}
+void main() {
+    if (inkGrain(floor(vLocal * 40.0)) < uFade || uClipSign * vLocal.z < uClip) discard;
+    vec3 normal = normalize(vNormal) * (gl_FrontFacing ? 1.0 : -1.0);
+    float light = max(dot(normal, normalize(vec3(-0.35, 0.8, 0.5))), 0.0);
+    vec3 ink = mix(uShade, uLit, light);
+
+    // The blinking light: a flash at the start of each cycle that fades...
+    float phase = fract(uTime / ${BLINK_SECONDS.toFixed(1)});
+    float flash = smoothstep(0.0, 0.05, phase) * exp(-3.0 * phase);
+    // ...lighting the cloth near the middle most, and a ring of glow
+    // going out from it as it fades
+    float d = distance(vLocal, uCentre);
+    float near = 1.0 / (1.0 + (d / (0.9 * uReach)) * (d / (0.9 * uReach)));
+    float ring = (d - phase * uReach * 2.4) / (0.22 * uReach);
+    float wave = exp(-ring * ring);
+    float glow = clamp(0.08 * near + flash * (1.1 * near + 0.8 * wave), 0.0, 1.0);
+
+    vec3 colour = mix(ink, uGlow, glow);
+    gl_FragColor = vec4(colour, clamp(uOpacity + glow * 0.5, 0.0, 1.0));
+}`,
+    });
 }

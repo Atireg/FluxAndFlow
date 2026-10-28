@@ -128,7 +128,7 @@ export const CLIP_NONE = -1e6;
 // rather than a see-through ghost - so it stays opaque and three interlocked
 // copies need no sorting. A hash without sin(), which loses precision on
 // some mobile GPUs. (The parts and a section's fill, so they dissolve alike.)
-const INK_GRAIN_GLSL = `
+export const INK_GRAIN_GLSL = `
 float inkGrain(vec3 p) {
     p = fract(p * 0.3183099 + 0.1);
     p *= 17.0;

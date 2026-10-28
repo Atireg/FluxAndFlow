@@ -422,12 +422,14 @@ export function createFraming({ rig, screen, state, grid, ui }) {
                 frameDevice(shown, mode, duration, ease, { margin: DEVICE_WHOLE_MARGIN, whole: true });
                 return;
             }
+            // (a view's `flight` first shot until its pull out, `flightStart`; or its
+            // `drawerView` - another angle - with the drawer out beside it)
+            const base = object.userData.project;
+            const overlay = object.userData.flightStart ? base?.view?.flight?.from
+                : state.drawerOpen ? base?.view?.drawerView : null;
+            const project = overlay ? { ...base, view: { ...base.view, ...overlay } } : base;
             // Or framed on a box of its own (`fit`, world space) - a pile's
             // aggregates with the drawer open - at the plain fit, no zoom or lift
-            // (a view's `flight` first shot until its pull out: `flightStart`)
-            const project = object.userData.flightStart
-                ? { ...object.userData.project, view: { ...object.userData.project.view, ...object.userData.project.view.flight.from } }
-                : object.userData.project;
             const ownView = framesCube && !fit && (!state.drawerOpen || side)
                 ? project.view
                 : {};

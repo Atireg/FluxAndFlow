@@ -1310,6 +1310,11 @@ the model turn (`flightTurn`; `view.spin`, a revolution in 40s here) - the
 model turns, not the camera, as in a `tour`. `pebble.userData.flightStart`
 makes `frameDetail` use the `from` shot until `maybeFly` clears it. It
 starts closed and opens; a pause button beside the slider holds the loop.
+The cloth's own shader (`makeClothMaterial`, cloth.js): the same inks, and a
+light blinking from the middle of the flower - each blink (every 2.6s) a flash
+that fades, lighting the cloth near the middle most with a ring of glow going
+out across it, and a faint steady glow near the middle. With the drawer out, a
+steep view from above (`view.drawerView`, wide screens: the user's screenshot).
 It plays by itself (`mechanism: { loop: seconds }`): open, closing,
 closed, opening, each end held a little, the slider following; the visitor's
 slider stops it, and it takes up again from there after 6s untouched.

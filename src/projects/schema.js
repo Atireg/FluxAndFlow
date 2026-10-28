@@ -233,6 +233,10 @@ function normaliseView(view, { id }) {
             throw new Error(`Project "${id}": view.flight should be { from: { elevation, zoom, lift }, hold, over } in seconds`);
         }
     }
+    // `drawerView`: { elevation, zoom, lift } - the view while the drawer is out beside it (wide screens)
+    if (view.drawerView !== undefined && (typeof view.drawerView !== 'object' || view.drawerView === null)) {
+        throw new Error(`Project "${id}": view.drawerView should be { elevation, zoom, lift }`);
+    }
     if (view.spin !== undefined && !(view.spin > 0)) throw new Error(`Project "${id}": view.spin should be seconds a revolution`);
 
     return { ...view };

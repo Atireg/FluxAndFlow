@@ -105,7 +105,7 @@ export function loadPointCloud({
                     }
                     if (material.transparent) mesh.renderOrder = 1; // after the opaque parts
                     group.add(mesh);
-                    if (cloth && motion && lookName === cloth.of) plates.push({ mesh, geometry });
+                    if (cloth && motion && lookName === cloth.of) plates.push({ mesh, geometry, motion });
                     // A part's outline in thin black (a glass sheet's upper ply),
                     // where its faces meet at more than EDGE_ANGLE - or its
                     // look's `edges`; a moving part's goes with it
@@ -120,11 +120,7 @@ export function loadPointCloud({
                 if (moving.length) group.userData.mechanism = moving;
                 // Cloth between the plates that move (`mechanism.cloth`), in its own look
                 if (plates.length > 1) {
-                    const material = makeInkMaterial(cloth);
-                    material.uniforms.uFade = fade;
-                    material.uniforms.uClip = clip;
-                    material.uniforms.uClipSign = sign;
-                    group.userData.cloth = makeCloth(plates, material);
+                    group.userData.cloth = makeCloth(plates, cloth, { fade, clip, sign });
                     group.add(group.userData.cloth.mesh);
                 }
                 if (section) addSection(group, { clip, sign, fade });
