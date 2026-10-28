@@ -689,3 +689,16 @@ Branch `claude/loving-ramanujan-stqa6z`, not merged.
 
 Open at end of session: as at the end of session 5; the path's ten
 milestones checked by the user.
+
+## Session 7
+
+- **Future Gardens** (slot 2, teaching, `#future-gardens`): a model that
+  moves - the user's Rhino mechanism, five petals that open on their hinges
+  as the rack slides, a slider ("open") over it. Made from two OBJ exports,
+  open and closed, by `tools/models/mechanism.mjs` (`mechanism.glb`); the
+  engine's `setMechanism`, the `mechanism` setting. Text, role and year still
+  to come; the looks (purple petals, green rack, yellow frame) are tunable.
+
+Open at end of session: Future Gardens' text, pictures and wording of its
+slider; whether it should play by itself.
+

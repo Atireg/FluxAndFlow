@@ -41,6 +41,7 @@ The project view: point cloud
 - A mesh becomes points as it loads
 - The devices: a laptop and a phone with a film on the screen
 - Frameless Glass Structures: parts in their own looks, a figure of points
+- Future Gardens: a model that moves, from two poses
 - Emergent Space: aggregates dropped with live physics
 - Point size, three sizes, three inks
 - Points gather out of a scattered cloud
@@ -1270,6 +1271,29 @@ means changing the screen's proportions there. The reuse sign lies face up
 for the playground's camera from above. A real model would replace them if
 it names its screen mesh the same way.
 
+
+Future Gardens: a model that moves, from two poses
+--------------------------------------------------
+
+The user's Rhino model (five petals on hinges, a rack driven by a small
+motor) is exported twice, the same objects in each pose, and
+`tools/models/mechanism.mjs` makes one .glb: the OPEN pose as the geometry,
+and in each moving part's node extras (`motion`) what takes it to the closed
+pose - a turn about an axis through a pivot (the petals; found by fitting
+each part's vertices between the two files, 45 degrees each) or a slide
+(the rack; 2.49 units). The engine (`setMechanism`, load.js) puts each part
+back by that, the rest of the way, from a slider ("open", the section
+slider's component). Everything else is fixed and merged into three parts.
+
+Why open as the base: the model is fitted to its size as it loads, and the
+open pose is the widest - fitted closed, the open petals would overflow.
+Why the files, not hinge settings: the user has the model, not the axes, and
+a fit gives them exactly. Needed of the export: the same mesh in both poses
+(a mesh made once, then moved - two separate meshings can't be paired),
+named objects (`petel_n`, `rack`; unnamed ones count as fixed), and curves
+(objects with no faces) are left out. The converter checks that every
+petal is a rigid turn and every rack vertex lands where the closed file has
+it. Not yet: an automatic demo (a loop) - the slider only.
 
 Emergent Space: aggregates dropped with live physics
 ----------------------------------------------------

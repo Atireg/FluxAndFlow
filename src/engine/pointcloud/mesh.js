@@ -105,6 +105,8 @@ export function pointsFromMeshes(root, total = MESH_SAMPLE_POINTS) {
         part: mesh.userData.part ?? mesh.name,
         // its edges outlined (`edges` in the file's extras - a sheet's upper ply)
         edges: Boolean(mesh.userData.edges),
+        // how it moves (`mechanism`), in the fitted space
+        motion: fittedMotion(mesh.userData.motion, centre, factor),
         geometry: solids[i],
     }));
     return group;
@@ -265,4 +267,20 @@ void main() {
     gl_FragColor = vec4(uInk, 1.0);
 }`,
     });
+}
+
+/**
+ * A moving part's motion from the file (in the file's own space) in the
+ * fitted model's: a turn about an axis through `pivot`, `angle` radians, or a
+ * slide `by` - from the pose the file holds to the other
+ */
+function fittedMotion(motion, centre, factor) {
+    if (!motion) return null;
+    if (motion.type === 'slide') return { type: 'slide', by: new THREE.Vector3(...motion.by).multiplyScalar(factor) };
+    return {
+        type: 'rotate',
+        axis: new THREE.Vector3(...motion.axis).normalize(),
+        pivot: new THREE.Vector3(...motion.pivot).sub(centre).multiplyScalar(factor),
+        angle: motion.angle,
+    };
 }

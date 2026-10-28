@@ -82,7 +82,8 @@ export function loadPointCloud({
                     ? sampled.userData.parts
                     : [{ material: '', part: '', geometry: sampled.userData.solid }];
                 const edgeMaterial = makeEdgeMaterial(screenColor(92, 92, 94), { fade, clip, sign }); // dark grey
-                pieces.forEach(({ material: lookName, part, edges, geometry }) => {
+                const moving = [];
+                pieces.forEach(({ material: lookName, part, edges, geometry, motion }) => {
                     if (lookName === figure) {
                         group.userData.figure = geometry;
                         return;
@@ -94,6 +95,11 @@ export function loadPointCloud({
                     const mesh = new THREE.Mesh(geometry, material);
                     // Its own name, for a project's `info` (see detail.js's hover)
                     mesh.name = part;
+                    // Moved by `setMechanism`, from the matrix it's given
+                    if (motion) {
+                        mesh.matrixAutoUpdate = false;
+                        moving.push({ mesh, motion });
+                    }
                     if (material.transparent) mesh.renderOrder = 1; // after the opaque parts
                     group.add(mesh);
                     // A part's outline in thin black (a glass sheet's upper ply),
@@ -106,6 +112,7 @@ export function loadPointCloud({
                     }
                     group.userData.solidMaterial ??= material;
                 });
+                if (moving.length) group.userData.mechanism = moving;
                 if (section) addSection(group, { clip, sign, fade });
                 if (floor) addFloor(group, fade);
                 // Where the pebble's points settle and circle (`screen`)
@@ -391,6 +398,33 @@ function cutFans(meshes, z) {
 export function sectionAt(section, share) {
     const along = (section.to - section.from) * Math.min(Math.max(share, 0), 1);
     return section.sign > 0 ? section.to - along : section.from + along;
+}
+
+const MOTION_TURN = new THREE.Matrix4();
+const MOTION_SHIFT = new THREE.Matrix4();
+
+/**
+ * A model with moving parts (`mechanism`) at `open` of the way from closed
+ * (0) to open (1), which is the pose its file holds: each part is put back by
+ * what takes it to the closed pose, the rest of the way
+ */
+export function setMechanism(model, open) {
+    const moving = model?.userData.mechanism;
+    if (!moving) return;
+    const closed = 1 - Math.min(Math.max(open, 0), 1);
+    moving.forEach(({ mesh, motion }) => {
+        if (motion.type === 'slide') {
+            mesh.matrix.makeTranslation(motion.by.x * closed, motion.by.y * closed, motion.by.z * closed);
+        } else {
+            // turned about the axis through the pivot
+            MOTION_TURN.makeRotationAxis(motion.axis, motion.angle * closed);
+            MOTION_SHIFT.makeTranslation(motion.pivot.x, motion.pivot.y, motion.pivot.z);
+            mesh.matrix.copy(MOTION_SHIFT).multiply(MOTION_TURN);
+            MOTION_SHIFT.makeTranslation(-motion.pivot.x, -motion.pivot.y, -motion.pivot.z);
+            mesh.matrix.multiply(MOTION_SHIFT);
+        }
+        mesh.matrixWorldNeedsUpdate = true;
+    });
 }
 
 export function setSection(model, share) {

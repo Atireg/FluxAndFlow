@@ -42,6 +42,8 @@
  *                 slides (a slider over the model), its parts cut away beyond it;
  *                 true comes in from the low end of z, { reverse: true } from
  *                 the high end
+ *   mechanism     with solid and parts: a model that moves (tools/models/mechanism.mjs):
+ *                 a slider over it ("open") moves the parts that its file says move
  *   tour          with section: { orbit, turns, cut, focus, reach, over, side,
  *                 above } - played as it opens: `turns` (1) round in `orbit`
  *                 seconds, give or take what ends it with the cut's side to
@@ -112,7 +114,7 @@ export function categoryLabel(id) {
  * than in blocks, so a kind brought forward isn't just a row.
  */
 export const EMPTY_SLOT_CATEGORIES = {
-    2: 'teaching', 5: 'teaching',
+    5: 'teaching',
     6: 'teaching', 8: 'real-world', 9: 'teaching',
 };
 
@@ -315,6 +317,13 @@ function normaliseInfo({ id, info, solid }) {
     return info;
 }
 
+function normaliseMechanism({ id, mechanism, solid, parts }) {
+    if (mechanism === undefined || mechanism === false) return false;
+    if (mechanism !== true) throw new Error(`Project "${id}": mechanism should be true or false`);
+    if (!solid || !parts) throw new Error(`Project "${id}": mechanism needs solid and parts`);
+    return true;
+}
+
 function normaliseSection({ id, section, solid }) {
     if (section === undefined || section === false) return false;
     const reverse = section?.reverse ?? false;
@@ -478,6 +487,7 @@ export function defineProject(project) {
         inks: normaliseInks(project),
         info: normaliseInfo(project),
         section: normaliseSection(project),
+        mechanism: normaliseMechanism(project),
         floor: normaliseFloor(project),
         notice: typeof project.notice === 'string' ? project.notice : '',
         tour: normaliseTour(project),

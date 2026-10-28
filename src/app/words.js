@@ -10,6 +10,9 @@ const EMPTY_WORDS = ['under\nconstruction', 'still\nsettling', 'yet to\ntake sha
 // Beside the slider that cuts a model across its length (a project's `section`)
 export const SECTION_WORD = 'section';
 
+// ...and the one that opens and closes a model that moves (`mechanism`)
+export const MECHANISM_WORD = 'open';
+
 // The filter's last choice: not a kind of project but a view of its own -
 // the employment history, as dots on a line (components/PathView.jsx)
 export const PATH_VIEW = { id: 'path', label: 'The path' };

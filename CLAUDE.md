@@ -127,6 +127,13 @@ in a pull-out drawer.
   joint-in-section drawing (`thumbImage`, a 600px copy), its lines in the
   ink. The person is formed by a third of the usual dissolve points
   (`FIGURE_SHARE`, dissolve.js: all 2400 slowed its opening).
+- **Future Gardens** (slot 2, teaching, `#future-gardens`): a model that
+  moves (`mechanism: true`): five petals turn on their hinges as the rack
+  slides, a slider ("open", `MECHANISM_WORD`) over it; solid, still, in the
+  user's colours. Made from two Rhino OBJ poses by
+  `tools/models/mechanism.mjs open.obj closed.obj mechanism.glb` - the file
+  holds the open pose and each moving part's `motion` to the closed. Drawer
+  text not yet written.
 - **Links**: each project's own address is `#<id>` (`#rock-print`); the
   path's is `#path`.
 - **Drawer copy** is real for all five projects, approved by the user

@@ -23,6 +23,7 @@ import emergentSpace from './emergent-space.js';
 import khReuse from './kh-reuse.js';
 import napNapHooray from './nap-nap-hooray.js';
 import framelessGlass from './frameless-glass.js';
+import futureGardens from './future-gardens.js';
 
 export { CATEGORIES, categoryLabel, hasDescription, metaRows } from './schema.js';
 
@@ -32,6 +33,7 @@ const catalog = [
     khReuse,
     napNapHooray,
     framelessGlass,
+    futureGardens,
 ];
 
 /**

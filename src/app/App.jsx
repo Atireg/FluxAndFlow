@@ -12,7 +12,7 @@ import HintTag from '../components/HintTag.jsx';
 import CategoryFilter from '../components/CategoryFilter.jsx';
 import VelocityTags from '../components/VelocityTags.jsx';
 import PathView from '../components/PathView.jsx';
-import { PATH_VIEW, emptyWords, hintWords } from './words.js';
+import { MECHANISM_WORD, PATH_VIEW, emptyWords, hintWords } from './words.js';
 import { clearProjectLink, linkedProject, showProjectLink } from './links.js';
 
 // ms after the loader starts to clear that a linked project opens
@@ -330,6 +330,10 @@ export default function App() {
 
             {project?.section && (
                 <SectionSlider key={project.id} ref={sectionRef} onSlide={(share) => engineRef.current?.setSection(share)} />
+            )}
+
+            {project?.mechanism && (
+                <SectionSlider key={project.id} word={MECHANISM_WORD} onSlide={(open) => engineRef.current?.setMechanism(open)} />
             )}
 
             <PathView shown={focus === PATH_VIEW.id && !project} />

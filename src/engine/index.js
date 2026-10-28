@@ -19,7 +19,7 @@ import { pebbleFluxTime, PEBBLE_FLUX_SPEED } from './pebbles/geometry.js';
 import { dropInProgress, placeDroppingPebble, updateDroppingPebble } from './pebbles/drop.js';
 import { updateDissolve } from './pebbles/dissolve.js';
 import { updateScreenSpin } from './pointcloud/screenVideo.js';
-import { fadeSectionOutline, setSection } from './pointcloud/load.js';
+import { fadeSectionOutline, setMechanism, setSection } from './pointcloud/load.js';
 import { GATHER_DURATION, GATHER_MAX_STEP, revealAt, setGather, setReveal } from './pointcloud/gather.js';
 import { trailResolution } from './pointcloud/trails.js';
 
@@ -569,6 +569,13 @@ export function createEngine({ canvas, source, ui }) {
             detail.stopTour(); // the visitor's own, from here on
             handled.at = clock.getElapsedTime();
             setSection(state.selected?.userData.detail, share);
+        },
+
+        // A project's mechanism (`mechanism`): its moving parts at `open` of
+        // the way from closed (0) to open (1)
+        setMechanism(open) {
+            handled.at = clock.getElapsedTime();
+            setMechanism(state.selected?.userData.detail, open);
         },
 
         openProject(id) {
