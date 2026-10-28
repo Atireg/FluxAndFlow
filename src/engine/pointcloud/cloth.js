@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
-const BINS = 28; // rows of folds along a strip
-const COLS = 4; // and points across it, between the two petals
+const BINS = 14; // rows of folds along a strip
+const COLS = 2; // and points across it, between the two petals
 const FROM = 0.06; // where along a petal a strip starts and ends, a share of its length
 const TO = 0.97;
 const PUSH = 0.16; // how far a fold is pushed out, a share of the strip's width there
