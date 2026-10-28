@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 
-const BINS = 14; // rows of folds along a strip
+const BINS = 28; // rows of folds along a strip
+const COLS = 4; // and points across it, between the two petals
 const FROM = 0.06; // where along a petal a strip starts and ends, a share of its length
 const TO = 0.97;
 const PUSH = 0.2; // how far a fold is pushed out, a share of the strip's width there
@@ -45,7 +46,7 @@ export function makeCloth(plates, material) {
         return { a: outer[index], b: outer[next], plates: [index, next] };
     });
 
-    const triangles = strips.length * (BINS - 1) * 4;
+    const triangles = strips.length * (BINS - 1) * COLS * 2;
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(triangles * 9), 3));
     geometry.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(triangles * 9), 3));
@@ -54,9 +55,9 @@ export function makeCloth(plates, material) {
     mesh.raycast = () => {};
     mesh.renderOrder = 1;
 
-    const A = Array.from({ length: BINS }, () => new THREE.Vector3());
-    const B = Array.from({ length: BINS }, () => new THREE.Vector3());
-    const M = Array.from({ length: BINS }, () => new THREE.Vector3());
+    // The strip's points: a row for each place along the petals, COLS + 1 across
+    const P = Array.from({ length: BINS }, () => Array.from({ length: COLS + 1 }, () => new THREE.Vector3()));
+    const B = new THREE.Vector3();
     const inward = new THREE.Vector3();
     const position = geometry.getAttribute('position');
     const normal = geometry.getAttribute('normal');
@@ -83,20 +84,25 @@ export function makeCloth(plates, material) {
             const matrixA = plates[first].mesh.matrix;
             const matrixB = plates[second].mesh.matrix;
             for (let j = 0; j < BINS; j++) {
-                A[j].copy(a[j]).applyMatrix4(matrixA);
-                B[j].copy(b[j]).applyMatrix4(matrixB);
+                const row = P[j];
+                row[0].copy(a[j]).applyMatrix4(matrixA);
+                B.copy(b[j]).applyMatrix4(matrixB);
+                const gap = row[0].distanceTo(B);
                 // Folded out, away from the ring's axis, by the gap there - the
                 // cloth bulging outside the petals, not hidden between them
-                M[j].addVectors(A[j], B[j]).multiplyScalar(0.5);
-                inward.set(M[j].x - hubNow.x, 0, M[j].z - hubNow.z);
+                inward.set((row[0].x + B.x) / 2 - hubNow.x, 0, (row[0].z + B.z) / 2 - hubNow.z);
                 if (inward.lengthSq() > 1e-12) inward.normalize();
-                M[j].addScaledVector(inward, A[j].distanceTo(B[j]) * PUSH * (j % 2 ? 1 : PUSH_ALTERNATE));
+                const push = gap * PUSH * (j % 2 ? 1 : PUSH_ALTERNATE);
+                for (let k = 1; k <= COLS; k++) {
+                    row[k].lerpVectors(row[0], B, k / COLS);
+                    if (k < COLS) row[k].addScaledVector(inward, push * Math.sin(Math.PI * k / COLS));
+                }
             }
             for (let j = 0; j < BINS - 1; j++) {
-                put(A[j], M[j], A[j + 1]);
-                put(M[j], M[j + 1], A[j + 1]);
-                put(M[j], B[j], M[j + 1]);
-                put(B[j], B[j + 1], M[j + 1]);
+                for (let k = 0; k < COLS; k++) {
+                    put(P[j][k], P[j][k + 1], P[j + 1][k]);
+                    put(P[j][k + 1], P[j + 1][k + 1], P[j + 1][k]);
+                }
             }
         });
         position.needsUpdate = true;
