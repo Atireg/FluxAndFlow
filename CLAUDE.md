@@ -131,7 +131,7 @@ in a pull-out drawer.
   moves (`mechanism: true`): five petals turn on their hinges as the rack
   slides, a slider ("open", `MECHANISM_WORD`) over it; solid, still, in the
   user's colours, playing by itself in a loop (`mechanism.loop`, paused
-  while the slider is used). Made from two Rhino OBJ poses by
+  while the slider is used), "under construction" (`notice`) under its name. Made from two Rhino OBJ poses by
   `tools/models/mechanism.mjs open.obj closed.obj mechanism.glb` - the file
   holds the open pose and each moving part's `motion` to the closed. Drawer
   text not yet written.

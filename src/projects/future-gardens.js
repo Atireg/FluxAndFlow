@@ -11,6 +11,8 @@ export default defineProject({
     slot: 2,
     title: 'Future Gardens',
     category: 'teaching',
+    // A small orange line under its name, while the rest is still to come
+    notice: 'under construction',
 
     thumbModel: 'models/mechanism.glb',
     thumbSize: 1.6,

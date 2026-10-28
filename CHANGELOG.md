@@ -699,7 +699,7 @@ milestones checked by the user.
   engine's `setMechanism`, the `mechanism` setting. Text, role and year still
   to come; the looks (purple petals, green rack, yellow frame) are tunable.
   It plays by itself in a loop (10s a cycle, `mechanism.loop`), paused while
-  the visitor uses the slider.
+  the visitor uses the slider. "under construction" in orange under its name.
 
 Open at end of session: Future Gardens' text, pictures and wording of its
 slider.
