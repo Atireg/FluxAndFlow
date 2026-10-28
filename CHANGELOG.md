@@ -704,6 +704,10 @@ milestones checked by the user.
   the petals outlined, the motor dark, a pleated lavender cloth between the
   petals that follows them (`mechanism.cloth`).
 
-Open at end of session: Future Gardens' text, pictures and wording of its
-slider.
+- **Future Gardens' drawer**: 2022, the client, two paragraphs rephrased from
+  the user's exhibition page, four exhibition photos. The cloth back to its
+  coarse mesh (14 rows, 2 across), smooth-shaded.
+
+Open at end of session: Future Gardens' role, picture captions/credits, and
+whether its text stands; the wording of its slider.
 

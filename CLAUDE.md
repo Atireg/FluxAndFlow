@@ -135,8 +135,12 @@ in a pull-out drawer.
   user's photo, a pleated lavender cloth between the petals (`mechanism.cloth`). Made from two Rhino OBJ poses by
   `tools/models/mechanism.mjs open.obj closed.obj mechanism.glb --flip-rack` (the
   rack reversed, asked for) - the file
-  holds the open pose and each moving part's `motion` to the closed. Drawer
-  text not yet written.
+  holds the open pose and each moving part's `motion` to the closed. Drawer:
+  2022, "The GPT Group and Swinburne University of Technology, Melbourne",
+  two paragraphs rephrased from the user's exhibition page (the user asked
+  for the text and "build and merge" in one go - not seen as options first;
+  change it on request), four photos of the exhibition (`future-gardens-01..04.jpg`,
+  the lobby first, two close-ups in a row, the lobby wide); no role yet.
 - **Links**: each project's own address is `#<id>` (`#rock-print`); the
   path's is `#path`.
 - **Drawer copy** is real for all five projects, approved by the user

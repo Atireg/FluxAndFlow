@@ -13,6 +13,23 @@ export default defineProject({
     category: 'teaching',
     // A small orange line under its name, while the rest is still to come
     notice: 'under construction',
+    year: '2022',
+    context: 'The GPT Group and Swinburne University of Technology, Melbourne',
+
+    // The drawer's text, from the user's exhibition page - rephrased
+    body: [
+        'Future Gardens was an exhibition by UnitedMake and Swinburne University '
+        + 'students in the East Wing Lobby of 530 Collins Street, Melbourne: seven '
+        + 'futuristic design specimens where digital and physical worlds meet, '
+        + 'exploring what non-fungible assets could become through science fiction '
+        + 'and biomimicry.',
+        'Visitors were invited to touch it: digital dragonflies that react to '
+        + 'temperature, symbiotic plants, artificial roots that talk to each other - '
+        + 'and mechanical flowers, clear acrylic petals that open and close, driven '
+        + 'by a small motor and a toothed rack, around a glowing pleated cloth. The '
+        + 'exhibition asked visitors to picture the future of gardens and design, and '
+        + 'to open their minds to the possibilities of emerging technologies.',
+    ],
 
     thumbModel: 'models/mechanism.glb',
     thumbSize: 1.6,
@@ -36,4 +53,28 @@ export default defineProject({
     still: true,
     doubleClick: 'none',
     view: { elevation: 22, turn: 20, zoom: { side: 1.2, stacked: 1.5 } },
+    // The exhibition: the lobby first, then the flower and a dragonfly close up, then the lobby again
+    images: [
+        {
+            src: 'images/future-gardens-01.jpg',
+            alt: 'The Future Gardens exhibition on a black platform in the lobby: white pots of tropical plants, glowing white paper flowers among the leaves, a visitor in the corner',
+            ratio: '3 / 2',
+        },
+        {
+            src: 'images/future-gardens-02.jpg',
+            alt: 'A visitor\'s hand reaching for a mechanical flower: its pleated white cloth glowing lavender on clear acrylic petals, among plants',
+            ratio: '3 / 2',
+        },
+        {
+            src: 'images/future-gardens-03.jpg',
+            alt: 'Digital dragonflies: frosted acrylic wings on tiers of a clear acrylic tower rising from a pot of soil, a hand beside it',
+            ratio: '3 / 2',
+        },
+        {
+            src: 'images/future-gardens-04.jpg',
+            alt: 'More of the exhibition: white pots on the platform, red and white mechanical shells among the ferns, a small screen, visitors talking behind',
+            ratio: '3 / 2',
+            wide: true,
+        },
+    ],
 });
