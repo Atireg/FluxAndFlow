@@ -459,6 +459,7 @@ export function createDetail({
                 parts: project.parts,
                 figure: project.figure,
                 section: project.section,
+                cloth: project.mechanism?.cloth,
                 floor: project.floor,
                 screen: project.screen,
                 screenVideo: source.screenVideo && assetUrl(source.screenVideo),

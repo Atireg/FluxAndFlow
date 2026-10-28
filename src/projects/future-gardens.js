@@ -19,15 +19,20 @@ export default defineProject({
     detailModel: 'models/mechanism.glb',
     // The model itself, each kind of part in its own look
     solid: { lit: [222, 222, 220], shade: [160, 160, 162] },
+    // Clear acrylic as in the user's photo: see-through, the petals outlined; the motor dark
     parts: {
-        petal: { lit: [176, 168, 210], shade: [112, 104, 150] },
-        rack: { lit: [150, 196, 150], shade: [84, 128, 84] },
-        frame: { lit: [236, 200, 96], shade: [170, 132, 40] },
-        motor: { lit: [222, 222, 220], shade: [160, 160, 162] },
-        screws: { lit: [204, 204, 202], shade: [168, 168, 168] },
+        petal: { lit: [244, 242, 255], shade: [196, 190, 228], opacity: 0.3, edges: true },
+        rack: { lit: [236, 244, 238], shade: [150, 190, 160], opacity: 0.5 },
+        frame: { lit: [244, 242, 255], shade: [160, 154, 204], opacity: 0.45 },
+        motor: { lit: [96, 96, 104], shade: [44, 44, 50] },
+        screws: { lit: [214, 214, 220], shade: [160, 160, 170] },
     },
     // The petals turn, the rack slides: by itself, a cycle in 10 seconds, or by the slider
-    mechanism: { loop: 10 },
+    mechanism: {
+        loop: 10,
+        // Cloth between the petals, glowing lavender as in the photo
+        cloth: { of: 'petal', lit: [236, 230, 255], shade: [176, 160, 236], opacity: 0.62 },
+    },
     still: true,
     doubleClick: 'none',
     view: { elevation: 22, turn: 20, zoom: { side: 1.2, stacked: 1.5 } },

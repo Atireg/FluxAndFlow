@@ -1295,7 +1295,13 @@ named objects (`petel_n`, `rack`; unnamed ones count as fixed), and curves
 petal is a rigid turn and every rack vertex lands where the closed file has
 it. The rack travels the other way to the petals (`--flip-rack`, asked
 for): up as they open, down as they close - not as the user's two files
-have it. It plays by itself (`mechanism: { loop: seconds }`): open, closing,
+have it. Its look is the user's photo of the real thing: clear acrylic (see-through
+parts, only the petals outlined - outlining the gear and rings was a tangle
+of lines), the motor dark, and a pleated lavender cloth between the petals
+(`mechanism.cloth`, `pointcloud/cloth.js`): each petal's long edges found by
+slicing it across its length, a strip from each to its neighbour's, folds
+pushed in by the gap there, rebuilt every time the mechanism moves.
+It plays by itself (`mechanism: { loop: seconds }`): open, closing,
 closed, opening, each end held a little, the slider following; the visitor's
 slider stops it, and it takes up again from there after 6s untouched.
 

@@ -6,6 +6,7 @@ import { createPile, findRods } from '../pile.js';
 import { addGatherAttributes, GATHER_DURATION, GATHER_SPREAD, GATHER_SWIRL, GATHER_TRAIL, GATHER_TRAIL_EVERY } from './gather.js';
 import { addTrails } from './trails.js';
 import { CLIP_NONE, makeCutFan, makeCutFill, makeEdgeMaterial, makeInkMaterial, pointsFromMeshes } from './mesh.js';
+import { makeCloth } from './cloth.js';
 import { addScreenPanel, addScreenVideo } from './screenVideo.js';
 import { smooth01 } from '../ease.js';
 
@@ -48,6 +49,7 @@ export function loadPointCloud({
     floor,
     screen,
     screenVideo,
+    cloth,
 }) {
     gltfLoader.load(url, async (gltf) => {
         const materials = [];
@@ -83,6 +85,7 @@ export function loadPointCloud({
                     : [{ material: '', part: '', geometry: sampled.userData.solid }];
                 const edgeMaterial = makeEdgeMaterial(screenColor(92, 92, 94), { fade, clip, sign }); // dark grey
                 const moving = [];
+                const plates = [];
                 pieces.forEach(({ material: lookName, part, edges, geometry, motion }) => {
                     if (lookName === figure) {
                         group.userData.figure = geometry;
@@ -102,17 +105,28 @@ export function loadPointCloud({
                     }
                     if (material.transparent) mesh.renderOrder = 1; // after the opaque parts
                     group.add(mesh);
+                    if (cloth && motion && lookName === cloth.of) plates.push({ mesh, geometry });
                     // A part's outline in thin black (a glass sheet's upper ply),
-                    // where its faces meet at more than EDGE_ANGLE
-                    if (edges) {
+                    // where its faces meet at more than EDGE_ANGLE - or its
+                    // look's `edges`; a moving part's goes with it
+                    if (edges || parts?.[lookName]?.edges) {
                         const outline = new THREE.LineSegments(new THREE.EdgesGeometry(geometry, EDGE_ANGLE), edgeMaterial);
                         outline.raycast = () => {};
                         outline.renderOrder = 2; // over the see-through parts
-                        group.add(outline);
+                        (motion ? mesh : group).add(outline);
                     }
                     group.userData.solidMaterial ??= material;
                 });
                 if (moving.length) group.userData.mechanism = moving;
+                // Cloth between the plates that move (`mechanism.cloth`), in its own look
+                if (plates.length > 1) {
+                    const material = makeInkMaterial(cloth);
+                    material.uniforms.uFade = fade;
+                    material.uniforms.uClip = clip;
+                    material.uniforms.uClipSign = sign;
+                    group.userData.cloth = makeCloth(plates, material);
+                    group.add(group.userData.cloth.mesh);
+                }
                 if (section) addSection(group, { clip, sign, fade });
                 if (floor) addFloor(group, fade);
                 // Where the pebble's points settle and circle (`screen`)
@@ -425,6 +439,7 @@ export function setMechanism(model, open) {
         }
         mesh.matrixWorldNeedsUpdate = true;
     });
+    model.userData.cloth?.update();
 }
 
 export function setSection(model, share) {

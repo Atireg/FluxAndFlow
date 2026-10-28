@@ -700,7 +700,9 @@ milestones checked by the user.
   to come; the looks (purple petals, green rack, yellow frame) are tunable.
   It plays by itself in a loop (10s a cycle, `mechanism.loop`), paused while
   the visitor uses the slider. "under construction" in orange under its name. The rack reversed
-  (`--flip-rack`): up as the petals open.
+  (`--flip-rack`): up as the petals open. Its look from the user's photo: clear acrylic parts,
+  the petals outlined, the motor dark, a pleated lavender cloth between the
+  petals that follows them (`mechanism.cloth`).
 
 Open at end of session: Future Gardens' text, pictures and wording of its
 slider.
