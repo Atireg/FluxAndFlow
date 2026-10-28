@@ -3,7 +3,7 @@ import * as THREE from 'three';
 const BINS = 14; // rows of folds along a strip
 const FROM = 0.12; // where along a petal a strip starts and ends, a share of its length
 const TO = 0.96;
-const PUSH = 0.34; // how far a fold is pushed in, a share of the strip's width there
+const PUSH = 0.2; // how far a fold is pushed out, a share of the strip's width there
 const PUSH_ALTERNATE = 0.25; // ...and every other row only this much of it, so it creases
 
 /**
@@ -11,7 +11,7 @@ const PUSH_ALTERNATE = 0.25; // ...and every other row only this much of it, so 
  * pleated strip from each plate's edge to its neighbour's, following them as
  * they move. The edges are found once on each plate in its starting pose, by
  * slicing it across its length, and carried along by the plate's own matrix
- * every time `update` runs; the folds are pushed in towards the middle, in
+ * every time `update` runs; the folds are pushed out, away from the middle, in
  * proportion to the gap, so the strip creases like paper rather than hangs.
  *
  * `plates`: [{ mesh, geometry }] - the moving meshes and their geometry (in
@@ -26,10 +26,17 @@ export function makeCloth(plates, material) {
         .sort((a, b) => Math.atan2(edges[a].centre.z - hub.z, edges[a].centre.x - hub.x)
             - Math.atan2(edges[b].centre.z - hub.z, edges[b].centre.x - hub.x));
 
-    // Each plate's edge towards the next one round (and the next's towards it)
+    // Each plate's edge facing the next one round: of the four pairs of
+    // edges, the two closest together all along - which also keeps the strip
+    // from twisting over
     const strips = order.map((index, n) => {
         const next = order[(n + 1) % order.length];
-        return { a: edges[index].towards(edges[next].centre), b: edges[next].towards(edges[index].centre), plates: [index, next] };
+        let best = null;
+        edges[index].sides.forEach((a) => edges[next].sides.forEach((b) => {
+            const gap = a.reduce((sum, p, j) => sum + p.distanceTo(b[j]), 0);
+            if (!best || gap < best.gap) best = { gap, a, b };
+        }));
+        return { a: best.a, b: best.b, plates: [index, next] };
     });
 
     const triangles = strips.length * (BINS - 1) * 4;
@@ -72,9 +79,10 @@ export function makeCloth(plates, material) {
             for (let j = 0; j < BINS; j++) {
                 A[j].copy(a[j]).applyMatrix4(matrixA);
                 B[j].copy(b[j]).applyMatrix4(matrixB);
-                // Folded in, towards the ring's axis, by the gap there
+                // Folded out, away from the ring's axis, by the gap there - the
+                // cloth bulging outside the petals, not hidden between them
                 M[j].addVectors(A[j], B[j]).multiplyScalar(0.5);
-                inward.set(hubNow.x - M[j].x, 0, hubNow.z - M[j].z);
+                inward.set(M[j].x - hubNow.x, 0, M[j].z - hubNow.z);
                 if (inward.lengthSq() > 1e-12) inward.normalize();
                 M[j].addScaledVector(inward, A[j].distanceTo(B[j]) * PUSH * (j % 2 ? 1 : PUSH_ALTERNATE));
             }
@@ -96,8 +104,7 @@ export function makeCloth(plates, material) {
 /**
  * A flat plate's two long edges, found by slicing its triangles across its
  * length at BINS places: the outermost point on each side at each. `centre`
- * is the plate's middle; `towards(point)` the edge (BINS points) on the side
- * of `point`.
+ * is the plate's middle; `sides` its two edges (BINS points each).
  */
 function plateEdges(geometry) {
     const position = geometry.getAttribute('position');
@@ -143,10 +150,7 @@ function plateEdges(geometry) {
         sides.high.push(high ?? centre.clone());
     }
 
-    return {
-        centre,
-        towards: (point) => (point.clone().sub(centre).dot(width) < 0 ? sides.low : sides.high),
-    };
+    return { centre, sides: [sides.low, sides.high] };
 }
 
 // A cloud's longest axis, and the longer of the other two (its width), by

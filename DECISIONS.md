@@ -1299,8 +1299,9 @@ have it. Its look is the user's photo of the real thing: clear acrylic (see-thro
 parts, only the petals outlined - outlining the gear and rings was a tangle
 of lines), the motor dark, and a pleated lavender cloth between the petals
 (`mechanism.cloth`, `pointcloud/cloth.js`): each petal's long edges found by
-slicing it across its length, a strip from each to its neighbour's, folds
-pushed in by the gap there, rebuilt every time the mechanism moves.
+slicing it across its length, a strip from each to its neighbour's (of the
+four pairs of edges, the two closest along their length - a strip picked by
+side twisted on some), folds pushed out, away from the axis, by the gap there, rebuilt every time the mechanism moves.
 It plays by itself (`mechanism: { loop: seconds }`): open, closing,
 closed, opening, each end held a little, the slider following; the visitor's
 slider stops it, and it takes up again from there after 6s untouched.
