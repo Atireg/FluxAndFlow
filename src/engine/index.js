@@ -4,7 +4,7 @@ import { createBoot } from './boot.js';
 import { createState } from './state.js';
 import { createVisited } from './visited.js';
 import { createCameraRig } from './camera/rig.js';
-import { createFraming, detailSince, DETAIL_ROTATE_SPEED, isHeld, modelStartYaw, modelTurn } from './camera/framing.js';
+import { createFraming, detailRotateSpeed, detailSince, isHeld, modelStartYaw, modelTurn } from './camera/framing.js';
 import { createCatalog, findPebble } from './catalog.js';
 import { createDetail } from './detail.js';
 import { createTags } from './tags.js';
@@ -171,7 +171,7 @@ export function createEngine({ canvas, source, ui }) {
     // A mechanism's loop (`mechanism.loop`): how far through its cycle, and
     // when the visitor last used its slider - it plays on from there once
     // they've left it for MECHANISM_IDLE
-    const loop = { phase: 0, open: 1, touched: -Infinity, playing: true };
+    const loop = { phase: 0.5, open: 0, touched: -Infinity, playing: true, paused: false, model: null };
     const MECHANISM_IDLE = 6; // seconds after the slider before the loop plays on
     const MECHANISM_HOLD = 0.15; // each end of the cycle held this share of it
 
@@ -184,7 +184,14 @@ export function createEngine({ canvas, source, ui }) {
     // Plays a mechanism (`mechanism.loop`: seconds a cycle) on its own, the
     // slider following; left alone while the visitor uses the slider
     const playMechanism = (model, seconds, since, frameTime, elapsedTime) => {
-        if (since < 0.5) return; // once the model has appeared
+        // A model newly shown starts closed, and opens
+        if (loop.model !== model) {
+            Object.assign(loop, { model, phase: 0.5, open: 0, touched: -Infinity, playing: true, paused: false });
+            setMechanism(model, 0);
+            ui.onMechanism?.(0);
+            return;
+        }
+        if (loop.paused) return;
         if (elapsedTime - loop.touched < MECHANISM_IDLE) { loop.playing = false; return; }
         if (!loop.playing) {
             // Takes up from where the slider left it, closing
@@ -282,15 +289,15 @@ export function createEngine({ canvas, source, ui }) {
                 const pile = model.userData.pile;
                 pile?.step(frameTime, since);
                 // ...and a `still` one doesn't turn at all
-                const turning = project.still ? 0 : modelTurn(model, since);
+                const turning = project.still ? 0 : project.view?.flight ? detail.flightTurn(model, since) : modelTurn(model, since);
                 // ...and a model with a screen turns round while its film loads
                 // ...and a `tour` turns it once round as it starts
-                model.rotation.y = modelStartYaw(project) + turning * DETAIL_ROTATE_SPEED + updateScreenSpin(model, frameTime)
+                model.rotation.y = modelStartYaw(project) + turning * detailRotateSpeed(project) + updateScreenSpin(model, frameTime)
                     + detail.tourSpin(model);
 
                 // A pile's ground (the pebble's dissolve, landed) turns with it
                 const dissolve = selected.userData.dissolve;
-                if (pile && dissolve?.userData.ground) dissolve.rotation.y = turning * DETAIL_ROTATE_SPEED;
+                if (pile && dissolve?.userData.ground) dissolve.rotation.y = turning * detailRotateSpeed(project);
 
                 /**
                  * Replays from scattered each time the project opens
@@ -305,6 +312,7 @@ export function createEngine({ canvas, source, ui }) {
                 setReveal(model, revealAt(since));
 
                 detail.updateTour(model, since);
+                detail.maybeFly(model, since);
                 if (project.mechanism?.loop && model.userData.mechanism) playMechanism(model, project.mechanism.loop, since, frameTime, elapsedTime);
                 detail.keepNear();
                 detail.updateHover(model, since);
@@ -611,6 +619,12 @@ export function createEngine({ canvas, source, ui }) {
             loop.touched = handled.at;
             loop.open = open;
             setMechanism(state.selected?.userData.detail, open);
+        },
+
+        // The mechanism's loop paused, or playing on from where it is
+        setMechanismPaused(paused) {
+            loop.paused = paused;
+            if (!paused) { loop.playing = false; loop.touched = -Infinity; }
         },
 
         openProject(id) {

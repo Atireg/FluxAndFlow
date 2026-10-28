@@ -647,6 +647,18 @@ canvas.webgl {
     cursor: ew-resize;
 }
 
+/* The mechanism's pause / play: a word, like the slider's */
+.section-slider__pause {
+    padding: 0.25rem 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    color: inherit;
+    cursor: pointer;
+}
+
 /* Beside the drawer when it's out: centred in what it leaves (--panel-fraction) */
 body.drawer-open .section-slider {
     left: calc((1 - var(--panel-fraction, 0.42)) * 50%);

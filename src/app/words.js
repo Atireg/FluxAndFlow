@@ -13,6 +13,10 @@ export const SECTION_WORD = 'section';
 // ...and the one that opens and closes a model that moves (`mechanism`)
 export const MECHANISM_WORD = 'open';
 
+// ...and its button that holds the loop, and sets it going again
+export const MECHANISM_PAUSE_WORD = 'pause';
+export const MECHANISM_PLAY_WORD = 'play';
+
 // The filter's last choice: not a kind of project but a view of its own -
 // the employment history, as dots on a line (components/PathView.jsx)
 export const PATH_VIEW = { id: 'path', label: 'The path' };

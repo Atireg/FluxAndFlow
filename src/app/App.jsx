@@ -6,6 +6,7 @@ import ProjectDrawer from '../components/ProjectDrawer.jsx';
 import CatalogTags from '../components/CatalogTags.jsx';
 import TapHint from '../components/TapHint.jsx';
 import PartInfo from '../components/PartInfo.jsx';
+import MechanismPause from '../components/MechanismPause.jsx';
 import SectionSlider from '../components/SectionSlider.jsx';
 import Banner from '../components/Banner.jsx';
 import HintTag from '../components/HintTag.jsx';
@@ -339,7 +340,13 @@ export default function App() {
             )}
 
             {project?.mechanism && (
-                <SectionSlider key={project.id} ref={mechanismRef} word={MECHANISM_WORD} onSlide={(open) => engineRef.current?.setMechanism(open)} />
+                <SectionSlider
+                    key={project.id}
+                    ref={mechanismRef}
+                    word={MECHANISM_WORD}
+                    onSlide={(open) => engineRef.current?.setMechanism(open)}
+                    after={<MechanismPause onPause={(paused) => engineRef.current?.setMechanismPaused(paused)} />}
+                />
             )}
 
             <PathView shown={focus === PATH_VIEW.id && !project} />

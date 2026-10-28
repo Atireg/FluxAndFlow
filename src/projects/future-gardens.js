@@ -50,9 +50,14 @@ export default defineProject({
         // Cloth between the petals, glowing lavender as in the photo
         cloth: { of: 'petal', lit: [236, 230, 255], shade: [176, 160, 236], opacity: 0.62 },
     },
-    still: true,
     doubleClick: 'none',
-    view: { elevation: 22, turn: 20, zoom: { side: 1.2, stacked: 1.5 } },
+    // Opens looking steeply down into the closed model, close; after 3s the camera pulls out
+    // to the view itself over 5s and the model turns round, a revolution in 40s
+    view: {
+        elevation: 22, turn: 20, zoom: { side: 1.1, stacked: 1.4 },
+        flight: { from: { elevation: 78, zoom: { side: 1.9, stacked: 2.2 } }, hold: 3, over: 5 },
+        spin: 40,
+    },
     // The exhibition: the lobby first, then the flower and a dragonfly close up, then the lobby again
     images: [
         {

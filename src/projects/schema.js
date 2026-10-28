@@ -224,6 +224,17 @@ function normaliseView(view, { id }) {
         throw new Error(`Project "${id}": view should be an object of degrees`);
     }
 
+    // `flight`: { from: { elevation, zoom, lift }, hold, over } - it opens in the
+    // `from` shot, `hold` seconds after the model appears pulls out to the view over `over`,
+    // the model turning from then; `spin`: seconds a revolution (80)
+    if (view.flight !== undefined) {
+        const { from, hold, over } = view.flight ?? {};
+        if (!from || typeof from !== 'object' || !(hold >= 0) || !(over > 0)) {
+            throw new Error(`Project "${id}": view.flight should be { from: { elevation, zoom, lift }, hold, over } in seconds`);
+        }
+    }
+    if (view.spin !== undefined && !(view.spin > 0)) throw new Error(`Project "${id}": view.spin should be seconds a revolution`);
+
     return { ...view };
 }
 

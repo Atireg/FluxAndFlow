@@ -10,7 +10,7 @@ import { SECTION_WORD } from '../app/words.js';
  * moves (`mechanism`) has one too, with its own `word`: all the way to the
  * right, open.
  */
-const SectionSlider = forwardRef(function SectionSlider({ onSlide, word = SECTION_WORD }, ref) {
+const SectionSlider = forwardRef(function SectionSlider({ onSlide, word = SECTION_WORD, after }, ref) {
     return (
         <label className="section-slider">
             <span className="section-slider__word">{word}</span>
@@ -23,6 +23,7 @@ const SectionSlider = forwardRef(function SectionSlider({ onSlide, word = SECTIO
                 defaultValue="1000"
                 onInput={(event) => onSlide(Number(event.currentTarget.value) / 1000)}
             />
+            {after}
         </label>
     );
 });

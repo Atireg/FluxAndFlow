@@ -1303,6 +1303,13 @@ slicing it across its length, a strip from each to its neighbour's (each petal's
 edge lower and further out, as the user marked it; every edge run hub to tip -
 a petal's length axis has no sign of its own, and one run backwards crossed
 its strips), folds pushed out, away from the axis, by the gap there, rebuilt every time the mechanism moves.
+Its camera (`view.flight`, from the user's screen recording): it opens
+looking steeply down into the closed model, close (`from`), holds 3s after
+the model appears, pulls out to the view itself over 5s, and only then does
+the model turn (`flightTurn`; `view.spin`, a revolution in 40s here) - the
+model turns, not the camera, as in a `tour`. `pebble.userData.flightStart`
+makes `frameDetail` use the `from` shot until `maybeFly` clears it. It
+starts closed and opens; a pause button beside the slider holds the loop.
 It plays by itself (`mechanism: { loop: seconds }`): open, closing,
 closed, opening, each end held a little, the slider following; the visitor's
 slider stops it, and it takes up again from there after 6s untouched.

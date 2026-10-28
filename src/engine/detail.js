@@ -411,6 +411,9 @@ export function createDetail({
              */
             const ease = OPEN_CAMERA_EASE;
 
+            // A view with a `flight` opens in its own first shot (maybeFly)
+            pebble.userData.flightStart = Boolean(project.view?.flight);
+
             /**
              * Which model: on a narrow screen a project may have its own
              * (`phone`), kept apart from the wide one so each loads once.
@@ -432,6 +435,7 @@ export function createDetail({
                 pebble.userData.detail.rotation.y = modelStartYaw(project);
                 pebble.userData.detail.userData.pile?.restart();
                 pebble.userData.detail.userData.turnOffset = 0;
+                pebble.userData.detail.userData.flightAt = undefined;
                 pebble.userData.detail.userData.held = null;
                 pebble.userData.detail.userData.gatherTime = 0;
                 pebble.userData.detailRotateStartTime = clock.getElapsedTime();
@@ -662,6 +666,29 @@ export function createDetail({
             model.userData.screenFilled = true;
             if (!isHeld(model)) playScreenVideo(model, true);
             framing.reframe(state.selected, { duration: FILL_SCREEN_DURATION });
+        },
+
+        /**
+         * A view's `flight` ({ from: { elevation, zoom, lift }, hold, over }):
+         * the project opens in the `from` shot, `hold` seconds after the
+         * model appears the camera pulls out to the view itself over `over`
+         * seconds - and only then does the model begin to turn (flightTurn)
+         */
+        maybeFly(model, since) {
+            const pebble = state.selected;
+            const flight = pebble?.userData.project?.view?.flight;
+            if (!flight) return;
+            model.userData.flightAt ??= since;
+            if (pebble.userData.flightStart && since - model.userData.flightAt >= flight.hold) {
+                pebble.userData.flightStart = false;
+                framing.frameDetail(pebble, { duration: flight.over });
+            }
+        },
+
+        // How long the model has turned, for a project with a `flight`: from the pull out
+        flightTurn(model, since) {
+            const flight = state.selected?.userData.project?.view?.flight;
+            return Math.max(0, since - (model.userData.flightAt ?? since) - (flight?.hold ?? 0));
         },
 
         maybeAutoZoom(model, since) {

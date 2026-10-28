@@ -53,6 +53,9 @@ const GRID_MARGIN = 1.15;
  */
 export const DETAIL_ROTATE_SPEED = (2 * Math.PI) / 80;
 
+// A project's own turn, a revolution in `view.spin` seconds (80 by default)
+export const detailRotateSpeed = (project) => (2 * Math.PI) / (project?.view?.spin ?? 80);
+
 // The model was authored to be seen from -X; turning it a quarter shows that
 // same face to a camera on +Z
 const DETAIL_MODEL_YAW = Math.PI / 2;
@@ -421,8 +424,12 @@ export function createFraming({ rig, screen, state, grid, ui }) {
             }
             // Or framed on a box of its own (`fit`, world space) - a pile's
             // aggregates with the drawer open - at the plain fit, no zoom or lift
+            // (a view's `flight` first shot until its pull out: `flightStart`)
+            const project = object.userData.flightStart
+                ? { ...object.userData.project, view: { ...object.userData.project.view, ...object.userData.project.view.flight.from } }
+                : object.userData.project;
             const ownView = framesCube && !fit && (!state.drawerOpen || side)
-                ? object.userData.project.view
+                ? project.view
                 : {};
             const box = fit?.clone() ?? (framesCube
                 ? new THREE.Box3().setFromCenterAndSize(object.position, new THREE.Vector3().setScalar(CUBE_SIZE))
@@ -433,7 +440,7 @@ export function createFraming({ rig, screen, state, grid, ui }) {
             const half = box.getSize(new THREE.Vector3()).multiplyScalar(0.5);
 
             // (or from a way of its own, `toCamera` - onto a section)
-            const toCamera = from ?? viewDirection(object.userData.project);
+            const toCamera = from ?? viewDirection(project);
             const forward = toCamera.clone().negate();
             const right = forward.clone().cross(camera.up).normalize();
             const up = right.clone().cross(forward).normalize();

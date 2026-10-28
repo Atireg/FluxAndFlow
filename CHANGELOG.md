@@ -707,6 +707,10 @@ milestones checked by the user.
 - **Future Gardens' drawer**: 2022, the client, two paragraphs rephrased from
   the user's exhibition page, four exhibition photos. The cloth back to its
   coarse mesh (14 rows, 2 across), smooth-shaded.
+- **Future Gardens' camera** (from the user's recording): opens looking down
+  into the closed model, then pulls out and the model turns round
+  (`view.flight`, `view.spin`); it starts closed and opens; a pause / play
+  button beside the slider (`MechanismPause`).
 
 Open at end of session: Future Gardens' role, picture captions/credits, and
 whether its text stands; the wording of its slider.
