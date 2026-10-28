@@ -19,13 +19,13 @@ export default defineProject({
     detailModel: 'models/mechanism.glb',
     // The model itself, each kind of part in its own look
     solid: { lit: [222, 222, 220], shade: [160, 160, 162] },
-    // Clear acrylic as in the user's photo: see-through, the petals outlined; the motor dark
+    // Clear acrylic as in the user's photo: see-through, every part outlined but the rack; the motor dark
     parts: {
         petal: { lit: [244, 242, 255], shade: [196, 190, 228], opacity: 0.3, edges: true },
         rack: { lit: [236, 244, 238], shade: [150, 190, 160], opacity: 0.5 },
-        frame: { lit: [244, 242, 255], shade: [160, 154, 204], opacity: 0.45 },
-        motor: { lit: [96, 96, 104], shade: [44, 44, 50] },
-        screws: { lit: [214, 214, 220], shade: [160, 160, 170] },
+        frame: { lit: [244, 242, 255], shade: [160, 154, 204], opacity: 0.45, edges: true },
+        motor: { lit: [96, 96, 104], shade: [44, 44, 50], edges: true },
+        screws: { lit: [214, 214, 220], shade: [160, 160, 170], edges: true },
     },
     // The petals turn, the rack slides: by itself, a cycle in 10 seconds, or by the slider
     mechanism: {
