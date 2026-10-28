@@ -4,8 +4,8 @@ const BINS = 28; // rows of folds along a strip
 const COLS = 4; // and points across it, between the two petals
 const FROM = 0.06; // where along a petal a strip starts and ends, a share of its length
 const TO = 0.97;
-const PUSH = 0.2; // how far a fold is pushed out, a share of the strip's width there
-const PUSH_ALTERNATE = 0.25; // ...and every other row only this much of it, so it creases
+const PUSH = 0.16; // how far a fold is pushed out, a share of the strip's width there
+const PUSH_ALTERNATE = 0.3; // ...and every other row only this much of it, so it gently ripples
 
 /**
  * Cloth between a ring of moving plates - a mechanism's petals (`cloth`): a
@@ -58,6 +58,8 @@ export function makeCloth(plates, material) {
     // The strip's points: a row for each place along the petals, COLS + 1 across
     const P = Array.from({ length: BINS }, () => Array.from({ length: COLS + 1 }, () => new THREE.Vector3()));
     const B = new THREE.Vector3();
+    const N = Array.from({ length: BINS }, () => Array.from({ length: COLS + 1 }, () => new THREE.Vector3()));
+    const [du, dv] = [new THREE.Vector3(), new THREE.Vector3()];
     const inward = new THREE.Vector3();
     const position = geometry.getAttribute('position');
     const normal = geometry.getAttribute('normal');
@@ -71,11 +73,14 @@ export function makeCloth(plates, material) {
         hubNow.multiplyScalar(1 / plates.length);
 
         let at = 0;
-        const put = (p, q, r) => {
-            face.crossVectors(e1.subVectors(q, p), e2.subVectors(r, p)).normalize();
-            [p, q, r].forEach((v) => {
+        // A triangle with each corner's own normal (smooth, the way the cloth
+        // curves), turned to the side its winding faces
+        const put = (p, q, r, np, nq, nr) => {
+            face.crossVectors(e1.subVectors(q, p), e2.subVectors(r, p));
+            [[p, np], [q, nq], [r, nr]].forEach(([v, n]) => {
+                const sign = n.dot(face) < 0 ? -1 : 1;
                 position.setXYZ(at, v.x, v.y, v.z);
-                normal.setXYZ(at, face.x, face.y, face.z);
+                normal.setXYZ(at, n.x * sign, n.y * sign, n.z * sign);
                 at++;
             });
         };
@@ -98,10 +103,17 @@ export function makeCloth(plates, material) {
                     if (k < COLS) row[k].addScaledVector(inward, push * Math.sin(Math.PI * k / COLS));
                 }
             }
+            for (let j = 0; j < BINS; j++) {
+                for (let k = 0; k <= COLS; k++) {
+                    du.subVectors(P[j][Math.min(k + 1, COLS)], P[j][Math.max(k - 1, 0)]);
+                    dv.subVectors(P[Math.min(j + 1, BINS - 1)][k], P[Math.max(j - 1, 0)][k]);
+                    N[j][k].crossVectors(du, dv).normalize();
+                }
+            }
             for (let j = 0; j < BINS - 1; j++) {
                 for (let k = 0; k < COLS; k++) {
-                    put(P[j][k], P[j][k + 1], P[j + 1][k]);
-                    put(P[j][k + 1], P[j + 1][k + 1], P[j + 1][k]);
+                    put(P[j][k], P[j][k + 1], P[j + 1][k], N[j][k], N[j][k + 1], N[j + 1][k]);
+                    put(P[j][k + 1], P[j + 1][k + 1], P[j + 1][k], N[j][k + 1], N[j + 1][k + 1], N[j + 1][k]);
                 }
             }
         });
