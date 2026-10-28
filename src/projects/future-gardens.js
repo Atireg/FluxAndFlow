@@ -24,8 +24,8 @@ export default defineProject({
         motor: { lit: [222, 222, 220], shade: [160, 160, 162] },
         screws: { lit: [204, 204, 202], shade: [168, 168, 168] },
     },
-    // Moved by the slider: the petals turn, the rack slides
-    mechanism: true,
+    // The petals turn, the rack slides: by itself, a cycle in 10 seconds, or by the slider
+    mechanism: { loop: 10 },
     still: true,
     doubleClick: 'none',
     view: { elevation: 22, turn: 20, zoom: { side: 1.2, stacked: 1.5 } },

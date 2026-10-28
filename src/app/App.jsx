@@ -51,6 +51,7 @@ export default function App() {
     const tapHintRef = useRef(null);
     const partInfoRef = useRef(null);
     const sectionRef = useRef(null);
+    const mechanismRef = useRef(null);
     const hintStringRef = useRef(null);
     const hintTagRef = useRef(null);
     const hintDissolveRef = useRef(null);
@@ -172,6 +173,11 @@ export default function App() {
                 // A `tour` moved the section: the slider follows it
                 onSection: (share) => {
                     if (sectionRef.current) sectionRef.current.value = String(Math.round(share * 1000));
+                },
+
+                // A mechanism's loop moved it: the slider follows
+                onMechanism: (open) => {
+                    if (mechanismRef.current) mechanismRef.current.value = String(Math.round(open * 1000));
                 },
 
                 hidePartInfo: () => {
@@ -333,7 +339,7 @@ export default function App() {
             )}
 
             {project?.mechanism && (
-                <SectionSlider key={project.id} word={MECHANISM_WORD} onSlide={(open) => engineRef.current?.setMechanism(open)} />
+                <SectionSlider key={project.id} ref={mechanismRef} word={MECHANISM_WORD} onSlide={(open) => engineRef.current?.setMechanism(open)} />
             )}
 
             <PathView shown={focus === PATH_VIEW.id && !project} />

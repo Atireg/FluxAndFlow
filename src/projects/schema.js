@@ -43,7 +43,9 @@
  *                 true comes in from the low end of z, { reverse: true } from
  *                 the high end
  *   mechanism     with solid and parts: a model that moves (tools/models/mechanism.mjs):
- *                 a slider over it ("open") moves the parts that its file says move
+ *                 a slider over it ("open") moves the parts that its file says move;
+ *                 { loop: seconds } plays it by itself, a cycle that long, paused
+ *                 while the visitor uses the slider
  *   tour          with section: { orbit, turns, cut, focus, reach, over, side,
  *                 above } - played as it opens: `turns` (1) round in `orbit`
  *                 seconds, give or take what ends it with the cut's side to
@@ -319,9 +321,12 @@ function normaliseInfo({ id, info, solid }) {
 
 function normaliseMechanism({ id, mechanism, solid, parts }) {
     if (mechanism === undefined || mechanism === false) return false;
-    if (mechanism !== true) throw new Error(`Project "${id}": mechanism should be true or false`);
+    const loop = mechanism?.loop;
+    if (mechanism !== true && (typeof mechanism !== 'object' || (loop !== undefined && !(loop > 0)))) {
+        throw new Error(`Project "${id}": mechanism should be true, false or { loop } - seconds a cycle`);
+    }
     if (!solid || !parts) throw new Error(`Project "${id}": mechanism needs solid and parts`);
-    return true;
+    return { loop: loop ?? 0 };
 }
 
 function normaliseSection({ id, section, solid }) {

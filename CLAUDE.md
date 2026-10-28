@@ -130,7 +130,8 @@ in a pull-out drawer.
 - **Future Gardens** (slot 2, teaching, `#future-gardens`): a model that
   moves (`mechanism: true`): five petals turn on their hinges as the rack
   slides, a slider ("open", `MECHANISM_WORD`) over it; solid, still, in the
-  user's colours. Made from two Rhino OBJ poses by
+  user's colours, playing by itself in a loop (`mechanism.loop`, paused
+  while the slider is used). Made from two Rhino OBJ poses by
   `tools/models/mechanism.mjs open.obj closed.obj mechanism.glb` - the file
   holds the open pose and each moving part's `motion` to the closed. Drawer
   text not yet written.

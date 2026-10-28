@@ -19,6 +19,7 @@ import { pebbleFluxTime, PEBBLE_FLUX_SPEED } from './pebbles/geometry.js';
 import { dropInProgress, placeDroppingPebble, updateDroppingPebble } from './pebbles/drop.js';
 import { updateDissolve } from './pebbles/dissolve.js';
 import { updateScreenSpin } from './pointcloud/screenVideo.js';
+import { clamp01, smooth01 } from './ease.js';
 import { fadeSectionOutline, setMechanism, setSection } from './pointcloud/load.js';
 import { GATHER_DURATION, GATHER_MAX_STEP, revealAt, setGather, setReveal } from './pointcloud/gather.js';
 import { trailResolution } from './pointcloud/trails.js';
@@ -42,6 +43,7 @@ import { trailResolution } from './pointcloud/trails.js';
  *   handleFraction()        how much the drawer's handle takes, 0..0.3
  *   showPartInfo(info, x, y) / hidePartInfo()   a model's part under the pointer (`info`)
  *   onSection(share)        a `tour` moved the section - the slider follows
+ *   onMechanism(open)       a mechanism's loop moved it - the slider follows
  *   showTapHint(x, y, action) / hideTapHint()   action: the project's doubleClick
  *   onFocus(category)       the filter changed from the canvas (a sunk pebble clicked)
  *   onEmptySlot()           an empty pebble was clicked - its tag is about to show
@@ -166,6 +168,36 @@ export function createEngine({ canvas, source, ui }) {
     // (`pressed` while they hold), the wheel or the slider - so its plane's
     // outline shows (fadeSectionOutline)
     const handled = { pressed: false, at: -Infinity };
+    // A mechanism's loop (`mechanism.loop`): how far through its cycle, and
+    // when the visitor last used its slider - it plays on from there once
+    // they've left it for MECHANISM_IDLE
+    const loop = { phase: 0, open: 1, touched: -Infinity, playing: true };
+    const MECHANISM_IDLE = 6; // seconds after the slider before the loop plays on
+    const MECHANISM_HOLD = 0.15; // each end of the cycle held this share of it
+
+    // How open it is at `phase` of a cycle: open, closing, closed, opening
+    const openAt = (phase) => {
+        const triangle = phase < 0.5 ? phase * 2 : 2 - phase * 2;
+        return 1 - smooth01(clamp01((triangle - MECHANISM_HOLD) / (1 - 2 * MECHANISM_HOLD)));
+    };
+
+    // Plays a mechanism (`mechanism.loop`: seconds a cycle) on its own, the
+    // slider following; left alone while the visitor uses the slider
+    const playMechanism = (model, seconds, since, frameTime, elapsedTime) => {
+        if (since < 0.5) return; // once the model has appeared
+        if (elapsedTime - loop.touched < MECHANISM_IDLE) { loop.playing = false; return; }
+        if (!loop.playing) {
+            // Takes up from where the slider left it, closing
+            let best = 0;
+            for (let i = 0; i <= 100; i++) if (Math.abs(openAt(i / 200) - loop.open) < Math.abs(openAt(best / 200) - loop.open)) best = i;
+            loop.phase = best / 200;
+            loop.playing = true;
+        }
+        loop.phase = (loop.phase + frameTime / seconds) % 1;
+        loop.open = openAt(loop.phase);
+        setMechanism(model, loop.open);
+        ui.onMechanism?.(loop.open);
+    };
 
     /**
      * Laid over whatever a pebble's mode has set, every frame, in this order:
@@ -273,6 +305,7 @@ export function createEngine({ canvas, source, ui }) {
                 setReveal(model, revealAt(since));
 
                 detail.updateTour(model, since);
+                if (project.mechanism?.loop && model.userData.mechanism) playMechanism(model, project.mechanism.loop, since, frameTime, elapsedTime);
                 detail.keepNear();
                 detail.updateHover(model, since);
                 if (handled.pressed) handled.at = elapsedTime;
@@ -575,6 +608,8 @@ export function createEngine({ canvas, source, ui }) {
         // the way from closed (0) to open (1)
         setMechanism(open) {
             handled.at = clock.getElapsedTime();
+            loop.touched = handled.at;
+            loop.open = open;
             setMechanism(state.selected?.userData.detail, open);
         },
 
