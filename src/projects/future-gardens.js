@@ -96,6 +96,10 @@ export default defineProject({
         // With the drawer out (wide screens): steeply from above, down into the open model (the user's screenshot)
         drawerView: { elevation: 80, zoom: { side: 1.9 } },
     },
+    // After the pictures: the students, as the user lists them
+    credits: 'Students: Anna, Nathan, Brianna, Jade, Nader, Amy, Emma, Jessica, Hameeda, '
+        + 'Nadine, Farah, Maria, Zoe, Aish, Matt, Joel, Josh, Mietta, Tanesha, Sunalika, '
+        + 'Untu & Habashi',
     // The exhibition: the lobby first, then the flower and a dragonfly close up, then the lobby again
     images: [
         {
