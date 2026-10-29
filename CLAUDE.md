@@ -123,9 +123,9 @@ in a pull-out drawer.
   the intro; the joint, the lamination in the cleanroom, the glass in the
   factory and the assembly at the fair after Construction; the tool's
   diagrams after Geometry; the climate studies and two thermal simulations
-  of the joint after Thermal analysis. In its pebble, the
-  joint-in-section drawing (`thumbImage`, a 600px copy), its lines in the
-  ink. The person is formed by a third of the usual dissolve points
+  of the joint after Thermal analysis. In its pebble, two glass
+  sheets and the joint between them, drawn as lines (`thumbImage`, 600px, made from the model by
+  `tools/models/frameless-glass-thumb.mjs`), its lines in the ink. The person is formed by a third of the usual dissolve points
   (`FIGURE_SHARE`, dissolve.js: all 2400 slowed its opening).
 - **Future Gardens** (slot 2, teaching, `#future-gardens`): a model that
   moves (`mechanism: true`): five petals turn on their hinges as the rack

@@ -725,6 +725,8 @@ milestones checked by the user.
   turning after the first opening, the camera zooms out after the second
   (`flight.turnAfter`, `shots[].openings`).
 - **Future Gardens' pebble** shows one petal (`mechanism-petal.glb`), face-on.
+- **Frameless Glass' pebble** shows two glass sheets and the joint between them
+  (GS1, GS2, GS1_GS2 from the model, drawn as lines), not the joint-in-section drawing.
 
 Open at end of session: Future Gardens' picture captions/credits, the wording
 of its slider and pause button; whether "United Make" is two words.
