@@ -1303,12 +1303,14 @@ slicing it across its length, a strip from each to its neighbour's (each petal's
 edge lower and further out, as the user marked it; every edge run hub to tip -
 a petal's length axis has no sign of its own, and one run backwards crossed
 its strips), folds pushed out, away from the axis, by the gap there, rebuilt every time the mechanism moves.
-Its camera (`view.flight`, from the user's screen recording): it opens
-looking steeply down into the closed model, close (`from`), holds 3s after
-the model appears, pulls out to the view itself over 5s, and only then does
-the model turn (`flightTurn`; `view.spin`, a revolution in 40s here) - the
-model turns, not the camera, as in a `tour`. `pebble.userData.flightStart`
-makes `frameDetail` use the `from` shot until `maybeFly` clears it. It
+Its camera (`view.flight`, from the user's screen recording and phone
+screenshot) is a round that repeats: shot 1, steeply from above, close, for 3
+cycles of the loop; shot 2, close on the hub from the side (gears and rack)
+for 2; then out to the view itself over 5s while the model turns once round
+(`flightTurn`; `view.spin`, 40s here - the model turns, not the camera, as in a
+`tour`); then back in, and the loop starts closed again. `pebble.userData.flightShot`
+makes `frameDetail` use that shot's view (-1 out); `maybeFly` moves it by the clock,
+and leaves it alone while the drawer is out or the visitor has the camera. It
 starts closed and opens; a pause button beside the slider holds the loop.
 The cloth's own shader (`makeClothMaterial`, cloth.js): the same inks, and a
 light blinking from the middle of the flower - each blink (every 2.6s) a flash

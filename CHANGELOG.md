@@ -714,6 +714,9 @@ milestones checked by the user.
 - **Future Gardens' cloth shader**: a light blinking from the flower's middle
   (a flash, a ring of glow going out). With the drawer out (wide screens) the
   view is steeply from above (`view.drawerView`).
+- **Future Gardens' camera as a repeating round**: from above for 3 cycles of
+  the loop, a close-up on the hub from the side for 2, out while the model turns
+  once round, then in again (`view.flight.shots`); the loop 8s a cycle.
 
 Open at end of session: Future Gardens' role, picture captions/credits, and
 whether its text stands; the wording of its slider.

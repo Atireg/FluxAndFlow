@@ -154,6 +154,18 @@ export function createDetail({
         ui.onSection?.(share);
     }
 
+    // A `flight`'s times: its shots one after another, each `cycles` of the mechanism's loop
+    // (or `hold` seconds) in its own shot, `over` to move between them, then the model's
+    // `spin` to turn once round out in the view itself - a round is the shots plus the spin
+    function flightTimes(project) {
+        const flight = project?.view?.flight;
+        if (!flight) return null;
+        const holds = flight.shots.map((shot) => shot.hold ?? shot.cycles * (project.mechanism?.loop ?? 0));
+        const hold = holds.reduce((sum, seconds) => sum + seconds, 0);
+        const spin = project.view.spin ?? 80;
+        return { holds, hold, over: flight.over, period: hold + spin };
+    }
+
     function startTour(model, project) {
         Object.assign(tour, { model, spin: 0, base: 0, start: TOUR_AFTER, turn: 0, moved: false, stopped: !project.tour });
         if (project.tour) {
@@ -412,7 +424,7 @@ export function createDetail({
             const ease = OPEN_CAMERA_EASE;
 
             // A view with a `flight` opens in its own first shot (maybeFly)
-            pebble.userData.flightStart = Boolean(project.view?.flight);
+            pebble.userData.flightShot = project.view?.flight ? 0 : null;
 
             /**
              * Which model: on a narrow screen a project may have its own
@@ -436,6 +448,7 @@ export function createDetail({
                 pebble.userData.detail.userData.pile?.restart();
                 pebble.userData.detail.userData.turnOffset = 0;
                 pebble.userData.detail.userData.flightAt = undefined;
+                pebble.userData.detail.userData.flightRound = 0;
                 pebble.userData.detail.userData.held = null;
                 pebble.userData.detail.userData.gatherTime = 0;
                 pebble.userData.detailRotateStartTime = clock.getElapsedTime();
@@ -669,26 +682,43 @@ export function createDetail({
         },
 
         /**
-         * A view's `flight` ({ from: { elevation, zoom, lift }, hold, over }):
-         * the project opens in the `from` shot, `hold` seconds after the
-         * model appears the camera pulls out to the view itself over `over`
-         * seconds - and only then does the model begin to turn (flightTurn)
+         * A view's `flight` ({ over, shots: [{ view: { elevation, zoom, lift }, cycles | hold }] }),
+         * a round that repeats: the camera in each shot in turn while a
+         * mechanism goes through its `cycles` of its loop (or for `hold`
+         * seconds), moving between them over `over`; then out to the view
+         * itself while the model turns once round (`view.spin` seconds,
+         * flightTurn); then back in to the first shot, and again. Left alone
+         * while the drawer is out or the visitor has the camera.
          */
         maybeFly(model, since) {
             const pebble = state.selected;
-            const flight = pebble?.userData.project?.view?.flight;
-            if (!flight) return;
+            const times = flightTimes(pebble?.userData.project);
+            if (!times) return;
             model.userData.flightAt ??= since;
-            if (pebble.userData.flightStart && since - model.userData.flightAt >= flight.hold) {
-                pebble.userData.flightStart = false;
-                framing.frameDetail(pebble, { duration: flight.over });
+            const elapsed = since - model.userData.flightAt;
+            const round = Math.floor(elapsed / times.period);
+            const into = elapsed - round * times.period;
+            model.userData.flightRound = round;
+
+            // Which shot it should be in now: one of them, or -1 for out and turning
+            let shot = -1;
+            let end = 0;
+            for (let i = 0; i < times.holds.length; i++) {
+                end += times.holds[i];
+                if (into < end) { shot = i; break; }
+            }
+            if (shot !== pebble.userData.flightShot && !state.drawerOpen && !rig.visitorOrbiting) {
+                pebble.userData.flightShot = shot;
+                framing.frameDetail(pebble, { duration: times.over });
             }
         },
 
-        // How long the model has turned, for a project with a `flight`: from the pull out
+        // How long the model has turned this round, for a project with a `flight`: from the pull out
         flightTurn(model, since) {
-            const flight = state.selected?.userData.project?.view?.flight;
-            return Math.max(0, since - (model.userData.flightAt ?? since) - (flight?.hold ?? 0));
+            const times = flightTimes(state.selected?.userData.project);
+            if (!times) return 0;
+            const elapsed = since - (model.userData.flightAt ?? since);
+            return Math.max(0, elapsed - Math.floor(elapsed / times.period) * times.period - times.hold);
         },
 
         maybeAutoZoom(model, since) {

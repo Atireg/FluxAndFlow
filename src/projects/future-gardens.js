@@ -46,16 +46,25 @@ export default defineProject({
     },
     // The petals turn, the rack slides: by itself, a cycle in 10 seconds, or by the slider
     mechanism: {
-        loop: 10,
+        loop: 8,
         // Cloth between the petals, glowing lavender as in the photo
         cloth: { of: 'petal', lit: [236, 230, 255], shade: [176, 160, 236], opacity: 0.5 },
     },
     doubleClick: 'none',
-    // Opens looking steeply down into the closed model, close; after 3s the camera pulls out
-    // to the view itself over 5s and the model turns round, a revolution in 40s
+    // Opens looking steeply down into the closed model, close, while it opens and closes 3 times
+    // (8s each), then close on the hub for 2 more; then the camera pulls out to the view itself and
+    // the model turns once round, in 40s; then it moves back in and starts again
     view: {
         elevation: 22, turn: 20, zoom: { side: 1.1, stacked: 1.4 },
-        flight: { from: { elevation: 78, zoom: { side: 1.9, stacked: 2.2 } }, hold: 3, over: 5 },
+        // Two shots, 5s between them: steeply from above, then close on the hub from the side (the
+        // gears and the rack, the user's phone screenshot); the second only 2 cycles
+        flight: {
+            over: 5,
+            shots: [
+                { view: { elevation: 78, zoom: { side: 1.9, stacked: 2.2 } }, cycles: 3 },
+                { view: { elevation: 12, zoom: { side: 4.2, stacked: 5.5 }, lift: { side: 0.1, stacked: 0.12 } }, cycles: 2 },
+            ],
+        },
         spin: 40,
         // With the drawer out (wide screens): steeply from above, down into the open model (the user's screenshot)
         drawerView: { elevation: 80, zoom: { side: 1.9 } },

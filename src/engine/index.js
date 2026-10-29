@@ -171,7 +171,7 @@ export function createEngine({ canvas, source, ui }) {
     // A mechanism's loop (`mechanism.loop`): how far through its cycle, and
     // when the visitor last used its slider - it plays on from there once
     // they've left it for MECHANISM_IDLE
-    const loop = { phase: 0.5, open: 0, touched: -Infinity, playing: true, paused: false, model: null };
+    const loop = { phase: 0.5, open: 0, touched: -Infinity, playing: true, paused: false, model: null, round: 0 };
     const MECHANISM_IDLE = 6; // seconds after the slider before the loop plays on
     const MECHANISM_HOLD = 0.15; // each end of the cycle held this share of it
 
@@ -186,10 +186,15 @@ export function createEngine({ canvas, source, ui }) {
     const playMechanism = (model, seconds, since, frameTime, elapsedTime) => {
         // A model newly shown starts closed, and opens
         if (loop.model !== model) {
-            Object.assign(loop, { model, phase: 0.5, open: 0, touched: -Infinity, playing: true, paused: false });
+            Object.assign(loop, { model, phase: 0.5, open: 0, touched: -Infinity, playing: true, paused: false, round: 0 });
             setMechanism(model, 0);
             ui.onMechanism?.(0);
             return;
+        }
+        // A new round of the camera's flight, in close again: it closes, and opens
+        if ((model.userData.flightRound ?? 0) !== loop.round) {
+            loop.round = model.userData.flightRound ?? 0;
+            if (!loop.paused) Object.assign(loop, { phase: 0.5, open: 0, touched: -Infinity, playing: true });
         }
         if (loop.paused) return;
         if (elapsedTime - loop.touched < MECHANISM_IDLE) { loop.playing = false; return; }

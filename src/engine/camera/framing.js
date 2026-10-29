@@ -422,10 +422,11 @@ export function createFraming({ rig, screen, state, grid, ui }) {
                 frameDevice(shown, mode, duration, ease, { margin: DEVICE_WHOLE_MARGIN, whole: true });
                 return;
             }
-            // (a view's `flight` first shot until its pull out, `flightStart`; or its
+            // (a view's `flight` shot it is in, `flightShot`; or its
             // `drawerView` - another angle - with the drawer out beside it)
             const base = object.userData.project;
-            const overlay = object.userData.flightStart ? base?.view?.flight?.from
+            const shot = object.userData.flightShot;
+            const overlay = shot >= 0 && base?.view?.flight ? base.view.flight.shots[shot]?.view
                 : state.drawerOpen ? base?.view?.drawerView : null;
             const project = overlay ? { ...base, view: { ...base.view, ...overlay } } : base;
             // Or framed on a box of its own (`fit`, world space) - a pile's

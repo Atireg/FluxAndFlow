@@ -224,13 +224,16 @@ function normaliseView(view, { id }) {
         throw new Error(`Project "${id}": view should be an object of degrees`);
     }
 
-    // `flight`: { from: { elevation, zoom, lift }, hold, over } - it opens in the
-    // `from` shot, `hold` seconds after the model appears pulls out to the view over `over`,
-    // the model turning from then; `spin`: seconds a revolution (80)
+    // `flight`: { over, shots: [{ view: { elevation, zoom, lift }, cycles | hold }] } - it opens in the first
+    // shot, for its `cycles` of the mechanism's loop (or `hold` seconds), moves on to the next
+    // over `over`, then out to the view itself while the model turns once round (`spin`: seconds a
+    // revolution, 80), then back in, and again
     if (view.flight !== undefined) {
-        const { from, hold, over } = view.flight ?? {};
-        if (!from || typeof from !== 'object' || !(hold >= 0) || !(over > 0)) {
-            throw new Error(`Project "${id}": view.flight should be { from: { elevation, zoom, lift }, hold, over } in seconds`);
+        const { over, shots } = view.flight ?? {};
+        const ok = over > 0 && Array.isArray(shots) && shots.length > 0
+            && shots.every((shot) => shot?.view && typeof shot.view === 'object' && (shot.hold >= 0 || shot.cycles > 0));
+        if (!ok) {
+            throw new Error(`Project "${id}": view.flight should be { over, shots: [{ view: { elevation, zoom, lift }, cycles (of the mechanism's loop) or hold (seconds) }] }`);
         }
     }
     // `drawerView`: { elevation, zoom, lift } - the view while the drawer is out beside it (wide screens)
