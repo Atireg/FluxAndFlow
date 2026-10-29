@@ -15,6 +15,7 @@ export default defineProject({
     notice: 'under construction',
     year: '2022',
     role: 'Teacher',
+    client: 'The GPT Group',
     context: 'A unit in the Bachelor of Architecture, Swinburne University of Technology, in '
         + 'collaboration with Mond Qu, Sonny Do and Edward Yee from United Make, Protolab '
         + 'and Daniel Prohasky. The unit was conceived by Associate Professor John Sadar.',

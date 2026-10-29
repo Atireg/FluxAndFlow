@@ -139,7 +139,7 @@ in a pull-out drawer.
   `tools/models/mechanism.mjs open.obj closed.obj mechanism.glb --flip-rack` (the
   rack reversed, asked for) - the file
   holds the open pose and each moving part's `motion` to the closed. Drawer:
-  2022, role "Teacher", context the Swinburne unit (Bachelor of Architecture,
+  2022, role "Teacher", client "The GPT Group" (a `client` row, added for it), context the Swinburne unit (Bachelor of Architecture,
   in collaboration with Mond Qu, Sonny Do and Edward Yee from United Make - written
   with the space, as the user writes it - Protolab and Daniel Prohasky; the unit
   conceived by Associate Professor John Sadar); the text approved ("Use 1"): the unit and its
@@ -244,7 +244,7 @@ defineProject({
     slot: 0,                              // grid position, 0..SLOT_COUNT-1
     title: 'Rock Print Pavilion',         // also the name on its pebble - keep it phone-short
     category: 'research',                 // 'research', 'teaching' or 'real-world' - required
-    year: '', role: '', context: '',      // drawer rows, if non-empty - state the role accurately
+    year: '', role: '', client: '', context: '',  // drawer rows, if non-empty - state the role accurately
     notice: '',                           // a small orange line under the title in the bar, if non-empty
     body: [], credits: '',                // drawer text: paragraphs, or string arrays for a list;
                                           // [words](https://...) a link; nothing = no handle

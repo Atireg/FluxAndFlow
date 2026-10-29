@@ -128,6 +128,7 @@ const DEFAULT_IMAGE_RATIO = '3 / 2';
 const META_FIELDS = [
     ['Year', 'year'],
     ['Role', 'role'],
+    ['Client', 'client'],
     ['Context', 'context'],
 ];
 
@@ -499,6 +500,7 @@ export function defineProject(project) {
         // Anything left empty is skipped rather than rendered blank
         year: project.year ?? '',
         role: project.role ?? '',
+        client: project.client ?? '',
         context: project.context ?? '',
         body,
         credits: project.credits ?? '',
