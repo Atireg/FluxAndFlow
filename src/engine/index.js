@@ -19,8 +19,7 @@ import { pebbleFluxTime, PEBBLE_FLUX_SPEED } from './pebbles/geometry.js';
 import { dropInProgress, placeDroppingPebble, updateDroppingPebble } from './pebbles/drop.js';
 import { updateDissolve } from './pebbles/dissolve.js';
 import { updateScreenSpin } from './pointcloud/screenVideo.js';
-import { clamp01, smooth01 } from './ease.js';
-import { fadeSectionOutline, setMechanism, setSection } from './pointcloud/load.js';
+import { fadeSectionOutline, mechanismOpenAt as openAt, setMechanism, setSection } from './pointcloud/load.js';
 import { GATHER_DURATION, GATHER_MAX_STEP, revealAt, setGather, setReveal } from './pointcloud/gather.js';
 import { trailResolution } from './pointcloud/trails.js';
 
@@ -173,13 +172,6 @@ export function createEngine({ canvas, source, ui }) {
     // they've left it for MECHANISM_IDLE
     const loop = { phase: 0.5, open: 0, touched: -Infinity, playing: true, paused: false, model: null, round: 0 };
     const MECHANISM_IDLE = 6; // seconds after the slider before the loop plays on
-    const MECHANISM_HOLD = 0.15; // each end of the cycle held this share of it
-
-    // How open it is at `phase` of a cycle: open, closing, closed, opening
-    const openAt = (phase) => {
-        const triangle = phase < 0.5 ? phase * 2 : 2 - phase * 2;
-        return 1 - smooth01(clamp01((triangle - MECHANISM_HOLD) / (1 - 2 * MECHANISM_HOLD)));
-    };
 
     // Plays a mechanism (`mechanism.loop`: seconds a cycle) on its own, the
     // slider following; left alone while the visitor uses the slider

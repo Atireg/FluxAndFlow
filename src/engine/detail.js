@@ -3,7 +3,7 @@ import { gsap } from 'gsap';
 import { assetUrl } from './assets.js';
 import { getPanelLayout, layoutMode, perLayout } from './layout.js';
 import { loadPhysics, PILE_FADE_OUT, PILE_REPLAY_WAIT } from './pile.js';
-import { loadPointCloud, setSection } from './pointcloud/load.js';
+import { loadPointCloud, mechanismOpensAt, setSection } from './pointcloud/load.js';
 import { GATHER_DURATION } from './pointcloud/gather.js';
 import { getDissolve } from './pebbles/dissolve.js';
 import { holdScreenVideo, playScreenVideo, primeScreenVideo, resetScreenSpin } from './pointcloud/screenVideo.js';
@@ -154,16 +154,21 @@ export function createDetail({
         ui.onSection?.(share);
     }
 
-    // A `flight`'s times: its shots one after another, each `cycles` of the mechanism's loop
-    // (or `hold` seconds) in its own shot, `over` to move between them, then the model's
-    // `spin` to turn once round out in the view itself - a round is the shots plus the spin
+    // A `flight`'s times, in seconds into a round, from the mechanism's loop: where each shot ends
+    // (`openings`: after that many more times the flower has opened fully, counted on from the last),
+    // where the model starts to turn (after `turnAfter` openings) and, once the camera has moved out,
+    // that it turns once round in `spin` - a round is the turn's start plus the spin, to whole cycles of the loop
     function flightTimes(project) {
         const flight = project?.view?.flight;
         if (!flight) return null;
-        const holds = flight.shots.map((shot) => shot.hold ?? shot.cycles * (project.mechanism?.loop ?? 0));
-        const hold = holds.reduce((sum, seconds) => sum + seconds, 0);
+        const loop = project.mechanism?.loop ?? 0;
+        let count = 0;
+        const ends = flight.shots.map((shot) => mechanismOpensAt(loop, count += shot.openings));
+        const turnStart = mechanismOpensAt(loop, flight.turnAfter);
         const spin = project.view.spin ?? 80;
-        return { holds, hold, over: flight.over, period: hold + spin };
+        // (a round whole cycles of the loop, so the next starts with the flower closed as it begins)
+        const period = Math.ceil(Math.max(turnStart + spin, ends[ends.length - 1]) / loop) * loop;
+        return { ends, turnStart, spin, over: flight.over, period };
     }
 
     function startTour(model, project) {
@@ -682,13 +687,14 @@ export function createDetail({
         },
 
         /**
-         * A view's `flight` ({ over, shots: [{ view: { elevation, zoom, lift }, cycles | hold }] }),
-         * a round that repeats: the camera in each shot in turn while a
-         * mechanism goes through its `cycles` of its loop (or for `hold`
-         * seconds), moving between them over `over`; then out to the view
-         * itself while the model turns once round (`view.spin` seconds,
-         * flightTurn); then back in to the first shot, and again. Left alone
-         * while the drawer is out or the visitor has the camera.
+         * A view's `flight` ({ over, turnAfter, shots: [{ view, openings }] }),
+         * a round that repeats, by the mechanism's loop: the camera in each shot
+         * in turn (a shot ends when the flower has opened fully `openings` more
+         * times), moving between them over `over`, the model starting to turn
+         * once it has opened `turnAfter` times (once round in `view.spin` seconds,
+         * flightTurn); after the last shot, out to the view itself; then, the
+         * turn done, back in to the first shot, and again. Left alone while the
+         * drawer is out or the visitor has the camera.
          */
         maybeFly(model, since) {
             const pebble = state.selected;
@@ -702,10 +708,8 @@ export function createDetail({
 
             // Which shot it should be in now: one of them, or -1 for out and turning
             let shot = -1;
-            let end = 0;
-            for (let i = 0; i < times.holds.length; i++) {
-                end += times.holds[i];
-                if (into < end) { shot = i; break; }
+            for (let i = 0; i < times.ends.length; i++) {
+                if (into < times.ends[i]) { shot = i; break; }
             }
             if (shot !== pebble.userData.flightShot && !state.drawerOpen && !rig.visitorOrbiting) {
                 pebble.userData.flightShot = shot;
@@ -718,7 +722,8 @@ export function createDetail({
             const times = flightTimes(state.selected?.userData.project);
             if (!times) return 0;
             const elapsed = since - (model.userData.flightAt ?? since);
-            return Math.max(0, elapsed - Math.floor(elapsed / times.period) * times.period - times.hold);
+            const into = elapsed - Math.floor(elapsed / times.period) * times.period;
+            return Math.min(times.spin, Math.max(0, into - times.turnStart));
         },
 
         maybeAutoZoom(model, since) {

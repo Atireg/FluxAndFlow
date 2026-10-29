@@ -78,18 +78,17 @@ export default defineProject({
         cloth: { of: 'petal', lit: [236, 230, 255], shade: [176, 160, 236], opacity: 0.5 },
     },
     doubleClick: 'none',
-    // Opens looking steeply down into the closed model, close, while it opens and closes 3 times
-    // (8s each), then close on the hub for 2 more; then the camera pulls out to the view itself and
-    // the model turns once round, in 40s; then it moves back in and starts again
+    // The camera, by the loop (8s a cycle, starting closed): looking steeply down into the flower
+    // as it opens; once it has opened the model starts to turn; close on the hub from the side for
+    // the next opening; then out to the view itself while it turns once round, in 40s; then back in
     view: {
         elevation: 22, turn: 20, zoom: { side: 1.1, stacked: 1.4 },
-        // Two shots, 5s between them: steeply from above, then close on the hub from the side (the
-        // gears and the rack, the user's phone screenshot); the second only 2 cycles
         flight: {
             over: 5,
+            turnAfter: 1,
             shots: [
-                { view: { elevation: 78, zoom: { side: 1.9, stacked: 2.2 } }, cycles: 3 },
-                { view: { elevation: 12, zoom: { side: 4.2, stacked: 5.5 }, lift: { side: 0.1, stacked: 0.12 } }, cycles: 2 },
+                { view: { elevation: 78, zoom: { side: 1.9, stacked: 2.2 } }, openings: 1 },
+                { view: { elevation: 12, zoom: { side: 4.2, stacked: 5.5 }, lift: { side: 0.1, stacked: 0.12 } }, openings: 1 },
             ],
         },
         spin: 40,

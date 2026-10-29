@@ -8,7 +8,7 @@ import { addTrails } from './trails.js';
 import { CLIP_NONE, makeCutFan, makeCutFill, makeEdgeMaterial, makeInkMaterial, pointsFromMeshes } from './mesh.js';
 import { makeCloth } from './cloth.js';
 import { addScreenPanel, addScreenVideo } from './screenVideo.js';
-import { smooth01 } from '../ease.js';
+import { clamp01, smooth01 } from '../ease.js';
 
 import gatherGlsl from '../shaders/pointCloud/gather.glsl';
 import pointCloudVertexShader from '../shaders/pointCloud/vertex.glsl';
@@ -408,6 +408,20 @@ function cutFans(meshes, z) {
 export function sectionAt(section, share) {
     const along = (section.to - section.from) * Math.min(Math.max(share, 0), 1);
     return section.sign > 0 ? section.to - along : section.from + along;
+}
+
+const MECHANISM_HOLD = 0.15; // each end of a mechanism's cycle held this share of it
+
+// How open a mechanism's loop is at `phase` (0..1) of its cycle: open, closing, closed, opening
+export function mechanismOpenAt(phase) {
+    const triangle = phase < 0.5 ? phase * 2 : 2 - phase * 2;
+    return 1 - smooth01(clamp01((triangle - MECHANISM_HOLD) / (1 - 2 * MECHANISM_HOLD)));
+}
+
+// When, in seconds into a loop of `loop` seconds a cycle that starts closed, it has opened
+// fully for the `n`th time (n = 1, 2, ...)
+export function mechanismOpensAt(loop, n) {
+    return loop * (0.5 - MECHANISM_HOLD / 2 + (n - 1));
 }
 
 const MOTION_TURN = new THREE.Matrix4();

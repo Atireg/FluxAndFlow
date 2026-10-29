@@ -225,16 +225,17 @@ function normaliseView(view, { id }) {
         throw new Error(`Project "${id}": view should be an object of degrees`);
     }
 
-    // `flight`: { over, shots: [{ view: { elevation, zoom, lift }, cycles | hold }] } - it opens in the first
-    // shot, for its `cycles` of the mechanism's loop (or `hold` seconds), moves on to the next
-    // over `over`, then out to the view itself while the model turns once round (`spin`: seconds a
-    // revolution, 80), then back in, and again
+    // `flight`: { over, turnAfter, shots: [{ view: { elevation, zoom, lift }, openings }] } - by the
+    // mechanism's loop (it starts closed): it opens in the first shot, each shot lasting until the
+    // flower has opened fully `openings` more times, moving on over `over`; the model starts turning
+    // after `turnAfter` openings, once round in `spin` seconds (80); after the last shot, out to the
+    // view itself; then back in at the turn's end, and again
     if (view.flight !== undefined) {
-        const { over, shots } = view.flight ?? {};
-        const ok = over > 0 && Array.isArray(shots) && shots.length > 0
-            && shots.every((shot) => shot?.view && typeof shot.view === 'object' && (shot.hold >= 0 || shot.cycles > 0));
+        const { over, turnAfter, shots } = view.flight ?? {};
+        const ok = over > 0 && turnAfter > 0 && Array.isArray(shots) && shots.length > 0
+            && shots.every((shot) => shot?.view && typeof shot.view === 'object' && shot.openings > 0);
         if (!ok) {
-            throw new Error(`Project "${id}": view.flight should be { over, shots: [{ view: { elevation, zoom, lift }, cycles (of the mechanism's loop) or hold (seconds) }] }`);
+            throw new Error(`Project "${id}": view.flight should be { over, turnAfter, shots: [{ view: { elevation, zoom, lift }, openings }] }`);
         }
     }
     // `drawerView`: { elevation, zoom, lift } - the view while the drawer is out beside it (wide screens)
