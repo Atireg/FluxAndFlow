@@ -140,9 +140,9 @@ in a pull-out drawer.
   rack reversed, asked for) - the file
   holds the open pose and each moving part's `motion` to the closed. Drawer:
   2022, role "Teacher", context the Swinburne unit (Bachelor of Architecture,
-  with United Make - written with the space, as the user writes it; conceived by
-  Associate Professor John Sadar with Mond Qu, Sonny Do, Edward Yee, Swinburne
-  Protolab and Daniel Prohasky); the text approved ("Use 1"): the unit and its
+  in collaboration with Mond Qu, Sonny Do and Edward Yee from United Make - written
+  with the space, as the user writes it - Protolab and Daniel Prohasky; the unit
+  conceived by Associate Professor John Sadar); the text approved ("Use 1"): the unit and its
   description with a list of its four outcomes, the graduate attributes, then the
   exhibition in two paragraphs; four photos of the exhibition
   (`future-gardens-01..04.jpg`, the lobby first, two close-ups in a row, the lobby wide).

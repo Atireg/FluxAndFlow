@@ -16,9 +16,8 @@ export default defineProject({
     year: '2022',
     role: 'Teacher',
     context: 'A unit in the Bachelor of Architecture, Swinburne University of Technology, in '
-        + 'collaboration with United Make. The unit was conceived by Associate Professor '
-        + 'John Sadar, together with Mond Qu, Sonny Do and Edward Yee from United Make, '
-        + 'Swinburne Protolab and Daniel Prohasky.',
+        + 'collaboration with Mond Qu, Sonny Do and Edward Yee from United Make, Protolab '
+        + 'and Daniel Prohasky. The unit was conceived by Associate Professor John Sadar.',
 
     // The drawer's text: the unit (the user's description), then the exhibition - rephrased (approved, "Use 1")
     body: [
