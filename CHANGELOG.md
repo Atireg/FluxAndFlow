@@ -721,6 +721,9 @@ milestones checked by the user.
   Architecture, Swinburne, with United Make - the user's description and
   outcomes), then the exhibition; role "Teacher"; the context credits who
   conceived the unit.
+- **Future Gardens' camera retimed by the loop** (the user's): the model starts
+  turning after the first opening, the camera zooms out after the second
+  (`flight.turnAfter`, `shots[].openings`).
 
 Open at end of session: Future Gardens' picture captions/credits, the wording
 of its slider and pause button; whether "United Make" is two words.

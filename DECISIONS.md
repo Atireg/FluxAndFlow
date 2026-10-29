@@ -1304,12 +1304,16 @@ edge lower and further out, as the user marked it; every edge run hub to tip -
 a petal's length axis has no sign of its own, and one run backwards crossed
 its strips), folds pushed out, away from the axis, by the gap there, rebuilt every time the mechanism moves.
 Its camera (`view.flight`, from the user's screen recording and phone
-screenshot) is a round that repeats: shot 1, steeply from above, close, for 3
-cycles of the loop; shot 2, close on the hub from the side (gears and rack)
-for 2; then out to the view itself over 5s while the model turns once round
-(`flightTurn`; `view.spin`, 40s here - the model turns, not the camera, as in a
-`tour`); then back in, and the loop starts closed again. `pebble.userData.flightShot`
-makes `frameDetail` use that shot's view (-1 out); `maybeFly` moves it by the clock,
+screenshot) is a round that repeats, timed by the loop (8s a cycle, starting
+closed; `mechanismOpensAt`): shot 1, steeply from above, close, until the
+flower has opened for the first time, when the model starts to turn
+(`turnAfter`); shot 2, close on the hub from the side (gears and rack), until
+its second opening; then out to the view itself over 5s while it goes on
+turning once round (`view.spin`, 40s - the model turns, not the camera, as in
+a `tour`; `flightTurn`); then back in. A round is rounded up to whole cycles of
+the loop so the next one starts with the flower closed (a loop reset
+mid-opening snapped it shut). `pebble.userData.flightShot` makes
+`frameDetail` use that shot's view (-1 out); `maybeFly` moves it by the clock,
 and leaves it alone while the drawer is out or the visitor has the camera. It
 starts closed and opens; a pause button beside the slider holds the loop.
 The cloth's own shader (`makeClothMaterial`, cloth.js): the same inks, and a

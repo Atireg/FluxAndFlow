@@ -132,9 +132,10 @@ in a pull-out drawer.
   slides, a slider ("open", `MECHANISM_WORD`) over it; solid, still, in the
   user's colours, playing by itself in a loop (`mechanism.loop`, paused
   while the slider is used), "under construction" (`notice`) under its name; clear acrylic as in the
-  user's photo, a pleated lavender cloth between the petals (`mechanism.cloth`); opens looking down into the closed model, close, then
-  pulls out and the model turns round (`view.flight`, `view.spin`: user's
-  recording), the loop starting closed, a pause / play button beside the
+  user's photo, a pleated lavender cloth between the petals (`mechanism.cloth`); opens looking down into the closed model, close; after its first
+  opening the model starts to turn, then a close-up on the hub, and after the
+  second opening the camera zooms out while it turns once round, then back in
+  (`view.flight`, `view.spin`: user's recording), the loop starting closed, a pause / play button beside the
   slider (`MechanismPause`; words "pause"/"play" are mine, unapproved). Made from two Rhino OBJ poses by
   `tools/models/mechanism.mjs open.obj closed.obj mechanism.glb --flip-rack` (the
   rack reversed, asked for) - the file
