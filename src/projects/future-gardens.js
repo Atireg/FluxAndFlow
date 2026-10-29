@@ -14,21 +14,48 @@ export default defineProject({
     // A small orange line under its name, while the rest is still to come
     notice: 'under construction',
     year: '2022',
-    context: 'The GPT Group and Swinburne University of Technology, Melbourne',
+    role: 'Teacher',
+    context: 'A unit in the Bachelor of Architecture, Swinburne University of Technology, in '
+        + 'collaboration with United Make. The unit was conceived by Associate Professor '
+        + 'John Sadar, together with Mond Qu, Sonny Do and Edward Yee from United Make, '
+        + 'Swinburne Protolab and Daniel Prohasky.',
 
-    // The drawer's text, from the user's exhibition page - rephrased
+    // The drawer's text: the unit (the user's description), then the exhibition - rephrased (approved, "Use 1")
     body: [
-        'Future Gardens was an exhibition by UnitedMake and Swinburne University '
-        + 'students in the East Wing Lobby of 530 Collins Street, Melbourne: seven '
-        + 'futuristic design specimens where digital and physical worlds meet, '
-        + 'exploring what non-fungible assets could become through science fiction '
-        + 'and biomimicry.',
-        'Visitors were invited to touch it: digital dragonflies that react to '
-        + 'temperature, symbiotic plants, artificial roots that talk to each other - '
-        + 'and mechanical flowers, clear acrylic petals that open and close, driven '
-        + 'by a small motor and a toothed rack, around a glowing pleated cloth. The '
-        + 'exhibition asked visitors to picture the future of gardens and design, and '
-        + 'to open their minds to the possibilities of emerging technologies.',
+        'Future Gardens was part of a unit within the Bachelor of Architecture at '
+        + 'Swinburne University of Technology, in collaboration with the studio United '
+        + 'Make. The students didn\'t only design: they built real objects for a real '
+        + 'exhibition.',
+        'The unit explores buildings as a communicative medium - as technological '
+        + 'communication and human networks. Students questioned traditional and '
+        + 'interactive modes of representation, looked at architectural components as '
+        + 'parts of a larger system, and made virtually animated prototypes and '
+        + 'communicative media, developing skills and knowledge of buildings as dynamic '
+        + 'systems.',
+        'By the end of the unit, students could:',
+        [
+            'communicate through different modes of architectural communication, '
+            + 'especially those involving time;',
+            'explain architectural systems and subsystems;',
+            'carry ideas and design outcomes through 2, 3 and 4-dimensional modes: '
+            + 'sketches, print, digital models and animation;',
+            'identify points of control for sustainable, resourceful and zero-waste '
+            + 'efficiencies within architectural systems.',
+        ],
+        'The unit contributes to Swinburne\'s graduate attributes: communication '
+        + 'skills, teamwork skills and digital literacies.',
+        'The Future Gardens exhibition, by United Make and Swinburne University '
+        + 'students, transformed the East Wing Lobby of 530 Collins Street, Melbourne, '
+        + 'into a showcase of seven futuristic design specimens. This fusion of digital '
+        + 'and physical realms investigated the potential of non-fungible assets '
+        + 'through science fiction and biomimicry.',
+        'Visitors could touch the exhibits: digital dragonflies that react to '
+        + 'temperature, symbiotic plants, and artificial roots that communicate with '
+        + 'each other. Among them were the mechanical flowers, with clear acrylic '
+        + 'petals that open and close, driven by a small motor and a toothed rack, '
+        + 'around a glowing pleated cloth. The exhibition invited visitors to picture '
+        + 'the future of gardens and design, and to open their minds to the '
+        + 'possibilities of emerging technologies.',
     ],
 
     thumbModel: 'models/mechanism.glb',
