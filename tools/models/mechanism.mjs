@@ -13,6 +13,8 @@
  *
  *     node tools/models/mechanism.mjs open.obj closed.obj mechanism.glb [--flip-rack]
  *
+ * It also writes the first petal alone (`<name>-petal.glb`) for the pebble.
+ *
  * `--flip-rack` has the rack travel the other way to the petals: in the
  * closed file's place when the petals are open, and the open file's when they
  * are closed (asked for).
@@ -113,6 +115,37 @@ function fitRotation(from, to) {
     return { axis: axis.toArray(), pivot: pivot.toArray(), angle, error, slide: along };
 }
 
+// The matrix that lays a flat plate as the playground's camera sees a thumbnail (from above, the
+// screen's up being -Z): its length (the largest axis of its points, running away from `root`) up
+// the screen (-Z), its breadth along X, its flat side up towards the camera (+Y)
+function facing(geometry, root) {
+    const position = geometry.getAttribute('position');
+    const points = Array.from({ length: position.count }, (_, i) => new THREE.Vector3().fromBufferAttribute(position, i));
+    const centre = points.reduce((sum, p) => sum.add(p), new THREE.Vector3()).multiplyScalar(1 / points.length);
+    const m = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+    points.forEach((p) => {
+        const d = p.clone().sub(centre).toArray();
+        for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) m[r * 3 + c] += d[r] * d[c];
+    });
+    const matrix = new THREE.Matrix3().fromArray(m);
+    const dominant = (away) => {
+        const v = new THREE.Vector3(1, 0.7, 0.3);
+        for (let k = 0; k < 80; k++) {
+            v.applyMatrix3(matrix);
+            if (away) v.addScaledVector(away, -v.dot(away));
+            v.normalize();
+        }
+        return v;
+    };
+    const length = dominant();
+    if (centre.clone().sub(root).dot(length) < 0) length.negate();
+    const width = dominant(length);
+    const flat = new THREE.Vector3().crossVectors(width, length).normalize();
+    // (x across, y out of the plate, z down the length) in the world's
+    const basis = new THREE.Matrix4().makeBasis(width, flat, length.clone().negate());
+    return new THREE.Matrix4().copy(basis).transpose().multiply(new THREE.Matrix4().makeTranslation(-centre.x, -centre.y, -centre.z));
+}
+
 export function mechanismToGlb(openPath, closedPath, fileName, { flipRack = false } = {}) {
     const open = readObj(openPath);
     const closed = readObj(closedPath);
@@ -167,6 +200,12 @@ export function mechanismToGlb(openPath, closedPath, fileName, { flipRack = fals
         });
 
     writeGlb(fileName, meshes, 'tools/models/mechanism.mjs');
+
+    // One petal on its own, as the project's pebble shows it (in its open pose, no motion)
+    // (laid to face the playground's camera)
+    const petal = meshes.find((mesh) => mesh.name === 'petel_1');
+    const faced = petal.geometry.clone().applyMatrix4(facing(petal.geometry, new THREE.Vector3(...petal.extras.motion.pivot)));
+    writeGlb(fileName.replace(/\.glb$/, '-petal.glb'), [{ name: petal.name, geometry: faced }], 'tools/models/mechanism.mjs');
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

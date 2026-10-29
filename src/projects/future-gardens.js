@@ -58,8 +58,8 @@ export default defineProject({
         + 'possibilities of emerging technologies.',
     ],
 
-    thumbModel: 'models/mechanism.glb',
-    thumbSize: 1.6,
+    thumbModel: 'models/mechanism-petal.glb',
+    thumbSize: 2.4,
     detailModel: 'models/mechanism.glb',
     // The model itself, each kind of part in its own look
     solid: { lit: [222, 222, 220], shade: [160, 160, 162] },

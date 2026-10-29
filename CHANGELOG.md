@@ -724,6 +724,7 @@ milestones checked by the user.
 - **Future Gardens' camera retimed by the loop** (the user's): the model starts
   turning after the first opening, the camera zooms out after the second
   (`flight.turnAfter`, `shots[].openings`).
+- **Future Gardens' pebble** shows one petal (`mechanism-petal.glb`), face-on.
 
 Open at end of session: Future Gardens' picture captions/credits, the wording
 of its slider and pause button; whether "United Make" is two words.
