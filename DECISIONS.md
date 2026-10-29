@@ -147,7 +147,11 @@ classes `.cube-tag` - cube-era names left as they are.
   each other looked muddy, so once the project's points appear they fade
   in over `REVEAL_DURATION` (1s, `uReveal` in the cloud's shader, from
   `revealAt`) while the dissolve's fade out over the same second. If the
-  model is still downloading, the dissolve simply runs on.
+  model is still downloading, the dissolve holds (`LOAD_HOLD`, swollen) and the
+  points swirl about the vertical axis (`swirl` in the dissolve's shader, each
+  point at its own speed, easing in, bobbing) until it has - the dissolve is the
+  loader (a project with a `screen` has its circling points, a `drop` or a
+  `figure` its landing, as before).
 - **No frame in the project view.** The pebble has dissolved; the project
   stands alone. Framing still fits the invisible `CUBE_SIZE` box.
 - **Visited pebbles stay darker**, like visited links: once its project has

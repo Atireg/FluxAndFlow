@@ -727,6 +727,9 @@ milestones checked by the user.
 - **Future Gardens' pebble** shows one petal (`mechanism-petal.glb`), face-on.
 - **Frameless Glass' pebble** shows two glass sheets and the joint between them
   (GS1, GS2, GS1_GS2 from the model, drawn as lines), not the joint-in-section drawing.
+- **The dissolve as the loader**: if a project's model hasn't loaded by the time
+  the pebble's points have swollen, they hold and swirl until it has, then give way
+  to it as before.
 
 Open at end of session: Future Gardens' picture captions/credits, the wording
 of its slider and pause button; whether "United Make" is two words.

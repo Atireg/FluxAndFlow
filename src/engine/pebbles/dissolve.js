@@ -22,7 +22,8 @@ import inkGlsl from '../shaders/pointCloud/ink.glsl';
  * there, as the ground its aggregates land on (uGround). One with a `screen`
  * has them settle onto its model's screen, in the inks, circling there like
  * a loading sign until its film has loaded, then fading where they are
- * (uScreen).
+ * (uScreen). Any other project's points hold, swollen and swirling, until its
+ * model has loaded (LOAD_HOLD) - the dissolve is the loader.
  */
 const DISSOLVE_DURATION = 3.6; // seconds from the click to the last point gone - overlapping the move in and the gather
 const DISSOLVE_MAX_STEP = 0.1; // seconds the dissolve moves on in one frame, at most - as the gather (GATHER_MAX_STEP)
@@ -47,6 +48,11 @@ const SPINNER_RELEASE = 0.7; // how far out they drift as they go, at most, as a
 // Points hold, swollen, at this share of the dissolve until the screen they're
 // to settle on has loaded - rather than falling towards nowhere
 const SCREEN_HOLD = 0.25;
+// ...and any other project's points hold, swollen, at this share until its model has loaded,
+// swirling round the model's place meanwhile - the dissolve is the loader
+const LOAD_HOLD = 0.45;
+const SWIRL_RATE = 0.6; // radians a second a point swirls at, at least; it adds up to 1.5 times this, point by point
+const SWIRL_BOB = 0.12; // units a point bobs up and down as it goes
 
 /**
  * Where a dissolving point is at T (0..1 of the dissolve), shared by the
@@ -68,6 +74,8 @@ uniform float uLanded; // the size a landed point keeps: finer still on a figure
 uniform float uScreen; // 1: ...or on a screen (uGround too), circling there
 uniform float uTime;
 uniform float uRelease; // 0..1 as the loading circle lets its points go
+uniform float uSwirl; // 1 once the points are held swirling, waiting for the model
+uniform float uSwirlFrom; // the time they started
 uniform vec3 uScreenCentre; // the screen's middle, and the vectors to its right and top edges
 uniform vec3 uScreenU;
 uniform vec3 uScreenV;
@@ -99,6 +107,19 @@ float spinnerInk() {
     return mix(1.0, 0.15 + 0.85 * aScreen / 6.2831853, uScreen);
 }
 
+// The swollen cloud turning about the vertical axis, each point at a speed of its own, easing
+// into it from where it was, and bobbing a little
+vec3 swirl(vec3 p, float time) {
+    float spin = uSwirl * max(time - uSwirlFrom, 0.0);
+    float eased = spin * spin / (spin + 1.0);
+    float angle = eased * ${SWIRL_RATE.toFixed(2)} * (1.0 + 1.5 * fract(aScreen * 0.159155));
+    float c = cos(angle);
+    float s = sin(angle);
+    vec3 q = vec3(c * p.x + s * p.z, p.y, -s * p.x + c * p.z);
+    q.y += uSwirl * ${SWIRL_BOB.toFixed(2)} * sin(time * 1.9 + aScreen * 5.0) * min(spin, 1.0);
+    return q;
+}
+
 vec3 dissolvePosition(vec3 home, float T, float time, out float falling) {
     // From the pebble's shape at the moment it was clicked, flux and all
     vec3 start = home + aNormal * pebbleFlux(normalize(home)) * uFluxAmount;
@@ -106,7 +127,7 @@ vec3 dissolvePosition(vec3 home, float T, float time, out float falling) {
     float t = clamp((T - aDelay) / (1.0 - aDelay), 0.0, 1.0);
     float rest = 1.0 - t;
     float swell = 1.0 - rest * rest;
-    vec3 p = start * (1.0 + uSwell * swell) + aDrift * swell;
+    vec3 p = swirl(start * (1.0 + uSwell * swell) + aDrift * swell, time);
 
     // Or swell out, then fall - each in turn, gathering speed - to its own
     // place on the ground, and stay there
@@ -272,6 +293,8 @@ export function getDissolve(pebble) {
             uScreen: { value: screen ? 1 : 0 },
             uTime: { value: 0 },
             uRelease: { value: 0 },
+            uSwirl: { value: 0 },
+            uSwirlFrom: { value: 0 },
             uScreenCentre: { value: new THREE.Vector3() },
             uScreenU: { value: new THREE.Vector3() },
             uScreenV: { value: new THREE.Vector3() },
@@ -316,6 +339,8 @@ export function updateDissolve({ state, renderer, camera, elapsedTime }) {
     if (points.userData.from !== state.dropStartedAt) {
         points.userData.from = state.dropStartedAt;
         points.userData.run = Math.max(elapsedTime - state.dropStartedAt, 0);
+        points.userData.swirling = false;
+        points.material.uniforms.uSwirl.value = 0;
     } else {
         points.userData.run += Math.min(Math.max(elapsedTime - points.userData.last, 0), DISSOLVE_MAX_STEP);
     }
@@ -338,6 +363,17 @@ export function updateDissolve({ state, renderer, camera, elapsedTime }) {
         }
         if (screen) placeScreen(points.material.uniforms, screen, detail);
         if (figure) placeFigure(points, figure, detail);
+    }
+
+    // Any other project's points hold, swirling, until its model has loaded
+    if (!ground && !shown && t > LOAD_HOLD) {
+        points.userData.run = LOAD_HOLD * DISSOLVE_DURATION;
+        t = LOAD_HOLD;
+        if (!points.userData.swirling) {
+            points.userData.swirling = true;
+            points.material.uniforms.uSwirl.value = 1;
+            points.material.uniforms.uSwirlFrom.value = elapsedTime;
+        }
     }
 
     points.visible = ground || t < 1;
