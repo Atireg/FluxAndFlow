@@ -738,6 +738,7 @@ milestones checked by the user.
 - **Future Gardens' YouTube Shorts** in the drawer, after the text and before the
   students: tall (`ratio: '9 / 16'`) and two to a row (`pair` on a film; `.drawer__videos--pair`).
   Four, two by two.
+- **Future Gardens' "under construction" taken off** (asked for).
 
 Open at end of session: Future Gardens' picture captions/credits, the wording
 of its slider and pause button; whether "United Make" is two words.

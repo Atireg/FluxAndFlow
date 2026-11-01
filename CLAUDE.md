@@ -131,7 +131,7 @@ in a pull-out drawer.
   moves (`mechanism: true`): five petals turn on their hinges as the rack
   slides, a slider ("open", `MECHANISM_WORD`) over it; solid, still, in the
   user's colours, playing by itself in a loop (`mechanism.loop`, paused
-  while the slider is used), "under construction" (`notice`) under its name; clear acrylic as in the
+  while the slider is used), its "under construction" `notice` taken off (asked for); clear acrylic as in the
   user's photo, a pleated lavender cloth between the petals (`mechanism.cloth`); one petal alone in its pebble (`mechanism-petal.glb`, laid to face the
   playground's camera by the converter); opens looking down into the closed model, close; after its first
   opening the model starts to turn, then a close-up on the hub, and after the
