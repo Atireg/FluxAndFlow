@@ -44,11 +44,13 @@ const ProjectDrawer = forwardRef(function ProjectDrawer({ project, open, onToggl
 
     // The films, then the pictures, set after paragraph `after` of the text
     // (`after` in the project), or undefined: the rest, after all of it
-    const media = (after) => (
+    const media = (after) => {
+        const films = (project?.videos ?? []).filter((video) => video.after === after);
+        return (
         <>
-            <div className="drawer__videos">
-                {(project?.videos ?? []).filter((video) => video.after === after)
-                    .map((video) => <ProjectVideo key={video.vimeo ?? video.youtube} video={video} />)}
+            {/* (tall films, `pair`, two to a row) */}
+            <div className={`drawer__videos${films.length && films.every((video) => video.pair) ? ' drawer__videos--pair' : ''}`}>
+                {films.map((video) => <ProjectVideo key={video.vimeo ?? video.youtube} video={video} />)}
             </div>
             <div className="drawer__images">
                 {(project?.images ?? []).filter((image) => image.after === after).map((image, index) => (
@@ -56,7 +58,8 @@ const ProjectDrawer = forwardRef(function ProjectDrawer({ project, open, onToggl
                 ))}
             </div>
         </>
-    );
+        );
+    };
 
     // An enlarged picture goes with the drawer, and with the project
     useEffect(() => {

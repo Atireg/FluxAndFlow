@@ -187,6 +187,8 @@ function normaliseVideo(video, { id, index, body }) {
         title: video.title ?? '',
         caption: video.caption ?? '',
         ratio: video.ratio || '16 / 9',
+        // tall films (a YouTube Short, '9 / 16') two to a row
+        pair: Boolean(video.pair),
         after: normaliseAfter(video, { id, what: `videos[${index}]`, body }),
     };
 }

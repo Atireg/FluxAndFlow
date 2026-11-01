@@ -147,7 +147,9 @@ in a pull-out drawer.
   conceived by Associate Professor John Sadar); the text approved ("Use 1", then reordered and "unit"
   made "subject" at the user's word): the exhibition in two paragraphs, four photos of it
   (`future-gardens-01..04.jpg`, the lobby first, two close-ups in a row, the lobby wide; `after: 1`),
-  then the subject and its description with a list of its four outcomes and the graduate attributes, and under them the
+  then the subject and its description with a list of its four outcomes and the graduate attributes, then
+  YouTube Shorts (tall, `ratio: '9 / 16'`, `pair`: two to a row; ids JyW8q2pENlg, pXxL_J5lpTA, 68hw30r_IxE -
+  the user's fourth link repeated the first, a fourth still to come), and under them the
   students, 22 first names in alphabetical order (`credits`; "Untu & Habashi" split, the user's).
 - **Links**: each project's own address is `#<id>` (`#rock-print`); the
   path's is `#path`.

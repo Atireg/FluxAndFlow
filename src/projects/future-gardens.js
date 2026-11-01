@@ -100,6 +100,13 @@ export default defineProject({
     credits: 'Students: Aish, Amy, Anna, Brianna, Emma, Farah, Habashi, Hameeda, Jade, '
         + 'Jessica, Joel, Josh, Maria, Matt, Mietta, Nader, Nadine, Nathan, Sunalika, '
         + 'Tanesha, Untu, Zoe',
+    // After the text, before the students: the YouTube Shorts, tall, two to a row
+    // (the user gave JyW8q2pENlg twice - one film, listed once)
+    videos: [
+        { youtube: 'JyW8q2pENlg', title: 'Future Gardens - YouTube Short', ratio: '9 / 16', pair: true },
+        { youtube: 'pXxL_J5lpTA', title: 'Future Gardens - YouTube Short', ratio: '9 / 16', pair: true },
+        { youtube: '68hw30r_IxE', title: 'Future Gardens - YouTube Short', ratio: '9 / 16', pair: true },
+    ],
     // The exhibition: the lobby first, then the flower and a dragonfly close up, then the lobby again
     images: [
         {

@@ -1326,6 +1326,11 @@ body.drawer-open .section-slider {
     margin: 1.5rem 0 0;
 }
 
+/* Tall films (`pair`: YouTube Shorts) two to a row, like the tall screenshots */
+.drawer__videos--pair {
+    grid-template-columns: 1fr 1fr;
+}
+
 /* ...or set among the text, after a paragraph (`after`) */
 .drawer__body .drawer__videos,
 .drawer__body .drawer__images {
