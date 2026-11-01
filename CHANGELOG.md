@@ -731,6 +731,10 @@ milestones checked by the user.
 - **The dissolve as the loader**: if a project's model hasn't loaded by the time
   the pebble's points have swollen, they hold and swirl until it has, then give way
   to it as before.
+- **Cheaper outlines for Future Gardens**: worked out once in the converter and
+  stored in the model (`mechanism.glb` 1.2 -> 1.4 MB, 0.6 -> 0.7 MB gzipped), not at
+  load, against the stutter as the model appears. The converter's glTF writer
+  takes line segments (`lines`).
 
 Open at end of session: Future Gardens' picture captions/credits, the wording
 of its slider and pause button; whether "United Make" is two words.

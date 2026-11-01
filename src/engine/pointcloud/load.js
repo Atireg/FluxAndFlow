@@ -110,7 +110,7 @@ export function loadPointCloud({
                     // where its faces meet at more than EDGE_ANGLE - or its
                     // look's `edges`; a moving part's goes with it
                     if (edges || parts?.[lookName]?.edges) {
-                        const outline = new THREE.LineSegments(new THREE.EdgesGeometry(geometry, EDGE_ANGLE), edgeMaterial);
+                        const outline = new THREE.LineSegments(sampled.userData.outlines?.[part] ?? new THREE.EdgesGeometry(geometry, EDGE_ANGLE), edgeMaterial);
                         outline.raycast = () => {};
                         outline.renderOrder = 2; // over the see-through parts
                         (motion ? mesh : group).add(outline);

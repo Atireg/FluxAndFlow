@@ -199,7 +199,15 @@ export function mechanismToGlb(openPath, closedPath, fileName, { flipRack = fals
             if (objects.length) meshes.push({ name, material: name, geometry: merged(objects), extras: { part: name } });
         });
 
-    writeGlb(fileName, meshes, 'tools/models/mechanism.mjs');
+    // Each part's outline - its edges where faces meet at more than 30 degrees - worked out here,
+    // once, so the site needn't at load (`extras.edgesOf` names the part it belongs to)
+    const outlines = meshes.map(({ name, geometry }) => ({
+        name: `${name}__edges`,
+        lines: true,
+        geometry: new THREE.EdgesGeometry(geometry, 30),
+        extras: { edgesOf: name },
+    }));
+    writeGlb(fileName, [...meshes, ...outlines], 'tools/models/mechanism.mjs');
 
     // One petal on its own, as the project's pebble shows it (in its open pose, no motion)
     // (laid to face the playground's camera)

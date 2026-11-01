@@ -21,7 +21,8 @@ export function weld(geometry, tolerance = 1e-4) {
 const pad = (n) => (n + 3) & ~3;
 
 // meshes: [{ name, geometry (indexed, welded), matrix? (16 numbers), material? (a name),
-//           extras? (an object, read back as the mesh's userData) }]
+//           extras? (an object, read back as the mesh's userData),
+//           lines? (true: geometry is line segments, not triangles - no index or normals) }]
 export function writeGlb(fileName, meshes, generator) {
     const chunks = [];
     const bufferViews = [];
@@ -35,10 +36,16 @@ export function writeGlb(fileName, meshes, generator) {
         return bufferViews.length - 1;
     };
 
-    const gltfMeshes = meshes.map(({ name, geometry }) => {
+    const gltfMeshes = meshes.map(({ name, geometry, lines }) => {
         geometry.computeBoundingBox();
         const { min, max } = geometry.boundingBox;
         const count = geometry.getAttribute('position').count;
+        // Line segments (`lines: true`): positions only, a pair for each, no indices or normals
+        if (lines) {
+            const first = accessors.length;
+            accessors.push({ bufferView: addView(new Float32Array(geometry.getAttribute('position').array), 34962), componentType: 5126, count, type: 'VEC3', min: min.toArray(), max: max.toArray() });
+            return { name, primitives: [{ attributes: { POSITION: first }, mode: 1 }] };
+        }
         const indices = count > 65535 ? new Uint32Array(geometry.index.array) : new Uint16Array(geometry.index.array);
         const first = accessors.length;
         accessors.push(

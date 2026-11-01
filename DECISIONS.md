@@ -1325,6 +1325,11 @@ light blinking from the middle of the flower - each blink (every 2.6s) a flash
 that fades, lighting the cloth near the middle most with a ring of glow going
 out across it, and a faint steady glow near the middle. With the drawer out, a
 steep view from above (`view.drawerView`, wide screens: the user's screenshot).
+Its outlines are worked out in the converter, once (`<part>__edges` line
+segments in the .glb, `edgesOf` in their extras, fitted like the parts in
+`pointsFromMeshes`): `EdgesGeometry` at load took ~160ms on a fast computer
+for these parts - a hitch, on a phone, just as the model appears. A part
+without a premade outline (Frameless Glass) still computes its own.
 It plays by itself (`mechanism: { loop: seconds }`): open, closing,
 closed, opening, each end held a little, the slider following; the visitor's
 slider stops it, and it takes up again from there after 6s untouched.

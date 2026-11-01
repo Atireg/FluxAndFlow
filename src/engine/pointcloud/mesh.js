@@ -18,7 +18,12 @@ export function pointsFromMeshes(root, total = MESH_SAMPLE_POINTS) {
     root.updateMatrixWorld(true);
 
     const meshes = [];
-    root.traverse((child) => { if (child.isMesh) meshes.push(child); });
+    // (a model's outlines worked out ahead, as line segments named for their part - `edgesOf`)
+    const outlines = [];
+    root.traverse((child) => {
+        if (child.isMesh) meshes.push(child);
+        else if (child.isLineSegments && child.userData.edgesOf) outlines.push(child);
+    });
     if (!meshes.length) return null;
 
     // Each mesh gets points in proportion to its surface area
@@ -98,6 +103,13 @@ export function pointsFromMeshes(root, total = MESH_SAMPLE_POINTS) {
     };
     const solids = meshes.map(fitted);
     group.userData.solid = mergeGeometries(solids);
+    // ...and their outlines, fitted the same way, by the part they outline
+    group.userData.outlines = Object.fromEntries(outlines.map((line) => {
+        const geometry = line.geometry.clone().applyMatrix4(line.matrixWorld);
+        geometry.translate(-centre.x, -centre.y, -centre.z);
+        geometry.scale(factor, factor, factor);
+        return [line.userData.edgesOf, geometry];
+    }));
     // (`material` the look's name; `part` its own, from the file's extras -
     // a glass sheet, a joint - for a project's `info`)
     group.userData.parts = meshes.map((mesh, i) => ({
