@@ -97,9 +97,9 @@ export default defineProject({
         drawerView: { elevation: 80, zoom: { side: 1.9 } },
     },
     // After the pictures: the students, in alphabetical order (the user's)
-    credits: 'Students: Aish, Amy, Anna, Brianna, Emma, Farah, Hameeda, Jade, Jessica, '
-        + 'Joel, Josh, Maria, Matt, Mietta, Nader, Nadine, Nathan, Sunalika, Tanesha, '
-        + 'Untu & Habashi, Zoe',
+    credits: 'Students: Aish, Amy, Anna, Brianna, Emma, Farah, Habashi, Hameeda, Jade, '
+        + 'Jessica, Joel, Josh, Maria, Matt, Mietta, Nader, Nadine, Nathan, Sunalika, '
+        + 'Tanesha, Untu, Zoe',
     // The exhibition: the lobby first, then the flower and a dragonfly close up, then the lobby again
     images: [
         {
