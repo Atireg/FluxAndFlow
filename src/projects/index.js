@@ -24,6 +24,7 @@ import khReuse from './kh-reuse.js';
 import napNapHooray from './nap-nap-hooray.js';
 import framelessGlass from './frameless-glass.js';
 import futureGardens from './future-gardens.js';
+import robotsAndStudents from './robots-and-students.js';
 
 export { CATEGORIES, categoryLabel, hasDescription, metaRows } from './schema.js';
 
@@ -34,6 +35,7 @@ const catalog = [
     napNapHooray,
     framelessGlass,
     futureGardens,
+    robotsAndStudents,
 ];
 
 /**

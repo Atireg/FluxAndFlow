@@ -150,6 +150,9 @@ in a pull-out drawer.
   then the subject and its description with a list of its four outcomes and the graduate attributes, then
   YouTube Shorts (tall, `ratio: '9 / 16'`, `pair`: two to a row; four of them, ids JyW8q2pENlg, pXxL_J5lpTA, 68hw30r_IxE, VluTNp1DUMM), and under them the
   students, 22 first names in alphabetical order (`credits`; "Untu & Habashi" split, the user's).
+- **Robots and students** (slot 5, teaching, `#robots-and-students`): a stand-in so far - Rock
+  Print Pavilion's model, one obviously fake line of text, no year or role. Waiting on the user
+  for the real model, text, role and pictures.
 - **Links**: each project's own address is `#<id>` (`#rock-print`); the
   path's is `#path`.
 - **Drawer copy** is real for all five projects, approved by the user

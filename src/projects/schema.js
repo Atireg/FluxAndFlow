@@ -117,7 +117,6 @@ export function categoryLabel(id) {
  * than in blocks, so a kind brought forward isn't just a row.
  */
 export const EMPTY_SLOT_CATEGORIES = {
-    5: 'teaching',
     6: 'teaching', 8: 'real-world', 9: 'teaching',
 };
 

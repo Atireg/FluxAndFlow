@@ -742,6 +742,8 @@ milestones checked by the user.
 - **The tap hint on solid models**: Future Gardens ("double-tap to pause": a
   double-tap holds its loop, `doubleClick: 'pause'`) and Frameless Glass ("double-tap to
   slice", for its tour, was "play again"). Solid models had no spot to show it from.
+- **Robots and students**: new teaching project in slot 5 (`robots-and-students.js`), a
+  stand-in (Rock Print's model, placeholder text) until the user sends the real content.
 
 Open at end of session: Future Gardens' picture captions/credits, the wording
 of its slider and pause button; whether "United Make" is two words.
