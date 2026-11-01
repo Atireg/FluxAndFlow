@@ -53,6 +53,7 @@ export default function App() {
     const partInfoRef = useRef(null);
     const sectionRef = useRef(null);
     const mechanismRef = useRef(null);
+    const [mechanismPaused, setMechanismPaused] = useState(false);
     const hintStringRef = useRef(null);
     const hintTagRef = useRef(null);
     const hintDissolveRef = useRef(null);
@@ -175,6 +176,9 @@ export default function App() {
                 onSection: (share) => {
                     if (sectionRef.current) sectionRef.current.value = String(Math.round(share * 1000));
                 },
+
+                // A mechanism's loop was held or set going (the button, or a double-tap): the button follows
+                onMechanismPause: (paused) => setMechanismPaused(paused),
 
                 // A mechanism's loop moved it: the slider follows
                 onMechanism: (open) => {
@@ -345,7 +349,7 @@ export default function App() {
                     ref={mechanismRef}
                     word={MECHANISM_WORD}
                     onSlide={(open) => engineRef.current?.setMechanism(open)}
-                    after={<MechanismPause onPause={(paused) => engineRef.current?.setMechanismPaused(paused)} />}
+                    after={<MechanismPause paused={mechanismPaused} onToggle={(paused) => engineRef.current?.setMechanismPaused(paused)} />}
                 />
             )}
 

@@ -928,6 +928,7 @@ export function createDetail({
             else if (action === 'zoom') detail.toggleZoom(clientX, clientY);
             else if (action === 'hold') detail.toggleHold();
             else if (action === 'drop') detail.replayDrop();
+            else if (action === 'pause') state.toggleMechanismPause?.();
         },
 
         // The tour's turn of the model, radians, on top of its own
@@ -1078,6 +1079,7 @@ export function createDetail({
             const action = state.selected?.userData.project?.doubleClick ?? 'zoom';
             if (action === 'none') return; // nothing to hint at
             if (action === 'hold' && isHeld(model)) return; // already still: nothing to pause
+            if (action === 'pause' && state.mechanismPaused?.()) return; // ...nor a mechanism already held
 
             state.tapHintNext = since + TAP_HINT_GAP;
 
@@ -1123,9 +1125,23 @@ export function createDetail({
                 return;
             }
 
-            // (a pile's aggregates are hidden while they wait to drop)
+            // A model drawn as itself, not points (`solid`): a random vertex of one of its parts
             const points = model.userData.points;
-            if (!points || !model.visible || !points.visible) return;
+            if (!points) {
+                if (!model.visible) return;
+                const meshes = [];
+                model.traverse((child) => { if (child.isMesh && child.visible && child.geometry?.attributes.position) meshes.push(child); });
+                if (!meshes.length) return;
+                showOnSpot(60, () => {
+                    const mesh = meshes[Math.floor(Math.random() * meshes.length)];
+                    const position = mesh.geometry.attributes.position;
+                    mesh.localToWorld(tapHintPoint.fromBufferAttribute(position, Math.floor(Math.random() * position.count)));
+                });
+                return;
+            }
+
+            // (a pile's aggregates are hidden while they wait to drop)
+            if (!model.visible || !points.visible) return;
 
             // A random point of the cloud. Zoomed in, most of it is off screen,
             // so allow plenty of tries - each is one projected point.

@@ -76,7 +76,8 @@ export default defineProject({
         // Cloth between the petals, glowing lavender as in the photo
         cloth: { of: 'petal', lit: [236, 230, 255], shade: [176, 160, 236], opacity: 0.5 },
     },
-    doubleClick: 'none',
+    // A double-tap holds the loop (and sets it going again), with the tap hint saying so
+    doubleClick: 'pause',
     // The camera, by the loop (8s a cycle, starting closed): looking steeply down into the flower
     // as it opens; once it has opened the model starts to turn; close on the hub from the side for
     // the next opening; then out to the view itself while it turns once round, in 40s; then back in

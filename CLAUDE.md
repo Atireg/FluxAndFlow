@@ -92,7 +92,7 @@ in a pull-out drawer.
   clear glass, each sheet's upper ply outlined thin dark grey); the person beside it isn't drawn - the pebble's points fall and
   form them (`figure`), in three greys (`inks`). Stands still
   (`still`); a double-click plays the tour again (`doubleClick: 'tour'`,
-  hint "play again"). Over a glass sheet, joint or support (named after
+  hint "double-tap to slice"). Over a glass sheet, joint or support (named after
   the user's drawing, GS1-GS8) the part is picked out, the turn holds and a
   card beside the pointer says what it is (`info`; a tap on a phone).
   A slider at the foot ("section") cuts it across its length, coming in
@@ -137,7 +137,7 @@ in a pull-out drawer.
   opening the model starts to turn, then a close-up on the hub, and after the
   second opening the camera zooms out while it turns once round, then back in
   (`view.flight`, `view.spin`: user's recording), the loop starting closed, a pause / play button beside the
-  slider (`MechanismPause`; words "pause"/"play" are mine, unapproved). Made from two Rhino OBJ poses by
+  slider (`MechanismPause`; words "pause"/"play" are mine, unapproved); a double-tap holds or sets going its loop (`doubleClick: 'pause'`), the tap hint saying "double-tap to pause". Made from two Rhino OBJ poses by
   `tools/models/mechanism.mjs open.obj closed.obj mechanism.glb --flip-rack` (the
   rack reversed, asked for) - the file
   holds the open pose and each moving part's `motion` to the closed. Drawer:

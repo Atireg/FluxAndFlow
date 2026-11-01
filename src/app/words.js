@@ -31,7 +31,7 @@ export const PATH_HINT = 'click me!';
 export const PATH_CV = { label: 'Full CV' };
 
 // What a double-tap does, by the project's `doubleClick`
-const HINT_ACTIONS = { zoom: 'zoom', hold: 'pause', drop: 'drop again', tour: 'play again' };
+const HINT_ACTIONS = { zoom: 'zoom', hold: 'pause', pause: 'pause', drop: 'drop again', tour: 'slice' };
 
 // A new answer for an empty pebble - never the one it gave last
 export function emptyWords(last) {

@@ -1330,6 +1330,11 @@ segments in the .glb, `edgesOf` in their extras, fitted like the parts in
 `pointsFromMeshes`): `EdgesGeometry` at load took ~160ms on a fast computer
 for these parts - a hitch, on a phone, just as the model appears. A part
 without a premade outline (Frameless Glass) still computes its own.
+A double-tap holds its loop or sets it going (`doubleClick: 'pause'`; state in the
+engine, the button follows through `ui.onMechanismPause`), and the tap hint says
+so - for a model drawn as itself (`solid`: no cloud of points to pick a spot in),
+the hint's dot falls from a random vertex of one of its parts (before this, solid
+models never showed one); Frameless Glass's, for its `tour`, reads "slice".
 It plays by itself (`mechanism: { loop: seconds }`): open, closing,
 closed, opening, each end held a little, the slider following; the visitor's
 slider stops it, and it takes up again from there after 6s untouched.

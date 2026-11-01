@@ -288,10 +288,11 @@ function normaliseDrop(drop, { id }) {
     return { ...drop };
 }
 
-function normaliseDoubleClick({ id, doubleClick = 'zoom', drop, tour }) {
-    if (!['zoom', 'hold', 'drop', 'tour', 'none'].includes(doubleClick)) {
-        throw new Error(`Project "${id}": doubleClick should be 'zoom', 'hold', 'drop', 'tour' or 'none'`);
+function normaliseDoubleClick({ id, doubleClick = 'zoom', drop, tour, mechanism }) {
+    if (!['zoom', 'hold', 'drop', 'tour', 'pause', 'none'].includes(doubleClick)) {
+        throw new Error(`Project "${id}": doubleClick should be 'zoom', 'hold', 'drop', 'tour', 'pause' or 'none'`);
     }
+    if (doubleClick === 'pause' && !mechanism) throw new Error(`Project "${id}": doubleClick 'pause' needs a mechanism`);
     if (doubleClick === 'drop' && !drop) throw new Error(`Project "${id}": doubleClick 'drop' needs a drop`);
     if (doubleClick === 'tour' && !tour) throw new Error(`Project "${id}": doubleClick 'tour' needs a tour`);
     return doubleClick;

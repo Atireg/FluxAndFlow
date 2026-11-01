@@ -43,6 +43,7 @@ import { trailResolution } from './pointcloud/trails.js';
  *   showPartInfo(info, x, y) / hidePartInfo()   a model's part under the pointer (`info`)
  *   onSection(share)        a `tour` moved the section - the slider follows
  *   onMechanism(open)       a mechanism's loop moved it - the slider follows
+ *   onMechanismPause(paused) its loop was held, or set going - the button follows
  *   showTapHint(x, y, action) / hideTapHint()   action: the project's doubleClick
  *   onFocus(category)       the filter changed from the canvas (a sunk pebble clicked)
  *   onEmptySlot()           an empty pebble was clicked - its tag is about to show
@@ -179,6 +180,7 @@ export function createEngine({ canvas, source, ui }) {
         // A model newly shown starts closed, and opens
         if (loop.model !== model) {
             Object.assign(loop, { model, phase: 0.5, open: 0, touched: -Infinity, playing: true, paused: false, round: 0 });
+            ui.onMechanismPause?.(false);
             setMechanism(model, 0);
             ui.onMechanism?.(0);
             return;
@@ -573,6 +575,15 @@ export function createEngine({ canvas, source, ui }) {
         if (state.selected) framing.reframe(state.selected, { duration: 0.4 });
     }
 
+    // The mechanism's loop held, or set going (the button's, or a double-tap's - `doubleClick: 'pause'`)
+    const setMechanismPaused = (paused) => {
+        loop.paused = paused;
+        if (!paused) { loop.playing = false; loop.touched = -Infinity; }
+        ui.onMechanismPause?.(paused);
+    };
+    state.toggleMechanismPause = () => setMechanismPaused(!loop.paused);
+    state.mechanismPaused = () => loop.paused;
+
     return {
         start() {
             catalog.build(screen.aspect);
@@ -619,10 +630,7 @@ export function createEngine({ canvas, source, ui }) {
         },
 
         // The mechanism's loop paused, or playing on from where it is
-        setMechanismPaused(paused) {
-            loop.paused = paused;
-            if (!paused) { loop.playing = false; loop.touched = -Infinity; }
-        },
+        setMechanismPaused,
 
         openProject(id) {
             if (state.view !== 'catalog') return false;

@@ -739,6 +739,9 @@ milestones checked by the user.
   students: tall (`ratio: '9 / 16'`) and two to a row (`pair` on a film; `.drawer__videos--pair`).
   Four, two by two.
 - **Future Gardens' "under construction" taken off** (asked for).
+- **The tap hint on solid models**: Future Gardens ("double-tap to pause": a
+  double-tap holds its loop, `doubleClick: 'pause'`) and Frameless Glass ("double-tap to
+  slice", for its tour, was "play again"). Solid models had no spot to show it from.
 
 Open at end of session: Future Gardens' picture captions/credits, the wording
 of its slider and pause button; whether "United Make" is two words.
