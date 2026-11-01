@@ -16,34 +16,13 @@ export default defineProject({
     year: '2022',
     role: 'Teacher',
     client: 'The GPT Group',
-    context: 'A unit in the Bachelor of Architecture, Swinburne University of Technology, in '
+    context: 'A subject in the Bachelor of Architecture, Swinburne University of Technology, in '
         + 'collaboration with Mond Qu, Sonny Do and Edward Yee from United Make, Protolab '
-        + 'and Daniel Prohasky. The unit was conceived by Associate Professor John Sadar.',
+        + 'and Daniel Prohasky. The subject was conceived by Associate Professor John Sadar.',
 
-    // The drawer's text: the unit (the user's description), then the exhibition - rephrased (approved, "Use 1")
+    // The drawer's text: the exhibition first (with its pictures), then the subject it was part of
+    // (the user's description) - rephrased, the user's order ("subject" for "unit" throughout)
     body: [
-        'Future Gardens was part of a unit within the Bachelor of Architecture at '
-        + 'Swinburne University of Technology, in collaboration with the studio United '
-        + 'Make. The students didn\'t only design: they built real objects for a real '
-        + 'exhibition.',
-        'The unit explores buildings as a communicative medium - as technological '
-        + 'communication and human networks. Students questioned traditional and '
-        + 'interactive modes of representation, looked at architectural components as '
-        + 'parts of a larger system, and made virtually animated prototypes and '
-        + 'communicative media, developing skills and knowledge of buildings as dynamic '
-        + 'systems.',
-        'By the end of the unit, students could:',
-        [
-            'communicate through different modes of architectural communication, '
-            + 'especially those involving time;',
-            'explain architectural systems and subsystems;',
-            'carry ideas and design outcomes through 2, 3 and 4-dimensional modes: '
-            + 'sketches, print, digital models and animation;',
-            'identify points of control for sustainable, resourceful and zero-waste '
-            + 'efficiencies within architectural systems.',
-        ],
-        'The unit contributes to Swinburne\'s graduate attributes: communication '
-        + 'skills, teamwork skills and digital literacies.',
         'The Future Gardens exhibition, by United Make and Swinburne University '
         + 'students, transformed the East Wing Lobby of 530 Collins Street, Melbourne, '
         + 'into a showcase of seven futuristic design specimens. This fusion of digital '
@@ -56,6 +35,28 @@ export default defineProject({
         + 'around a glowing pleated cloth. The exhibition invited visitors to picture '
         + 'the future of gardens and design, and to open their minds to the '
         + 'possibilities of emerging technologies.',
+        'Future Gardens was part of a subject within the Bachelor of Architecture at '
+        + 'Swinburne University of Technology, in collaboration with the studio United '
+        + 'Make. The students didn\'t only design: they built real objects for a real '
+        + 'exhibition.',
+        'The subject explores buildings as a communicative medium - as technological '
+        + 'communication and human networks. Students questioned traditional and '
+        + 'interactive modes of representation, looked at architectural components as '
+        + 'parts of a larger system, and made virtually animated prototypes and '
+        + 'communicative media, developing skills and knowledge of buildings as dynamic '
+        + 'systems.',
+        'By the end of the subject, students could:',
+        [
+            'communicate through different modes of architectural communication, '
+            + 'especially those involving time;',
+            'explain architectural systems and subsystems;',
+            'carry ideas and design outcomes through 2, 3 and 4-dimensional modes: '
+            + 'sketches, print, digital models and animation;',
+            'identify points of control for sustainable, resourceful and zero-waste '
+            + 'efficiencies within architectural systems.',
+        ],
+        'The subject contributes to Swinburne\'s graduate attributes: communication '
+        + 'skills, teamwork skills and digital literacies.',
     ],
 
     thumbModel: 'models/mechanism-petal.glb',
@@ -105,22 +106,26 @@ export default defineProject({
             src: 'images/future-gardens-01.jpg',
             alt: 'The Future Gardens exhibition on a black platform in the lobby: white pots of tropical plants, glowing white paper flowers among the leaves, a visitor in the corner',
             ratio: '3 / 2',
+            after: 1,
         },
         {
             src: 'images/future-gardens-02.jpg',
             alt: 'A visitor\'s hand reaching for a mechanical flower: its pleated white cloth glowing lavender on clear acrylic petals, among plants',
             ratio: '3 / 2',
+            after: 1,
         },
         {
             src: 'images/future-gardens-03.jpg',
             alt: 'Digital dragonflies: frosted acrylic wings on tiers of a clear acrylic tower rising from a pot of soil, a hand beside it',
             ratio: '3 / 2',
+            after: 1,
         },
         {
             src: 'images/future-gardens-04.jpg',
             alt: 'More of the exhibition: white pots on the platform, red and white mechanical shells among the ferns, a small screen, visitors talking behind',
             ratio: '3 / 2',
             wide: true,
+            after: 1,
         },
     ],
 });

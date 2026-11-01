@@ -717,10 +717,11 @@ milestones checked by the user.
 - **Future Gardens' camera as a repeating round**: from above for 3 cycles of
   the loop, a close-up on the hub from the side for 2, out while the model turns
   once round, then in again (`view.flight.shots`); the loop 8s a cycle.
-- **Future Gardens' drawer text**: the unit it belonged to (Bachelor of
+- **Future Gardens' drawer text**: the subject it belonged to (Bachelor of
   Architecture, Swinburne, with United Make - the user's description and
   outcomes), then the exhibition; role "Teacher"; the context credits who
-  conceived the unit.
+  conceived the subject. Later the exhibition and its pictures put first, the
+  subject after, and "unit" made "subject" throughout (the user's).
 - **Future Gardens' camera retimed by the loop** (the user's): the model starts
   turning after the first opening, the camera zooms out after the second
   (`flight.turnAfter`, `shots[].openings`).

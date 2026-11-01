@@ -141,13 +141,13 @@ in a pull-out drawer.
   `tools/models/mechanism.mjs open.obj closed.obj mechanism.glb --flip-rack` (the
   rack reversed, asked for) - the file
   holds the open pose and each moving part's `motion` to the closed. Drawer:
-  2022, role "Teacher", client "The GPT Group" (a `client` row, added for it), context the Swinburne unit (Bachelor of Architecture,
+  2022, role "Teacher", client "The GPT Group" (a `client` row, added for it), context the Swinburne subject (Bachelor of Architecture,
   in collaboration with Mond Qu, Sonny Do and Edward Yee from United Make - written
-  with the space, as the user writes it - Protolab and Daniel Prohasky; the unit
-  conceived by Associate Professor John Sadar); the text approved ("Use 1"): the unit and its
-  description with a list of its four outcomes, the graduate attributes, then the
-  exhibition in two paragraphs; four photos of the exhibition
-  (`future-gardens-01..04.jpg`, the lobby first, two close-ups in a row, the lobby wide), and under them the
+  with the space, as the user writes it - Protolab and Daniel Prohasky; the subject
+  conceived by Associate Professor John Sadar); the text approved ("Use 1", then reordered and "unit"
+  made "subject" at the user's word): the exhibition in two paragraphs, four photos of it
+  (`future-gardens-01..04.jpg`, the lobby first, two close-ups in a row, the lobby wide; `after: 1`),
+  then the subject and its description with a list of its four outcomes and the graduate attributes, and under them the
   students, 21 first names (`credits`).
 - **Links**: each project's own address is `#<id>` (`#rock-print`); the
   path's is `#path`.
